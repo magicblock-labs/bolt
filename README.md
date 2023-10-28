@@ -15,6 +15,7 @@
     <a href="https://discord.com/invite/MBkdC3gxcv"><img alt="Discord Chat" src="https://img.shields.io/discord/943797222162726962?color=blueviolet" /></a>
     <a href="https://opensource.org/licenses/MIT"><img alt="License" src="https://img.shields.io/github/license/magicblock-labs/bolt?color=blueviolet" /></a>
   </p>
+
 </div>
 
 Bolt is a high-performance, scalable SVM-based framework designed for Fully On Chain (FOC) Games and Autonomous Worlds. 
