@@ -6,7 +6,7 @@
   <h1>Bolt</h1>
 
   <p>
-    <strong>High-performance, Composable framework for Fully On Chain Games and Autonomous Worlds. </strong>
+    <strong>A high-performance and composable SVM-based framework for Fully On-chain ames and Autonomous Worlds. </strong>
   </p>
 
   <p>
@@ -18,7 +18,11 @@
 
 </div>
 
-Bolt is a high-performance, scalable SVM-based framework designed for Fully On Chain (FOC) Games and Autonomous Worlds. 
+Bolt is a high-performance, composable SVM-based framework designed to scale Fully On Chain (FOC) Games and Autonomous Worlds. 
+
+## ⚡️ Early sign-ups
+
+[Form](https://i4a385hjc2e.typeform.com/to/pAFHn2mI)
 
 ## 📘 Bolt book
 
