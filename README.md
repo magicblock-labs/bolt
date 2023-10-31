@@ -26,7 +26,7 @@ Read the Bolt book: [book.boltengine.gg](https://book.boltengine.gg/)
 
 ## 📜 Bolt Whitepaper
 
-Read the Bolt whitepaper for a detailed overview on the architecture and the scalability solution: [Ephemeral Rollups are All you Need]()
+Read the Bolt whitepaper for a detailed overview on the architecture and the scalability solution: [Ephemeral Rollups are All you Need](https://book.boltengine.gg/files/Ephemeral_Rollups_are_All_you_Need.pdf)
 
 ## 🚧 Warning: under costruction
 
