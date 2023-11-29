@@ -6,7 +6,7 @@
   <h1>Bolt</h1>
 
   <p>
-    <strong>A high-performance and composable SVM-based framework for Fully On-chain ames and Autonomous Worlds. </strong>
+    <strong>A high-performance and composable SVM-based framework for Fully On-chain games and Autonomous Worlds. </strong>
   </p>
 
   <p>
