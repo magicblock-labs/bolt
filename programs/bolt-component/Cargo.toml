@@ -1,0 +1,21 @@
+[package]
+name = "bolt-component"
+version = "0.0.1"
+edition = "2021"
+description = "Bolt component template"
+license = "MIT"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "bolt_component"
+
+[features]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+default = []
+
+[dependencies]
+anchor-lang = { version = "0.29.0", features = ["init-if-needed"] }
+bolt-system = { path = "../bolt-system", features = ["cpi"], version = "0.0.1" }

@@ -1,0 +1,40 @@
+[toolchain]
+
+[features]
+seeds = false
+skip-lint = false
+
+[programs.localnet]
+bolt-component = "CmP2djJgABZ4cRokm4ndxuq6LerqpNHLBsaUv2XKEJua"
+bolt-system = "7X4EFsDJ5aYTcEjKzJ94rD8FRKgQeXC89fkpeTS4KaqP"
+component-position = "Fn1JzzEdyb55fsyduWS94mYHizGhJZuhvjX6DVvrmGbQ"
+component-velocity = "CbHEFbSQdRN4Wnoby9r16umnJ1zWbULBHg4yqzGQonU1"
+system-apply-velocity = "6LHhFVwif6N9Po3jHtSmMVtPjF6zRfL3xMosSzcrQAS8"
+system-fly = "BAQXfRwpNE43pdkeajsffA4rEkFQxwmUEDZKJjQHuvAN"
+system-simple-movement = "FSa6qoJXFBR3a7ThQkTAMrC15p6NkchPEjBdd4n6dXxA"
+world = "WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n"
+
+[programs.devnet]
+world = "WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n"
+
+[registry]
+url = "https://api.apr.dev"
+
+[provider]
+cluster = "localnet"
+wallet = "./tests/fixtures/provider.json"
+
+[scripts]
+test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/bolt.ts"
+
+[workspace]
+members = [
+    "programs/bolt-component",
+    "programs/bolt-system",
+    "programs/world",
+    "examples/component-position",
+    "examples/component-velocity",
+    "examples/system-apply-velocity",
+    "examples/system-fly",
+    "examples/system-simple-movement",
+]

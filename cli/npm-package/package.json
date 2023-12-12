@@ -1,0 +1,23 @@
+{
+  "name": "@magicblock-labs/bolt-cli",
+  "version": "0.0.1",
+  "description": "Bolt CLI tool",
+  "homepage": "https://github.com/magicblock-labs/bolt#readme",
+  "bugs": {
+    "url": "https://github.com/magicblock-labs/bolt/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/magicblock-labs/bolt.git"
+  },
+  "license": "MIT",
+  "bin": {
+    "bolt": "./bolt.js"
+  },
+  "scripts": {
+    "prepack": "[ \"$(uname -op)\" != \"x86_64 GNU/Linux\" ] && (echo Can be packed only on x86_64 GNU/Linux && exit 1) || ([ \"$(./bolt --version)\" != \"bolt-cli $(jq -r .version package.json)\" ] && (echo Check bolt binary version && exit 2) || exit 0)"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

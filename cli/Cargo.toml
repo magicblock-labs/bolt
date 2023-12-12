@@ -1,0 +1,22 @@
+[package]
+name = "bolt-cli"
+version = "0.0.1"
+authors = ["Magicblock Labs <dev@magicblock.gg>"]
+rust-version = "1.60"
+edition = "2021"
+repository = "https://github.com/magicblock-labs/bolt"
+description = "Bolt CLI"
+license = "MIT"
+
+[[bin]]
+name = "bolt"
+path = "src/bin/main.rs"
+
+[features]
+dev = []
+
+[dependencies]
+anchor-cli = { git = "https://github.com/coral-xyz/anchor.git", rev = "v0.29.0" }
+anyhow = "1.0.32"
+heck = "0.4.0"
+clap = { version = "4.2.4", features = ["derive"] }

@@ -1,0 +1,17 @@
+.idea*
+.idea
+.anchor
+*.DS_Store
+target
+**/*.rs.bk
+node_modules
+test-ledger
+.yarn
+**/test-ledger
+
+# Examples
+tests/examples/.anchor
+tests/examples/target
+tests/examples/node_modules
+tests/examples/.yarn
+

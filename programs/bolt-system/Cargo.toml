@@ -1,0 +1,20 @@
+[package]
+name = "bolt-system"
+version = "0.0.1"
+edition = "2021"
+description = "Bolt system template"
+license = "MIT"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "bolt_system"
+
+[features]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+default = []
+
+[dependencies]
+anchor-lang = "0.29.0"

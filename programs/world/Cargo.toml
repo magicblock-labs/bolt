@@ -1,0 +1,23 @@
+[package]
+name = "world"
+version = "0.0.1"
+edition = "2021"
+description = "Bolt World program"
+license = "MIT"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "world"
+
+[features]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+default = []
+
+[dependencies]
+anchor-lang = { version = "0.29.0", features = ["init-if-needed"] }
+bolt-component = { path = "../../programs/bolt-component", features = ["cpi"], version = "0.0.1"}
+bolt-system = { path = "../../programs/bolt-system", features = ["cpi"], version = "0.0.1"}
+solana-security-txt = "1.1.1"
