@@ -1,0 +1,9 @@
+{
+  "entryPoints": ["src/index.ts"],
+  "out": "docs",
+  "exclude": ["**/*+(test|spec).ts"],
+  "excludeExternals": true,
+  "excludePrivate": true,
+  "externalPattern": ["**/node_modules/**"],
+  "excludeNotDocumented": false
+}

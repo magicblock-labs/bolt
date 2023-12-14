@@ -1,0 +1,44 @@
+{
+  "name": "@magicblock-labs/bolt-sdk",
+  "version": "0.0.1",
+  "description": "Bolt typescript SDK",
+  "author": "dev@magicblock.gg",
+  "license": "MIT",
+  "private": false,
+  "devDependencies": {
+    "@metaplex-foundation/solita": "^0.20.1",
+    "@typescript-eslint/eslint-plugin": "^6.14.0",
+    "@typescript-eslint/parser": "^6.14.0",
+    "eslint": "^8.55.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-config-standard-with-typescript": "^42.0.0",
+    "eslint-plugin-import": "^2.29.0",
+    "eslint-plugin-react": "^7.33.2",
+    "prettier": "^3.1.1",
+    "rimraf": "^5.0.5",
+    "typedoc": "^0.25.4",
+    "typedoc-plugin-markdown": "^3.17.1"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/magicblock-labs/bolt",
+    "directory": "clients/bolt-sdk"
+  },
+  "main": "lib/index.js",
+  "scripts": {
+    "clean": "rimraf lib",
+    "build": "npm run clean && tsc && npm run lint:fix",
+    "build:docs": "typedoc && typedoc --plugin typedoc-plugin-markdown --out docs-mk",
+    "dev": "tsc --watch",
+    "start": "tsc",
+    "lint": "eslint -c ../../.eslintrc.yml --ext .ts,.tsx src",
+    "lint:fix": "eslint -c ../../.eslintrc.yml --ext .ts,.tsx src --fix"
+  },
+  "files": [
+    "lib"
+  ]
+}
