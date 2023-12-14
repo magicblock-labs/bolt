@@ -30,10 +30,57 @@ var __exportStar =
         __createBinding(exports, m, p);
   };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PROGRAM_ID = exports.PROGRAM_ADDRESS = void 0;
+exports.FindComponentPda =
+  exports.FindEntityPda =
+  exports.FindWorldPda =
+  exports.FindWorldRegistryPda =
+  exports.PROGRAM_ID =
+  exports.PROGRAM_ADDRESS =
+    void 0;
 var web3_js_1 = require("@solana/web3.js");
 __exportStar(require("./accounts"), exports);
 __exportStar(require("./instructions"), exports);
 exports.PROGRAM_ADDRESS = "WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n";
 exports.PROGRAM_ID = new web3_js_1.PublicKey(exports.PROGRAM_ADDRESS);
+function FindWorldRegistryPda(programId) {
+  if (programId === void 0) {
+    programId = new web3_js_1.PublicKey(exports.PROGRAM_ID);
+  }
+  return web3_js_1.PublicKey.findProgramAddressSync(
+    [Buffer.from("registry")],
+    programId
+  )[0];
+}
+exports.FindWorldRegistryPda = FindWorldRegistryPda;
+function FindWorldPda(id, programId) {
+  if (programId === void 0) {
+    programId = new web3_js_1.PublicKey(exports.PROGRAM_ID);
+  }
+  return web3_js_1.PublicKey.findProgramAddressSync(
+    [Buffer.from("world"), id.toBuffer("le", 8)],
+    programId
+  )[0];
+}
+exports.FindWorldPda = FindWorldPda;
+function FindEntityPda(worldId, entityId, programId) {
+  if (programId === void 0) {
+    programId = new web3_js_1.PublicKey(exports.PROGRAM_ID);
+  }
+  return web3_js_1.PublicKey.findProgramAddressSync(
+    [
+      Buffer.from("entity"),
+      worldId.toBuffer("be", 8),
+      entityId.toBuffer("be", 8),
+    ],
+    programId
+  )[0];
+}
+exports.FindEntityPda = FindEntityPda;
+function FindComponentPda(componentProgramId, entity, componentId) {
+  return web3_js_1.PublicKey.findProgramAddressSync(
+    [Buffer.from(componentId), entity.toBytes()],
+    componentProgramId
+  )[0];
+}
+exports.FindComponentPda = FindComponentPda;
 //# sourceMappingURL=index.js.map
