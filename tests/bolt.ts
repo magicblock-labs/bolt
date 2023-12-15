@@ -85,7 +85,7 @@ describe("bolt", () => {
     const worldPda = FindWorldPda(worldProgram, new BN(0));
     entity1 = FindEntityPda(worldProgram, new BN(0), new BN(0));
     await worldProgram.methods
-      .addEntity()
+      .addEntity(null)
       .accounts({
         world: worldPda,
         entity: entity1,
@@ -99,7 +99,7 @@ describe("bolt", () => {
 
     entity2 = FindEntityPda(worldProgram, new BN(0), new BN(1));
     await worldProgram.methods
-      .addEntity()
+      .addEntity(null)
       .accounts({
         world: worldPda,
         entity: entity2,
@@ -113,10 +113,25 @@ describe("bolt", () => {
 
     const entityPda = FindEntityPda(worldProgram, new BN(0), new BN(2));
     await worldProgram.methods
-      .addEntity()
+      .addEntity(null)
       .accounts({
         world: worldPda,
         entity: entityPda,
+        payer: provider.wallet.publicKey,
+      })
+      .rpc();
+  });
+
+  it("Add entity 4 with extra seeds", async () => {
+    const worldPda = FindWorldPda(worldProgram, new BN(0));
+    const seed = "extra-seed";
+    let entity3 = FindEntityPda(worldProgram, new BN(0), new BN(3), seed);
+
+    await worldProgram.methods
+      .addEntity(seed)
+      .accounts({
+        world: worldPda,
+        entity: entity3,
         payer: provider.wallet.publicKey,
       })
       .rpc();
@@ -452,15 +467,20 @@ describe("bolt", () => {
     )[0];
   }
 
-  function FindEntityPda(program: Program<World>, worldId: BN, entityId: BN) {
-    return PublicKey.findProgramAddressSync(
-      [
-        Buffer.from("entity"),
-        worldId.toBuffer("be", 8),
-        entityId.toBuffer("be", 8),
-      ],
-      program.programId
-    )[0];
+  function FindEntityPda(
+    program: Program<World>,
+    worldId: BN,
+    entityId: BN,
+    extraSeed?: string
+  ) {
+    let seeds = [Buffer.from("entity"), worldId.toBuffer("be", 8)];
+    if (extraSeed) {
+      seeds.push(Buffer.from(new Uint8Array(8)));
+      seeds.push(Buffer.from(extraSeed));
+    } else {
+      seeds.push(entityId.toBuffer("be", 8));
+    }
+    return PublicKey.findProgramAddressSync(seeds, program.programId)[0];
   }
 
   function FindComponentPda(

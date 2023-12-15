@@ -5,6 +5,7 @@
 target
 **/*.rs.bk
 node_modules
+clients/sdk/node_modules
 test-ledger
 .yarn
 **/test-ledger

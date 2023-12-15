@@ -1,0 +1,273 @@
+{
+  "version": "0.0.1",
+  "name": "world",
+  "instructions": [
+    {
+      "name": "initializeRegistry",
+      "accounts": [
+        {
+          "name": "registry",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "initializeNewWorld",
+      "accounts": [
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "world",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "registry",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "addEntity",
+      "accounts": [
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "entity",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "world",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "extraSeed",
+          "type": {
+            "option": "string"
+          }
+        }
+      ]
+    },
+    {
+      "name": "initializeComponent",
+      "accounts": [
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "data",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "entity",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "componentProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "apply",
+      "accounts": [
+        {
+          "name": "componentProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "boltSystem",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "boltComponent",
+          "isMut": true,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": "bytes"
+        }
+      ]
+    },
+    {
+      "name": "apply2",
+      "accounts": [
+        {
+          "name": "boltSystem",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "componentProgram1",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "boltComponent1",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "componentProgram2",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "boltComponent2",
+          "isMut": true,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": "bytes"
+        }
+      ]
+    },
+    {
+      "name": "apply3",
+      "accounts": [
+        {
+          "name": "boltSystem",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "componentProgram1",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "boltComponent1",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "componentProgram2",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "boltComponent2",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "componentProgram3",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "boltComponent3",
+          "isMut": true,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": "bytes"
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "Registry",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "worlds",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "World",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "id",
+            "type": "u64"
+          },
+          {
+            "name": "entities",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Entity",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "id",
+            "type": "u64"
+          }
+        ]
+      }
+    }
+  ],
+  "metadata": {
+    "address": "WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n",
+    "origin": "anchor",
+    "binaryVersion": "0.29.0",
+    "libVersion": "0.29.0"
+  }
+}

@@ -29,7 +29,15 @@ pub mod world {
         Ok(())
     }
 
-    pub fn add_entity(ctx: Context<AddEntity>) -> Result<()> {
+    #[allow(unused_variables)]
+    pub fn add_entity(ctx: Context<AddEntity>, extra_seed: Option<String>) -> Result<()> {
+        msg!(
+            "extra seeds: {:?}",
+            match extra_seed {
+                Some(ref seed) => seed.as_bytes(),
+                None => &[],
+            }
+        );
         ctx.accounts.entity.id = ctx.accounts.world.entities;
         ctx.accounts.world.entities += 1;
         msg!("entity id: {}", ctx.accounts.entity.id);
@@ -207,10 +215,19 @@ pub struct InitializeNewWorld<'info> {
 }
 
 #[derive(Accounts)]
+#[instruction(extra_seed: Option<String>)]
 pub struct AddEntity<'info> {
     #[account(mut)]
     pub payer: Signer<'info>,
-    #[account(init_if_needed, payer = payer, space = World::size(), seeds = [Entity::seed(), &world.id.to_be_bytes(), &world.entities.to_be_bytes()], bump)]
+    #[account(init, payer = payer, space = World::size(), seeds = [Entity::seed(), &world.id.to_be_bytes(),
+    &match extra_seed {
+        Some(ref seed) => [0; 8],
+        None => world.entities.to_be_bytes()
+    },
+    match extra_seed {
+        Some(ref seed) => seed.as_bytes(),
+        None => &[],
+    }], bump)]
     pub entity: Account<'info, Entity>,
     #[account(mut, address = world.pda().0)]
     pub world: Account<'info, World>,

@@ -1,0 +1,36 @@
+Arguments: 
+  /opt/homebrew/Cellar/node/20.3.0/bin/node /Users/gabrielepicco/.cache/node/corepack/yarn/1.22.19/bin/yarn.js init
+
+PATH: 
+  /Users/gabrielepicco/anaconda3/bin:/Users/gabrielepicco/anaconda3/condabin:/opt/homebrew/opt/dotnet@6/bin:/opt/homebrew/bin:/Users/gabrielepicco/.local/share/solana/install/active_release/bin:/Users/gabrielepicco/.cargo/bin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Library/Apple/usr/bin:/usr/local/share/dotnet:~/.dotnet/tools:/Library/Frameworks/Mono.framework/Versions/Current/Commands:/Users/gabrielepicco/Documents/Solana/bolt/node_modules/.bin:/Users/gabrielepicco/.foundry/bin:/Users/gabrielepicco/.dojo/bin:/Users/gabrielepicco/.dojo/bin:/Users/gabrielepicco/.dojo/bin
+
+Yarn version: 
+  1.22.19
+
+Node version: 
+  20.3.0
+
+Platform: 
+  darwin arm64
+
+Trace: 
+  Error: canceled
+      at Interface.<anonymous> (/Users/gabrielepicco/.cache/node/corepack/yarn/1.22.19/lib/cli.js:137150:13)
+      at Interface.emit (node:events:511:28)
+      at [_ttyWrite] [as _ttyWrite] (node:internal/readline/interface:1124:18)
+      at ReadStream.onkeypress (node:internal/readline/interface:263:20)
+      at ReadStream.emit (node:events:511:28)
+      at emitKeys (node:internal/readline/utils:357:14)
+      at emitKeys.next (<anonymous>)
+      at ReadStream.onData (node:internal/readline/emitKeypressEvents:64:36)
+      at ReadStream.emit (node:events:511:28)
+      at addChunk (node:internal/streams/readable:332:12)
+
+npm manifest: 
+  No manifest
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile
