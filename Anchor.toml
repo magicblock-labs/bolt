@@ -21,8 +21,8 @@ world = "WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n"
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "devnet"
-wallet = "~/.config/solana/id.json"
+cluster = "localnet"
+wallet = "./tests/fixtures/provider.json"
 
 [scripts]
 test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/bolt.ts"

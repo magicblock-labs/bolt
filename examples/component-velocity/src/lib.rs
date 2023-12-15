@@ -65,12 +65,14 @@ pub struct Initialize<'info> {
 
 // Component data
 #[account]
-#[derive(InitSpace, Default, Copy)]
+#[derive(InitSpace, Default)]
 pub struct Velocity {
     pub x: i64,
     pub y: i64,
     pub z: i64,
     pub last_applied: i64,
+    #[max_len(20)]
+    pub description: String,
 }
 
 impl Velocity {
