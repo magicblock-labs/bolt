@@ -10,6 +10,7 @@ export declare function FindWorldPda(id: BN, programId?: PublicKey): PublicKey;
 export declare function FindEntityPda(
   worldId: BN,
   entityId: BN,
+  extraSeed?: string,
   programId?: PublicKey
 ): PublicKey;
 export declare function FindComponentPda(

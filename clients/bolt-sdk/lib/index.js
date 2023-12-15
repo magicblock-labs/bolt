@@ -62,18 +62,18 @@ function FindWorldPda(id, programId) {
   )[0];
 }
 exports.FindWorldPda = FindWorldPda;
-function FindEntityPda(worldId, entityId, programId) {
+function FindEntityPda(worldId, entityId, extraSeed, programId) {
   if (programId === void 0) {
     programId = new web3_js_1.PublicKey(exports.PROGRAM_ID);
   }
-  return web3_js_1.PublicKey.findProgramAddressSync(
-    [
-      Buffer.from("entity"),
-      worldId.toBuffer("be", 8),
-      entityId.toBuffer("be", 8),
-    ],
-    programId
-  )[0];
+  var seeds = [Buffer.from("entity"), worldId.toBuffer("be", 8)];
+  if (extraSeed != null) {
+    seeds.push(Buffer.from(new Uint8Array(8)));
+    seeds.push(Buffer.from(extraSeed));
+  } else {
+    seeds.push(entityId.toBuffer("be", 8));
+  }
+  return web3_js_1.PublicKey.findProgramAddressSync(seeds, programId)[0];
 }
 exports.FindEntityPda = FindEntityPda;
 function FindComponentPda(componentProgramId, entity, componentId) {

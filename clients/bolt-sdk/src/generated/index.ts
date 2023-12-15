@@ -41,16 +41,17 @@ export function FindWorldPda(
 export function FindEntityPda(
   worldId: BN,
   entityId: BN,
+  extraSeed?: string,
   programId: PublicKey = new PublicKey(PROGRAM_ID)
 ) {
-  return PublicKey.findProgramAddressSync(
-    [
-      Buffer.from("entity"),
-      worldId.toBuffer("be", 8),
-      entityId.toBuffer("be", 8),
-    ],
-    programId
-  )[0];
+  const seeds = [Buffer.from("entity"), worldId.toBuffer("be", 8)];
+  if (extraSeed != null) {
+    seeds.push(Buffer.from(new Uint8Array(8)));
+    seeds.push(Buffer.from(extraSeed));
+  } else {
+    seeds.push(entityId.toBuffer("be", 8));
+  }
+  return PublicKey.findProgramAddressSync(seeds, programId)[0];
 }
 
 export function FindComponentPda(

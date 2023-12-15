@@ -13,10 +13,23 @@ import * as web3 from "@solana/web3.js";
  * @category AddEntity
  * @category generated
  */
-export const addEntityStruct = new beet.BeetArgsStruct<{
-  instructionDiscriminator: number[] /* size: 8 */;
-}>(
-  [["instructionDiscriminator", beet.uniformFixedSizeArray(beet.u8, 8)]],
+export interface AddEntityInstructionArgs {
+  extraSeed: beet.COption<string>;
+}
+/**
+ * @category Instructions
+ * @category AddEntity
+ * @category generated
+ */
+export const addEntityStruct = new beet.FixableBeetArgsStruct<
+  AddEntityInstructionArgs & {
+    instructionDiscriminator: number[] /* size: 8 */;
+  }
+>(
+  [
+    ["instructionDiscriminator", beet.uniformFixedSizeArray(beet.u8, 8)],
+    ["extraSeed", beet.coption(beet.utf8String)],
+  ],
   "AddEntityInstructionArgs"
 );
 /**
@@ -45,16 +58,20 @@ export const addEntityInstructionDiscriminator = [
  * Creates a _AddEntity_ instruction.
  *
  * @param accounts that will be accessed while the instruction is processed
+ * @param args to provide as instruction data to the program
+ *
  * @category Instructions
  * @category AddEntity
  * @category generated
  */
 export function createAddEntityInstruction(
   accounts: AddEntityInstructionAccounts,
+  args: AddEntityInstructionArgs = { extraSeed: null },
   programId = new web3.PublicKey("WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n")
 ) {
   const [data] = addEntityStruct.serialize({
     instructionDiscriminator: addEntityInstructionDiscriminator,
+    ...args,
   });
   const keys: web3.AccountMeta[] = [
     {

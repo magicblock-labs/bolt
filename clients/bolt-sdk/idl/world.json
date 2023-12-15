@@ -73,7 +73,14 @@
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [
+        {
+          "name": "extraSeed",
+          "type": {
+            "option": "string"
+          }
+        }
+      ]
     },
     {
       "name": "initializeComponent",
