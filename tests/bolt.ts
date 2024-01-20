@@ -86,13 +86,13 @@ describe("bolt", () => {
 
     const worldPda = FindWorldPda(worldProgram, new BN(1));
     await worldProgram.methods
-        .initializeNewWorld()
-        .accounts({
-          world: worldPda,
-          registry: registryPda,
-          payer: provider.wallet.publicKey,
-        })
-        .rpc();
+      .initializeNewWorld()
+      .accounts({
+        world: worldPda,
+        registry: registryPda,
+        payer: provider.wallet.publicKey,
+      })
+      .rpc();
   });
 
   it("Add entity 1", async () => {
