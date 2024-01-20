@@ -33,7 +33,7 @@ export function FindWorldPda(
   programId: PublicKey = new PublicKey(PROGRAM_ID)
 ) {
   return PublicKey.findProgramAddressSync(
-    [Buffer.from("world"), id.toBuffer("le", 8)],
+    [Buffer.from("world"), id.toBuffer("be", 8)],
     programId
   )[0];
 }
