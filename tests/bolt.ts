@@ -81,6 +81,20 @@ describe("bolt", () => {
       .rpc();
   });
 
+  it("InitializeNewWorld 2", async () => {
+    const registryPda = FindWorldRegistryPda(worldProgram);
+
+    const worldPda = FindWorldPda(worldProgram, new BN(1));
+    await worldProgram.methods
+      .initializeNewWorld()
+      .accounts({
+        world: worldPda,
+        registry: registryPda,
+        payer: provider.wallet.publicKey,
+      })
+      .rpc();
+  });
+
   it("Add entity 1", async () => {
     const worldPda = FindWorldPda(worldProgram, new BN(0));
     entity1 = FindEntityPda(worldProgram, new BN(0), new BN(0));
@@ -462,7 +476,7 @@ describe("bolt", () => {
 
   function FindWorldPda(program: Program<World>, id: BN) {
     return PublicKey.findProgramAddressSync(
-      [Buffer.from("world"), id.toBuffer("le", 8)],
+      [Buffer.from("world"), id.toBuffer("be", 8)],
       program.programId
     )[0];
   }

@@ -196,7 +196,7 @@ pub mod world {
 
 #[derive(Accounts)]
 pub struct InitializeRegistry<'info> {
-    #[account(init_if_needed, payer = payer, space = Registry::size(), seeds = [Registry::seed()], bump)]
+    #[account(init, payer = payer, space = Registry::size(), seeds = [Registry::seed()], bump)]
     pub registry: Account<'info, Registry>,
     #[account(mut)]
     pub payer: Signer<'info>,
@@ -207,7 +207,7 @@ pub struct InitializeRegistry<'info> {
 pub struct InitializeNewWorld<'info> {
     #[account(mut)]
     pub payer: Signer<'info>,
-    #[account(init_if_needed, payer = payer, space = World::size(), seeds = [World::seed(), & registry.worlds.to_be_bytes()], bump)]
+    #[account(init, payer = payer, space = World::size(), seeds = [World::seed(), &registry.worlds.to_be_bytes()], bump)]
     pub world: Account<'info, World>,
     #[account(mut, address = Registry::pda().0)]
     pub registry: Account<'info, Registry>,

@@ -57,7 +57,7 @@ function FindWorldPda(id, programId) {
     programId = new web3_js_1.PublicKey(exports.PROGRAM_ID);
   }
   return web3_js_1.PublicKey.findProgramAddressSync(
-    [Buffer.from("world"), id.toBuffer("le", 8)],
+    [Buffer.from("world"), id.toBuffer("be", 8)],
     programId
   )[0];
 }
