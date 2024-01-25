@@ -1,5 +1,5 @@
-use crate::VERSION;
 use crate::ANCHOR_VERSION;
+use crate::VERSION;
 use anchor_cli::Files;
 use anyhow::Result;
 use heck::{ToKebabCase, ToSnakeCase, ToUpperCamelCase};
@@ -104,7 +104,6 @@ pub struct Position {{
     pub x: i64,
     pub y: i64,
     pub z: i64,
-    #[max_len(20)]
     pub description: String,
 }}
 "#,
@@ -260,8 +259,8 @@ describe("{}", () => {{
 
   it("InitializeNewWorld", async () => {{
         const registry = await Registry.fromAccountAddress(provider.connection, registryPda);
-        worldId = new BN(registry.worlds);
-        worldPda = FindWorldPda(new BN(worldId))
+        worldId = new anchor.BN(registry.worlds);
+        worldPda = FindWorldPda(new anchor.BN(worldId))
         const initializeWorldIx = createInitializeNewWorldInstruction(
             {{
                 world: worldPda,

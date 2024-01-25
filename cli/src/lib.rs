@@ -1,15 +1,17 @@
 mod rust_template;
 
-use std::collections::BTreeMap;
-use anchor_cli::config::{Config, ConfigOverride, ProgramDeployment, TestValidator, Validator, WithPath};
+use crate::rust_template::{create_component, create_system};
+use anchor_cli::config::{
+    Config, ConfigOverride, ProgramDeployment, TestValidator, Validator, WithPath,
+};
+use anchor_client::Cluster;
 use anyhow::{anyhow, Result};
 use clap::{Parser, Subcommand};
+use heck::{ToKebabCase, ToSnakeCase};
+use std::collections::BTreeMap;
 use std::fs::{self, File};
 use std::io::Write;
 use std::process::Stdio;
-use heck::{ToKebabCase, ToSnakeCase};
-use anchor_client::Cluster;
-use crate::rust_template::{create_component, create_system};
 
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 pub const ANCHOR_VERSION: &str = anchor_cli::VERSION;
@@ -54,10 +56,27 @@ pub struct Opts {
 pub fn entry(opts: Opts) -> Result<()> {
     match opts.command {
         BoltCommand::Anchor(command) => {
-            if let anchor_cli::Command::Init { name, javascript, solidity, no_git, jest, template, force } = command {
-                init(&opts.cfg_override, name, javascript, solidity, no_git, jest, template, force)
-            }
-            else {
+            if let anchor_cli::Command::Init {
+                name,
+                javascript,
+                solidity,
+                no_git,
+                jest,
+                template,
+                force,
+            } = command
+            {
+                init(
+                    &opts.cfg_override,
+                    name,
+                    javascript,
+                    solidity,
+                    no_git,
+                    jest,
+                    template,
+                    force,
+                )
+            } else {
                 // Delegate to the existing anchor_cli handler
                 let opts = anchor_cli::Opts {
                     cfg_override: opts.cfg_override,
@@ -73,6 +92,7 @@ pub fn entry(opts: Opts) -> Result<()> {
 
 // Bolt Init
 
+#[allow(clippy::too_many_arguments)]
 fn init(
     cfg_override: &ConfigOverride,
     name: String,
@@ -126,7 +146,7 @@ fn init(
             } else {
                 "yarn run jest --preset ts-jest"
             }
-                .to_owned(),
+            .to_owned(),
         );
     } else {
         cfg.scripts.insert(
@@ -136,7 +156,7 @@ fn init(
             } else {
                 "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
             }
-                .to_owned(),
+            .to_owned(),
         );
     }
 
@@ -170,34 +190,43 @@ fn init(
             },
         );
         cfg.workspace.members.push("programs/*".to_owned());
-        cfg.workspace.members.push("programs-ecs/components/*".to_owned());
-        cfg.workspace.members.push("programs-ecs/systems/*".to_owned());
+        cfg.workspace
+            .members
+            .push("programs-ecs/components/*".to_owned());
+        cfg.workspace
+            .members
+            .push("programs-ecs/systems/*".to_owned());
     }
 
     // Setup the test validator to clone Bolt programs from devnet
-    let mut validator = Validator::default();
-    validator.url = Some("https://rpc.magicblock.app/devnet/".to_owned());
-    validator.rpc_port = 8899;
-    validator.ledger = ".bolt/test-ledger".to_owned();
-    validator.clone = Some(vec![
-        // World program
-        anchor_cli::config::CloneEntry{
-            address: "WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n".to_owned(),
-        },
-        // World executable data
-        anchor_cli::config::CloneEntry{
-            address: "CrsqUXPpJYpVAAx5qMKU6K8RT1TzT81T8BL6JndWSeo3".to_owned(),
-        },
-        // Registry
-        anchor_cli::config::CloneEntry{
-            address: "EHLkWwAT9oebVv9ht3mtqrvHhRVMKrt54tF3MfHTey2K".to_owned(),
-        },
-    ]);
+    let validator = Validator {
+        url: Some("https://rpc.magicblock.app/devnet/".to_owned()),
+        rpc_port: 8899,
+        bind_address: "0.0.0.0".to_owned(),
+        ledger: ".bolt/test-ledger".to_owned(),
+        clone: Some(vec![
+            // World program
+            anchor_cli::config::CloneEntry {
+                address: "WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n".to_owned(),
+            },
+            // World executable data
+            anchor_cli::config::CloneEntry {
+                address: "CrsqUXPpJYpVAAx5qMKU6K8RT1TzT81T8BL6JndWSeo3".to_owned(),
+            },
+            // Registry
+            anchor_cli::config::CloneEntry {
+                address: "EHLkWwAT9oebVv9ht3mtqrvHhRVMKrt54tF3MfHTey2K".to_owned(),
+            },
+        ]),
+        ..Default::default()
+    };
 
-    let mut test_validator = TestValidator::default();
-    test_validator.startup_wait = 5000;
-    test_validator.shutdown_wait = 2000;
-    test_validator.validator = Some(validator);
+    let test_validator = TestValidator {
+        startup_wait: 5000,
+        shutdown_wait: 2000,
+        validator: Some(validator),
+        ..Default::default()
+    };
 
     cfg.test_validator = Some(test_validator);
     cfg.programs.insert(Cluster::Localnet, localnet);
@@ -208,7 +237,10 @@ fn init(
     fs::write(".gitignore", rust_template::git_ignore())?;
 
     // Initialize .prettierignore file
-    fs::write(".prettierignore", anchor_cli::rust_template::prettier_ignore())?;
+    fs::write(
+        ".prettierignore",
+        anchor_cli::rust_template::prettier_ignore(),
+    )?;
 
     // Remove the default programs if `--force` is passed
     if force {
@@ -219,7 +251,7 @@ fn init(
         )?;
         fs::remove_dir_all(
             std::env::current_dir()?
-                .join("programs-ecs" )
+                .join("programs-ecs")
                 .join(&project_name),
         )?;
     }
@@ -306,7 +338,11 @@ fn init(
 
 // Install node modules
 fn install_node_modules(cmd: &str) -> Result<std::process::Output> {
-    let mut command = std::process::Command::new(if cfg!(target_os = "windows") { "cmd" } else { cmd });
+    let mut command = std::process::Command::new(if cfg!(target_os = "windows") {
+        "cmd"
+    } else {
+        cmd
+    });
     if cfg!(target_os = "windows") {
         command.arg(format!("/C {} install", cmd));
     } else {
