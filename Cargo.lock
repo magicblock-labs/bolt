@@ -950,6 +950,7 @@ dependencies = [
  "anyhow",
  "clap 4.4.11",
  "heck 0.4.1",
+ "syn 2.0.38",
 ]
 
 [[package]]
@@ -968,6 +969,7 @@ version = "0.1.0"
 name = "bolt-lang"
 version = "0.0.1"
 dependencies = [
+ "ahash 0.8.6",
  "anchor-lang 0.29.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "bolt-attribute-bolt-account",
  "bolt-attribute-bolt-component",

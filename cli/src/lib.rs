@@ -1,21 +1,34 @@
 mod rust_template;
 
-use anchor_cli::config::{Config, ConfigOverride, WithPath};
+use std::collections::BTreeMap;
+use anchor_cli::config::{Config, ConfigOverride, ProgramDeployment, TestValidator, Validator, WithPath};
 use anyhow::{anyhow, Result};
 use clap::{Parser, Subcommand};
-use std::fs;
+use std::fs::{self, File};
+use std::io::Write;
+use std::process::Stdio;
+use heck::{ToKebabCase, ToSnakeCase};
+use anchor_client::Cluster;
+use crate::rust_template::{create_component, create_system};
 
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
+pub const ANCHOR_VERSION: &str = anchor_cli::VERSION;
 
 #[derive(Debug, Subcommand)]
 pub enum BoltCommand {
-    // Include all existing commands from anchor_cli::Command
-    #[clap(flatten)]
-    Anchor(anchor_cli::Command),
     #[clap(about = "Create a new component")]
     Component(ComponentCommand),
     #[clap(about = "Create a new system")]
     System(SystemCommand),
+    // Include all existing commands from anchor_cli::Command
+    #[clap(flatten)]
+    Anchor(anchor_cli::Command),
+}
+
+#[derive(Debug, Parser)]
+pub struct InitCommand {
+    #[clap(short, long, help = "Workspace name")]
+    pub workspace_name: String,
 }
 
 #[derive(Debug, Parser)]
@@ -41,16 +54,269 @@ pub struct Opts {
 pub fn entry(opts: Opts) -> Result<()> {
     match opts.command {
         BoltCommand::Anchor(command) => {
-            // Delegate to the existing anchor_cli handler
-            let ops = anchor_cli::Opts {
-                cfg_override: opts.cfg_override,
-                command,
-            };
-            anchor_cli::entry(ops)
+            if let anchor_cli::Command::Init { name, javascript, solidity, no_git, jest, template, force } = command {
+                init(&opts.cfg_override, name, javascript, solidity, no_git, jest, template, force)
+            }
+            else {
+                // Delegate to the existing anchor_cli handler
+                let opts = anchor_cli::Opts {
+                    cfg_override: opts.cfg_override,
+                    command,
+                };
+                anchor_cli::entry(opts)
+            }
         }
         BoltCommand::Component(command) => new_component(&opts.cfg_override, command.name),
         BoltCommand::System(command) => new_system(&opts.cfg_override, command.name),
     }
+}
+
+// Bolt Init
+
+fn init(
+    cfg_override: &ConfigOverride,
+    name: String,
+    javascript: bool,
+    solidity: bool,
+    no_git: bool,
+    jest: bool,
+    template: anchor_cli::rust_template::ProgramTemplate,
+    force: bool,
+) -> Result<()> {
+    if !force && Config::discover(cfg_override)?.is_some() {
+        return Err(anyhow!("Workspace already initialized"));
+    }
+
+    // We need to format different cases for the dir and the name
+    let rust_name = name.to_snake_case();
+    let project_name = if name == rust_name {
+        rust_name.clone()
+    } else {
+        name.to_kebab_case()
+    };
+
+    // Additional keywords that have not been added to the `syn` crate as reserved words
+    // https://github.com/dtolnay/syn/pull/1098
+    let extra_keywords = ["async", "await", "try"];
+    let component_name = "position";
+    let system_name = "movement";
+    // Anchor converts to snake case before writing the program name
+    if syn::parse_str::<syn::Ident>(&rust_name).is_err()
+        || extra_keywords.contains(&rust_name.as_str())
+    {
+        return Err(anyhow!(
+            "Anchor workspace name must be a valid Rust identifier. It may not be a Rust reserved word, start with a digit, or include certain disallowed characters. See https://doc.rust-lang.org/reference/identifiers.html for more detail.",
+        ));
+    }
+
+    if force {
+        fs::create_dir_all(&project_name)?;
+    } else {
+        fs::create_dir(&project_name)?;
+    }
+    std::env::set_current_dir(&project_name)?;
+    fs::create_dir("app")?;
+
+    let mut cfg = Config::default();
+    if jest {
+        cfg.scripts.insert(
+            "test".to_owned(),
+            if javascript {
+                "yarn run jest"
+            } else {
+                "yarn run jest --preset ts-jest"
+            }
+                .to_owned(),
+        );
+    } else {
+        cfg.scripts.insert(
+            "test".to_owned(),
+            if javascript {
+                "yarn run mocha -t 1000000 tests/"
+            } else {
+                "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
+            }
+                .to_owned(),
+        );
+    }
+
+    let mut localnet = BTreeMap::new();
+    let program_id = anchor_cli::rust_template::get_or_create_program_id(&rust_name);
+    localnet.insert(
+        rust_name,
+        ProgramDeployment {
+            address: program_id,
+            path: None,
+            idl: None,
+        },
+    );
+    if !solidity {
+        let component_id = anchor_cli::rust_template::get_or_create_program_id(component_name);
+        let system_id = anchor_cli::rust_template::get_or_create_program_id(system_name);
+        localnet.insert(
+            component_name.to_owned(),
+            ProgramDeployment {
+                address: component_id,
+                path: None,
+                idl: None,
+            },
+        );
+        localnet.insert(
+            system_name.to_owned(),
+            ProgramDeployment {
+                address: system_id,
+                path: None,
+                idl: None,
+            },
+        );
+        cfg.workspace.members.push("programs/*".to_owned());
+        cfg.workspace.members.push("programs-ecs/components/*".to_owned());
+        cfg.workspace.members.push("programs-ecs/systems/*".to_owned());
+    }
+
+    // Setup the test validator to clone Bolt programs from devnet
+    let mut validator = Validator::default();
+    validator.url = Some("https://rpc.magicblock.app/devnet/".to_owned());
+    validator.rpc_port = 8899;
+    validator.ledger = ".bolt/test-ledger".to_owned();
+    validator.clone = Some(vec![
+        // World program
+        anchor_cli::config::CloneEntry{
+            address: "WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n".to_owned(),
+        },
+        // World executable data
+        anchor_cli::config::CloneEntry{
+            address: "CrsqUXPpJYpVAAx5qMKU6K8RT1TzT81T8BL6JndWSeo3".to_owned(),
+        },
+        // Registry
+        anchor_cli::config::CloneEntry{
+            address: "EHLkWwAT9oebVv9ht3mtqrvHhRVMKrt54tF3MfHTey2K".to_owned(),
+        },
+    ]);
+
+    let mut test_validator = TestValidator::default();
+    test_validator.startup_wait = 5000;
+    test_validator.shutdown_wait = 2000;
+    test_validator.validator = Some(validator);
+
+    cfg.test_validator = Some(test_validator);
+    cfg.programs.insert(Cluster::Localnet, localnet);
+    let toml = cfg.to_string();
+    fs::write("Anchor.toml", toml)?;
+
+    // Initialize .gitignore file
+    fs::write(".gitignore", rust_template::git_ignore())?;
+
+    // Initialize .prettierignore file
+    fs::write(".prettierignore", anchor_cli::rust_template::prettier_ignore())?;
+
+    // Remove the default programs if `--force` is passed
+    if force {
+        fs::remove_dir_all(
+            std::env::current_dir()?
+                .join(if solidity { "solidity" } else { "programs" })
+                .join(&project_name),
+        )?;
+        fs::remove_dir_all(
+            std::env::current_dir()?
+                .join("programs-ecs" )
+                .join(&project_name),
+        )?;
+    }
+
+    // Build the program.
+    if solidity {
+        anchor_cli::solidity_template::create_program(&project_name)?;
+    } else {
+        create_component(component_name)?;
+        create_system(system_name)?;
+        anchor_cli::rust_template::create_program(&project_name, template)?;
+    }
+
+    // Build the test suite.
+    fs::create_dir("tests")?;
+    // Build the migrations directory.
+    fs::create_dir("migrations")?;
+
+    if javascript {
+        // Build javascript config
+        let mut package_json = File::create("package.json")?;
+        package_json.write_all(rust_template::package_json(jest).as_bytes())?;
+
+        if jest {
+            let mut test = File::create(format!("tests/{}.test.js", &project_name))?;
+            if solidity {
+                test.write_all(anchor_cli::solidity_template::jest(&project_name).as_bytes())?;
+            } else {
+                test.write_all(anchor_cli::rust_template::jest(&project_name).as_bytes())?;
+            }
+        } else {
+            let mut test = File::create(format!("tests/{}.js", &project_name))?;
+            if solidity {
+                test.write_all(anchor_cli::solidity_template::mocha(&project_name).as_bytes())?;
+            } else {
+                test.write_all(anchor_cli::rust_template::mocha(&project_name).as_bytes())?;
+            }
+        }
+
+        let mut deploy = File::create("migrations/deploy.js")?;
+
+        deploy.write_all(anchor_cli::rust_template::deploy_script().as_bytes())?;
+    } else {
+        // Build typescript config
+        let mut ts_config = File::create("tsconfig.json")?;
+        ts_config.write_all(anchor_cli::rust_template::ts_config(jest).as_bytes())?;
+
+        let mut ts_package_json = File::create("package.json")?;
+        ts_package_json.write_all(rust_template::ts_package_json(jest).as_bytes())?;
+
+        let mut deploy = File::create("migrations/deploy.ts")?;
+        deploy.write_all(anchor_cli::rust_template::ts_deploy_script().as_bytes())?;
+
+        let mut mocha = File::create(format!("tests/{}.ts", &project_name))?;
+        if solidity {
+            mocha.write_all(anchor_cli::solidity_template::ts_mocha(&project_name).as_bytes())?;
+        } else {
+            mocha.write_all(rust_template::ts_mocha(&project_name).as_bytes())?;
+        }
+    }
+
+    let yarn_result = install_node_modules("yarn")?;
+    if !yarn_result.status.success() {
+        println!("Failed yarn install will attempt to npm install");
+        install_node_modules("npm")?;
+    }
+
+    if !no_git {
+        let git_result = std::process::Command::new("git")
+            .arg("init")
+            .stdout(Stdio::inherit())
+            .stderr(Stdio::inherit())
+            .output()
+            .map_err(|e| anyhow::format_err!("git init failed: {}", e.to_string()))?;
+        if !git_result.status.success() {
+            eprintln!("Failed to automatically initialize a new git repository");
+        }
+    }
+
+    println!("{project_name} initialized");
+
+    Ok(())
+}
+
+// Install node modules
+fn install_node_modules(cmd: &str) -> Result<std::process::Output> {
+    let mut command = std::process::Command::new(if cfg!(target_os = "windows") { "cmd" } else { cmd });
+    if cfg!(target_os = "windows") {
+        command.arg(format!("/C {} install", cmd));
+    } else {
+        command.arg("install");
+    }
+    command
+        .stdout(Stdio::inherit())
+        .stderr(Stdio::inherit())
+        .output()
+        .map_err(|e| anyhow::format_err!("{} install failed: {}", cmd, e.to_string()))
 }
 
 // Create a new component from the template
