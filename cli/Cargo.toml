@@ -16,7 +16,7 @@ path = "src/bin/main.rs"
 dev = []
 
 [dependencies]
-anchor-cli = { git = "https://github.com/coral-xyz/anchor.git"}
+anchor-cli = { git = "https://github.com/coral-xyz/anchor.git" }
 anchor-client = { git = "https://github.com/coral-xyz/anchor.git" }
 anyhow = "1.0.32"
 heck = "0.4.0"

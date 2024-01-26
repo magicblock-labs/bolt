@@ -2,7 +2,7 @@ use crate::ANCHOR_VERSION;
 use crate::VERSION;
 use anchor_cli::Files;
 use anyhow::Result;
-use heck::{ToKebabCase, ToSnakeCase, ToUpperCamelCase};
+use heck::{ToSnakeCase, ToUpperCamelCase};
 use std::path::{Path, PathBuf};
 
 /// Create a component from the given name.
@@ -53,7 +53,7 @@ pub mod {} {{
 }}
 
 #[account]
-#[bolt_account(component_id = "{}")]
+#[bolt_account(component_id = "")]
 pub struct {} {{
     pub x: i64,
     pub y: i64,
@@ -65,7 +65,6 @@ pub struct {} {{
             anchor_cli::rust_template::get_or_create_program_id(name),
             name.to_upper_camel_case(),
             name.to_snake_case(),
-            name.to_kebab_case(),
             name.to_upper_camel_case(),
         ),
     )]
@@ -164,7 +163,10 @@ pub fn package_json(jest: bool) -> String {
     "devDependencies": {{
         "chai": "^4.3.4",
         "mocha": "^9.0.3",
-        "prettier": "^2.6.2"
+        "prettier": "^2.6.2",
+        "@metaplex-foundation/beet": "^0.7.1",
+        "@metaplex-foundation/beet-solana": "^0.4.0",
+         "bolt-sdk": "latest"
     }}
 }}
 "#
@@ -231,7 +233,8 @@ pub fn ts_mocha(name: &str) -> String {
         r#"import * as anchor from "@coral-xyz/anchor";
 import {{ Program }} from "@coral-xyz/anchor";
 import {{ PublicKey }} from "@solana/web3.js";
-import {{ {} }} from "../target/types/{}";
+import {{ Position }} from "../target/types/position";
+import {{ Movement }} from "../target/types/movement";
 import {{
     createInitializeNewWorldInstruction,
     FindWorldPda,
@@ -243,6 +246,7 @@ import {{
     createInitializeComponentInstruction,
     FindComponentPda, createApplyInstruction
 }} from "bolt-sdk"
+import {{expect}} from "chai";
 
 describe("{}", () => {{
   // Configure the client to use the local cluster.
@@ -255,7 +259,8 @@ describe("{}", () => {{
   let worldPda: PublicKey;
   let entityPda: PublicKey;
 
-  const program = anchor.workspace.{} as Program<{}>;
+  const positionComponent = anchor.workspace.Position as Program<Position>;
+  const systemMovement = anchor.workspace.Movement as Program<Movement>;
 
   it("InitializeNewWorld", async () => {{
         const registry = await Registry.fromAccountAddress(provider.connection, registryPda);
@@ -272,12 +277,61 @@ describe("{}", () => {{
         const txSign = await provider.sendAndConfirm(tx);
         console.log(`Initialized a new world (ID=${{worldId}}). Initialization signature: ${{txSign}}`);
     }});
+
+  it("Add an entity", async () => {{
+      const world = await World.fromAccountAddress(provider.connection, worldPda);
+      const entityId = new anchor.BN(world.entities);
+      entityPda = FindEntityPda(worldId, entityId);
+
+      let createEntityIx = createAddEntityInstruction({{
+          world: worldPda,
+          payer: provider.wallet.publicKey,
+          entity: entityPda,
+      }});
+      const tx = new anchor.web3.Transaction().add(createEntityIx);
+      const txSign = await provider.sendAndConfirm(tx);
+      console.log(`Initialized a new Entity (ID=${{worldId}}). Initialization signature: ${{txSign}}`);
+  }});
+
+  it("Add a component", async () => {{
+      const positionComponentPda = FindComponentPda(positionComponent.programId, entityPda, "");
+      let initComponentIx = createInitializeComponentInstruction({{
+          payer: provider.wallet.publicKey,
+          entity: entityPda,
+          data: positionComponentPda,
+          componentProgram: positionComponent.programId,
+      }});
+
+      const tx = new anchor.web3.Transaction().add(initComponentIx);
+      const txSign = await provider.sendAndConfirm(tx);
+      console.log(`Initialized a new component. Initialization signature: ${{txSign}}`);
+  }});
+
+  it("Apply a system", async () => {{
+      const positionComponentPda = FindComponentPda(positionComponent.programId, entityPda, "");
+      // Check that the component has been initialized and x is 0
+      let positionData = await positionComponent.account.position.fetch(
+          positionComponentPda
+      );
+      expect(positionData.x.toNumber()).to.eq(0);
+      let applySystemIx = createApplyInstruction({{
+          componentProgram: positionComponent.programId,
+          boltSystem: systemMovement.programId,
+          boltComponent: positionComponentPda,
+      }}, {{args: new Uint8Array()}});
+
+      const tx = new anchor.web3.Transaction().add(applySystemIx);
+      await provider.sendAndConfirm(tx);
+
+      // Check that the system has been applied and x is > 0
+      positionData = await positionComponent.account.position.fetch(
+          positionComponentPda
+      );
+      expect(positionData.x.toNumber()).to.gt(0);
+  }});
+
 }});
 "#,
-        name.to_upper_camel_case(),
-        name.to_snake_case(),
-        name,
-        name.to_upper_camel_case(),
         name.to_upper_camel_case(),
     )
 }
@@ -327,5 +381,18 @@ target
 node_modules
 test-ledger
 .yarn
+"#
+}
+
+pub fn prettier_ignore() -> &'static str {
+    r#"
+.anchor
+.bolt
+.DS_Store
+target
+node_modules
+dist
+build
+test-ledger
 "#
 }

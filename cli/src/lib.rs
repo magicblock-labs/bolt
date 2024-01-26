@@ -35,17 +35,16 @@ pub struct InitCommand {
 
 #[derive(Debug, Parser)]
 pub struct ComponentCommand {
-    #[clap(short, long, help = "Name of the component")]
     pub name: String,
 }
 
 #[derive(Debug, Parser)]
 pub struct SystemCommand {
-    #[clap(short, long, help = "Name of the system")]
     pub name: String,
 }
 
 #[derive(Debug, Parser)]
+#[clap(version = VERSION)]
 pub struct Opts {
     #[clap(flatten)]
     pub cfg_override: ConfigOverride,
@@ -135,7 +134,7 @@ fn init(
         fs::create_dir(&project_name)?;
     }
     std::env::set_current_dir(&project_name)?;
-    fs::create_dir("app")?;
+    fs::create_dir_all("app")?;
 
     let mut cfg = Config::default();
     if jest {
@@ -239,7 +238,7 @@ fn init(
     // Initialize .prettierignore file
     fs::write(
         ".prettierignore",
-        anchor_cli::rust_template::prettier_ignore(),
+        rust_template::prettier_ignore(),
     )?;
 
     // Remove the default programs if `--force` is passed
@@ -256,7 +255,7 @@ fn init(
         )?;
     }
 
-    // Build the program.
+    //Build the program.
     if solidity {
         anchor_cli::solidity_template::create_program(&project_name)?;
     } else {
@@ -266,9 +265,9 @@ fn init(
     }
 
     // Build the test suite.
-    fs::create_dir("tests")?;
+    fs::create_dir_all("tests")?;
     // Build the migrations directory.
-    fs::create_dir("migrations")?;
+    fs::create_dir_all("migrations")?;
 
     if javascript {
         // Build javascript config
