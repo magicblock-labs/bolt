@@ -147,6 +147,8 @@ jobs:
 
       - name: Install the Bolt CLI, create a project and run tests
         run: |
+          rustc --version
+          cargo --version
           cargo install --path cli --force --locked
           bolt init test-project --force
           sleep 5
