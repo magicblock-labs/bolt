@@ -4,7 +4,7 @@ on:
   pull_request:
 
 env:
-  solana_version: v1.18.0
+  solana_version: v1.17.0
   anchor_version: 0.29.0
 
 jobs:
@@ -13,7 +13,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         name: cache solana cli
         id: cache-solana
         with:
@@ -22,7 +22,7 @@ jobs:
             ~/.local/share/solana/
           key: solana-${{ runner.os }}-v0000-${{ env.solana_version }}
 
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
 
@@ -47,7 +47,11 @@ jobs:
         with:
           toolchain: stable
 
+      - name: Cache rust
+        uses: Swatinem/rust-cache@v2
+
       - name: install solana
+        if: steps.cache-solana.outputs.cache-hit != 'true'
         run: |
           sh -c "$(curl -sSfL https://release.solana.com/${{ env.solana_version }}/install)"
           export PATH="$HOME/.local/share/solana/install/active_release/bin:$PATH"
@@ -58,7 +62,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Cache rust
         uses: Swatinem/rust-cache@v2
       - name: Run fmt
@@ -70,14 +74,14 @@ jobs:
     needs: install
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Use Node ${{ matrix.node }}
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 20
 
       - name: Cache node dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: '**/node_modules'
           key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
@@ -90,10 +94,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - name: install rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+
+      - name: Cache rust
+        uses: Swatinem/rust-cache@v2
+
+      - uses: actions/checkout@v4
 
       - name: Use Node ${{ matrix.node }}
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 20
 
@@ -107,7 +119,7 @@ jobs:
           export PATH="/home/runner/.local/share/solana/install/active_release/bin:$PATH"
           yarn --frozen-lockfile
 
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         name: cache solana cli
         id: cache-solana
         with:
@@ -143,8 +155,6 @@ jobs:
 
       - name: Install the Bolt CLI, create a project and run tests
         run: |
-          rustc --version
-          cargo --version
           export PATH="/home/runner/.local/share/solana/install/active_release/bin:$PATH"
           cargo install --path cli --force --locked
           bolt init test-project --force
