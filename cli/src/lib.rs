@@ -236,26 +236,23 @@ fn init(
     fs::write(".gitignore", rust_template::git_ignore())?;
 
     // Initialize .prettierignore file
-    fs::write(
-        ".prettierignore",
-        rust_template::prettier_ignore(),
-    )?;
+    fs::write(".prettierignore", rust_template::prettier_ignore())?;
 
     // Remove the default programs if `--force` is passed
     if force {
-        fs::remove_dir_all(
-            std::env::current_dir()?
-                .join(if solidity { "solidity" } else { "programs" })
-                .join(&project_name),
-        )?;
-        fs::remove_dir_all(
-            std::env::current_dir()?
-                .join("programs-ecs")
-                .join(&project_name),
-        )?;
+        let programs_path = std::env::current_dir()?
+            .join(if solidity { "solidity" } else { "programs" })
+            .join(&project_name);
+        fs::create_dir_all(&programs_path)?;
+        fs::remove_dir_all(&programs_path)?;
+        let programs_ecs_path = std::env::current_dir()?
+            .join("programs-ecs")
+            .join(&project_name);
+        fs::create_dir_all(&programs_ecs_path)?;
+        fs::remove_dir_all(&programs_ecs_path)?;
     }
 
-    //Build the program.
+    // Build the program.
     if solidity {
         anchor_cli::solidity_template::create_program(&project_name)?;
     } else {
