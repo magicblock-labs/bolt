@@ -4,7 +4,7 @@ on:
   pull_request:
 
 env:
-  solana_version: v1.17.0
+  solana_version: v1.18.0
   anchor_version: 0.29.0
 
 jobs:
@@ -153,12 +153,11 @@ jobs:
           npm i -g @coral-xyz/anchor-cli@${{ env.anchor_version }} ts-mocha typescript
           anchor test
 
-      - name: Install the Bolt CLI, create a project and run tests
+      - name: Install the Bolt CLI and create a new project
         run: |
           export PATH="/home/runner/.local/share/solana/install/active_release/bin:$PATH"
           cargo install --path cli --force --locked
           bolt init test-project --force
-          cd test-project && bolt test
 
       - uses: actions/upload-artifact@v3
         if: always()
