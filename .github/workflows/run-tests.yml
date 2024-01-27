@@ -148,7 +148,7 @@ jobs:
       - name: Install the Bolt CLI, create a project and run tests
         run: |
           export PATH="/home/runner/.local/share/solana/install/active_release/bin:$PATH"
-          cargo add solana-readonly-account
+          cargo add --package bolt-cli solana-readonly-account
           cargo install --path cli --force --locked
           bolt init test-project --force
           cd test-project && bolt test
