@@ -276,14 +276,14 @@ fn init(
             if solidity {
                 test.write_all(anchor_cli::solidity_template::jest(&project_name).as_bytes())?;
             } else {
-                test.write_all(anchor_cli::rust_template::jest(&project_name).as_bytes())?;
+                test.write_all(rust_template::jest(&project_name).as_bytes())?;
             }
         } else {
             let mut test = File::create(format!("tests/{}.js", &project_name))?;
             if solidity {
                 test.write_all(anchor_cli::solidity_template::mocha(&project_name).as_bytes())?;
             } else {
-                test.write_all(anchor_cli::rust_template::mocha(&project_name).as_bytes())?;
+                test.write_all(rust_template::mocha(&project_name).as_bytes())?;
             }
         }
 

@@ -228,6 +228,88 @@ pub fn ts_package_json(jest: bool) -> String {
     }
 }
 
+pub fn mocha(name: &str) -> String {
+    format!(
+        r#"const anchor = require("@coral-xyz/anchor");
+const boltSdk = require("bolt-sdk");
+const {{
+    createInitializeNewWorldInstruction,
+    FindWorldPda,
+    FindWorldRegistryPda,
+    Registry,
+    World
+}} = boltSdk;
+
+describe("{}", () => {{
+  // Configure the client to use the local cluster.
+  const provider = anchor.AnchorProvider.env();
+  anchor.setProvider(provider);
+
+  it("InitializeNewWorld", async () => {{
+      const registry = await Registry.fromAccountAddress(provider.connection, registryPda);
+      worldId = new anchor.BN(registry.worlds);
+      worldPda = FindWorldPda(new anchor.BN(worldId))
+      const initializeWorldIx = createInitializeNewWorldInstruction(
+          {{
+              world: worldPda,
+              registry: registryPda,
+              payer: provider.wallet.publicKey,
+          }});
+
+      const tx = new anchor.web3.Transaction().add(initializeWorldIx);
+      const txSign = await provider.sendAndConfirm(tx);
+      console.log(`Initialized a new world (ID=${{worldId}}). Initialization signature: ${{txSign}}`);
+    }});
+  }});
+}});
+"#,
+        name,
+    )
+}
+
+pub fn jest(name: &str) -> String {
+    format!(
+        r#"const anchor = require("@coral-xyz/anchor");
+const boltSdk = require("bolt-sdk");
+const {{
+    createInitializeNewWorldInstruction,
+    FindWorldPda,
+    FindWorldRegistryPda,
+    Registry,
+    World
+}} = boltSdk;
+
+describe("{}", () => {{
+  // Configure the client to use the local cluster.
+  const provider = anchor.AnchorProvider.env();
+  anchor.setProvider(provider);
+
+  // Constants used to test the program.
+  const registryPda = FindWorldRegistryPda();
+  let worldId: anchor.BN;
+  let worldPda: PublicKey;
+
+  it("InitializeNewWorld", async () => {{
+      const registry = await Registry.fromAccountAddress(provider.connection, registryPda);
+      worldId = new anchor.BN(registry.worlds);
+      worldPda = FindWorldPda(new anchor.BN(worldId))
+      const initializeWorldIx = createInitializeNewWorldInstruction(
+          {{
+              world: worldPda,
+              registry: registryPda,
+              payer: provider.wallet.publicKey,
+          }});
+
+      const tx = new anchor.web3.Transaction().add(initializeWorldIx);
+      const txSign = await provider.sendAndConfirm(tx);
+      console.log(`Initialized a new world (ID=${{worldId}}). Initialization signature: ${{txSign}}`);
+    }});
+  }});
+"#,
+        name,
+    )
+}
+
 pub fn ts_mocha(name: &str) -> String {
     format!(
         r#"import * as anchor from "@coral-xyz/anchor";
