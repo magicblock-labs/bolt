@@ -144,6 +144,12 @@ jobs:
           npm i -g @coral-xyz/anchor-cli@${{ env.anchor_version }} ts-mocha typescript
           anchor test
 
+      - name: Install the Bolt CLI, create a project and run tests
+        run: |
+          cargo install --path cli --force --locked
+          bolt init test-project --force
+          cd test-project && bolt test
+
       - uses: actions/upload-artifact@v3
         if: always()
         with:
