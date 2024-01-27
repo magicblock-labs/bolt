@@ -43,7 +43,7 @@ jobs:
           yarn --frozen-lockfile --network-concurrency 2
 
       - name: install rust
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@1.73.0
         with:
           toolchain: stable
 
@@ -151,7 +151,6 @@ jobs:
           cargo --version
           cargo install --path cli --force --locked
           bolt init test-project --force
-          sleep 5
           cd test-project && bolt test
 
       - uses: actions/upload-artifact@v3
