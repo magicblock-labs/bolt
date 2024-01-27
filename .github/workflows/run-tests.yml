@@ -4,14 +4,14 @@ on:
   pull_request:
 
 env:
-  solana_version: v1.17.0
+  solana_version: v1.18.0
   anchor_version: 0.29.0
 
 jobs:
   install:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - uses: actions/cache@v3
         name: cache solana cli
@@ -43,15 +43,11 @@ jobs:
           yarn --frozen-lockfile --network-concurrency 2
 
       - name: install rust
-        uses: dtolnay/rust-toolchain@1.75.0
+        uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: stable
 
-      - name: Cache rust
-        uses: Swatinem/rust-cache@v2
-
       - name: install solana
-        if: steps.cache-solana.outputs.cache-hit != 'true'
         run: |
           sh -c "$(curl -sSfL https://release.solana.com/${{ env.solana_version }}/install)"
           export PATH="$HOME/.local/share/solana/install/active_release/bin:$PATH"
@@ -150,7 +146,6 @@ jobs:
           rustc --version
           cargo --version
           export PATH="/home/runner/.local/share/solana/install/active_release/bin:$PATH"
-          cargo add --package bolt-cli solana-readonly-account
           cargo install --path cli --force --locked
           bolt init test-project --force
           cd test-project && bolt test
