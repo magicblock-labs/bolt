@@ -43,7 +43,7 @@ jobs:
           yarn --frozen-lockfile --network-concurrency 2
 
       - name: install rust
-        uses: dtolnay/rust-toolchain@1.73.0
+        uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: stable
 
@@ -147,8 +147,8 @@ jobs:
 
       - name: Install the Bolt CLI, create a project and run tests
         run: |
-          rustc --version
-          cargo --version
+          export PATH="/home/runner/.local/share/solana/install/active_release/bin:$PATH"
+          cargo add solana-readonly-account
           cargo install --path cli --force --locked
           bolt init test-project --force
           cd test-project && bolt test
