@@ -42,7 +42,8 @@ jobs:
           export PATH="/home/runner/.local/share/solana/install/active_release/bin:$PATH"
           yarn --frozen-lockfile --network-concurrency 2
 
-      - uses: dtolnay/rust-toolchain@stable
+      - name: install rust
+        uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: stable
 
@@ -148,7 +149,7 @@ jobs:
         run: |
           cargo install --path cli --force --locked
           bolt init test-project --force
-          cd test-project && bolt test
+          cd test-project && anchor test
 
       - uses: actions/upload-artifact@v3
         if: always()
