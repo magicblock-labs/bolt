@@ -153,11 +153,12 @@ jobs:
           npm i -g @coral-xyz/anchor-cli@${{ env.anchor_version }} ts-mocha typescript
           anchor test
 
-      - name: Install the Bolt CLI and create a new project
+      - name: Install the Bolt CLI and create & build a new project
         run: |
           export PATH="/home/runner/.local/share/solana/install/active_release/bin:$PATH"
           cargo install --path cli --force --locked
           bolt init test-project --force
+          cd test-project && bolt build
 
       - uses: actions/upload-artifact@v3
         if: always()
