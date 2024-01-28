@@ -21,7 +21,6 @@ pub fn bolt_account(attr: TokenStream, item: TokenStream) -> TokenStream {
     let mut component_id_value = None;
 
     if !attr.is_empty() {
-
         let attr_meta = parse_macro_input!(attr as Meta);
 
         component_id_value = match attr_meta {
@@ -48,7 +47,7 @@ pub fn bolt_account(attr: TokenStream, item: TokenStream) -> TokenStream {
                     None
                 }
             }),
-            _ => None
+            _ => None,
         };
     }
 

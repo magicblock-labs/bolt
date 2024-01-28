@@ -57,7 +57,7 @@ export function FindEntityPda(
 export function FindComponentPda(
   componentProgramId: PublicKey,
   entity: PublicKey,
-  componentId: string
+  componentId: string = ""
 ) {
   return PublicKey.findProgramAddressSync(
     [Buffer.from(componentId), entity.toBytes()],

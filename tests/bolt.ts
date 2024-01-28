@@ -10,6 +10,12 @@ import { SystemApplyVelocity } from "../target/types/system_apply_velocity";
 import { World } from "../target/types/world";
 import { expect } from "chai";
 import BN from "bn.js";
+import {
+  FindComponentPda,
+  FindEntityPda,
+  FindWorldPda,
+  FindWorldRegistryPda,
+} from "../clients/bolt-sdk";
 
 enum Direction {
   Left = "Left",
@@ -57,7 +63,7 @@ describe("bolt", () => {
   let componentVelocityEntity1: PublicKey;
 
   it("InitializeWorldsRegistry", async () => {
-    const registryPda = FindWorldRegistryPda(worldProgram);
+    const registryPda = FindWorldRegistryPda(worldProgram.programId);
     await worldProgram.methods
       .initializeRegistry()
       .accounts({
@@ -68,9 +74,9 @@ describe("bolt", () => {
   });
 
   it("InitializeNewWorld", async () => {
-    const registryPda = FindWorldRegistryPda(worldProgram);
+    const registryPda = FindWorldRegistryPda(worldProgram.programId);
 
-    const worldPda = FindWorldPda(worldProgram, new BN(0));
+    const worldPda = FindWorldPda(new BN(0), worldProgram.programId);
     await worldProgram.methods
       .initializeNewWorld()
       .accounts({
@@ -82,9 +88,9 @@ describe("bolt", () => {
   });
 
   it("InitializeNewWorld 2", async () => {
-    const registryPda = FindWorldRegistryPda(worldProgram);
+    const registryPda = FindWorldRegistryPda(worldProgram.programId);
 
-    const worldPda = FindWorldPda(worldProgram, new BN(1));
+    const worldPda = FindWorldPda(new BN(1), worldProgram.programId);
     await worldProgram.methods
       .initializeNewWorld()
       .accounts({
@@ -96,8 +102,8 @@ describe("bolt", () => {
   });
 
   it("Add entity 1", async () => {
-    const worldPda = FindWorldPda(worldProgram, new BN(0));
-    entity1 = FindEntityPda(worldProgram, new BN(0), new BN(0));
+    const worldPda = FindWorldPda(new BN(0), worldProgram.programId);
+    entity1 = FindEntityPda(new BN(0), new BN(0), null, worldProgram.programId);
     await worldProgram.methods
       .addEntity(null)
       .accounts({
@@ -109,9 +115,9 @@ describe("bolt", () => {
   });
 
   it("Add entity 2", async () => {
-    const worldPda = FindWorldPda(worldProgram, new BN(0));
+    const worldPda = FindWorldPda(new BN(0), worldProgram.programId);
 
-    entity2 = FindEntityPda(worldProgram, new BN(0), new BN(1));
+    entity2 = FindEntityPda(new BN(0), new BN(1), null, worldProgram.programId);
     await worldProgram.methods
       .addEntity(null)
       .accounts({
@@ -123,9 +129,14 @@ describe("bolt", () => {
   });
 
   it("Add entity 3", async () => {
-    const worldPda = FindWorldPda(worldProgram, new BN(0));
+    const worldPda = FindWorldPda(new BN(0), worldProgram.programId);
 
-    const entityPda = FindEntityPda(worldProgram, new BN(0), new BN(2));
+    const entityPda = FindEntityPda(
+      new BN(0),
+      new BN(2),
+      null,
+      worldProgram.programId
+    );
     await worldProgram.methods
       .addEntity(null)
       .accounts({
@@ -137,9 +148,14 @@ describe("bolt", () => {
   });
 
   it("Add entity 4 with extra seeds", async () => {
-    const worldPda = FindWorldPda(worldProgram, new BN(0));
+    const worldPda = FindWorldPda(new BN(0), worldProgram.programId);
     const seed = "extra-seed";
-    let entity3 = FindEntityPda(worldProgram, new BN(0), new BN(3), seed);
+    let entity3 = FindEntityPda(
+      new BN(0),
+      new BN(3),
+      seed,
+      worldProgram.programId
+    );
 
     await worldProgram.methods
       .addEntity(seed)
@@ -188,8 +204,7 @@ describe("bolt", () => {
   it("Initialize Position Component on Entity 1", async () => {
     componentPositionEntity1 = FindComponentPda(
       boltComponentPositionProgram.programId,
-      entity1,
-      ""
+      entity1
     );
 
     console.log("Component Position E1: ", componentPositionEntity1.toBase58());
@@ -464,47 +479,4 @@ describe("bolt", () => {
     console.log("|                             |");
     console.log("+-----------------------------+");
   });
-
-  // Utils
-
-  function FindWorldRegistryPda(program: Program<World>) {
-    return PublicKey.findProgramAddressSync(
-      [Buffer.from("registry")],
-      program.programId
-    )[0];
-  }
-
-  function FindWorldPda(program: Program<World>, id: BN) {
-    return PublicKey.findProgramAddressSync(
-      [Buffer.from("world"), id.toBuffer("be", 8)],
-      program.programId
-    )[0];
-  }
-
-  function FindEntityPda(
-    program: Program<World>,
-    worldId: BN,
-    entityId: BN,
-    extraSeed?: string
-  ) {
-    let seeds = [Buffer.from("entity"), worldId.toBuffer("be", 8)];
-    if (extraSeed) {
-      seeds.push(Buffer.from(new Uint8Array(8)));
-      seeds.push(Buffer.from(extraSeed));
-    } else {
-      seeds.push(entityId.toBuffer("be", 8));
-    }
-    return PublicKey.findProgramAddressSync(seeds, program.programId)[0];
-  }
-
-  function FindComponentPda(
-    program: PublicKey,
-    entity: PublicKey,
-    seed: string = "component"
-  ) {
-    return PublicKey.findProgramAddressSync(
-      [Buffer.from(seed), entity.toBytes()],
-      program
-    )[0];
-  }
 });

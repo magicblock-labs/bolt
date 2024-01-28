@@ -77,6 +77,9 @@ function FindEntityPda(worldId, entityId, extraSeed, programId) {
 }
 exports.FindEntityPda = FindEntityPda;
 function FindComponentPda(componentProgramId, entity, componentId) {
+  if (componentId === void 0) {
+    componentId = "";
+  }
   return web3_js_1.PublicKey.findProgramAddressSync(
     [Buffer.from(componentId), entity.toBytes()],
     componentProgramId
