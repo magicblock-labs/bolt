@@ -1,6 +1,5 @@
 use proc_macro::TokenStream;
 use quote::quote;
-use syn::spanned::Spanned;
 use syn::{parse_macro_input, parse_quote, Attribute, DeriveInput, Lit, Meta, NestedMeta};
 
 /// This BoltAccount attribute is used to automatically generate the seed and size functions
@@ -9,7 +8,7 @@ use syn::{parse_macro_input, parse_quote, Attribute, DeriveInput, Lit, Meta, Nes
 /// The macro also adds the InitSpace and Default derives to the struct.
 ///
 /// #[account]
-/// #[bolt_account(component_id = "bolt-position")]
+/// #[bolt_account]
 /// pub struct Position {
 ///     pub x: i64,
 ///     pub y: i64,
@@ -18,45 +17,42 @@ use syn::{parse_macro_input, parse_quote, Attribute, DeriveInput, Lit, Meta, Nes
 /// ```
 #[proc_macro_attribute]
 pub fn bolt_account(attr: TokenStream, item: TokenStream) -> TokenStream {
-    let attr = parse_macro_input!(attr as Meta);
     let mut input = parse_macro_input!(item as DeriveInput);
+    let mut component_id_value = None;
 
-    let component_id_value = match attr {
-        Meta::NameValue(meta_name_value) if meta_name_value.path.is_ident("component_id") => {
-            if let Lit::Str(lit) = meta_name_value.lit {
-                Some(lit.value())
-            } else {
-                None
+    if !attr.is_empty() {
+
+        let attr_meta = parse_macro_input!(attr as Meta);
+
+        component_id_value = match attr_meta {
+            Meta::Path(_) => None,
+            Meta::NameValue(meta_name_value) if meta_name_value.path.is_ident("component_id") => {
+                if let Lit::Str(lit) = meta_name_value.lit {
+                    Some(lit.value())
+                } else {
+                    None
+                }
             }
-        }
-        Meta::List(meta) => meta.nested.into_iter().find_map(|nested_meta| {
-            if let NestedMeta::Meta(Meta::NameValue(meta_name_value)) = nested_meta {
-                if meta_name_value.path.is_ident("component_id") {
-                    if let Lit::Str(lit) = meta_name_value.lit {
-                        Some(lit.value())
+            Meta::List(meta) => meta.nested.into_iter().find_map(|nested_meta| {
+                if let NestedMeta::Meta(Meta::NameValue(meta_name_value)) = nested_meta {
+                    if meta_name_value.path.is_ident("component_id") {
+                        if let Lit::Str(lit) = meta_name_value.lit {
+                            Some(lit.value())
+                        } else {
+                            None
+                        }
                     } else {
                         None
                     }
                 } else {
                     None
                 }
-            } else {
-                None
-            }
-        }),
-        _ => {
-            let error = syn::Error::new(attr.span(), "Missing required attribute `component_id`");
-            return error.to_compile_error().into();
-        }
-    };
+            }),
+            _ => None
+        };
+    }
 
-    let component_id_value = match component_id_value {
-        Some(value) => value,
-        None => {
-            let error = syn::Error::new(input.span(), "The `component_id` attribute is required");
-            return error.to_compile_error().into();
-        }
-    };
+    let component_id_value = component_id_value.unwrap_or_else(|| "".to_string());
 
     let additional_derives: Attribute = parse_quote! { #[derive(InitSpace, Default)] };
     input.attrs.push(additional_derives);

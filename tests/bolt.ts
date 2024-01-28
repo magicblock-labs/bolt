@@ -189,7 +189,7 @@ describe("bolt", () => {
     componentPositionEntity1 = FindComponentPda(
       boltComponentPositionProgram.programId,
       entity1,
-      "component-position"
+      ""
     );
 
     console.log("Component Position E1: ", componentPositionEntity1.toBase58());
@@ -227,7 +227,7 @@ describe("bolt", () => {
     componentPositionEntity2 = FindComponentPda(
       boltComponentPositionProgram.programId,
       entity2,
-      "component-position"
+      ""
     );
 
     await worldProgram.methods

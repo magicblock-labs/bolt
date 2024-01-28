@@ -19,7 +19,7 @@ use syn::{
 /// }
 ///
 /// #[account]
-/// #[bolt_account(component_id = "bolt-position")]
+/// #[bolt_account]
 /// pub struct Position {
 ///     pub x: i64,
 ///     pub y: i64,

@@ -9,7 +9,7 @@ pub mod component_position {
 }
 
 #[account]
-#[bolt_account(component_id = "component-position")]
+#[bolt_account]
 #[derive(Copy)]
 pub struct Position {
     pub x: i64,
