@@ -16,6 +16,6 @@ export declare function FindEntityPda(
 export declare function FindComponentPda(
   componentProgramId: PublicKey,
   entity: PublicKey,
-  componentId: string
+  componentId?: string
 ): PublicKey;
 //# sourceMappingURL=index.d.ts.map
