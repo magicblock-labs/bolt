@@ -241,8 +241,7 @@ describe("bolt", () => {
   it("Initialize Position Component on Entity 2", async () => {
     componentPositionEntity2 = FindComponentPda(
       boltComponentPositionProgram.programId,
-      entity2,
-      ""
+      entity2
     );
 
     await worldProgram.methods
