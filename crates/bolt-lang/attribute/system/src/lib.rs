@@ -15,7 +15,6 @@ struct SystemTransform;
 /// # Example
 /// ```ignore
 /// #[system]
-/// #[program]
 /// pub mod system_fly {
 ///     use super::*;
 ///
@@ -33,9 +32,22 @@ struct SystemTransform;
 pub fn system(attr: TokenStream, item: TokenStream) -> TokenStream {
     let mut input = parse_macro_input!(item as ItemMod);
     let _attr = parse_macro_input!(attr as syn::AttributeArgs);
+
+    let use_super = syn::parse_quote! { use super::*; };
+    if let Some(ref mut content) = input.content {
+        content.1.insert(0, syn::Item::Use(use_super));
+    }
+
     let mut transform = SystemTransform;
     transform.visit_item_mod_mut(&mut input);
-    TokenStream::from(quote! { #input })
+
+    // Add `#[program]` macro
+    let expanded = quote! {
+        #[program]
+        #input
+    };
+
+    TokenStream::from(expanded)
 }
 
 /// Visits the AST and modifies the system function

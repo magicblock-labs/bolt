@@ -1,6 +1,7 @@
 use proc_macro::TokenStream;
 use quote::quote;
 use syn::{parse_macro_input, Attribute, DeriveInput};
+use bolt_utils::add_bolt_metadata;
 
 #[proc_macro_attribute]
 pub fn component_deserialize(_attr: TokenStream, item: TokenStream) -> TokenStream {
@@ -9,6 +10,8 @@ pub fn component_deserialize(_attr: TokenStream, item: TokenStream) -> TokenStre
     // Add the AnchorDeserialize and AnchorSerialize derives to the struct
     let additional_derives: Attribute = syn::parse_quote! { #[derive(anchor_lang::AnchorDeserialize, anchor_lang::AnchorSerialize)] };
     input.attrs.push(additional_derives);
+
+    add_bolt_metadata(&mut input);
 
     let name = &input.ident;
     let expanded = quote! {

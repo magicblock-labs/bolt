@@ -1,8 +1,8 @@
 [package]
-name = "bolt-attribute-bolt-component-deserialize"
+name = "bolt-attribute-bolt-program"
 version = "0.0.1"
 edition = "2021"
-description = "Bolt attribute-bolt-component-deserialize"
+description = "Bolt attribute-bolt-program"
 license = "MIT"
 
 [lib]
@@ -10,6 +10,5 @@ proc-macro = true
 
 [dependencies]
 syn = { version = "1.0", features = ["full"] }
-bolt-utils = { path = "../../utils", version = "0.0.1" }
 quote = "1.0"
 proc-macro2 = "1.0"

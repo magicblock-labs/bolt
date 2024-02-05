@@ -382,6 +382,7 @@ dependencies = [
  "anchor-derive-accounts 0.29.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "anchor-derive-serde 0.29.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "anchor-derive-space 0.29.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "anchor-syn 0.29.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "arrayref",
  "base64 0.13.1",
  "bincode",
@@ -908,18 +909,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8d696c370c750c948ada61c69a0ee2cbbb9c50b1019ddb86d9317157a99c2cae"
 
 [[package]]
-name = "bolt-attribute-bolt-account"
-version = "0.0.1"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 1.0.109",
-]
-
-[[package]]
 name = "bolt-attribute-bolt-component"
 version = "0.0.1"
 dependencies = [
+ "bolt-utils",
  "proc-macro2",
  "quote",
  "syn 1.0.109",
@@ -927,6 +920,16 @@ dependencies = [
 
 [[package]]
 name = "bolt-attribute-bolt-component-deserialize"
+version = "0.0.1"
+dependencies = [
+ "bolt-utils",
+ "proc-macro2",
+ "quote",
+ "syn 1.0.109",
+]
+
+[[package]]
+name = "bolt-attribute-bolt-program"
 version = "0.0.1"
 dependencies = [
  "proc-macro2",
@@ -973,9 +976,9 @@ version = "0.0.1"
 dependencies = [
  "ahash 0.8.6",
  "anchor-lang 0.29.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "bolt-attribute-bolt-account",
  "bolt-attribute-bolt-component",
  "bolt-attribute-bolt-component-deserialize",
+ "bolt-attribute-bolt-program",
  "bolt-attribute-bolt-system",
  "bolt-system",
  "serde",
@@ -988,6 +991,15 @@ name = "bolt-system"
 version = "0.0.1"
 dependencies = [
  "anchor-lang 0.29.0 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "bolt-utils"
+version = "0.0.1"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 1.0.109",
 ]
 
 [[package]]

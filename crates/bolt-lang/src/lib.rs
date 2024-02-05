@@ -1,7 +1,7 @@
 pub use anchor_lang::prelude::*;
 
-pub use bolt_attribute_bolt_account::bolt_account;
 pub use bolt_attribute_bolt_component::component;
+pub use bolt_attribute_bolt_program::bolt_program;
 pub use bolt_attribute_bolt_component_deserialize::component_deserialize;
 pub use bolt_attribute_bolt_system::system;
 
@@ -35,4 +35,10 @@ pub trait ComponentDeserialize: Sized {
     /// Deserializes an `AccountInfo` into a `Self`.
     /// `Account`.
     fn from_account_info(account: &anchor_lang::prelude::AccountInfo) -> Result<Self>;
+}
+
+/// Metadata for the component.
+#[derive(InitSpace, AnchorSerialize, AnchorDeserialize, Default, Copy, Clone)]
+pub struct BoltMetadata {
+    pub authority: Pubkey
 }

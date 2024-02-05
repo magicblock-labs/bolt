@@ -3,10 +3,7 @@ use bolt_lang::*;
 declare_id!("FSa6qoJXFBR3a7ThQkTAMrC15p6NkchPEjBdd4n6dXxA");
 
 #[system]
-#[program]
 pub mod system_simple_movement {
-    use super::*;
-
     pub fn execute(ctx: Context<Component>, args_p: Vec<u8>) -> Result<Position> {
         let args = parse_args::<Args>(&args_p);
 

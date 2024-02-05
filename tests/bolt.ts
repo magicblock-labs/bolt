@@ -180,6 +180,7 @@ describe("bolt", () => {
         data: componentEntity1,
         componentProgram: boltComponentProgramOrigin.programId,
         entity: entity1,
+        authority: provider.wallet.publicKey,
       })
       .rpc();
   });
@@ -197,6 +198,7 @@ describe("bolt", () => {
         data: componentEntity2,
         componentProgram: boltComponentProgramOrigin.programId,
         entity: entity2,
+        authority: provider.wallet.publicKey,
       })
       .rpc();
   });
@@ -216,8 +218,9 @@ describe("bolt", () => {
         data: componentPositionEntity1,
         componentProgram: boltComponentPositionProgram.programId,
         entity: entity1,
+        authority: boltComponentPositionProgram.programId,
       })
-      .rpc();
+      .rpc({ skipPreflight: true });
   });
 
   it("Initialize Velocity Component on Entity 1", async () => {
@@ -234,6 +237,7 @@ describe("bolt", () => {
         data: componentVelocityEntity1,
         componentProgram: boltComponentVelocityProgram.programId,
         entity: entity1,
+        authority: boltComponentVelocityProgram.programId,
       })
       .rpc();
   });
@@ -251,6 +255,7 @@ describe("bolt", () => {
         data: componentPositionEntity2,
         componentProgram: boltComponentPositionProgram.programId,
         entity: entity2,
+        authority: boltComponentPositionProgram.programId,
       })
       .rpc();
   });
@@ -290,7 +295,7 @@ describe("bolt", () => {
         boltSystem: systemSimpleMovement,
         boltComponent: componentPositionEntity1,
       })
-      .rpc({ skipPreflight: true });
+      .rpc();
 
     expect(
       (
@@ -320,6 +325,7 @@ describe("bolt", () => {
     console.log("+----------------+------------+");
     console.log("|                             |");
     console.log("+-----------------------------+");
+    console.log("Component Position: ", componentPositionEntity1.toString());
   });
 
   it("Simple Movement System and Right direction on Entity 1", async () => {

@@ -10,5 +10,6 @@ proc-macro = true
 
 [dependencies]
 syn = { version = "1.0", features = ["full"] }
+bolt-utils = { path = "../../utils", version = "0.0.1" }
 quote = "1.0"
 proc-macro2 = "1.0"

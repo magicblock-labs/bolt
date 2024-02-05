@@ -1,25 +1,14 @@
 use proc_macro::TokenStream;
-use proc_macro2::TokenStream as TokenStream2;
-use quote::{quote, ToTokens};
-use syn::{
-    parse_macro_input, parse_quote, Attribute, AttributeArgs, Field, Fields, ItemMod, ItemStruct,
-    NestedMeta, Type,
-};
+use quote::quote;
+use syn::{Attribute, DeriveInput, Lit, Meta, NestedMeta, parse_macro_input, parse_quote};
+use bolt_utils::{add_bolt_metadata};
 
-/// This macro attribute is used to define a BOLT component.
+/// This Component attribute is used to automatically generate the seed and size functions
 ///
-/// Bolt components are themselves programs that can be called by other programs.
+/// The component_id can be used to define the seed used to generate the PDA which stores the component data.
+/// The macro also adds the InitSpace and Default derives to the struct.
 ///
-/// # Example
-/// ```ignore
-/// #[component(Position)]
-/// #[program]
-/// pub mod component_position {
-///     use super::*;
-/// }
-///
-/// #[account]
-/// #[bolt_account]
+/// #[component]
 /// pub struct Position {
 ///     pub x: i64,
 ///     pub y: i64,
@@ -27,128 +16,75 @@ use syn::{
 /// }
 /// ```
 #[proc_macro_attribute]
-pub fn component(args: TokenStream, input: TokenStream) -> TokenStream {
-    let ast = parse_macro_input!(input as syn::ItemMod);
-    let args = parse_macro_input!(args as syn::AttributeArgs);
-    let component_type =
-        extract_type_name(&args).expect("Expected a component type in macro arguments");
-    let modified = modify_component_module(ast, &component_type);
-    TokenStream::from(quote! { #modified })
-}
+pub fn component(attr: TokenStream, item: TokenStream) -> TokenStream {
+    let mut input = parse_macro_input!(item as DeriveInput);
+    let mut component_id_value = None;
 
-/// Modifies the component module and adds the necessary functions and structs.
-fn modify_component_module(mut module: ItemMod, component_type: &Type) -> ItemMod {
-    let (initialize_fn, initialize_struct) = generate_initialize(component_type);
-    //let (apply_fn, apply_struct, apply_impl, update_fn, update_struct) = generate_instructions(component_type);
-    let (update_fn, update_struct) = generate_update(component_type);
+    if !attr.is_empty() {
+        let attr_meta = parse_macro_input!(attr as Meta);
 
-    module.content = module.content.map(|(brace, mut items)| {
-        items.extend(
-            vec![initialize_fn, initialize_struct, update_fn, update_struct]
-                .into_iter()
-                .map(|item| syn::parse2(item).unwrap())
-                .collect::<Vec<_>>(),
-        );
-
-        let modified_items = items
-            .into_iter()
-            .map(|item| match item {
-                syn::Item::Struct(mut struct_item) if struct_item.ident == "Apply" => {
-                    modify_apply_struct(&mut struct_item);
-                    syn::Item::Struct(struct_item)
+        component_id_value = match attr_meta {
+            Meta::Path(_) => None,
+            Meta::NameValue(meta_name_value) if meta_name_value.path.is_ident("component_id") => {
+                if let Lit::Str(lit) = meta_name_value.lit {
+                    Some(lit.value())
+                } else {
+                    None
                 }
-                _ => item,
-            })
-            .collect();
-        (brace, modified_items)
-    });
+            }
+            Meta::List(meta) => meta.nested.into_iter().find_map(|nested_meta| {
+                if let NestedMeta::Meta(Meta::NameValue(meta_name_value)) = nested_meta {
+                    if meta_name_value.path.is_ident("component_id") {
+                        if let Lit::Str(lit) = meta_name_value.lit {
+                            Some(lit.value())
+                        } else {
+                            None
+                        }
+                    } else {
+                        None
+                    }
+                } else {
+                    None
+                }
+            }),
+            _ => None,
+        };
+    }
 
-    module
-}
+    let component_id_value = component_id_value.unwrap_or_else(|| "".to_string());
 
-/// Extracts the type name from attribute arguments.
-fn extract_type_name(args: &AttributeArgs) -> Option<Type> {
-    args.iter().find_map(|arg| {
-        if let NestedMeta::Meta(syn::Meta::Path(path)) = arg {
-            Some(Type::Path(syn::TypePath {
-                qself: None,
-                path: path.clone(),
-            }))
-        } else {
-            None
+    let additional_macro: Attribute = parse_quote! { #[account] };
+    let additional_derives: Attribute = parse_quote! { #[derive(InitSpace, Default)] };
+    input.attrs.push(additional_derives);
+
+    add_bolt_metadata(&mut input);
+
+    let name = &input.ident;
+    let component_name = syn::Ident::new(&name.to_string().to_lowercase(), input.ident.span());
+
+    let anchor_program = quote! {
+        #[bolt_program(#name)]
+        pub mod #component_name {
+            use super::*;
         }
-    })
-}
+    };
 
-/// Modifies the Apply struct, change the bolt system to accept any compatible system.
-fn modify_apply_struct(struct_item: &mut ItemStruct) {
-    if let Fields::Named(fields_named) = &mut struct_item.fields {
-        fields_named
-            .named
-            .iter_mut()
-            .filter(|field| is_expecting_program(field))
-            .for_each(|field| {
-                field.ty = syn::parse_str("UncheckedAccount<'info>").expect("Failed to parse type");
-                field.attrs.push(create_check_attribute());
-            });
-    }
-}
+    let expanded = quote! {
+        #anchor_program
 
-/// Creates the check attribute.
-fn create_check_attribute() -> Attribute {
-    parse_quote! {
-        #[doc = "CHECK: This program can modify the data of the component"]
-    }
-}
+        #additional_macro
+        #input
 
-/// Generates the initialize function and struct.
-fn generate_initialize(component_type: &Type) -> (TokenStream2, TokenStream2) {
-    (
-        quote! {
-            #[automatically_derived]
-            pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
-                ctx.accounts.data.set_inner(<#component_type>::default());
-                Ok(())
+        #[automatically_derived]
+        impl ComponentTraits for #name {
+            fn seed() -> &'static [u8] {
+                #component_id_value.as_bytes()
             }
-        },
-        quote! {
-            #[automatically_derived]
-            #[derive(Accounts)]
-            pub struct Initialize<'info>  {
-                #[account(mut)]
-                pub payer: Signer<'info>,
-                #[account(init_if_needed, payer = payer, space = <#component_type>::size(), seeds = [<#component_type>::seed(), entity.key().as_ref()], bump)]
-                pub data: Account<'info, #component_type>,
-                #[account()]
-                pub entity: Account<'info, Entity>,
-                pub system_program: Program<'info, System>,
-            }
-        },
-    )
-}
 
-/// Generates the instructions and related structs to inject in the component.
-fn generate_update(component_type: &Type) -> (TokenStream2, TokenStream2) {
-    (
-        quote! {
-            #[automatically_derived]
-            pub fn update(ctx: Context<Update>, data: Vec<u8>) -> Result<()> {
-                ctx.accounts.bolt_component.set_inner(<#component_type>::try_from_slice(&data)?);
-                Ok(())
+            fn size() -> usize {
+                8 + <#name>::INIT_SPACE
             }
-        },
-        quote! {
-            #[automatically_derived]
-            #[derive(Accounts)]
-            pub struct Update<'info> {
-                #[account(mut)]
-                pub bolt_component: Account<'info, #component_type>,
-            }
-        },
-    )
-}
-
-/// Checks if the field is expecting a program.
-fn is_expecting_program(field: &Field) -> bool {
-    field.ty.to_token_stream().to_string().contains("Program")
+        }
+    };
+    expanded.into()
 }

@@ -31,17 +31,8 @@ pub mod world {
 
     #[allow(unused_variables)]
     pub fn add_entity(ctx: Context<AddEntity>, extra_seed: Option<String>) -> Result<()> {
-        msg!(
-            "extra seeds: {:?}",
-            match extra_seed {
-                Some(ref seed) => seed.as_bytes(),
-                None => &[],
-            }
-        );
         ctx.accounts.entity.id = ctx.accounts.world.entities;
         ctx.accounts.world.entities += 1;
-        msg!("entity id: {}", ctx.accounts.entity.id);
-        msg!("world entities: {}", ctx.accounts.world.entities);
         Ok(())
     }
 
@@ -240,11 +231,13 @@ pub struct InitializeComponent<'info> {
     pub payer: Signer<'info>,
     #[account(mut)]
     /// CHECK: component data check
-    pub data: UncheckedAccount<'info>,
+    pub data: AccountInfo<'info>,
     #[account()]
     pub entity: Account<'info, Entity>,
     /// CHECK: component program check
-    pub component_program: UncheckedAccount<'info>,
+    pub component_program: AccountInfo<'info>,
+    /// CHECK: component authority check
+    pub authority: Option<AccountInfo<'info>>,
     pub system_program: Program<'info, System>,
 }
 
@@ -257,6 +250,7 @@ impl<'info> InitializeComponent<'info> {
             payer: self.payer.to_account_info(),
             data: self.data.to_account_info(),
             entity: self.entity.to_account_info(),
+            authority: self.authority.as_ref().map(|a| a.to_account_info()),
             system_program: self.system_program.to_account_info(),
         };
         CpiContext::new(cpi_program, cpi_accounts)

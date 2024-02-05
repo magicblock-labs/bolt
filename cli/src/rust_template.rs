@@ -46,14 +46,7 @@ fn create_component_template_simple(name: &str, program_path: &Path) -> Files {
 
 declare_id!("{}");
 
-#[component({})]
-#[program]
-pub mod {} {{
-    use super::*;
-}}
-
-#[account]
-#[bolt_account(component_id = "")]
+#[component]
 pub struct {} {{
     pub x: i64,
     pub y: i64,
@@ -63,8 +56,6 @@ pub struct {} {{
 }}
 "#,
             anchor_cli::rust_template::get_or_create_program_id(name),
-            name.to_upper_camel_case(),
-            name.to_snake_case(),
             name.to_upper_camel_case(),
         ),
     )]
@@ -80,15 +71,14 @@ fn create_system_template_simple(name: &str, program_path: &Path) -> Files {
 declare_id!("{}");
 
 #[system]
-#[program]
 pub mod {} {{
-    use super::*;
 
     pub fn execute(ctx: Context<Component>, args: Vec<u8>) -> Result<Position> {{
         let mut position = Position::from_account_info(&ctx.accounts.position)?;
         position.x += 1;
         Ok(position)
     }}
+
 }}
 
 // Define the Account to parse from the component
@@ -436,6 +426,7 @@ no-idl = []
 no-log-ix-name = []
 cpi = ["no-entrypoint"]
 default = []
+idl-build = ["anchor-lang/idl-build"]
 
 [dependencies]
 bolt-lang = "{2}"
