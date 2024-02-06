@@ -37,7 +37,9 @@ pub mod world {
     }
 
     pub fn initialize_component(ctx: Context<InitializeComponent>) -> Result<()> {
-        bolt_component::cpi::initialize(ctx.accounts.build())?;
+        let data = bolt_component::cpi::initialize(ctx.accounts.build())?;
+        let component_data = &mut *ctx.accounts.data.data.borrow_mut();
+        component_data.copy_from_slice(&data.get());
         Ok(())
     }
 

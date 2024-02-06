@@ -16,8 +16,6 @@ struct SystemTransform;
 /// ```ignore
 /// #[system]
 /// pub mod system_fly {
-///     use super::*;
-///
 ///     pub fn execute(ctx: Context<Component>, _args: Vec<u8>) -> Result<Position> {
 ///         let pos = Position {
 ///             x: ctx.accounts.position.x,

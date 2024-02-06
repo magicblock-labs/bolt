@@ -7,5 +7,5 @@ declare_id!("Fn1JzzEdyb55fsyduWS94mYHizGhJZuhvjX6DVvrmGbQ");
 pub struct Position {
     pub x: i64,
     pub y: i64,
-    pub z: i64,
+    pub z: i64
 }

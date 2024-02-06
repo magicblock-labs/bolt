@@ -1,6 +1,5 @@
 use anchor_lang::prelude::borsh::{BorshDeserialize, BorshSerialize};
 use anchor_lang::prelude::*;
-//use bolt_helpers_system_template::*;
 
 declare_id!("7X4EFsDJ5aYTcEjKzJ94rD8FRKgQeXC89fkpeTS4KaqP");
 

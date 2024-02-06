@@ -110,15 +110,10 @@ fn generate_initialize(component_type: &Type) -> (TokenStream2, TokenStream2) {
     (
         quote! {
             #[automatically_derived]
-            pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
-                ctx.accounts.data.set_inner(<#component_type>::default());
-                if let Some(authority) = &ctx.accounts.authority {
-                    if authority.key != ctx.accounts.payer.key {
-                        panic!("The authority does not match the payer.");
-                    }
-                    ctx.accounts.data.bolt_metadata.authority = *authority.key;
-                }
-                Ok(())
+            pub fn initialize(ctx: Context<Initialize>) -> Result<Vec<u8>> {
+                let mut serialized_data = Vec::new();
+                <#component_type>::default().serialize(&mut serialized_data).expect("Failed to serialize");
+                Ok(serialized_data)
             }
         },
         quote! {
@@ -127,8 +122,8 @@ fn generate_initialize(component_type: &Type) -> (TokenStream2, TokenStream2) {
             pub struct Initialize<'info>  {
                 #[account(mut)]
                 pub payer: Signer<'info>,
-                #[account(init_if_needed, payer = payer, space = <#component_type>::size(), seeds = [<#component_type>::seed(), entity.key().as_ref()], bump)]
-                pub data: Account<'info, #component_type>,
+                #[account(init_if_needed, owner=World::id(), payer = payer, space = <#component_type>::size(), seeds = [<#component_type>::seed(), entity.key().as_ref()], bump)]
+                pub data: AccountInfo<'info>,
                 #[account()]
                 pub entity: Account<'info, Entity>,
                 #[account()]

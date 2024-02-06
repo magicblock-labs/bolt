@@ -1,4 +1,5 @@
 use anchor_lang::prelude::*;
+use std::str::FromStr;
 
 declare_id!("CmP2djJgABZ4cRokm4ndxuq6LerqpNHLBsaUv2XKEJua");
 
@@ -6,15 +7,13 @@ declare_id!("CmP2djJgABZ4cRokm4ndxuq6LerqpNHLBsaUv2XKEJua");
 pub mod bolt_component {
     use super::*;
 
-    pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
-        // ctx.accounts.data.to_account_info().assign(::ID); TODO: Test delegate to the world program
-        if let Some(authority) = &ctx.accounts.authority {
-            if authority.key != ctx.accounts.payer.key {
-                panic!("Authority mismatch");
-            }
-            ctx.accounts.data.bolt_metadata.authority = *authority.key;
-        }
-        Ok(())
+    pub fn initialize(_ctx: Context<Initialize>) -> Result<Vec<u8>> {
+        let mut component = Component::default();
+        component.bolt_metadata.authority = Pubkey::from_str("WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n").unwrap();
+        let mut serialized_data = Vec::new();
+        anchor_lang::AccountSerialize::try_serialize(&component, &mut serialized_data).expect("Failed to serialize");
+        //component.serialize(&mut serialized_data).expect("Failed to serialize");
+        Ok(serialized_data)
     }
 
     pub fn apply(_ctx: Context<Apply>, _args: Vec<u8>) -> Result<()> {
@@ -56,8 +55,8 @@ pub mod bolt_component {
 pub struct Initialize<'info> {
     #[account(mut)]
     pub payer: Signer<'info>,
-    #[account(init_if_needed, payer = payer, space = Component::size(), seeds = [Component::seed(), entity.key().as_ref()], bump)]
-    pub data: Account<'info, Component>,
+    #[account(init_if_needed, owner = Pubkey::from_str("WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n").unwrap(), payer = payer, space = Component::size(), seeds = [Component::seed(), entity.key().as_ref()], bump)]
+    pub data: AccountInfo<'info>,
     #[account()]
     /// CHECK: A generic entity account
     pub entity: AccountInfo<'info>,

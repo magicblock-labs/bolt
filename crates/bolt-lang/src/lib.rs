@@ -8,6 +8,7 @@ pub use bolt_attribute_bolt_system::system;
 pub use bolt_system;
 pub use world;
 pub use world::Entity;
+pub use world::program::World;
 
 pub use serde;
 pub use serde::{Deserialize as BoltDeserialize, Serialize as BoltSerialize};

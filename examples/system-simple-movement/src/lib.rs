@@ -4,9 +4,10 @@ declare_id!("FSa6qoJXFBR3a7ThQkTAMrC15p6NkchPEjBdd4n6dXxA");
 
 #[system]
 pub mod system_simple_movement {
+
     pub fn execute(ctx: Context<Component>, args_p: Vec<u8>) -> Result<Position> {
         let args = parse_args::<Args>(&args_p);
-
+        
         let mut position = Position::from_account_info(&ctx.accounts.position)?;
 
         // Compute the new position based on the direction
@@ -26,7 +27,6 @@ pub mod system_simple_movement {
 // Define the Account to parse from the component
 #[derive(Accounts)]
 pub struct Component<'info> {
-    /// CHECK: check that the component is the expected account
     pub position: AccountInfo<'info>,
 }
 
