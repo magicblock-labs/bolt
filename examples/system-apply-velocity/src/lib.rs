@@ -18,8 +18,8 @@ pub mod system_apply_velocity {
     }
 }
 
-#[derive(Accounts)]
-pub struct Component<'info> {
-    pub velocity: Account<'info, Velocity>,
-    pub position: Account<'info, Position>,
+#[system_input]
+pub struct Component {
+    pub velocity: Velocity,
+    pub position: Position,
 }

@@ -947,6 +947,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "bolt-attribute-bolt-system-input"
+version = "0.0.1"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 1.0.109",
+]
+
+[[package]]
 name = "bolt-cli"
 version = "0.0.1"
 dependencies = [
@@ -971,6 +980,24 @@ name = "bolt-helpers"
 version = "0.1.0"
 
 [[package]]
+name = "bolt-helpers-system-template"
+version = "0.0.1"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 1.0.109",
+]
+
+[[package]]
+name = "bolt-helpers-world-apply"
+version = "0.0.1"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 1.0.109",
+]
+
+[[package]]
 name = "bolt-lang"
 version = "0.0.1"
 dependencies = [
@@ -980,6 +1007,7 @@ dependencies = [
  "bolt-attribute-bolt-component-deserialize",
  "bolt-attribute-bolt-program",
  "bolt-attribute-bolt-system",
+ "bolt-attribute-bolt-system-input",
  "bolt-system",
  "serde",
  "serde_json",
@@ -991,6 +1019,7 @@ name = "bolt-system"
 version = "0.0.1"
 dependencies = [
  "anchor-lang 0.29.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "bolt-helpers-system-template",
 ]
 
 [[package]]
@@ -5391,6 +5420,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "tuple-conv"
+version = "1.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1fd6314683350324c1bb3d71a65fbeacb4e870cb4faf30b28d8a7787fb8116dd"
+
+[[package]]
 name = "typenum"
 version = "1.17.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5917,8 +5952,10 @@ version = "0.0.1"
 dependencies = [
  "anchor-lang 0.29.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "bolt-component",
+ "bolt-helpers-world-apply",
  "bolt-system",
  "solana-security-txt",
+ "tuple-conv",
 ]
 
 [[package]]

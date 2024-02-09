@@ -1,4 +1,6 @@
 use anchor_lang::prelude::*;
+use bolt_helpers_world_apply::apply_system;
+use tuple_conv::RepeatedTuple;
 
 #[cfg(not(feature = "no-entrypoint"))]
 use solana_security_txt::security_txt;
@@ -15,8 +17,12 @@ security_txt! {
     source_code: "https://github.com/magicblock-labs/bolt"
 }
 
+mod error;
+
+#[apply_system(max_components = 3)]
 #[program]
 pub mod world {
+    use crate::error::WorldError;
     use super::*;
 
     pub fn initialize_registry(_ctx: Context<InitializeRegistry>) -> Result<()> {
@@ -37,154 +43,53 @@ pub mod world {
     }
 
     pub fn initialize_component(ctx: Context<InitializeComponent>) -> Result<()> {
-        let data = bolt_component::cpi::initialize(ctx.accounts.build())?;
-        let component_data = &mut *ctx.accounts.data.data.borrow_mut();
-        component_data.copy_from_slice(&data.get());
+        if !ctx.accounts.authority.is_signer && ctx.accounts.authority.key != &ID {
+            return Err(WorldError::InvalidAuthority.into());
+        }
+        bolt_component::cpi::initialize(ctx.accounts.build())?;
         Ok(())
     }
 
     pub fn apply(ctx: Context<ApplySystem>, args: Vec<u8>) -> Result<()> {
         let res = bolt_system::cpi::execute(ctx.accounts.build(), args)?;
-        bolt_component::cpi::update(ctx.accounts.build_update(), res.get())?;
-        Ok(())
-    }
-
-    // Apply to 2 components
-    pub fn apply2(ctx: Context<ApplySystem2>, args: Vec<u8>) -> Result<()> {
-        let res = bolt_system::cpi::execute_2(ctx.accounts.build(), args)?;
-        let (result1, result2) = res.get();
         bolt_component::cpi::update(
-            ctx.accounts.build_update(
-                ctx.accounts.component_program_1.clone(),
-                ctx.accounts.bolt_component_1.clone(),
+            build_update_context(
+                ctx.accounts.component_program.clone(),
+                ctx.accounts.bolt_component.clone(),
+                ctx.accounts.instruction_sysvar_account.clone(),
             ),
-            result1,
-        )?;
-        bolt_component::cpi::update(
-            ctx.accounts.build_update(
-                ctx.accounts.component_program_2.clone(),
-                ctx.accounts.bolt_component_2.clone(),
-            ),
-            result2,
-        )?;
+            res.get())?;
         Ok(())
     }
 
     #[derive(Accounts)]
-    pub struct ApplySystem2<'info> {
+    pub struct ApplySystem<'info> {
+        /// CHECK: bolt component program check
+        pub component_program: UncheckedAccount<'info>,
         /// CHECK: bolt system program check
         pub bolt_system: UncheckedAccount<'info>,
-        /// CHECK: bolt component program check
-        pub component_program_1: UncheckedAccount<'info>,
         #[account(mut)]
         /// CHECK: component account
-        pub bolt_component_1: UncheckedAccount<'info>,
-        /// CHECK: bolt component program check
-        pub component_program_2: UncheckedAccount<'info>,
-        #[account(mut)]
-        /// CHECK: component account
-        pub bolt_component_2: UncheckedAccount<'info>,
+        pub bolt_component: UncheckedAccount<'info>,
+        /// CHECK: authority check
+        pub authority: AccountInfo<'info>,
+        #[account(address = anchor_lang::solana_program::sysvar::instructions::id())]
+        /// CHECK: instruction sysvar check
+        pub instruction_sysvar_account: UncheckedAccount<'info>,
     }
 
-    impl<'info> ApplySystem2<'info> {
+    impl<'info> ApplySystem<'info> {
         pub fn build(
             &self,
-        ) -> CpiContext<'_, '_, '_, 'info, bolt_system::cpi::accounts::SetData2<'info>> {
+        ) -> CpiContext<'_, '_, '_, 'info, bolt_system::cpi::accounts::SetData<'info>> {
             let cpi_program = self.bolt_system.to_account_info();
-            let cpi_accounts = bolt_system::cpi::accounts::SetData2 {
-                component1: self.bolt_component_1.to_account_info(),
-                component2: self.bolt_component_2.to_account_info(),
-            };
-            CpiContext::new(cpi_program, cpi_accounts)
-        }
-
-        pub fn build_update(
-            &self,
-            component_program: UncheckedAccount<'info>,
-            component: UncheckedAccount<'info>,
-        ) -> CpiContext<'_, '_, '_, 'info, bolt_component::cpi::accounts::Update<'info>> {
-            let cpi_program = component_program.to_account_info();
-            let cpi_accounts = bolt_component::cpi::accounts::Update {
-                bolt_component: component.to_account_info(),
+            let cpi_accounts = bolt_system::cpi::accounts::SetData {
+                component: self.bolt_component.to_account_info(),
             };
             CpiContext::new(cpi_program, cpi_accounts)
         }
     }
 
-    // Apply to 3 components
-    pub fn apply3(ctx: Context<ApplySystem3>, args: Vec<u8>) -> Result<()> {
-        let res = bolt_system::cpi::execute_3(ctx.accounts.build(), args)?;
-        let (result1, result2, result3) = res.get();
-        bolt_component::cpi::update(
-            ctx.accounts.build_update(
-                ctx.accounts.component_program_1.clone(),
-                ctx.accounts.bolt_component_1.clone(),
-            ),
-            result1,
-        )?;
-        bolt_component::cpi::update(
-            ctx.accounts.build_update(
-                ctx.accounts.component_program_2.clone(),
-                ctx.accounts.bolt_component_2.clone(),
-            ),
-            result2,
-        )?;
-        bolt_component::cpi::update(
-            ctx.accounts.build_update(
-                ctx.accounts.component_program_3.clone(),
-                ctx.accounts.bolt_component_3.clone(),
-            ),
-            result3,
-        )?;
-        Ok(())
-    }
-
-    #[derive(Accounts)]
-    pub struct ApplySystem3<'info> {
-        /// CHECK: bolt system program check
-        pub bolt_system: UncheckedAccount<'info>,
-        /// CHECK: bolt component program check
-        pub component_program_1: UncheckedAccount<'info>,
-        #[account(mut)]
-        /// CHECK: component account
-        pub bolt_component_1: UncheckedAccount<'info>,
-        /// CHECK: bolt component program check
-        pub component_program_2: UncheckedAccount<'info>,
-        #[account(mut)]
-        /// CHECK: component account
-        pub bolt_component_2: UncheckedAccount<'info>,
-        /// CHECK: bolt component program check
-        pub component_program_3: UncheckedAccount<'info>,
-        #[account(mut)]
-        /// CHECK: component account
-        pub bolt_component_3: UncheckedAccount<'info>,
-    }
-
-    impl<'info> ApplySystem3<'info> {
-        pub fn build(
-            &self,
-        ) -> CpiContext<'_, '_, '_, 'info, bolt_system::cpi::accounts::SetData3<'info>> {
-            let cpi_program = self.bolt_system.to_account_info();
-            let cpi_accounts = bolt_system::cpi::accounts::SetData3 {
-                component1: self.bolt_component_1.to_account_info(),
-                component2: self.bolt_component_2.to_account_info(),
-                component3: self.bolt_component_3.to_account_info(),
-            };
-            CpiContext::new(cpi_program, cpi_accounts)
-        }
-
-        pub fn build_update(
-            &self,
-            component_program: UncheckedAccount<'info>,
-            component: UncheckedAccount<'info>,
-        ) -> CpiContext<'_, '_, '_, 'info, bolt_component::cpi::accounts::Update<'info>> {
-            let cpi_program = component_program.to_account_info();
-            let cpi_accounts = bolt_component::cpi::accounts::Update {
-                bolt_component: component.to_account_info(),
-            };
-            CpiContext::new(cpi_program, cpi_accounts)
-        }
-    }
 }
 
 #[derive(Accounts)]
@@ -238,8 +143,11 @@ pub struct InitializeComponent<'info> {
     pub entity: Account<'info, Entity>,
     /// CHECK: component program check
     pub component_program: AccountInfo<'info>,
-    /// CHECK: component authority check
-    pub authority: Option<AccountInfo<'info>>,
+    /// CHECK: authority check
+    pub authority: AccountInfo<'info>,
+    #[account(address = anchor_lang::solana_program::sysvar::instructions::id())]
+    /// CHECK: instruction sysvar check
+    pub instruction_sysvar_account: UncheckedAccount<'info>,
     pub system_program: Program<'info, System>,
 }
 
@@ -248,51 +156,18 @@ impl<'info> InitializeComponent<'info> {
         &self,
     ) -> CpiContext<'_, '_, '_, 'info, bolt_component::cpi::accounts::Initialize<'info>> {
         let cpi_program = self.component_program.to_account_info();
+
         let cpi_accounts = bolt_component::cpi::accounts::Initialize {
             payer: self.payer.to_account_info(),
             data: self.data.to_account_info(),
             entity: self.entity.to_account_info(),
-            authority: self.authority.as_ref().map(|a| a.to_account_info()),
+            authority: self.authority.to_account_info(),
+            instruction_sysvar_account: self.instruction_sysvar_account.to_account_info(),
             system_program: self.system_program.to_account_info(),
         };
         CpiContext::new(cpi_program, cpi_accounts)
     }
 }
-
-#[derive(Accounts)]
-pub struct ApplySystem<'info> {
-    /// CHECK: bolt component program check
-    pub component_program: UncheckedAccount<'info>,
-    /// CHECK: bolt system program check
-    pub bolt_system: UncheckedAccount<'info>,
-    #[account(mut)]
-    /// CHECK: component account
-    pub bolt_component: UncheckedAccount<'info>,
-}
-
-impl<'info> ApplySystem<'info> {
-    pub fn build(
-        &self,
-    ) -> CpiContext<'_, '_, '_, 'info, bolt_system::cpi::accounts::SetData<'info>> {
-        let cpi_program = self.bolt_system.to_account_info();
-        let cpi_accounts = bolt_system::cpi::accounts::SetData {
-            component: self.bolt_component.to_account_info(),
-        };
-        CpiContext::new(cpi_program, cpi_accounts)
-    }
-
-    pub fn build_update(
-        &self,
-    ) -> CpiContext<'_, '_, '_, 'info, bolt_component::cpi::accounts::Update<'info>> {
-        let cpi_program = self.component_program.to_account_info();
-        let cpi_accounts = bolt_component::cpi::accounts::Update {
-            bolt_component: self.bolt_component.to_account_info(),
-        };
-        CpiContext::new(cpi_program, cpi_accounts)
-    }
-}
-
-// Accounts
 
 #[account]
 #[derive(InitSpace, Default, Copy)]
@@ -345,4 +220,18 @@ impl Entity {
     pub fn seed() -> &'static [u8] {
         b"entity"
     }
+}
+
+/// Builds the context for updating a component.
+pub fn build_update_context<'info>(
+    component_program: UncheckedAccount<'info>,
+    component: UncheckedAccount<'info>,
+    instruction_sysvar_account: UncheckedAccount<'info>,
+) -> CpiContext<'info, 'info, 'info, 'info, bolt_component::cpi::accounts::Update<'info>> {
+    let cpi_program = component_program.to_account_info();
+    let cpi_accounts = bolt_component::cpi::accounts::Update {
+        bolt_component: component.to_account_info(),
+        instruction_sysvar_account: instruction_sysvar_account.to_account_info(),
+    };
+    CpiContext::new(cpi_program, cpi_accounts)
 }

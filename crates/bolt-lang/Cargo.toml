@@ -12,6 +12,7 @@ anchor-lang = { version = "0.29.0"}
 bolt-attribute-bolt-program = { path = "./attribute/bolt-program", version = "0.0.1" }
 bolt-attribute-bolt-component = { path = "./attribute/component", version = "0.0.1" }
 bolt-attribute-bolt-system = { path = "./attribute/system", version = "0.0.1" }
+bolt-attribute-bolt-system-input = { path = "./attribute/system-input", version = "0.0.1" }
 bolt-attribute-bolt-component-deserialize = { path = "./attribute/component-deserialize", version = "0.0.1" }
 
 # Bolt Programs

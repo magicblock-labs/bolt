@@ -110,10 +110,16 @@ fn generate_initialize(component_type: &Type) -> (TokenStream2, TokenStream2) {
     (
         quote! {
             #[automatically_derived]
-            pub fn initialize(ctx: Context<Initialize>) -> Result<Vec<u8>> {
-                let mut serialized_data = Vec::new();
-                <#component_type>::default().serialize(&mut serialized_data).expect("Failed to serialize");
-                Ok(serialized_data)
+            pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
+                let instruction = anchor_lang::solana_program::sysvar::instructions::get_instruction_relative(
+                    0, &ctx.accounts.instruction_sysvar_account.to_account_info()
+                ).unwrap();
+                if instruction.program_id != World::id() {
+                    panic!("The instruction must be called from the world program");
+                }
+                ctx.accounts.data.set_inner(<#component_type>::default());
+                ctx.accounts.data.bolt_metadata.authority = *ctx.accounts.authority.key;
+                Ok(())
             }
         },
         quote! {
@@ -122,12 +128,14 @@ fn generate_initialize(component_type: &Type) -> (TokenStream2, TokenStream2) {
             pub struct Initialize<'info>  {
                 #[account(mut)]
                 pub payer: Signer<'info>,
-                #[account(init_if_needed, owner=World::id(), payer = payer, space = <#component_type>::size(), seeds = [<#component_type>::seed(), entity.key().as_ref()], bump)]
-                pub data: AccountInfo<'info>,
+                #[account(init_if_needed, payer = payer, space = <#component_type>::size(), seeds = [<#component_type>::seed(), entity.key().as_ref()], bump)]
+                pub data: Account<'info, #component_type>,
                 #[account()]
                 pub entity: Account<'info, Entity>,
                 #[account()]
-                pub authority: Option<AccountInfo<'info>>,
+                pub authority: AccountInfo<'info>,
+                #[account(address = anchor_lang::solana_program::sysvar::instructions::id())]
+                pub instruction_sysvar_account: UncheckedAccount<'info>,
                 pub system_program: Program<'info, System>,
             }
         },
@@ -140,6 +148,12 @@ fn generate_update(component_type: &Type) -> (TokenStream2, TokenStream2) {
         quote! {
             #[automatically_derived]
             pub fn update(ctx: Context<Update>, data: Vec<u8>) -> Result<()> {
+                let instruction = anchor_lang::solana_program::sysvar::instructions::get_instruction_relative(
+                    0, &ctx.accounts.instruction_sysvar_account.to_account_info()
+                ).unwrap();
+                if instruction.program_id != World::id() {
+                    panic!("The instruction must be called from the world program");
+                }
                 ctx.accounts.bolt_component.set_inner(<#component_type>::try_from_slice(&data)?);
                 Ok(())
             }
@@ -150,6 +164,8 @@ fn generate_update(component_type: &Type) -> (TokenStream2, TokenStream2) {
             pub struct Update<'info> {
                 #[account(mut)]
                 pub bolt_component: Account<'info, #component_type>,
+                #[account(address = anchor_lang::solana_program::sysvar::instructions::id())]
+                pub instruction_sysvar_account: UncheckedAccount<'info>,
             }
         },
     )

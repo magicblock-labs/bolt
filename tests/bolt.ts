@@ -35,6 +35,10 @@ function serializeArgs(args: any = {}) {
   );
 }
 
+const SYSVAR_INSTRUCTIONS_PUBKEY = new PublicKey(
+  "Sysvar1nstructions1111111111111111111111111"
+);
+
 describe("bolt", () => {
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
@@ -180,6 +184,7 @@ describe("bolt", () => {
         data: componentEntity1,
         componentProgram: boltComponentProgramOrigin.programId,
         entity: entity1,
+        instructionSysvarAccount: SYSVAR_INSTRUCTIONS_PUBKEY,
         authority: provider.wallet.publicKey,
       })
       .rpc();
@@ -198,6 +203,7 @@ describe("bolt", () => {
         data: componentEntity2,
         componentProgram: boltComponentProgramOrigin.programId,
         entity: entity2,
+        instructionSysvarAccount: SYSVAR_INSTRUCTIONS_PUBKEY,
         authority: provider.wallet.publicKey,
       })
       .rpc();
@@ -218,9 +224,10 @@ describe("bolt", () => {
         data: componentPositionEntity1,
         componentProgram: boltComponentPositionProgram.programId,
         entity: entity1,
-        authority: boltComponentPositionProgram.programId,
+        instructionSysvarAccount: SYSVAR_INSTRUCTIONS_PUBKEY,
+        authority: worldProgram.programId,
       })
-      .rpc({ skipPreflight: true });
+      .rpc();
   });
 
   it("Initialize Velocity Component on Entity 1", async () => {
@@ -237,7 +244,8 @@ describe("bolt", () => {
         data: componentVelocityEntity1,
         componentProgram: boltComponentVelocityProgram.programId,
         entity: entity1,
-        authority: boltComponentVelocityProgram.programId,
+        instructionSysvarAccount: SYSVAR_INSTRUCTIONS_PUBKEY,
+        authority: worldProgram.programId,
       })
       .rpc();
   });
@@ -255,7 +263,8 @@ describe("bolt", () => {
         data: componentPositionEntity2,
         componentProgram: boltComponentPositionProgram.programId,
         entity: entity2,
-        authority: boltComponentPositionProgram.programId,
+        instructionSysvarAccount: SYSVAR_INSTRUCTIONS_PUBKEY,
+        authority: worldProgram.programId,
       })
       .rpc();
   });
@@ -294,6 +303,8 @@ describe("bolt", () => {
         componentProgram: boltComponentPositionProgram.programId,
         boltSystem: systemSimpleMovement,
         boltComponent: componentPositionEntity1,
+        instructionSysvarAccount: SYSVAR_INSTRUCTIONS_PUBKEY,
+        authority: worldProgram.programId,
       })
       .rpc();
 
@@ -338,8 +349,10 @@ describe("bolt", () => {
         componentProgram: boltComponentPositionProgram.programId,
         boltSystem: systemSimpleMovement,
         boltComponent: componentPositionEntity1,
+        instructionSysvarAccount: SYSVAR_INSTRUCTIONS_PUBKEY,
+        authority: worldProgram.programId,
       })
-      .rpc({ skipPreflight: true });
+      .rpc();
 
     expect(
       (
@@ -385,6 +398,8 @@ describe("bolt", () => {
         componentProgram: boltComponentPositionProgram.programId,
         boltSystem: systemFly,
         boltComponent: componentPositionEntity1,
+        instructionSysvarAccount: SYSVAR_INSTRUCTIONS_PUBKEY,
+        authority: worldProgram.programId,
       })
       .rpc();
 
@@ -427,6 +442,8 @@ describe("bolt", () => {
         boltSystem: applyVelocity,
         boltComponent1: componentVelocityEntity1,
         boltComponent2: componentPositionEntity1,
+        instructionSysvarAccount: SYSVAR_INSTRUCTIONS_PUBKEY,
+        authority: worldProgram.programId,
       })
       .remainingAccounts([
         {

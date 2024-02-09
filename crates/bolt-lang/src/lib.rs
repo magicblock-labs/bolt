@@ -4,6 +4,7 @@ pub use bolt_attribute_bolt_component::component;
 pub use bolt_attribute_bolt_program::bolt_program;
 pub use bolt_attribute_bolt_component_deserialize::component_deserialize;
 pub use bolt_attribute_bolt_system::system;
+pub use bolt_attribute_bolt_system_input::system_input;
 
 pub use bolt_system;
 pub use world;

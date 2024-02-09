@@ -12,8 +12,7 @@ pub mod system_fly {
     }
 }
 
-#[derive(Accounts)]
-pub struct Component<'info> {
-    #[account()]
-    pub position: Account<'info, Position>,
+#[system_input]
+pub struct Component {
+    pub position: Position,
 }
