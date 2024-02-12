@@ -1,12 +1,18 @@
 use proc_macro::TokenStream;
 use proc_macro2::Ident;
 use quote::quote;
-use syn::{
-    parse_macro_input, parse_quote, visit_mut::VisitMut, Expr, GenericArgument, ItemFn, ItemMod,
-    PathArguments, ReturnType, Stmt, Type, TypePath,
-};
+use syn::{parse_macro_input, parse_quote, visit_mut::VisitMut, Expr, GenericArgument, ItemFn, ItemMod, PathArguments, ReturnType, Stmt, Type, TypePath, FnArg, ItemStruct};
 
-struct SystemTransform;
+#[derive(Default)]
+struct SystemTransform{
+    return_values: usize,
+}
+
+#[derive(Default)]
+struct Extractor {
+    context_struct_name: Option<String>,
+    field_count: Option<usize>,
+}
 
 /// This macro attribute is used to define a BOLT system.
 ///
@@ -28,31 +34,47 @@ struct SystemTransform;
 /// ```
 #[proc_macro_attribute]
 pub fn system(attr: TokenStream, item: TokenStream) -> TokenStream {
-    let mut input = parse_macro_input!(item as ItemMod);
+
+    println!("xys: ");
+    let mut ast = parse_macro_input!(item as ItemMod);
     let _attr = parse_macro_input!(attr as syn::AttributeArgs);
 
-    let use_super = syn::parse_quote! { use super::*; };
-    if let Some(ref mut content) = input.content {
-        content.1.insert(0, syn::Item::Use(use_super));
+    // Extract the number of components from the module
+    let mut extractor = Extractor::default();
+    extractor.visit_item_mod_mut(&mut ast);
+
+    if let Some(components_len) = extractor.field_count {
+        let use_super = syn::parse_quote! { use super::*; };
+        if let Some(ref mut content) = ast.content {
+            content.1.insert(0, syn::Item::Use(use_super));
+        }
+
+        let mut transform = SystemTransform{
+            return_values: components_len,
+        };
+        transform.visit_item_mod_mut(&mut ast);
+
+        println!("after transform: ");
+
+        // Add `#[program]` macro and try_to_vec implementation
+        let expanded = quote! {
+            #[program]
+            #ast
+        };
+
+        TokenStream::from(expanded)
+    }else {
+        panic!("Could not find the component bundle: {} in the module", extractor.context_struct_name.unwrap());
     }
-
-    let mut transform = SystemTransform;
-    transform.visit_item_mod_mut(&mut input);
-
-    // Add `#[program]` macro
-    let expanded = quote! {
-        #[program]
-        #input
-    };
-
-    TokenStream::from(expanded)
 }
 
 /// Visits the AST and modifies the system function
 impl VisitMut for SystemTransform {
     // Modify the return instruction to return Result<Vec<u8>>
     fn visit_expr_mut(&mut self, expr: &mut Expr) {
+        println!("visit_expr: ");
         if let Some(inner_variable) = Self::extract_inner_ok_expression(expr) {
+            println!("inner_variable: ");
             let new_return_expr: Expr = match inner_variable {
                 Expr::Tuple(tuple_expr) => {
                     let tuple_elements = tuple_expr.elems.iter().map(|elem| {
@@ -61,28 +83,30 @@ impl VisitMut for SystemTransform {
                     parse_quote! { Ok((#(#tuple_elements),*)) }
                 }
                 _ => {
-                    parse_quote! { Ok((#inner_variable).try_to_vec()?) }
+                    parse_quote! {
+                        #inner_variable.try_to_vec()
+                    }
                 }
             };
             *expr = new_return_expr;
         }
     }
 
-    // Modify the return type of the system function to Result<Vec<u8>>
+    // Modify the return type of the system function to Result<Vec<u8>,*>
     fn visit_item_fn_mut(&mut self, item_fn: &mut ItemFn) {
         if item_fn.sig.ident == "execute" {
             // Modify the return type to Result<Vec<u8>> if necessary
             if let ReturnType::Type(_, type_box) = &item_fn.sig.output {
                 if let Type::Path(type_path) = &**type_box {
-                    let ret_values = Self::extract_return_value(type_path);
-                    if ret_values > 1 {
+                    println!("ret_values: {}", self.return_values);
+                    if self.return_values > 1 {
                         item_fn.sig.ident = Ident::new(
-                            format!("execute_{}", ret_values).as_str(),
+                            format!("execute_{}", self.return_values).as_str(),
                             item_fn.sig.ident.span(),
                         );
                     }
                     if !Self::check_is_vec_u8(type_path) {
-                        Self::modify_fn_return_type(item_fn, ret_values);
+                        Self::modify_fn_return_type(item_fn, self.return_values);
                         // Modify the return statement inside the function body
                         let block = &mut item_fn.block;
                         for stmt in &mut block.stmts {
@@ -146,28 +170,10 @@ impl SystemTransform {
         false
     }
 
-    // Helper function to extract the number of return values from a type
-    fn extract_return_value(ty: &TypePath) -> usize {
-        if let Some(segment) = ty.path.segments.last() {
-            if segment.ident == "Result" {
-                if let PathArguments::AngleBracketed(args) = &segment.arguments {
-                    return if let Some(GenericArgument::Type(Type::Tuple(tuple))) =
-                        args.args.first()
-                    {
-                        tuple.elems.len()
-                    } else {
-                        1
-                    };
-                }
-            }
-        }
-        0
-    }
-
     // Helper function to modify the return type of a function to be Result<Vec<u8>> or Result<(Vec<u8>, Vec<u8>, ...)>
-    fn modify_fn_return_type(item_fn: &mut syn::ItemFn, ret_values: usize) {
+    fn modify_fn_return_type(item_fn: &mut ItemFn, ret_values: usize) {
         item_fn.sig.output = if ret_values == 1 {
-            parse_quote! { -> Result<Vec<u8>> }
+            parse_quote! { -> Result<(Vec<u8>,)> }
         } else {
             let types = std::iter::repeat(quote! { Vec<u8> })
                 .take(ret_values)
@@ -211,3 +217,33 @@ impl SystemTransform {
         None
     }
 }
+
+/// Visits the AST to extract the number of input components
+impl VisitMut for Extractor {
+    fn visit_item_fn_mut(&mut self, i: &mut ItemFn) {
+        for input in &i.sig.inputs {
+            if let FnArg::Typed(pat_type) = input {
+                if let Type::Path(type_path) = &*pat_type.ty {
+                    let last_segment = type_path.path.segments.last().unwrap();
+                    if last_segment.ident == "Context" {
+                        if let PathArguments::AngleBracketed(args) = &last_segment.arguments {
+                            if let Some(syn::GenericArgument::Type(syn::Type::Path(type_path))) = args.args.first() {
+                                let ident = &type_path.path.segments.first().unwrap().ident;
+                                self.context_struct_name = Some(ident.to_string());
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    fn visit_item_struct_mut(&mut self, i: &mut ItemStruct) {
+        if let Some(name) = &self.context_struct_name {
+            if i.ident == name {
+                self.field_count = Some(i.fields.len());
+            }
+        }
+    }
+}
+

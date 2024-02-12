@@ -306,7 +306,7 @@ describe("bolt", () => {
         instructionSysvarAccount: SYSVAR_INSTRUCTIONS_PUBKEY,
         authority: worldProgram.programId,
       })
-      .rpc();
+      .rpc({ skipPreflight: true });
 
     expect(
       (

@@ -6,7 +6,8 @@ declare_id!("6LHhFVwif6N9Po3jHtSmMVtPjF6zRfL3xMosSzcrQAS8");
 
 #[system]
 pub mod system_apply_velocity {
-    pub fn execute(ctx: Context<Component>, _args: Vec<u8>) -> Result<(Velocity, Position)> {
+
+    pub fn execute(ctx: Context<Components>, _args: Vec<u8>) -> Result<Components> {
         ctx.accounts.velocity.x = 10;
         let clock = Clock::get()?;
         ctx.accounts.velocity.last_applied = clock.unix_timestamp;
@@ -14,12 +15,14 @@ pub mod system_apply_velocity {
         msg!("last applied: {}", ctx.accounts.velocity.last_applied);
         msg!("Position: {}", ctx.accounts.position.x);
         msg!("Remaining accounts: {}", ctx.remaining_accounts.len());
-        Ok((*ctx.accounts.velocity, *ctx.accounts.position))
+        Ok(ctx.accounts)
     }
+
+    #[system_input]
+    pub struct Components {
+        pub velocity: Velocity,
+        pub position: Position,
+    }
+
 }
 
-#[system_input]
-pub struct Component {
-    pub velocity: Velocity,
-    pub position: Position,
-}
