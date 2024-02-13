@@ -24,8 +24,8 @@ pub mod system_simple_movement {
     }
 
     #[system_input]
-    pub struct Components<'info> {
-        //#[component_id("Fn1JzzEdyb55fsyduWS94mYHizGhJZuhvjX6DVvrmGbQ")]
+    pub struct Components {
+        #[component_id(address = "Fn1JzzEdyb55fsyduWS94mYHizGhJZuhvjX6DVvrmGbQ")]
         pub position: Position,
     }
 
@@ -35,18 +35,6 @@ pub mod system_simple_movement {
         pub x: i64,
         pub y: i64,
         pub z: i64,
-    }
-
-    impl AccountSerialize for Position {
-        fn try_serialize<W: Write>(&self, _writer: &mut W) -> Result<()> {
-            Ok(())
-        }
-    }
-
-    impl Owner for Position {
-        fn owner() -> Pubkey{
-            Pubkey::from_str("Fn1JzzEdyb55fsyduWS94mYHizGhJZuhvjX6DVvrmGbQ").unwrap()
-        }
     }
 
     // Define the structs to deserialize the arguments

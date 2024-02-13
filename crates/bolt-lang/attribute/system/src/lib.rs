@@ -34,8 +34,6 @@ struct Extractor {
 /// ```
 #[proc_macro_attribute]
 pub fn system(attr: TokenStream, item: TokenStream) -> TokenStream {
-
-    println!("xys: ");
     let mut ast = parse_macro_input!(item as ItemMod);
     let _attr = parse_macro_input!(attr as syn::AttributeArgs);
 
@@ -54,8 +52,6 @@ pub fn system(attr: TokenStream, item: TokenStream) -> TokenStream {
         };
         transform.visit_item_mod_mut(&mut ast);
 
-        println!("after transform: ");
-
         // Add `#[program]` macro and try_to_vec implementation
         let expanded = quote! {
             #[program]
@@ -72,9 +68,7 @@ pub fn system(attr: TokenStream, item: TokenStream) -> TokenStream {
 impl VisitMut for SystemTransform {
     // Modify the return instruction to return Result<Vec<u8>>
     fn visit_expr_mut(&mut self, expr: &mut Expr) {
-        println!("visit_expr: ");
         if let Some(inner_variable) = Self::extract_inner_ok_expression(expr) {
-            println!("inner_variable: ");
             let new_return_expr: Expr = match inner_variable {
                 Expr::Tuple(tuple_expr) => {
                     let tuple_elements = tuple_expr.elems.iter().map(|elem| {
@@ -98,7 +92,6 @@ impl VisitMut for SystemTransform {
             // Modify the return type to Result<Vec<u8>> if necessary
             if let ReturnType::Type(_, type_box) = &item_fn.sig.output {
                 if let Type::Path(type_path) = &**type_box {
-                    println!("ret_values: {}", self.return_values);
                     if self.return_values > 1 {
                         item_fn.sig.ident = Ident::new(
                             format!("execute_{}", self.return_values).as_str(),
