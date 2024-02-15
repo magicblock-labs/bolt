@@ -403,7 +403,7 @@ fn cargo_toml(name: &str) -> String {
     format!(
         r#"[package]
 name = "{0}"
-version = "0.1.0"
+version = "0.0.1"
 description = "Created with Bolt"
 edition = "2021"
 

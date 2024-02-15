@@ -146,13 +146,16 @@ jobs:
           echo ${{ secrets.SYSTEM_FLY }} > target/deploy/system_fly-keypair.json
           echo ${{ secrets.SYSTEM_SIMPLE_MOVEMENT }} > target/deploy/system_simple_movement-keypair.json
 
-      - name: run tests
+      - name: run build
         run: |
           export PATH="/home/runner/.local/share/solana/install/active_release/bin:$PATH"
           ls node_modules/.bin
-          cargo install --path cli --force --locked 
-          bolt build
-          bolt test
+          npm i -g @coral-xyz/anchor-cli@${{ env.anchor_version }} ts-mocha typescript
+          anchor build
+          anchor idl build
+
+      - name: run tests
+        run: anchor test
 
       - name: Install the Bolt CLI and create & build a new project
         run: |

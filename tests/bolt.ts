@@ -1,8 +1,8 @@
 import * as anchor from "@coral-xyz/anchor";
 import { type Program } from "@coral-xyz/anchor";
 import { PublicKey } from "@solana/web3.js";
-import { type ComponentPosition } from "../target/types/component_position";
-import { type ComponentVelocity } from "../target/types/component_velocity";
+import { type Position } from "../target/types/position";
+import { type Velocity } from "../target/types/velocity";
 import { type BoltComponent } from "../target/types/bolt_component";
 import { type SystemSimpleMovement } from "../target/types/system_simple_movement";
 import { type SystemFly } from "../target/types/system_fly";
@@ -45,9 +45,9 @@ describe("bolt", () => {
 
   const worldProgram = anchor.workspace.World as Program<World>;
   const boltComponentPositionProgram = anchor.workspace
-    .ComponentPosition as Program<ComponentPosition>;
+    .Position as Program<Position>;
   const boltComponentVelocityProgram = anchor.workspace
-    .ComponentVelocity as Program<ComponentVelocity>;
+    .Velocity as Program<Velocity>;
   const boltComponentProgramOrigin = anchor.workspace
     .BoltComponent as Program<BoltComponent>;
 

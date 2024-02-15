@@ -986,7 +986,7 @@ dependencies = [
 
 [[package]]
 name = "bolt-helpers"
-version = "0.1.0"
+version = "0.0.1"
 
 [[package]]
 name = "bolt-helpers-system-template"
@@ -1376,7 +1376,7 @@ dependencies = [
 
 [[package]]
 name = "component-position"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "anchor-lang 0.29.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "bolt-lang",
@@ -1384,7 +1384,7 @@ dependencies = [
 
 [[package]]
 name = "component-velocity"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "anchor-lang 0.29.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "bolt-lang",
@@ -5032,7 +5032,7 @@ dependencies = [
 
 [[package]]
 name = "system-apply-velocity"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "anchor-lang 0.29.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "bolt-lang",
@@ -5063,7 +5063,7 @@ dependencies = [
 
 [[package]]
 name = "system-fly"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "anchor-lang 0.29.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "bolt-lang",
@@ -5072,7 +5072,7 @@ dependencies = [
 
 [[package]]
 name = "system-simple-movement"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "anchor-lang 0.29.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "bolt-lang",
