@@ -151,8 +151,10 @@ jobs:
           export PATH="/home/runner/.local/share/solana/install/active_release/bin:$PATH"
           ls node_modules/.bin
           npm i -g @coral-xyz/anchor-cli@${{ env.anchor_version }} ts-mocha typescript
-          anchor build
+          solana-test-validator > /dev/null &
+          sleep 5
           anchor idl build
+          anchor deploy
 
       - name: run tests
         run: anchor test
