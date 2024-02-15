@@ -149,7 +149,6 @@ jobs:
       - name: run build
         run: |
           export PATH="/home/runner/.local/share/solana/install/active_release/bin:$PATH"
-          ls node_modules/.bin
           npm i -g @coral-xyz/anchor-cli@${{ env.anchor_version }} ts-mocha typescript
           solana-test-validator > /dev/null &
           sleep 5
@@ -159,7 +158,10 @@ jobs:
           anchor deploy
 
       - name: run tests
-        run: anchor test
+        run: |
+          export PATH="/home/runner/.local/share/solana/install/active_release/bin:$PATH"
+          npm i -g @coral-xyz/anchor-cli@${{ env.anchor_version }} ts-mocha typescript
+          anchor test
 
       - name: Install the Bolt CLI and create & build a new project
         run: |
