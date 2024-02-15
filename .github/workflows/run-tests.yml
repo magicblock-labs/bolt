@@ -153,6 +153,8 @@ jobs:
           npm i -g @coral-xyz/anchor-cli@${{ env.anchor_version }} ts-mocha typescript
           solana-test-validator > /dev/null &
           sleep 5
+          solana airdrop -u l 100 tEsT3eV6RFCWs1BZ7AXTzasHqTtMnMLCB2tjQ42TDXD
+          anchor build
           anchor idl build
           anchor deploy
 
