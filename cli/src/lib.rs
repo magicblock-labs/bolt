@@ -2,7 +2,8 @@ mod rust_template;
 
 use crate::rust_template::{create_component, create_system};
 use anchor_cli::config::{
-    Config, ConfigOverride, ProgramDeployment, TestValidator, Validator, WithPath,
+    BootstrapMode, Config, ConfigOverride, ProgramArch, ProgramDeployment, TestValidator,
+    Validator, WithPath,
 };
 use anchor_client::Cluster;
 use anyhow::{anyhow, Result};
@@ -54,8 +55,8 @@ pub struct Opts {
 
 pub fn entry(opts: Opts) -> Result<()> {
     match opts.command {
-        BoltCommand::Anchor(command) => {
-            if let anchor_cli::Command::Init {
+        BoltCommand::Anchor(command) => match command {
+            anchor_cli::Command::Init {
                 name,
                 javascript,
                 solidity,
@@ -63,27 +64,54 @@ pub fn entry(opts: Opts) -> Result<()> {
                 jest,
                 template,
                 force,
-            } = command
-            {
-                init(
-                    &opts.cfg_override,
-                    name,
-                    javascript,
-                    solidity,
-                    no_git,
-                    jest,
-                    template,
-                    force,
-                )
-            } else {
-                // Delegate to the existing anchor_cli handler
+            } => init(
+                &opts.cfg_override,
+                name,
+                javascript,
+                solidity,
+                no_git,
+                jest,
+                template,
+                force,
+            ),
+            anchor_cli::Command::Build {
+                idl,
+                idl_ts,
+                verifiable,
+                program_name,
+                solana_version,
+                docker_image,
+                bootstrap,
+                cargo_args,
+                env,
+                skip_lint,
+                no_docs,
+                arch,
+            } => build(
+                &opts.cfg_override,
+                idl,
+                idl_ts,
+                verifiable,
+                skip_lint,
+                program_name,
+                solana_version,
+                docker_image,
+                bootstrap,
+                None,
+                None,
+                env,
+                cargo_args,
+                no_docs,
+                arch,
+            ),
+            _ => {
                 let opts = anchor_cli::Opts {
                     cfg_override: opts.cfg_override,
                     command,
                 };
                 anchor_cli::entry(opts)
             }
-        }
+        },
         BoltCommand::Component(command) => new_component(&opts.cfg_override, command.name),
         BoltCommand::System(command) => new_system(&opts.cfg_override, command.name),
     }
@@ -330,6 +358,43 @@ fn init(
     println!("{project_name} initialized");
 
     Ok(())
+}
+
+#[allow(clippy::too_many_arguments)]
+pub fn build(
+    cfg_override: &ConfigOverride,
+    idl: Option<String>,
+    idl_ts: Option<String>,
+    verifiable: bool,
+    skip_lint: bool,
+    program_name: Option<String>,
+    solana_version: Option<String>,
+    docker_image: Option<String>,
+    bootstrap: BootstrapMode,
+    stdout: Option<File>,
+    stderr: Option<File>,
+    env_vars: Vec<String>,
+    cargo_args: Vec<String>,
+    no_docs: bool,
+    arch: ProgramArch,
+) -> Result<()> {
+    anchor_cli::build(
+        cfg_override,
+        idl,
+        idl_ts,
+        verifiable,
+        skip_lint,
+        program_name,
+        solana_version,
+        docker_image,
+        bootstrap,
+        stdout,
+        stderr,
+        env_vars,
+        cargo_args,
+        no_docs,
+        arch,
+    )
 }
 
 // Install node modules

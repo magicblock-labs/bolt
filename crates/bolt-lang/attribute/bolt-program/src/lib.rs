@@ -115,7 +115,7 @@ fn generate_initialize(component_type: &Type) -> (TokenStream2, TokenStream2) {
                     0, &ctx.accounts.instruction_sysvar_account.to_account_info()
                 ).unwrap();
                 if instruction.program_id != World::id() {
-                    panic!("The instruction must be called from the world program");
+                    return Err(BoltError::InvalidCaller.into());
                 }
                 ctx.accounts.data.set_inner(<#component_type>::default());
                 ctx.accounts.data.bolt_metadata.authority = *ctx.accounts.authority.key;
@@ -148,12 +148,18 @@ fn generate_update(component_type: &Type) -> (TokenStream2, TokenStream2) {
         quote! {
             #[automatically_derived]
             pub fn update(ctx: Context<Update>, data: Vec<u8>) -> Result<()> {
+                // Check if the instruction is called from the world program
                 let instruction = anchor_lang::solana_program::sysvar::instructions::get_instruction_relative(
                     0, &ctx.accounts.instruction_sysvar_account.to_account_info()
                 ).unwrap();
                 if instruction.program_id != World::id() {
-                    panic!("The instruction must be called from the world program");
+                    return Err(BoltError::InvalidCaller.into());
                 }
+                // Check if the authority is authorized to modify the data
+                if ctx.accounts.bolt_component.bolt_metadata.authority != World::id() && ctx.accounts.bolt_component.bolt_metadata.authority != *ctx.accounts.authority.key {
+                    return Err(BoltError::InvalidAuthority.into());
+                }
+
                 ctx.accounts.bolt_component.set_inner(<#component_type>::try_from_slice(&data)?);
                 Ok(())
             }
@@ -164,6 +170,9 @@ fn generate_update(component_type: &Type) -> (TokenStream2, TokenStream2) {
             pub struct Update<'info> {
                 #[account(mut)]
                 pub bolt_component: Account<'info, #component_type>,
+                #[account()]
+                /// CHECK: The authority of the component
+                pub authority: AccountInfo<'info>,
                 #[account(address = anchor_lang::solana_program::sysvar::instructions::id())]
                 pub instruction_sysvar_account: UncheckedAccount<'info>,
             }

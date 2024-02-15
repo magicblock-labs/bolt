@@ -67,6 +67,7 @@ fn create_system_template_simple(name: &str, program_path: &Path) -> Files {
         program_path.join("src").join("lib.rs"),
         format!(
             r#"use bolt_lang::*;
+use component_position::Position;
 
 declare_id!("{}");
 
@@ -79,21 +80,11 @@ pub mod {} {{
         Ok(position)
     }}
 
-}}
+    #[system_input]
+    pub struct Components {{
+        pub position: Position,
+    }}
 
-// Define the Account to parse from the component
-#[derive(Accounts)]
-pub struct Component<'info> {{
-    /// CHECK: check that the component is the expected account
-    pub position: AccountInfo<'info>,
-}}
-
-#[component_deserialize]
-pub struct Position {{
-    pub x: i64,
-    pub y: i64,
-    pub z: i64,
-    pub description: String,
 }}
 "#,
             anchor_cli::rust_template::get_or_create_program_id(name),

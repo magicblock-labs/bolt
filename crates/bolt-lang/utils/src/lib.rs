@@ -1,5 +1,5 @@
-use syn::{DeriveInput, Field, Type, Visibility};
 use proc_macro2::Ident;
+use syn::{DeriveInput, Field, Type, Visibility};
 
 pub fn add_bolt_metadata(input: &mut DeriveInput) {
     let authority_field: Field = Field {

@@ -1,21 +1,24 @@
 pub use anchor_lang::prelude::*;
 
 pub use bolt_attribute_bolt_component::component;
-pub use bolt_attribute_bolt_program::bolt_program;
 pub use bolt_attribute_bolt_component_deserialize::component_deserialize;
+pub use bolt_attribute_bolt_component_id::component_id;
+pub use bolt_attribute_bolt_program::bolt_program;
 pub use bolt_attribute_bolt_system::system;
 pub use bolt_attribute_bolt_system_input::system_input;
-pub use bolt_attribute_bolt_component_id::component_id;
 
 pub use bolt_system;
 pub use world;
-pub use world::Entity;
 pub use world::program::World;
+pub use world::Entity;
 
 pub use serde;
 pub use serde::{Deserialize as BoltDeserialize, Serialize as BoltSerialize};
 
 use std::str;
+
+mod errors;
+pub use crate::errors::BoltError;
 
 /// Parses the arguments from a byte array.
 pub fn parse_args<T: serde::de::DeserializeOwned>(args_p: &[u8]) -> T {
@@ -43,5 +46,5 @@ pub trait ComponentDeserialize: Sized {
 /// Metadata for the component.
 #[derive(InitSpace, AnchorSerialize, AnchorDeserialize, Default, Copy, Clone)]
 pub struct BoltMetadata {
-    pub authority: Pubkey
+    pub authority: Pubkey,
 }

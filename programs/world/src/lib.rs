@@ -22,8 +22,8 @@ mod error;
 #[apply_system(max_components = 3)]
 #[program]
 pub mod world {
-    use crate::error::WorldError;
     use super::*;
+    use crate::error::WorldError;
 
     pub fn initialize_registry(_ctx: Context<InitializeRegistry>) -> Result<()> {
         Ok(())
@@ -51,14 +51,19 @@ pub mod world {
     }
 
     pub fn apply(ctx: Context<ApplySystem>, args: Vec<u8>) -> Result<()> {
+        if !ctx.accounts.authority.is_signer && ctx.accounts.authority.key != &ID {
+            return Err(WorldError::InvalidAuthority.into());
+        }
         let res = bolt_system::cpi::execute(ctx.accounts.build(), args)?;
         bolt_component::cpi::update(
             build_update_context(
                 ctx.accounts.component_program.clone(),
                 ctx.accounts.bolt_component.clone(),
+                ctx.accounts.authority.clone(),
                 ctx.accounts.instruction_sysvar_account.clone(),
             ),
-            res.get())?;
+            res.get(),
+        )?;
         Ok(())
     }
 
@@ -72,7 +77,7 @@ pub mod world {
         /// CHECK: component account
         pub bolt_component: UncheckedAccount<'info>,
         /// CHECK: authority check
-        pub authority: AccountInfo<'info>,
+        pub authority: UncheckedAccount<'info>,
         #[account(address = anchor_lang::solana_program::sysvar::instructions::id())]
         /// CHECK: instruction sysvar check
         pub instruction_sysvar_account: UncheckedAccount<'info>,
@@ -89,7 +94,6 @@ pub mod world {
             CpiContext::new(cpi_program, cpi_accounts)
         }
     }
-
 }
 
 #[derive(Accounts)]
@@ -226,11 +230,13 @@ impl Entity {
 pub fn build_update_context<'info>(
     component_program: UncheckedAccount<'info>,
     component: UncheckedAccount<'info>,
+    authority: UncheckedAccount<'info>,
     instruction_sysvar_account: UncheckedAccount<'info>,
 ) -> CpiContext<'info, 'info, 'info, 'info, bolt_component::cpi::accounts::Update<'info>> {
     let cpi_program = component_program.to_account_info();
     let cpi_accounts = bolt_component::cpi::accounts::Update {
         bolt_component: component.to_account_info(),
+        authority: authority.to_account_info(),
         instruction_sysvar_account: instruction_sysvar_account.to_account_info(),
     };
     CpiContext::new(cpi_program, cpi_accounts)

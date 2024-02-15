@@ -7,9 +7,12 @@ pub mod bolt_component {
     use super::*;
 
     pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
-        let instruction = anchor_lang::solana_program::sysvar::instructions::get_instruction_relative(
-            0, &ctx.accounts.instruction_sysvar_account.to_account_info()
-        ).unwrap();
+        let instruction =
+            anchor_lang::solana_program::sysvar::instructions::get_instruction_relative(
+                0,
+                &ctx.accounts.instruction_sysvar_account.to_account_info(),
+            )
+            .unwrap();
         if instruction.program_id == id() {
             panic!("The instruction must be called from a CPI");
         }
@@ -41,7 +44,16 @@ pub mod bolt_component {
         }
     }
 
-    pub fn update(_ctx: Context<Update>, _data: Vec<u8>) -> Result<()> {
+    pub fn update(ctx: Context<Update>, _data: Vec<u8>) -> Result<()> {
+        let instruction =
+            anchor_lang::solana_program::sysvar::instructions::get_instruction_relative(
+                0,
+                &ctx.accounts.instruction_sysvar_account.to_account_info(),
+            )
+            .unwrap();
+        if instruction.program_id == id() {
+            panic!("The instruction must be called from a CPI");
+        }
         Ok(())
     }
 
@@ -49,6 +61,9 @@ pub mod bolt_component {
     pub struct Update<'info> {
         #[account(mut)]
         pub bolt_component: Account<'info, Component>,
+        #[account()]
+        /// CHECK: The authority of the component
+        pub authority: AccountInfo<'info>,
         #[account(address = anchor_lang::solana_program::sysvar::instructions::id())]
         pub instruction_sysvar_account: UncheckedAccount<'info>,
     }
@@ -97,5 +112,5 @@ pub struct Position {
 
 #[derive(InitSpace, AnchorSerialize, AnchorDeserialize, Default, Copy, Clone)]
 pub struct BoltMetadata {
-    pub authority: Pubkey
+    pub authority: Pubkey,
 }

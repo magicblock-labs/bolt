@@ -1,14 +1,15 @@
+use bolt_utils::add_bolt_metadata;
 use proc_macro::TokenStream;
 use quote::quote;
-use syn::{Attribute, DeriveInput, Lit, Meta, NestedMeta, parse_macro_input, parse_quote};
-use bolt_utils::{add_bolt_metadata};
+use syn::{parse_macro_input, parse_quote, Attribute, DeriveInput, Lit, Meta, NestedMeta};
 
 /// This Component attribute is used to automatically generate the seed and size functions
 ///
 /// The component_id can be used to define the seed used to generate the PDA which stores the component data.
 /// The macro also adds the InitSpace and Default derives to the struct.
 ///
-/// #[component]
+/// #[component_deserialize]
+/// #[derive(Clone)]
 /// pub struct Position {
 ///     pub x: i64,
 ///     pub y: i64,

@@ -23,6 +23,4 @@ pub mod system_apply_velocity {
         pub velocity: Velocity,
         pub position: Position,
     }
-
 }
-

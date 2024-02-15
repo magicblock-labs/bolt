@@ -1,10 +1,13 @@
 use proc_macro::TokenStream;
 use proc_macro2::Ident;
 use quote::quote;
-use syn::{parse_macro_input, parse_quote, visit_mut::VisitMut, Expr, GenericArgument, ItemFn, ItemMod, PathArguments, ReturnType, Stmt, Type, TypePath, FnArg, ItemStruct};
+use syn::{
+    parse_macro_input, parse_quote, visit_mut::VisitMut, Expr, FnArg, GenericArgument, ItemFn,
+    ItemMod, ItemStruct, PathArguments, ReturnType, Stmt, Type, TypePath,
+};
 
 #[derive(Default)]
-struct SystemTransform{
+struct SystemTransform {
     return_values: usize,
 }
 
@@ -47,7 +50,7 @@ pub fn system(attr: TokenStream, item: TokenStream) -> TokenStream {
             content.1.insert(0, syn::Item::Use(use_super));
         }
 
-        let mut transform = SystemTransform{
+        let mut transform = SystemTransform {
             return_values: components_len,
         };
         transform.visit_item_mod_mut(&mut ast);
@@ -59,8 +62,11 @@ pub fn system(attr: TokenStream, item: TokenStream) -> TokenStream {
         };
 
         TokenStream::from(expanded)
-    }else {
-        panic!("Could not find the component bundle: {} in the module", extractor.context_struct_name.unwrap());
+    } else {
+        panic!(
+            "Could not find the component bundle: {} in the module",
+            extractor.context_struct_name.unwrap()
+        );
     }
 }
 
@@ -220,7 +226,9 @@ impl VisitMut for Extractor {
                     let last_segment = type_path.path.segments.last().unwrap();
                     if last_segment.ident == "Context" {
                         if let PathArguments::AngleBracketed(args) = &last_segment.arguments {
-                            if let Some(syn::GenericArgument::Type(syn::Type::Path(type_path))) = args.args.first() {
+                            if let Some(syn::GenericArgument::Type(syn::Type::Path(type_path))) =
+                                args.args.first()
+                            {
                                 let ident = &type_path.path.segments.first().unwrap().ident;
                                 self.context_struct_name = Some(ident.to_string());
                             }
@@ -239,4 +247,3 @@ impl VisitMut for Extractor {
         }
     }
 }
-

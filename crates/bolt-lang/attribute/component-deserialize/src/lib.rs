@@ -1,8 +1,18 @@
+use bolt_utils::add_bolt_metadata;
 use proc_macro::TokenStream;
 use quote::quote;
 use syn::{parse_macro_input, Attribute, DeriveInput};
-use bolt_utils::add_bolt_metadata;
 
+/// This macro is used to defined a struct as a BOLT component and automatically implements the
+/// `ComponentDeserialize` and `AccountDeserialize` traits for the struct.
+///
+/// #[component]
+/// pub struct Position {
+///     pub x: i64,
+///     pub y: i64,
+///     pub z: i64,
+/// }
+/// ```
 #[proc_macro_attribute]
 pub fn component_deserialize(_attr: TokenStream, item: TokenStream) -> TokenStream {
     let mut input = parse_macro_input!(item as DeriveInput);

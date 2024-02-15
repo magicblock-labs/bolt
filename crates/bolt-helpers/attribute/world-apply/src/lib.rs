@@ -30,6 +30,7 @@ pub fn apply_system(attr: TokenStream, item: TokenStream) -> TokenStream {
                 build_update_context(
                     ctx.accounts.#component_program_name.clone(),
                     ctx.accounts.#bolt_component_name.clone(),
+                    ctx.accounts.authority.clone(),
                     ctx.accounts.instruction_sysvar_account.clone(),
                 ),
                 res[#index].to_owned()
@@ -39,13 +40,15 @@ pub fn apply_system(attr: TokenStream, item: TokenStream) -> TokenStream {
 
         quote! {
         pub fn #apply_func_name(ctx: Context<#data_struct>, args: Vec<u8>) -> Result<()> {
+            if !ctx.accounts.authority.is_signer && ctx.accounts.authority.key != &ID {
+                return Err(WorldError::InvalidAuthority.into());
+            }
             let res = bolt_system::cpi::#execute_func_name(ctx.accounts.build(), args)?.get().to_vec();
             #(#updates)*
             Ok(())
         }
     }
     });
-
 
     // Append each generated function to the module's items
     if let Some((brace, mut content)) = input.content.take() {
@@ -59,10 +62,17 @@ pub fn apply_system(attr: TokenStream, item: TokenStream) -> TokenStream {
     }
 
     let data_def = (2..=max_components).map(|i| {
-        let data_struct = syn::Ident::new(&format!("ApplySystem{}", i), proc_macro2::Span::call_site());
+        let data_struct =
+            syn::Ident::new(&format!("ApplySystem{}", i), proc_macro2::Span::call_site());
         let fields = (1..=i).map(|n| {
-            let component_program_name = syn::Ident::new(&format!("component_program_{}", n), proc_macro2::Span::call_site());
-            let component_name = syn::Ident::new(&format!("bolt_component_{}", n), proc_macro2::Span::call_site());
+            let component_program_name = syn::Ident::new(
+                &format!("component_program_{}", n),
+                proc_macro2::Span::call_site(),
+            );
+            let component_name = syn::Ident::new(
+                &format!("bolt_component_{}", n),
+                proc_macro2::Span::call_site(),
+            );
             quote! {
                 /// CHECK: bolt component program check
                 pub #component_program_name: UncheckedAccount<'info>,
@@ -78,7 +88,7 @@ pub fn apply_system(attr: TokenStream, item: TokenStream) -> TokenStream {
                 pub bolt_system: UncheckedAccount<'info>,
                 #(#fields)*
                  /// CHECK: authority check
-                pub authority: AccountInfo<'info>,
+                pub authority: UncheckedAccount<'info>,
                 #[account(address = anchor_lang::solana_program::sysvar::instructions::id())]
                 /// CHECK: instruction sysvar check
                 pub instruction_sysvar_account: UncheckedAccount<'info>,

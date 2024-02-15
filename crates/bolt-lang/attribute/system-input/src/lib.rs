@@ -1,6 +1,6 @@
 use proc_macro::TokenStream;
-use quote::{quote};
-use syn::{parse_macro_input, ItemStruct, Fields, Meta, MetaNameValue, Lit};
+use quote::quote;
+use syn::{parse_macro_input, Fields, ItemStruct, Lit, Meta, MetaNameValue};
 
 /// This macro attribute is used to define a BOLT system input.
 ///
@@ -9,16 +9,11 @@ use syn::{parse_macro_input, ItemStruct, Fields, Meta, MetaNameValue, Lit};
 ///
 /// # Example
 /// ```ignore
-/// pub struct Component {
-///     pub position: Position,
-/// }
-///
-/// Will be transfomed into:
-///#[derive(Accounts)]
-///pub struct Component<'info> {
-///    #[account()]
-///    pub position: Account<'info, Position>,
+///#[system_input]
+///pub struct Components {
+///    pub position: Position,
 ///}
+///
 /// ```
 #[proc_macro_attribute]
 pub fn system_input(_attr: TokenStream, item: TokenStream) -> TokenStream {
@@ -91,7 +86,9 @@ pub fn system_input(_attr: TokenStream, item: TokenStream) -> TokenStream {
         }
     });
 
-    let tuple_elements = (0..try_to_vec_fields.len()).map(|_| quote! {Vec<u8>}).collect::<Vec<_>>();
+    let tuple_elements = (0..try_to_vec_fields.len())
+        .map(|_| quote! {Vec<u8>})
+        .collect::<Vec<_>>();
     let generated_tuple_type = match tuple_elements.len() {
         0 => panic!("system_input macro only supports structs with named fields"),
         1 => quote! { (Vec<u8>,) },
