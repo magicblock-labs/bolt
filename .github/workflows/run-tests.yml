@@ -4,7 +4,7 @@ on:
   pull_request:
 
 env:
-  solana_version: v1.18.0
+  solana_version: v1.18.1
   anchor_version: 0.29.0
 
 jobs:
@@ -150,9 +150,9 @@ jobs:
         run: |
           export PATH="/home/runner/.local/share/solana/install/active_release/bin:$PATH"
           ls node_modules/.bin
-          npm i -g @coral-xyz/anchor-cli@${{ env.anchor_version }} ts-mocha typescript
-          anchor build
-          anchor test
+          cargo install --path cli --force --locked 
+          bolt build
+          bolt test
 
       - name: Install the Bolt CLI and create & build a new project
         run: |
