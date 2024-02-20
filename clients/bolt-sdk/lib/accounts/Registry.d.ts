@@ -20,8 +20,8 @@ export declare class Registry implements RegistryArgs {
     commitmentOrConfig?: web3.Commitment | web3.GetAccountInfoConfig
   ): Promise<Registry>;
   static gpaBuilder(programId?: web3.PublicKey): beetSolana.GpaBuilder<{
-    worlds: any;
     accountDiscriminator: any;
+    worlds: any;
   }>;
   static deserialize(buf: Buffer, offset?: number): [Registry, number];
   serialize(): [Buffer, number];

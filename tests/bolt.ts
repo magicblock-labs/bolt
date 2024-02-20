@@ -1,20 +1,22 @@
 import * as anchor from "@coral-xyz/anchor";
-import { Program } from "@coral-xyz/anchor";
-import { PublicKey } from "@solana/web3.js";
-import { ComponentPosition } from "../target/types/component_position";
-import { ComponentVelocity } from "../target/types/component_velocity";
-import { BoltComponent } from "../target/types/bolt_component";
-import { SystemSimpleMovement } from "../target/types/system_simple_movement";
-import { SystemFly } from "../target/types/system_fly";
-import { SystemApplyVelocity } from "../target/types/system_apply_velocity";
-import { World } from "../target/types/world";
+import { type Program } from "@coral-xyz/anchor";
+import { type PublicKey } from "@solana/web3.js";
+import { type Position } from "../target/types/position";
+import { type Velocity } from "../target/types/velocity";
+import { type BoltComponent } from "../target/types/bolt_component";
+import { type SystemSimpleMovement } from "../target/types/system_simple_movement";
+import { type SystemFly } from "../target/types/system_fly";
+import { type SystemApplyVelocity } from "../target/types/system_apply_velocity";
+import { type World } from "../target/types/world";
 import { expect } from "chai";
 import BN from "bn.js";
 import {
+  createInitializeRegistryInstruction,
   FindComponentPda,
   FindEntityPda,
   FindWorldPda,
   FindWorldRegistryPda,
+  SYSVAR_INSTRUCTIONS_PUBKEY,
 } from "../clients/bolt-sdk";
 
 enum Direction {
@@ -41,9 +43,9 @@ describe("bolt", () => {
 
   const worldProgram = anchor.workspace.World as Program<World>;
   const boltComponentPositionProgram = anchor.workspace
-    .ComponentPosition as Program<ComponentPosition>;
+    .Position as Program<Position>;
   const boltComponentVelocityProgram = anchor.workspace
-    .ComponentVelocity as Program<ComponentVelocity>;
+    .Velocity as Program<Velocity>;
   const boltComponentProgramOrigin = anchor.workspace
     .BoltComponent as Program<BoltComponent>;
 
@@ -58,19 +60,21 @@ describe("bolt", () => {
 
   let entity1: PublicKey;
   let entity2: PublicKey;
+  let entity5: PublicKey;
   let componentPositionEntity1: PublicKey;
   let componentPositionEntity2: PublicKey;
+  let componentPositionEntity5: PublicKey;
   let componentVelocityEntity1: PublicKey;
 
   it("InitializeWorldsRegistry", async () => {
     const registryPda = FindWorldRegistryPda(worldProgram.programId);
-    await worldProgram.methods
-      .initializeRegistry()
-      .accounts({
-        registry: registryPda,
-        payer: provider.wallet.publicKey,
-      })
-      .rpc();
+    const initializeRegistryIx = createInitializeRegistryInstruction({
+      registry: registryPda,
+      payer: provider.wallet.publicKey,
+    });
+
+    const tx = new anchor.web3.Transaction().add(initializeRegistryIx);
+    await provider.sendAndConfirm(tx);
   });
 
   it("InitializeNewWorld", async () => {
@@ -150,7 +154,7 @@ describe("bolt", () => {
   it("Add entity 4 with extra seeds", async () => {
     const worldPda = FindWorldPda(new BN(0), worldProgram.programId);
     const seed = "extra-seed";
-    let entity3 = FindEntityPda(
+    const entity4 = FindEntityPda(
       new BN(0),
       new BN(3),
       seed,
@@ -161,14 +165,28 @@ describe("bolt", () => {
       .addEntity(seed)
       .accounts({
         world: worldPda,
-        entity: entity3,
+        entity: entity4,
+        payer: provider.wallet.publicKey,
+      })
+      .rpc();
+  });
+
+  it("Add entity 5", async () => {
+    const worldPda = FindWorldPda(new BN(0), worldProgram.programId);
+    entity5 = FindEntityPda(new BN(0), new BN(4), null, worldProgram.programId);
+
+    await worldProgram.methods
+      .addEntity(null)
+      .accounts({
+        world: worldPda,
+        entity: entity5,
         payer: provider.wallet.publicKey,
       })
       .rpc();
   });
 
   it("Initialize Original Component on Entity 1, trough the world instance", async () => {
-    let componentEntity1 = FindComponentPda(
+    const componentEntity1 = FindComponentPda(
       boltComponentProgramOrigin.programId,
       entity1,
       "origin-component"
@@ -180,12 +198,14 @@ describe("bolt", () => {
         data: componentEntity1,
         componentProgram: boltComponentProgramOrigin.programId,
         entity: entity1,
+        instructionSysvarAccount: SYSVAR_INSTRUCTIONS_PUBKEY,
+        authority: provider.wallet.publicKey,
       })
       .rpc();
   });
 
   it("Initialize Original Component on Entity 2, trough the world instance", async () => {
-    let componentEntity2 = FindComponentPda(
+    const componentEntity2 = FindComponentPda(
       boltComponentProgramOrigin.programId,
       entity2,
       "origin-component"
@@ -197,6 +217,8 @@ describe("bolt", () => {
         data: componentEntity2,
         componentProgram: boltComponentProgramOrigin.programId,
         entity: entity2,
+        instructionSysvarAccount: SYSVAR_INSTRUCTIONS_PUBKEY,
+        authority: provider.wallet.publicKey,
       })
       .rpc();
   });
@@ -216,6 +238,8 @@ describe("bolt", () => {
         data: componentPositionEntity1,
         componentProgram: boltComponentPositionProgram.programId,
         entity: entity1,
+        instructionSysvarAccount: SYSVAR_INSTRUCTIONS_PUBKEY,
+        authority: worldProgram.programId,
       })
       .rpc();
   });
@@ -234,6 +258,8 @@ describe("bolt", () => {
         data: componentVelocityEntity1,
         componentProgram: boltComponentVelocityProgram.programId,
         entity: entity1,
+        instructionSysvarAccount: SYSVAR_INSTRUCTIONS_PUBKEY,
+        authority: worldProgram.programId,
       })
       .rpc();
   });
@@ -251,6 +277,27 @@ describe("bolt", () => {
         data: componentPositionEntity2,
         componentProgram: boltComponentPositionProgram.programId,
         entity: entity2,
+        instructionSysvarAccount: SYSVAR_INSTRUCTIONS_PUBKEY,
+        authority: worldProgram.programId,
+      })
+      .rpc();
+  });
+
+  it("Initialize Position Component on Entity 5", async () => {
+    componentPositionEntity5 = FindComponentPda(
+      boltComponentPositionProgram.programId,
+      entity5
+    );
+
+    await worldProgram.methods
+      .initializeComponent()
+      .accounts({
+        payer: provider.wallet.publicKey,
+        data: componentPositionEntity5,
+        componentProgram: boltComponentPositionProgram.programId,
+        entity: entity5,
+        instructionSysvarAccount: SYSVAR_INSTRUCTIONS_PUBKEY,
+        authority: provider.wallet.publicKey,
       })
       .rpc();
   });
@@ -289,6 +336,8 @@ describe("bolt", () => {
         componentProgram: boltComponentPositionProgram.programId,
         boltSystem: systemSimpleMovement,
         boltComponent: componentPositionEntity1,
+        instructionSysvarAccount: SYSVAR_INSTRUCTIONS_PUBKEY,
+        authority: worldProgram.programId,
       })
       .rpc({ skipPreflight: true });
 
@@ -320,6 +369,7 @@ describe("bolt", () => {
     console.log("+----------------+------------+");
     console.log("|                             |");
     console.log("+-----------------------------+");
+    console.log("Component Position: ", componentPositionEntity1.toString());
   });
 
   it("Simple Movement System and Right direction on Entity 1", async () => {
@@ -332,8 +382,10 @@ describe("bolt", () => {
         componentProgram: boltComponentPositionProgram.programId,
         boltSystem: systemSimpleMovement,
         boltComponent: componentPositionEntity1,
+        instructionSysvarAccount: SYSVAR_INSTRUCTIONS_PUBKEY,
+        authority: worldProgram.programId,
       })
-      .rpc({ skipPreflight: true });
+      .rpc();
 
     expect(
       (
@@ -379,6 +431,8 @@ describe("bolt", () => {
         componentProgram: boltComponentPositionProgram.programId,
         boltSystem: systemFly,
         boltComponent: componentPositionEntity1,
+        instructionSysvarAccount: SYSVAR_INSTRUCTIONS_PUBKEY,
+        authority: worldProgram.programId,
       })
       .rpc();
 
@@ -421,6 +475,8 @@ describe("bolt", () => {
         boltSystem: applyVelocity,
         boltComponent1: componentVelocityEntity1,
         boltComponent2: componentPositionEntity1,
+        instructionSysvarAccount: SYSVAR_INSTRUCTIONS_PUBKEY,
+        authority: worldProgram.programId,
       })
       .remainingAccounts([
         {
@@ -433,7 +489,7 @@ describe("bolt", () => {
 
     console.log("Component Velocity: ", componentVelocityEntity1.toBase58());
 
-    let componentData =
+    const componentData =
       await boltComponentVelocityProgram.account.velocity.fetch(
         componentVelocityEntity1
       );
@@ -457,7 +513,7 @@ describe("bolt", () => {
     console.log("|                             |");
     console.log("+-----------------------------+");
 
-    let positionData =
+    const positionData =
       await boltComponentPositionProgram.account.position.fetch(
         componentPositionEntity1
       );
@@ -477,5 +533,86 @@ describe("bolt", () => {
     console.log("+----------------+------------+");
     console.log("|                             |");
     console.log("+-----------------------------+");
+  });
+
+  // Check illegal authority usage
+  it("Check invalid component update", async () => {
+    const componentDataPrev =
+      await boltComponentPositionProgram.account.position.fetch(
+        componentPositionEntity5
+      );
+
+    try {
+      await worldProgram.methods
+        .apply(Buffer.alloc(0)) // Move Up
+        .accounts({
+          componentProgram: boltComponentPositionProgram.programId,
+          boltSystem: systemFly,
+          boltComponent: componentPositionEntity5,
+          instructionSysvarAccount: SYSVAR_INSTRUCTIONS_PUBKEY,
+          authority: worldProgram.programId,
+        })
+        .rpc();
+    } catch (e) {
+      expect(e.message).to.contain("Invalid authority");
+    }
+
+    const componentData =
+      await boltComponentPositionProgram.account.position.fetch(
+        componentPositionEntity5
+      );
+
+    expect(
+      componentDataPrev.x.toNumber() === componentData.x.toNumber() &&
+        componentDataPrev.y.toNumber() === componentData.y.toNumber() &&
+        componentDataPrev.z.toNumber() === componentData.z.toNumber()
+    ).to.equal(true);
+  });
+
+  // Check illegal call, without CPI
+  it("Check invalid init without CPI", async () => {
+    let invalid = false;
+    const componentVelocityEntity5 = FindComponentPda(
+      boltComponentVelocityProgram.programId,
+      entity5
+    );
+    try {
+      await boltComponentProgramOrigin.methods
+        .initialize()
+        .accounts({
+          payer: provider.wallet.publicKey,
+          data: componentVelocityEntity5,
+          entity: entity5,
+          instructionSysvarAccount: SYSVAR_INSTRUCTIONS_PUBKEY,
+          systemProgram: anchor.web3.SystemProgram.programId,
+          authority: provider.wallet.publicKey,
+        })
+        .rpc();
+    } catch (e) {
+      invalid = true;
+    }
+    expect(invalid).to.equal(true);
+  });
+
+  // Check illegal call, without CPI
+  it("Check invalid update without CPI", async () => {
+    let invalid = false;
+    const componentVelocityEntity5 = FindComponentPda(
+      boltComponentVelocityProgram.programId,
+      entity5
+    );
+    try {
+      await boltComponentProgramOrigin.methods
+        .update(null)
+        .accounts({
+          boltComponent: componentVelocityEntity5,
+          instructionSysvarAccount: SYSVAR_INSTRUCTIONS_PUBKEY,
+          authority: provider.wallet.publicKey,
+        })
+        .rpc();
+    } catch (e) {
+      invalid = true;
+    }
+    expect(invalid).to.equal(true);
   });
 });

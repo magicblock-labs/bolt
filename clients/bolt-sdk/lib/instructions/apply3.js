@@ -65,6 +65,7 @@ exports.createApply3Instruction =
     void 0;
 var beet = __importStar(require("@metaplex-foundation/beet"));
 var web3 = __importStar(require("@solana/web3.js"));
+var index_1 = require("../index");
 exports.apply3Struct = new beet.FixableBeetArgsStruct(
   [
     ["instructionDiscriminator", beet.uniformFixedSizeArray(beet.u8, 8)],
@@ -74,6 +75,7 @@ exports.apply3Struct = new beet.FixableBeetArgsStruct(
 );
 exports.apply3InstructionDiscriminator = [254, 146, 49, 7, 236, 131, 105, 221];
 function createApply3Instruction(accounts, args, programId) {
+  var _a, _b;
   if (programId === void 0) {
     programId = new web3.PublicKey(
       "WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n"
@@ -121,14 +123,28 @@ function createApply3Instruction(accounts, args, programId) {
       isWritable: true,
       isSigner: false,
     },
+    {
+      pubkey:
+        (_a = accounts.authority) !== null && _a !== void 0 ? _a : programId,
+      isWritable: false,
+      isSigner: false,
+    },
+    {
+      pubkey:
+        (_b = accounts.instructionSysvarAccount) !== null && _b !== void 0
+          ? _b
+          : index_1.SYSVAR_INSTRUCTIONS_PUBKEY,
+      isWritable: false,
+      isSigner: false,
+    },
   ];
   if (accounts.anchorRemainingAccounts != null) {
     for (
-      var _i = 0, _a = accounts.anchorRemainingAccounts;
-      _i < _a.length;
+      var _i = 0, _c = accounts.anchorRemainingAccounts;
+      _i < _c.length;
       _i++
     ) {
-      var acc = _a[_i];
+      var acc = _c[_i];
       keys.push(acc);
     }
   }

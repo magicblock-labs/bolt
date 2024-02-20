@@ -2,14 +2,7 @@ use bolt_lang::*;
 
 declare_id!("Fn1JzzEdyb55fsyduWS94mYHizGhJZuhvjX6DVvrmGbQ");
 
-#[component(Position)]
-#[program]
-pub mod component_position {
-    use super::*;
-}
-
-#[account]
-#[bolt_account]
+#[component]
 #[derive(Copy)]
 pub struct Position {
     pub x: i64,

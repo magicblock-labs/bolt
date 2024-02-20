@@ -382,6 +382,7 @@ dependencies = [
  "anchor-derive-accounts 0.29.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "anchor-derive-serde 0.29.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "anchor-derive-space 0.29.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "anchor-syn 0.29.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "arrayref",
  "base64 0.13.1",
  "bincode",
@@ -908,18 +909,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8d696c370c750c948ada61c69a0ee2cbbb9c50b1019ddb86d9317157a99c2cae"
 
 [[package]]
-name = "bolt-attribute-bolt-account"
-version = "0.0.1"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 1.0.109",
-]
-
-[[package]]
 name = "bolt-attribute-bolt-component"
 version = "0.0.1"
 dependencies = [
+ "bolt-utils",
  "proc-macro2",
  "quote",
  "syn 1.0.109",
@@ -929,6 +922,25 @@ dependencies = [
 name = "bolt-attribute-bolt-component-deserialize"
 version = "0.0.1"
 dependencies = [
+ "bolt-utils",
+ "proc-macro2",
+ "quote",
+ "syn 1.0.109",
+]
+
+[[package]]
+name = "bolt-attribute-bolt-component-id"
+version = "0.0.1"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 1.0.109",
+]
+
+[[package]]
+name = "bolt-attribute-bolt-program"
+version = "0.0.1"
+dependencies = [
  "proc-macro2",
  "quote",
  "syn 1.0.109",
@@ -936,6 +948,15 @@ dependencies = [
 
 [[package]]
 name = "bolt-attribute-bolt-system"
+version = "0.0.1"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 1.0.109",
+]
+
+[[package]]
+name = "bolt-attribute-bolt-system-input"
 version = "0.0.1"
 dependencies = [
  "proc-macro2",
@@ -965,7 +986,25 @@ dependencies = [
 
 [[package]]
 name = "bolt-helpers"
-version = "0.1.0"
+version = "0.0.1"
+
+[[package]]
+name = "bolt-helpers-system-template"
+version = "0.0.1"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 1.0.109",
+]
+
+[[package]]
+name = "bolt-helpers-world-apply"
+version = "0.0.1"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 1.0.109",
+]
 
 [[package]]
 name = "bolt-lang"
@@ -973,10 +1012,12 @@ version = "0.0.1"
 dependencies = [
  "ahash 0.8.6",
  "anchor-lang 0.29.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "bolt-attribute-bolt-account",
  "bolt-attribute-bolt-component",
  "bolt-attribute-bolt-component-deserialize",
+ "bolt-attribute-bolt-component-id",
+ "bolt-attribute-bolt-program",
  "bolt-attribute-bolt-system",
+ "bolt-attribute-bolt-system-input",
  "bolt-system",
  "serde",
  "serde_json",
@@ -988,6 +1029,16 @@ name = "bolt-system"
 version = "0.0.1"
 dependencies = [
  "anchor-lang 0.29.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "bolt-helpers-system-template",
+]
+
+[[package]]
+name = "bolt-utils"
+version = "0.0.1"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 1.0.109",
 ]
 
 [[package]]
@@ -1321,22 +1372,6 @@ dependencies = [
  "either",
  "memchr",
  "unreachable",
-]
-
-[[package]]
-name = "component-position"
-version = "0.1.0"
-dependencies = [
- "anchor-lang 0.29.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "bolt-lang",
-]
-
-[[package]]
-name = "component-velocity"
-version = "0.1.0"
-dependencies = [
- "anchor-lang 0.29.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "bolt-lang",
 ]
 
 [[package]]
@@ -3104,6 +3139,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "be97d76faf1bfab666e1375477b23fde79eccf0276e9b63b92a39d676a889ba9"
 dependencies = [
  "rand 0.8.5",
+]
+
+[[package]]
+name = "position"
+version = "0.0.1"
+dependencies = [
+ "anchor-lang 0.29.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "bolt-lang",
 ]
 
 [[package]]
@@ -4981,12 +5024,12 @@ dependencies = [
 
 [[package]]
 name = "system-apply-velocity"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "anchor-lang 0.29.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "bolt-lang",
- "component-position",
- "component-velocity",
+ "position",
+ "velocity",
 ]
 
 [[package]]
@@ -5012,16 +5055,16 @@ dependencies = [
 
 [[package]]
 name = "system-fly"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "anchor-lang 0.29.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "bolt-lang",
- "component-position",
+ "position",
 ]
 
 [[package]]
 name = "system-simple-movement"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "anchor-lang 0.29.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "bolt-lang",
@@ -5379,6 +5422,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "tuple-conv"
+version = "1.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1fd6314683350324c1bb3d71a65fbeacb4e870cb4faf30b28d8a7787fb8116dd"
+
+[[package]]
 name = "typenum"
 version = "1.17.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5507,6 +5556,14 @@ name = "vec_map"
 version = "0.8.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f1bddf1187be692e79c5ffeab891132dfb0f236ed36a43c7ed39f1165ee20191"
+
+[[package]]
+name = "velocity"
+version = "0.0.1"
+dependencies = [
+ "anchor-lang 0.29.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "bolt-lang",
+]
 
 [[package]]
 name = "version_check"
@@ -5905,8 +5962,10 @@ version = "0.0.1"
 dependencies = [
  "anchor-lang 0.29.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "bolt-component",
+ "bolt-helpers-world-apply",
  "bolt-system",
  "solana-security-txt",
+ "tuple-conv",
 ]
 
 [[package]]

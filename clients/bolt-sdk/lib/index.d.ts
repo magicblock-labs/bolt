@@ -4,6 +4,7 @@ export * from "./accounts";
 export * from "./instructions";
 export declare const PROGRAM_ADDRESS =
   "WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n";
+export declare const SYSVAR_INSTRUCTIONS_PUBKEY: PublicKey;
 export declare const PROGRAM_ID: PublicKey;
 export declare function FindWorldRegistryPda(programId?: PublicKey): PublicKey;
 export declare function FindWorldPda(id: BN, programId?: PublicKey): PublicKey;

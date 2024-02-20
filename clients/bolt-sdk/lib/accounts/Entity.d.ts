@@ -20,8 +20,8 @@ export declare class Entity implements EntityArgs {
     commitmentOrConfig?: web3.Commitment | web3.GetAccountInfoConfig
   ): Promise<Entity>;
   static gpaBuilder(programId?: web3.PublicKey): beetSolana.GpaBuilder<{
-    accountDiscriminator: any;
     id: any;
+    accountDiscriminator: any;
   }>;
   static deserialize(buf: Buffer, offset?: number): [Entity, number];
   serialize(): [Buffer, number];

@@ -4,7 +4,7 @@ on:
   pull_request:
 
 env:
-  solana_version: v1.18.0
+  solana_version: v1.18.1
   anchor_version: 0.29.0
 
 jobs:
@@ -30,6 +30,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y pkg-config build-essential libudev-dev
+          npm install --global yarn
 
       - name: Cache node dependencies
         uses: actions/cache@v3
@@ -146,10 +147,21 @@ jobs:
           echo ${{ secrets.SYSTEM_FLY }} > target/deploy/system_fly-keypair.json
           echo ${{ secrets.SYSTEM_SIMPLE_MOVEMENT }} > target/deploy/system_simple_movement-keypair.json
 
+      - name: run build
+        run: |
+          export PATH="/home/runner/.local/share/solana/install/active_release/bin:$PATH"
+          npm i -g @coral-xyz/anchor-cli@${{ env.anchor_version }} ts-mocha typescript
+          solana-test-validator > /dev/null &
+          sleep 5
+          solana airdrop -u l 100 tEsT3eV6RFCWs1BZ7AXTzasHqTtMnMLCB2tjQ42TDXD
+          anchor build
+          anchor idl build
+          anchor deploy
+          pkill -9 -f solana-test-validator
+
       - name: run tests
         run: |
           export PATH="/home/runner/.local/share/solana/install/active_release/bin:$PATH"
-          ls node_modules/.bin
           npm i -g @coral-xyz/anchor-cli@${{ env.anchor_version }} ts-mocha typescript
           anchor test
 
@@ -158,7 +170,12 @@ jobs:
           export PATH="/home/runner/.local/share/solana/install/active_release/bin:$PATH"
           cargo install --path cli --force --locked
           bolt init test-project --force
-          cd test-project && bolt build
+          cd test-project
+          cargo add --package position --path "../crates/bolt-lang" # Overrides the version with the local version
+          cargo add --package movement --path "../crates/bolt-lang" # -
+          yarn add file:../clients/bolt-sdk/ -D # Overrides the bolt ts SDK with the local version
+          bolt build
+          bolt test
 
       - uses: actions/upload-artifact@v3
         if: always()

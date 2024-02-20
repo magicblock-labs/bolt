@@ -1,15 +1,13 @@
 use bolt_lang::*;
-use component_position::Position;
-use component_velocity::Velocity;
+use position::Position;
+use velocity::Velocity;
 
 declare_id!("6LHhFVwif6N9Po3jHtSmMVtPjF6zRfL3xMosSzcrQAS8");
 
 #[system]
-#[program]
 pub mod system_apply_velocity {
-    use super::*;
 
-    pub fn execute(ctx: Context<Component>, _args: Vec<u8>) -> Result<(Velocity, Position)> {
+    pub fn execute(ctx: Context<Components>, _args: Vec<u8>) -> Result<Components> {
         ctx.accounts.velocity.x = 10;
         let clock = Clock::get()?;
         ctx.accounts.velocity.last_applied = clock.unix_timestamp;
@@ -17,14 +15,12 @@ pub mod system_apply_velocity {
         msg!("last applied: {}", ctx.accounts.velocity.last_applied);
         msg!("Position: {}", ctx.accounts.position.x);
         msg!("Remaining accounts: {}", ctx.remaining_accounts.len());
-        Ok((*ctx.accounts.velocity, *ctx.accounts.position))
+        Ok(ctx.accounts)
     }
-}
 
-#[derive(Accounts)]
-pub struct Component<'info> {
-    #[account()]
-    pub velocity: Account<'info, Velocity>,
-    #[account()]
-    pub position: Account<'info, Position>,
+    #[system_input]
+    pub struct Components {
+        pub velocity: Velocity,
+        pub position: Position,
+    }
 }

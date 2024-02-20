@@ -22,8 +22,8 @@ export declare class World implements WorldArgs {
     commitmentOrConfig?: web3.Commitment | web3.GetAccountInfoConfig
   ): Promise<World>;
   static gpaBuilder(programId?: web3.PublicKey): beetSolana.GpaBuilder<{
-    accountDiscriminator: any;
     id: any;
+    accountDiscriminator: any;
     entities: any;
   }>;
   static deserialize(buf: Buffer, offset?: number): [World, number];

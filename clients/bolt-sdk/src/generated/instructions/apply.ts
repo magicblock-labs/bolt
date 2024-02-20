@@ -7,6 +7,7 @@
 
 import * as beet from "@metaplex-foundation/beet";
 import * as web3 from "@solana/web3.js";
+import { SYSVAR_INSTRUCTIONS_PUBKEY } from "../index";
 
 /**
  * @category Instructions
@@ -38,6 +39,8 @@ export const applyStruct = new beet.FixableBeetArgsStruct<
  * @property [] componentProgram
  * @property [] boltSystem
  * @property [_writable_] boltComponent
+ * @property [] authority
+ * @property [] instructionSysvarAccount
  * @category Instructions
  * @category Apply
  * @category generated
@@ -46,6 +49,8 @@ export interface ApplyInstructionAccounts {
   componentProgram: web3.PublicKey;
   boltSystem: web3.PublicKey;
   boltComponent: web3.PublicKey;
+  authority?: web3.PublicKey;
+  instructionSysvarAccount?: web3.PublicKey;
   anchorRemainingAccounts?: web3.AccountMeta[];
 }
 
@@ -86,6 +91,16 @@ export function createApplyInstruction(
     {
       pubkey: accounts.boltComponent,
       isWritable: true,
+      isSigner: false,
+    },
+    {
+      pubkey: accounts.authority ?? programId,
+      isWritable: false,
+      isSigner: false,
+    },
+    {
+      pubkey: accounts.instructionSysvarAccount ?? SYSVAR_INSTRUCTIONS_PUBKEY,
+      isWritable: false,
       isSigner: false,
     },
   ];

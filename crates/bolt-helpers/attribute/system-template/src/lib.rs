@@ -6,8 +6,6 @@ use syn::parse::{Parse, ParseStream, Result};
 use syn::{parse_macro_input, Ident, LitInt, Token};
 
 /// This macro attribute is a helper used for defining BOLT systems execute proxy instructions.
-///
-/// ```
 #[proc_macro_attribute]
 pub fn system_template(attr: TokenStream, item: TokenStream) -> TokenStream {
     let attr_p = parse_macro_input!(attr as SystemTemplateInput);
@@ -20,7 +18,7 @@ pub fn system_template(attr: TokenStream, item: TokenStream) -> TokenStream {
     // Generate a function for execute instruction
     let funcs = (2..=max_components).map(|i| {
         let func_name = syn::Ident::new(&format!("execute_{}", i), proc_macro2::Span::call_site());
-        let data_struct = syn::Ident::new("SetData", proc_macro2::Span::call_site());
+        let data_struct = syn::Ident::new(&format!("SetData{}", i), proc_macro2::Span::call_site());
         let return_values = vec![quote!(Vec::<u8>::new()); i];
         let return_types = vec![quote!(Vec<u8>); i];
         quote! {
@@ -49,11 +47,11 @@ pub fn system_template(attr: TokenStream, item: TokenStream) -> TokenStream {
             quote! {
                 #[account()]
                 /// CHECK: unchecked account
-                pub #field_name: anchor_lang::prelude::UncheckedAccount<'info>,
+                pub #field_name: UncheckedAccount<'info>,
             }
         });
         let struct_def = quote! {
-        #[derive(Accounts, BorshDeserialize, BorshSerialize, Clone)]
+            #[derive(Accounts)]
             pub struct #data_struct<'info> {
                 #(#fields)*
             }

@@ -1,12 +1,11 @@
 [package]
-name = "bolt-attribute-bolt-account"
+name = "bolt-utils"
 version = "0.0.1"
 edition = "2021"
-description = "Bolt attribute-bolt-account"
+description = "Bolt utils"
 license = "MIT"
 
 [lib]
-proc-macro = true
 
 [dependencies]
 syn = { version = "1.0", features = ["full"] }

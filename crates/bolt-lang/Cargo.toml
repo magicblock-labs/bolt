@@ -9,10 +9,12 @@ license = "MIT"
 anchor-lang = { version = "0.29.0"}
 
 # Bolt Attributes
+bolt-attribute-bolt-program = { path = "./attribute/bolt-program", version = "0.0.1" }
 bolt-attribute-bolt-component = { path = "./attribute/component", version = "0.0.1" }
-bolt-attribute-bolt-account = { path = "./attribute/account", version = "0.0.1" }
 bolt-attribute-bolt-system = { path = "./attribute/system", version = "0.0.1" }
+bolt-attribute-bolt-system-input = { path = "./attribute/system-input", version = "0.0.1" }
 bolt-attribute-bolt-component-deserialize = { path = "./attribute/component-deserialize", version = "0.0.1" }
+bolt-attribute-bolt-component-id = { path = "./attribute/component-id", version = "0.0.1" }
 
 # Bolt Programs
 world = { path = "../../programs/world", features = ["cpi"], version = "0.0.1"}

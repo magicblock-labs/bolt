@@ -46,14 +46,7 @@ fn create_component_template_simple(name: &str, program_path: &Path) -> Files {
 
 declare_id!("{}");
 
-#[component({})]
-#[program]
-pub mod {} {{
-    use super::*;
-}}
-
-#[account]
-#[bolt_account(component_id = "")]
+#[component]
 pub struct {} {{
     pub x: i64,
     pub y: i64,
@@ -63,8 +56,6 @@ pub struct {} {{
 }}
 "#,
             anchor_cli::rust_template::get_or_create_program_id(name),
-            name.to_upper_camel_case(),
-            name.to_snake_case(),
             name.to_upper_camel_case(),
         ),
     )]
@@ -76,34 +67,25 @@ fn create_system_template_simple(name: &str, program_path: &Path) -> Files {
         program_path.join("src").join("lib.rs"),
         format!(
             r#"use bolt_lang::*;
+use position::Position;
 
 declare_id!("{}");
 
 #[system]
-#[program]
 pub mod {} {{
-    use super::*;
 
-    pub fn execute(ctx: Context<Component>, args: Vec<u8>) -> Result<Position> {{
-        let mut position = Position::from_account_info(&ctx.accounts.position)?;
+    pub fn execute(ctx: Context<Components>, args_p: Vec<u8>) -> Result<Components> {{
+        let position = &mut ctx.accounts.position;
         position.x += 1;
-        Ok(position)
+        position.y += 1;
+        Ok(ctx.accounts)
     }}
-}}
 
-// Define the Account to parse from the component
-#[derive(Accounts)]
-pub struct Component<'info> {{
-    /// CHECK: check that the component is the expected account
-    pub position: AccountInfo<'info>,
-}}
+    #[system_input]
+    pub struct Components {{
+        pub position: Position,
+    }}
 
-#[component_deserialize]
-pub struct Position {{
-    pub x: i64,
-    pub y: i64,
-    pub z: i64,
-    pub description: String,
 }}
 "#,
             anchor_cli::rust_template::get_or_create_program_id(name),
@@ -422,7 +404,7 @@ fn cargo_toml(name: &str) -> String {
     format!(
         r#"[package]
 name = "{0}"
-version = "0.1.0"
+version = "0.0.1"
 description = "Created with Bolt"
 edition = "2021"
 
@@ -436,6 +418,7 @@ no-idl = []
 no-log-ix-name = []
 cpi = ["no-entrypoint"]
 default = []
+idl-build = ["anchor-lang/idl-build"]
 
 [dependencies]
 bolt-lang = "{2}"
@@ -476,5 +459,24 @@ node_modules
 dist
 build
 test-ledger
+"#
+}
+
+pub fn registry_account() -> &'static str {
+    r#"
+{
+  "pubkey": "EHLkWwAT9oebVv9ht3mtqrvHhRVMKrt54tF3MfHTey2K",
+  "account": {
+    "lamports": 1002240,
+    "data": [
+      "L65u9ri2/NoCAAAAAAAAAA==",
+      "base64"
+    ],
+    "owner": "WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n",
+    "executable": false,
+    "rentEpoch": 18446744073709551615,
+    "space": 16
+  }
+}
 "#
 }

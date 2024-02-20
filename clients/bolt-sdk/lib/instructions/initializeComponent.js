@@ -50,6 +50,7 @@ exports.createInitializeComponentInstruction =
     void 0;
 var beet = __importStar(require("@metaplex-foundation/beet"));
 var web3 = __importStar(require("@solana/web3.js"));
+var index_1 = require("../index");
 exports.initializeComponentStruct = new beet.BeetArgsStruct(
   [["instructionDiscriminator", beet.uniformFixedSizeArray(beet.u8, 8)]],
   "InitializeComponentInstructionArgs"
@@ -58,7 +59,7 @@ exports.initializeComponentInstructionDiscriminator = [
   36, 143, 233, 113, 12, 234, 61, 30,
 ];
 function createInitializeComponentInstruction(accounts, programId) {
-  var _a;
+  var _a, _b, _c;
   if (programId === void 0) {
     programId = new web3.PublicKey(
       "WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n"
@@ -91,8 +92,22 @@ function createInitializeComponentInstruction(accounts, programId) {
     },
     {
       pubkey:
-        (_a = accounts.systemProgram) !== null && _a !== void 0
-          ? _a
+        (_a = accounts.authority) !== null && _a !== void 0 ? _a : programId,
+      isWritable: false,
+      isSigner: false,
+    },
+    {
+      pubkey:
+        (_b = accounts.instructionSysvarAccount) !== null && _b !== void 0
+          ? _b
+          : index_1.SYSVAR_INSTRUCTIONS_PUBKEY,
+      isWritable: false,
+      isSigner: false,
+    },
+    {
+      pubkey:
+        (_c = accounts.systemProgram) !== null && _c !== void 0
+          ? _c
           : web3.SystemProgram.programId,
       isWritable: false,
       isSigner: false,
@@ -100,11 +115,11 @@ function createInitializeComponentInstruction(accounts, programId) {
   ];
   if (accounts.anchorRemainingAccounts != null) {
     for (
-      var _i = 0, _b = accounts.anchorRemainingAccounts;
-      _i < _b.length;
+      var _i = 0, _d = accounts.anchorRemainingAccounts;
+      _i < _d.length;
       _i++
     ) {
-      var acc = _b[_i];
+      var acc = _d[_i];
       keys.push(acc);
     }
   }
