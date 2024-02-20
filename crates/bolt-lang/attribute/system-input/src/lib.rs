@@ -34,11 +34,17 @@ pub fn system_input(_attr: TokenStream, item: TokenStream) -> TokenStream {
             if let Ok(Meta::List(meta_list)) = attr.parse_meta() {
                 if meta_list.path.is_ident("component_id") {
                     for nested_meta in meta_list.nested.iter() {
-                        if let syn::NestedMeta::Meta(Meta::NameValue(MetaNameValue { path, lit: Lit::Str(lit_str), .. })) = nested_meta {
+                        if let syn::NestedMeta::Meta(Meta::NameValue(MetaNameValue {
+                            path,
+                            lit: Lit::Str(lit_str),
+                            ..
+                        })) = nested_meta
+                        {
                             if path.is_ident("address") {
                                 let address = lit_str.value();
                                 let field_type = &field.ty;
                                 return Some(quote! {
+                                    use std::str::FromStr;
                                     impl Owner for #field_type {
 
                                         fn owner() -> Pubkey {
@@ -46,7 +52,7 @@ pub fn system_input(_attr: TokenStream, item: TokenStream) -> TokenStream {
                                         }
                                     }
                                     impl AccountSerialize for #field_type {
-                                        fn try_serialize<W: Write>(&self, _writer: &mut W) -> Result<()> {
+                                        fn try_serialize<W>(&self, _writer: &mut W) -> Result<()> {
                                             Ok(())
                                         }
                                     }

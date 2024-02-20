@@ -62,11 +62,10 @@ pub fn component(attr: TokenStream, item: TokenStream) -> TokenStream {
 
     let name = &input.ident;
     let component_name = syn::Ident::new(&name.to_string().to_lowercase(), input.ident.span());
-    let mod_name = syn::Ident::new(&format!("component_{}", component_name), input.ident.span());
 
     let anchor_program = quote! {
         #[bolt_program(#name)]
-        pub mod #mod_name {
+        pub mod #component_name {
             use super::*;
         }
     };
