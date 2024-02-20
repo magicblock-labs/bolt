@@ -67,17 +67,18 @@ fn create_system_template_simple(name: &str, program_path: &Path) -> Files {
         program_path.join("src").join("lib.rs"),
         format!(
             r#"use bolt_lang::*;
-use component_position::Position;
+use position::Position;
 
 declare_id!("{}");
 
 #[system]
 pub mod {} {{
 
-    pub fn execute(ctx: Context<Component>, args: Vec<u8>) -> Result<Position> {{
-        let mut position = Position::from_account_info(&ctx.accounts.position)?;
+    pub fn execute(ctx: Context<Components>, args_p: Vec<u8>) -> Result<Components> {{
+        let position = &mut ctx.accounts.position;
         position.x += 1;
-        Ok(position)
+        position.y += 1;
+        Ok(ctx.accounts)
     }}
 
     #[system_input]
@@ -458,5 +459,24 @@ node_modules
 dist
 build
 test-ledger
+"#
+}
+
+pub fn registry_account() -> &'static str {
+    r#"
+{
+  "pubkey": "EHLkWwAT9oebVv9ht3mtqrvHhRVMKrt54tF3MfHTey2K",
+  "account": {
+    "lamports": 1002240,
+    "data": [
+      "L65u9ri2/NoCAAAAAAAAAA==",
+      "base64"
+    ],
+    "owner": "WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n",
+    "executable": false,
+    "rentEpoch": 18446744073709551615,
+    "space": 16
+  }
+}
 "#
 }

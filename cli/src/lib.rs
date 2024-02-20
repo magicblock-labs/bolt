@@ -2,8 +2,8 @@ mod rust_template;
 
 use crate::rust_template::{create_component, create_system};
 use anchor_cli::config::{
-    BootstrapMode, Config, ConfigOverride, ProgramArch, ProgramDeployment, TestValidator,
-    Validator, WithPath,
+    BootstrapMode, Config, ConfigOverride, GenesisEntry, ProgramArch, ProgramDeployment,
+    TestValidator, Validator, WithPath,
 };
 use anchor_client::Cluster;
 use anyhow::{anyhow, Result};
@@ -16,6 +16,8 @@ use std::process::Stdio;
 
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 pub const ANCHOR_VERSION: &str = anchor_cli::VERSION;
+
+pub const WORLD_PROGRAM: &str = "WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n";
 
 #[derive(Debug, Subcommand)]
 pub enum BoltCommand {
@@ -231,18 +233,11 @@ fn init(
         rpc_port: 8899,
         bind_address: "0.0.0.0".to_owned(),
         ledger: ".bolt/test-ledger".to_owned(),
-        clone: Some(vec![
-            // World program
-            anchor_cli::config::CloneEntry {
-                address: "WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n".to_owned(),
-            },
-            // World executable data
-            anchor_cli::config::CloneEntry {
-                address: "CrsqUXPpJYpVAAx5qMKU6K8RT1TzT81T8BL6JndWSeo3".to_owned(),
-            },
-            // Registry
-            anchor_cli::config::CloneEntry {
+        account: Some(vec![
+            // Registry account
+            anchor_cli::config::AccountEntry {
                 address: "EHLkWwAT9oebVv9ht3mtqrvHhRVMKrt54tF3MfHTey2K".to_owned(),
+                filename: "tests/fixtures/registry.json".to_owned(),
             },
         ]),
         ..Default::default()
@@ -252,6 +247,11 @@ fn init(
         startup_wait: 5000,
         shutdown_wait: 2000,
         validator: Some(validator),
+        genesis: Some(vec![GenesisEntry {
+            address: WORLD_PROGRAM.to_owned(),
+            program: "tests/fixtures/world.so".to_owned(),
+            upgradeable: Some(false),
+        }]),
         ..Default::default()
     };
 
@@ -284,15 +284,53 @@ fn init(
     if solidity {
         anchor_cli::solidity_template::create_program(&project_name)?;
     } else {
-        create_component(component_name)?;
         create_system(system_name)?;
+        create_component(component_name)?;
         anchor_cli::rust_template::create_program(&project_name, template)?;
+
+        // Add the component as a dependency to the system
+        std::process::Command::new("cargo")
+            .arg("add")
+            .arg("--package")
+            .arg(system_name)
+            .arg("--path")
+            .arg(format!("programs-ecs/components/{}", component_name))
+            .arg("--features")
+            .arg("cpi")
+            .stdout(Stdio::inherit())
+            .stderr(Stdio::inherit())
+            .spawn()
+            .map_err(|e| {
+                anyhow::format_err!(
+                    "error adding component as dependency to the system: {}",
+                    e.to_string()
+                )
+            })?;
     }
 
     // Build the test suite.
-    fs::create_dir_all("tests")?;
+    fs::create_dir_all("tests/fixtures")?;
     // Build the migrations directory.
     fs::create_dir_all("migrations")?;
+
+    // Create the registry account
+    fs::write(
+        "tests/fixtures/registry.json",
+        rust_template::registry_account(),
+    )?;
+
+    // Dump the World program into tests/fixtures/world.so
+    std::process::Command::new("solana")
+        .arg("program")
+        .arg("dump")
+        .arg("-u")
+        .arg("d")
+        .arg(WORLD_PROGRAM)
+        .arg("tests/fixtures/world.so")
+        .stdout(Stdio::inherit())
+        .stderr(Stdio::inherit())
+        .spawn()
+        .map_err(|e| anyhow::format_err!("solana program dump failed: {}", e.to_string()))?;
 
     if javascript {
         // Build javascript config
