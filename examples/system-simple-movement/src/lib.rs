@@ -1,11 +1,9 @@
 use bolt_lang::*;
-use std::str::FromStr;
 
 declare_id!("FSa6qoJXFBR3a7ThQkTAMrC15p6NkchPEjBdd4n6dXxA");
 
 #[system]
 pub mod system_simple_movement {
-    use std::io::Write;
 
     pub fn execute(ctx: Context<Components>, args_p: Vec<u8>) -> Result<Components> {
         let args = parse_args::<Args>(&args_p);

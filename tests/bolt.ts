@@ -11,6 +11,7 @@ import { type World } from "../target/types/world";
 import { expect } from "chai";
 import BN from "bn.js";
 import {
+  createInitializeRegistryInstruction,
   FindComponentPda,
   FindEntityPda,
   FindWorldPda,
@@ -34,10 +35,6 @@ function serializeArgs(args: any = {}) {
     binaryData.byteLength
   );
 }
-
-const SYSVAR_INSTRUCTIONS_PUBKEY = new PublicKey(
-  "Sysvar1nstructions1111111111111111111111111"
-);
 
 describe("bolt", () => {
   const provider = anchor.AnchorProvider.env();
@@ -70,13 +67,13 @@ describe("bolt", () => {
 
   it("InitializeWorldsRegistry", async () => {
     const registryPda = FindWorldRegistryPda(worldProgram.programId);
-    await worldProgram.methods
-      .initializeRegistry()
-      .accounts({
-        registry: registryPda,
-        payer: provider.wallet.publicKey,
-      })
-      .rpc();
+    const initializeRegistryIx = createInitializeRegistryInstruction({
+      registry: registryPda,
+      payer: provider.wallet.publicKey,
+    });
+
+    const tx = new anchor.web3.Transaction().add(initializeRegistryIx);
+    await provider.sendAndConfirm(tx);
   });
 
   it("InitializeNewWorld", async () => {
