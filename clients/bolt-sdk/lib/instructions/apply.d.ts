@@ -12,6 +12,8 @@ export interface ApplyInstructionAccounts {
   componentProgram: web3.PublicKey;
   boltSystem: web3.PublicKey;
   boltComponent: web3.PublicKey;
+  authority?: web3.PublicKey;
+  instructionSysvarAccount?: web3.PublicKey;
   anchorRemainingAccounts?: web3.AccountMeta[];
 }
 export declare const applyInstructionDiscriminator: number[];

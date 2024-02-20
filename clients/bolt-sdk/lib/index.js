@@ -35,12 +35,16 @@ exports.FindComponentPda =
   exports.FindWorldPda =
   exports.FindWorldRegistryPda =
   exports.PROGRAM_ID =
+  exports.SYSVAR_INSTRUCTIONS_PUBKEY =
   exports.PROGRAM_ADDRESS =
     void 0;
 var web3_js_1 = require("@solana/web3.js");
 __exportStar(require("./accounts"), exports);
 __exportStar(require("./instructions"), exports);
 exports.PROGRAM_ADDRESS = "WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n";
+exports.SYSVAR_INSTRUCTIONS_PUBKEY = new web3_js_1.PublicKey(
+  "Sysvar1nstructions1111111111111111111111111"
+);
 exports.PROGRAM_ID = new web3_js_1.PublicKey(exports.PROGRAM_ADDRESS);
 function FindWorldRegistryPda(programId) {
   if (programId === void 0) {

@@ -8,6 +8,8 @@ export interface InitializeComponentInstructionAccounts {
   data: web3.PublicKey;
   entity: web3.PublicKey;
   componentProgram: web3.PublicKey;
+  authority?: web3.PublicKey;
+  instructionSysvarAccount?: web3.PublicKey;
   systemProgram?: web3.PublicKey;
   anchorRemainingAccounts?: web3.AccountMeta[];
 }

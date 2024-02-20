@@ -31,15 +31,15 @@ var __exportStar =
   };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.accountProviders = void 0;
+var Entity_1 = require("./Entity");
 var Registry_1 = require("./Registry");
 var World_1 = require("./World");
-var Entity_1 = require("./Entity");
 __exportStar(require("./Entity"), exports);
 __exportStar(require("./Registry"), exports);
 __exportStar(require("./World"), exports);
 exports.accountProviders = {
+  Entity: Entity_1.Entity,
   Registry: Registry_1.Registry,
   World: World_1.World,
-  Entity: Entity_1.Entity,
 };
 //# sourceMappingURL=index.js.map

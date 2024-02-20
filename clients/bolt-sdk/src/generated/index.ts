@@ -11,6 +11,10 @@ export * from "./instructions";
  */
 export const PROGRAM_ADDRESS = "WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n";
 
+export const SYSVAR_INSTRUCTIONS_PUBKEY = new PublicKey(
+  "Sysvar1nstructions1111111111111111111111111"
+);
+
 /**
  * Program public key
  *

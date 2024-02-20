@@ -106,6 +106,16 @@
           "isSigner": false
         },
         {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "instructionSysvarAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
           "name": "systemProgram",
           "isMut": false,
           "isSigner": false
@@ -129,6 +139,16 @@
         {
           "name": "boltComponent",
           "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "instructionSysvarAccount",
+          "isMut": false,
           "isSigner": false
         }
       ],
@@ -165,6 +185,16 @@
         {
           "name": "boltComponent2",
           "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "instructionSysvarAccount",
+          "isMut": false,
           "isSigner": false
         }
       ],
@@ -212,6 +242,16 @@
           "name": "boltComponent3",
           "isMut": true,
           "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "instructionSysvarAccount",
+          "isMut": false,
+          "isSigner": false
         }
       ],
       "args": [
@@ -223,6 +263,18 @@
     }
   ],
   "accounts": [
+    {
+      "name": "Entity",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "id",
+            "type": "u64"
+          }
+        ]
+      }
+    },
     {
       "name": "Registry",
       "type": {
@@ -250,18 +302,13 @@
           }
         ]
       }
-    },
+    }
+  ],
+  "errors": [
     {
-      "name": "Entity",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "id",
-            "type": "u64"
-          }
-        ]
-      }
+      "code": 6000,
+      "name": "InvalidAuthority",
+      "msg": "Invalid authority for instruction"
     }
   ],
   "metadata": {
