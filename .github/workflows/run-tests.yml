@@ -30,6 +30,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y pkg-config build-essential libudev-dev
+          npm install --global yarn
 
       - name: Cache node dependencies
         uses: actions/cache@v3
@@ -168,7 +169,12 @@ jobs:
           export PATH="/home/runner/.local/share/solana/install/active_release/bin:$PATH"
           cargo install --path cli --force --locked
           bolt init test-project --force
-          cd test-project && bolt build
+          cd test-project
+          cargo add --package position --path "../crates/bolt-lang" # Overrides the version with the local version
+          cargo add --package movement --path "../crates/bolt-lang" # -
+          yarn add file:../clients/bolt-sdk/ -D # Overrides the bolt ts SDK with the local version
+          bolt build
+          bolt test
 
       - uses: actions/upload-artifact@v3
         if: always()
