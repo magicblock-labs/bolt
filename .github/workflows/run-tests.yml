@@ -157,12 +157,13 @@ jobs:
           anchor build
           anchor idl build
           anchor deploy
+          pkill -9 -f solana-test-validator
 
       - name: run tests
         run: |
           export PATH="/home/runner/.local/share/solana/install/active_release/bin:$PATH"
           npm i -g @coral-xyz/anchor-cli@${{ env.anchor_version }} ts-mocha typescript
-          anchor test --skip-local-validator
+          anchor test
 
       - name: Install the Bolt CLI and create & build a new project
         run: |

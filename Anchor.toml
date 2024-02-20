@@ -7,8 +7,8 @@ skip-lint = false
 [programs.localnet]
 bolt-component = "CmP2djJgABZ4cRokm4ndxuq6LerqpNHLBsaUv2XKEJua"
 bolt-system = "7X4EFsDJ5aYTcEjKzJ94rD8FRKgQeXC89fkpeTS4KaqP"
-component-position = "Fn1JzzEdyb55fsyduWS94mYHizGhJZuhvjX6DVvrmGbQ"
-component-velocity = "CbHEFbSQdRN4Wnoby9r16umnJ1zWbULBHg4yqzGQonU1"
+position = "Fn1JzzEdyb55fsyduWS94mYHizGhJZuhvjX6DVvrmGbQ"
+velocity = "CbHEFbSQdRN4Wnoby9r16umnJ1zWbULBHg4yqzGQonU1"
 system-apply-velocity = "6LHhFVwif6N9Po3jHtSmMVtPjF6zRfL3xMosSzcrQAS8"
 system-fly = "HT2YawJjkNmqWcLNfPAMvNsLdWwPvvvbKA5bpMw4eUpq"
 system-simple-movement = "FSa6qoJXFBR3a7ThQkTAMrC15p6NkchPEjBdd4n6dXxA"

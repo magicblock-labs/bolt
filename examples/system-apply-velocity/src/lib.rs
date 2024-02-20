@@ -1,6 +1,6 @@
 use bolt_lang::*;
-use component_position::Position;
-use component_velocity::Velocity;
+use position::Position;
+use velocity::Velocity;
 
 declare_id!("6LHhFVwif6N9Po3jHtSmMVtPjF6zRfL3xMosSzcrQAS8");
 

@@ -1,5 +1,5 @@
 use bolt_lang::*;
-use component_position::Position;
+use position::Position;
 
 declare_id!("HT2YawJjkNmqWcLNfPAMvNsLdWwPvvvbKA5bpMw4eUpq");
 

@@ -1375,22 +1375,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "component-position"
-version = "0.0.1"
-dependencies = [
- "anchor-lang 0.29.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "bolt-lang",
-]
-
-[[package]]
-name = "component-velocity"
-version = "0.0.1"
-dependencies = [
- "anchor-lang 0.29.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "bolt-lang",
-]
-
-[[package]]
 name = "concurrent-queue"
 version = "2.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3155,6 +3139,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "be97d76faf1bfab666e1375477b23fde79eccf0276e9b63b92a39d676a889ba9"
 dependencies = [
  "rand 0.8.5",
+]
+
+[[package]]
+name = "position"
+version = "0.0.1"
+dependencies = [
+ "anchor-lang 0.29.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "bolt-lang",
 ]
 
 [[package]]
@@ -5036,8 +5028,8 @@ version = "0.0.1"
 dependencies = [
  "anchor-lang 0.29.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "bolt-lang",
- "component-position",
- "component-velocity",
+ "position",
+ "velocity",
 ]
 
 [[package]]
@@ -5067,7 +5059,7 @@ version = "0.0.1"
 dependencies = [
  "anchor-lang 0.29.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "bolt-lang",
- "component-position",
+ "position",
 ]
 
 [[package]]
@@ -5564,6 +5556,14 @@ name = "vec_map"
 version = "0.8.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f1bddf1187be692e79c5ffeab891132dfb0f236ed36a43c7ed39f1165ee20191"
+
+[[package]]
+name = "velocity"
+version = "0.0.1"
+dependencies = [
+ "anchor-lang 0.29.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "bolt-lang",
+]
 
 [[package]]
 name = "version_check"

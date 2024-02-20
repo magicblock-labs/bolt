@@ -1,12 +1,12 @@
 [package]
-name = "component-velocity"
+name = "velocity"
 version = "0.0.1"
 description = "Created with Bolt"
 edition = "2021"
 
 [lib]
 crate-type = ["cdylib", "lib"]
-name = "component_velocity"
+name = "velocity"
 
 [features]
 no-entrypoint = []

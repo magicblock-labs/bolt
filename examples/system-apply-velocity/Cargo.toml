@@ -19,5 +19,5 @@ idl-build = ["anchor-lang/idl-build"]
 [dependencies]
 anchor-lang = "0.29.0"
 bolt-lang = { path = "../../crates/bolt-lang" }
-component-velocity = { path = "../component-velocity", features = ["cpi"]}
-component-position = { path = "../component-position", features = ["cpi"]}
+velocity = { path = "../component-velocity", features = ["cpi"]}
+position = { path = "../component-position", features = ["cpi"]}
