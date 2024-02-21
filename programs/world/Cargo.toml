@@ -1,9 +1,12 @@
 [package]
 name = "world"
-version = "0.0.1"
-edition = "2021"
 description = "Bolt World program"
-license = "MIT"
+version = { workspace = true }
+authors = { workspace = true }
+repository = { workspace = true }
+homepage = { workspace = true }
+license = { workspace = true }
+edition = { workspace = true }
 
 [lib]
 crate-type = ["cdylib", "lib"]
@@ -18,10 +21,10 @@ default = []
 idl-build = ["anchor-lang/idl-build"]
 
 [dependencies]
-anchor-lang = { version = "0.29.0", features = ["init-if-needed"] }
-bolt-component = { path = "../../programs/bolt-component", features = ["cpi"], version = "0.0.1"}
-bolt-helpers-world-apply = { path = "../../crates/bolt-helpers/attribute/world-apply", version = "0.0.1" }
-bolt-system = { path = "../../programs/bolt-system", features = ["cpi"], version = "0.0.1"}
-solana-security-txt = "1.1.1"
-tuple-conv = "1.0.1"
+anchor-lang = { workspace = true, features = ["init-if-needed"] }
+bolt-component = { path = "../../programs/bolt-component", features = ["cpi"]}
+bolt-helpers-world-apply = { path = "../../crates/bolt-helpers/attribute/world-apply" }
+bolt-system = { path = "../../programs/bolt-system", features = ["cpi"]}
+solana-security-txt = { workspace = true }
+tuple-conv = { workspace = true }
 

@@ -7,7 +7,7 @@ This Typescript sdk provides a convenient interface and methods for interacting 
 To install the bolt sdk, run the following command:
 
 ```bash
-npm install bolt-sdk
+npm install @magicblock-labs/bolt-sdk
 ```
 
 ## Contributing

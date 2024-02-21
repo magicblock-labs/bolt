@@ -148,7 +148,7 @@ pub fn package_json(jest: bool) -> String {
         "prettier": "^2.6.2",
         "@metaplex-foundation/beet": "^0.7.1",
         "@metaplex-foundation/beet-solana": "^0.4.0",
-         "bolt-sdk": "latest"
+         "@magicblock-labs/bolt-sdk": "latest"
     }}
 }}
 "#
@@ -176,7 +176,7 @@ pub fn ts_package_json(jest: bool) -> String {
             "typescript": "^4.3.5",
             "@metaplex-foundation/beet": "^0.7.1",
             "@metaplex-foundation/beet-solana": "^0.4.0",
-            "bolt-sdk": "latest"
+            "@magicblock-labs/bolt-sdk": "latest"
         }}
     }}
     "#
@@ -202,7 +202,7 @@ pub fn ts_package_json(jest: bool) -> String {
         "prettier": "^2.6.2",
         "@metaplex-foundation/beet": "^0.7.1",
         "@metaplex-foundation/beet-solana": "^0.4.0",
-        "bolt-sdk": "latest"
+        "@magicblock-labs/bolt-sdk": "latest"
     }}
 }}
 "#
@@ -213,7 +213,7 @@ pub fn ts_package_json(jest: bool) -> String {
 pub fn mocha(name: &str) -> String {
     format!(
         r#"const anchor = require("@coral-xyz/anchor");
-const boltSdk = require("bolt-sdk");
+const boltSdk = require("@magicblock-labs/bolt-sdk");
 const {{
     createInitializeNewWorldInstruction,
     FindWorldPda,
@@ -252,7 +252,7 @@ describe("{}", () => {{
 pub fn jest(name: &str) -> String {
     format!(
         r#"const anchor = require("@coral-xyz/anchor");
-const boltSdk = require("bolt-sdk");
+const boltSdk = require("@magicblock-labs/bolt-sdk");
 const {{
     createInitializeNewWorldInstruction,
     FindWorldPda,
@@ -309,7 +309,7 @@ import {{
     createAddEntityInstruction,
     createInitializeComponentInstruction,
     FindComponentPda, createApplyInstruction
-}} from "bolt-sdk"
+}} from "@magicblock-labs/bolt-sdk"
 import {{expect}} from "chai";
 
 describe("{}", () => {{
