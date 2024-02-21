@@ -6,10 +6,44 @@ members = [
     "crates/*",
 ]
 
+[workspace.package]
+version = "0.0.1"
+authors = ["Magicblock Labs <dev@magicblock.gg>"]
+repository = "https://github.com/magicblock-labs/bolt"
+homepage = "https://www.magicblock.gg/"
+license = "MIT"
+edition = "2021"
+
+[workspace.dependencies]
+bolt-attribute-bolt-program = { path = "crates/bolt-lang/attribute/bolt-program", version = "=0.0.1" }
+bolt-attribute-bolt-component = { path = "crates/bolt-lang/attribute/component", version = "=0.0.1" }
+bolt-attribute-bolt-system = { path = "crates/bolt-lang/attribute/system", version = "=0.0.1"}
+bolt-attribute-bolt-system-input = { path = "crates/bolt-lang/attribute/system-input", version = "=0.0.1" }
+bolt-attribute-bolt-component-deserialize = { path = "crates/bolt-lang/attribute/component-deserialize", version = "=0.0.1" }
+bolt-attribute-bolt-component-id = { path = "crates/bolt-lang/attribute/component-id", version = "=0.0.1" }
+world = { path = "programs/world", features = ["cpi"], version = "=0.0.1"}
+bolt-system = { path = "programs/bolt-system", features = ["cpi"], version = "=0.0.1"}
+
+## External crates
+anchor-lang = "0.29.0"
+solana-security-txt = "1.1.1"
+tuple-conv = "1.0.1"
+syn = { version = "1.0.60", features = ["full"] }
+quote = "1.0"
+proc-macro2 = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+anyhow = "1.0.32"
+heck = "0.4.0"
+clap = { version = "4.2.4", features = ["derive"] }
+# TODO: Remove once https://github.com/solana-labs/solana/issues/33504 is resolved.
+ahash = "=0.8.6"
+
 [profile.release]
 overflow-checks = true
 lto = "fat"
 codegen-units = 1
+
 [profile.release.build-override]
 opt-level = 3
 incremental = false

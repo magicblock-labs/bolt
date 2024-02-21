@@ -1,14 +1,17 @@
 [package]
 name = "bolt-attribute-bolt-system"
-version = "0.0.1"
-edition = "2021"
 description = "Bolt attribute-bolt-system"
-license = "MIT"
+version = { workspace = true }
+authors = { workspace = true }
+repository = { workspace = true }
+homepage = { workspace = true }
+license = { workspace = true }
+edition = { workspace = true }
 
 [lib]
 proc-macro = true
 
 [dependencies]
-syn = { version = "1.0", features = ["full", "visit-mut"] }
-quote = "1.0"
-proc-macro2 = "1.0"
+syn = { workspace = true, features = ["visit-mut"] }
+quote = { workspace = true }
+proc-macro2 = { workspace = true }

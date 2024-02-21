@@ -6,7 +6,7 @@ target
 **/*.rs.bk
 node_modules
 clients/sdk/node_modules
-test-ledger
+clients/bolt-sdk/yarn-error.log
 .yarn
 **/test-ledger
 
@@ -15,4 +15,5 @@ tests/examples/.anchor
 tests/examples/target
 tests/examples/node_modules
 tests/examples/.yarn
+
 
