@@ -1,0 +1,176 @@
+name: Publish Bolt SDKs
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+env:
+  solana_version: v1.18.1
+  anchor_version: 0.29.0
+
+jobs:
+  install:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/cache@v4
+        name: cache solana cli
+        id: cache-solana
+        with:
+          path: |
+            ~/.cache/solana/
+            ~/.local/share/solana/
+          key: solana-${{ runner.os }}-v0000-${{ env.solana_version }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: install essentials
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pkg-config build-essential libudev-dev
+          npm install --global yarn
+
+      - name: Cache node dependencies
+        uses: actions/cache@v3
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
+
+      - name: install node_modules
+        run: |
+          export PATH="/home/runner/.local/share/solana/install/active_release/bin:$PATH"
+          yarn --frozen-lockfile --network-concurrency 2
+
+      - name: install rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+
+      - name: Cache rust
+        uses: Swatinem/rust-cache@v2
+
+      - name: install solana
+        if: steps.cache-solana.outputs.cache-hit != 'true'
+        run: |
+          sh -c "$(curl -sSfL https://release.solana.com/${{ env.solana_version }}/install)"
+          export PATH="$HOME/.local/share/solana/install/active_release/bin:$PATH"
+          solana --version
+
+  clippy-lint:
+    needs: install
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Cache rust
+        uses: Swatinem/rust-cache@v2
+      - name: Run fmt
+        run: cargo fmt -- --check
+      - name: Run clippy
+        run: cargo clippy -- --deny=warnings
+
+  yarn-lint:
+    needs: install
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node ${{ matrix.node }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Cache node dependencies
+        uses: actions/cache@v4
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
+
+      - name: Run lint
+        run: yarn lint
+
+  test:
+    needs: [clippy-lint, yarn-lint]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: install rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+
+      - name: Cache rust
+        uses: Swatinem/rust-cache@v2
+
+      - uses: actions/checkout@v4
+
+      - name: Use Node ${{ matrix.node }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Cache node dependencies
+        uses: actions/cache@v3
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
+      - name: install node_modules
+        run: |
+          export PATH="/home/runner/.local/share/solana/install/active_release/bin:$PATH"
+          yarn --frozen-lockfile
+
+      - uses: actions/cache@v4
+        name: cache solana cli
+        id: cache-solana
+        with:
+          path: |
+            ~/.cache/solana/
+            ~/.local/share/solana/
+          key: solana-${{ runner.os }}-v0000-${{ env.solana_version }}
+
+      - name: setup solana
+        run: |
+          export PATH="/home/runner/.local/share/solana/install/active_release/bin:$PATH"
+          solana --version
+          solana-keygen new --silent --no-bip39-passphrase
+
+      - name: Set deployments keys
+        run: |
+          mkdir -p target/deploy
+          echo ${{ secrets.WORLD }} > target/deploy/world-keypair.json
+          echo ${{ secrets.BOLT_COMPONENT }} > target/deploy/bolt_component-keypair.json
+          echo ${{ secrets.BOLT_SYSTEM }} > target/deploy/bolt_system-keypair.json
+          echo ${{ secrets.COMPONENT_POSITION }} > target/deploy/component_position-keypair.json
+          echo ${{ secrets.COMPONENT_VELOCITY }} > target/deploy/component_velocity-keypair.json
+          echo ${{ secrets.SYSTEM_APPLY_VELOCITY }} > target/deploy/system_apply_velocity-keypair.json
+          echo ${{ secrets.SYSTEM_FLY }} > target/deploy/system_fly-keypair.json
+          echo ${{ secrets.SYSTEM_SIMPLE_MOVEMENT }} > target/deploy/system_simple_movement-keypair.json
+
+      - name: run build
+        run: |
+          export PATH="/home/runner/.local/share/solana/install/active_release/bin:$PATH"
+          npm i -g @coral-xyz/anchor-cli@${{ env.anchor_version }} ts-mocha typescript
+          solana-test-validator > /dev/null &
+          sleep 5
+          solana airdrop -u l 100 tEsT3eV6RFCWs1BZ7AXTzasHqTtMnMLCB2tjQ42TDXD
+          anchor build
+          anchor idl build
+          anchor deploy
+          pkill -9 -f solana-test-validator
+
+      - name: run tests
+        run: |
+          export PATH="/home/runner/.local/share/solana/install/active_release/bin:$PATH"
+          npm i -g @coral-xyz/anchor-cli@${{ env.anchor_version }} ts-mocha typescript
+          anchor test
+
+      - name: npm publish
+        run: |
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
+          npm set //registry.npmjs.org/:_authToken ${{ secrets.NPM_TOKEN }}
+          cd clients/bolt-sdk/ && yarn build && yarn lint:fix && cd ../../ && yarn lint:fix
+          cd clients/bolt-sdk/ && npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
