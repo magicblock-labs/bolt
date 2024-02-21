@@ -78,7 +78,6 @@ jobs:
       - name: Publish to NPM
         shell: bash
         run: |
-          cd npm
           # set the binary name
           bin="bolt-cli"
           # derive the OS and architecture from the build matrix name
