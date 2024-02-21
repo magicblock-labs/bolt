@@ -1,16 +1,21 @@
 [package]
 name = "bolt-cli"
-version = "0.0.1"
-authors = ["Magicblock Labs <dev@magicblock.gg>"]
 rust-version = "1.60"
-edition = "2021"
-repository = "https://github.com/magicblock-labs/bolt"
 description = "Bolt CLI"
-license = "MIT"
+version = { workspace = true }
+authors = { workspace = true }
+repository = { workspace = true }
+homepage = { workspace = true }
+license = { workspace = true }
+edition = { workspace = true }
 
 [[bin]]
 name = "bolt"
 path = "src/bin/main.rs"
+
+[profile.release]
+opt-level = 3
+lto = true
 
 [features]
 dev = []
@@ -18,7 +23,7 @@ dev = []
 [dependencies]
 anchor-cli = { git = "https://github.com/coral-xyz/anchor.git" }
 anchor-client = { git = "https://github.com/coral-xyz/anchor.git" }
-anyhow = "1.0.32"
-heck = "0.4.0"
-clap = { version = "4.2.4", features = ["derive"] }
-syn = { version = "1.0.60", features = ["full", "extra-traits"] }
+anyhow = { workspace = true }
+heck = { workspace = true }
+clap = { workspace = true }
+syn = { workspace = true, features = ["full", "extra-traits"] }

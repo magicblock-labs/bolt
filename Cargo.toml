@@ -28,11 +28,14 @@ bolt-system = { path = "programs/bolt-system", features = ["cpi"], version = "=0
 anchor-lang = "0.29.0"
 solana-security-txt = "1.1.1"
 tuple-conv = "1.0.1"
-syn = { version = "1.0", features = ["full"] }
+syn = { version = "1.0.60", features = ["full"] }
 quote = "1.0"
 proc-macro2 = "1.0"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
+anyhow = "1.0.32"
+heck = "0.4.0"
+clap = { version = "4.2.4", features = ["derive"] }
 # TODO: Remove once https://github.com/solana-labs/solana/issues/33504 is resolved.
 ahash = "=0.8.6"
 
