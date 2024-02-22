@@ -30,7 +30,7 @@ jobs:
 #            OS: windows-2022,
 #            TOOLCHAIN: stable,
 #            TARGET: x86_64-pc-windows-msvc,
-          }
+#          }
           - {
             NAME: win32-arm64-msvc,
             OS: windows-2022,
@@ -48,7 +48,7 @@ jobs:
 #            OS: macos-11,
 #            TOOLCHAIN: stable,
 #            TARGET: aarch64-apple-darwin,
-          }
+#          }
     steps:
       - name: Checkout
         uses: actions/checkout@v4

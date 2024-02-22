@@ -16,4 +16,9 @@ tests/examples/target
 tests/examples/node_modules
 tests/examples/.yarn
 
+cli/npm-package/lib
+cli/npm-package/.npmrc
+cli/npm-package/.yarnrc
+.npmrc
+.yarnrc
 

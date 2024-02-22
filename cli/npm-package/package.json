@@ -12,10 +12,30 @@
   },
   "license": "MIT",
   "bin": {
-    "bolt": "./bolt.js"
+    "bolt": "lib/bolt.js"
   },
   "scripts": {
-    "prepack": "[ \"$(uname -op)\" != \"x86_64 GNU/Linux\" ] && (echo Can be packed only on x86_64 GNU/Linux && exit 1) || ([ \"$(./bolt --version)\" != \"bolt-cli $(jq -r .version package.json)\" ] && (echo Check bolt binary version && exit 2) || exit 0)"
+    "postinstall": "node scripts/setupNpmRegistry.js",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "build": "tsc",
+    "dev": "yarn build && node lib/index.js"
+  },
+  "devDependencies": {
+    "@types/node": "^20.8.8",
+    "@typescript-eslint/eslint-plugin": "^5.48.0",
+    "@typescript-eslint/parser": "^5.48.0",
+    "eslint": "^8.31.0",
+    "typescript": "^4.9.4"
+  },
+  "optionalDependencies": {
+    "@magicblock-labs/bolt-linux-x64": "0.0.1",
+    "@magicblock-labs/bolt-linux-arm64": "0.0.1",
+    "@magicblock-labs/bolt-darwin-x64": "0.0.1",
+    "@magicblock-labs/bolt-darwin-arm64": "0.0.1",
+    "@magicblock-labs/bolt-windows-x64": "0.0.1",
+    "@magicblock-labs/bolt-windows-arm64": "0.0.1"
   },
   "publishConfig": {
     "access": "public"
