@@ -69,7 +69,7 @@ jobs:
         with:
           command: build
           args: --manifest-path=cli/Cargo.toml --release --locked --target ${{ matrix.build.TARGET }}
-          #use-cross: ${{ matrix.build.OS == 'ubuntu-20.04' }} # use `cross` for Linux builds
+          use-cross: ${{ matrix.build.OS == 'ubuntu-20.04' }} # use `cross` for Linux builds
 
       - uses: actions/setup-node@v4
         with:
