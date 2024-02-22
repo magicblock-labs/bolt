@@ -75,7 +75,7 @@ jobs:
         with:
           node-version: 20
 
-      - name: Build the NPM package
+      - name: Build and publish the NPM package
         shell: bash
         run: |
           # set the binary name
@@ -105,10 +105,7 @@ jobs:
             bin="${bin}.exe"
           fi
           cp "target/${{ matrix.build.TARGET }}/release/${bin}" "${node_pkg}/bin"
-
-      - name: Publish the package
-        shell: bash
-        run: |
+          # publish the package
           cd "${node_pkg}"
           echo "//npm.pkg.github.com/:_authToken=${{ secrets.NPM_GITHUB_TOKEN }}" > ~/.npmrc
           npm set //npm.pkg.github.com/:_authToken ${{ secrets.NPM_GITHUB_TOKEN }}
