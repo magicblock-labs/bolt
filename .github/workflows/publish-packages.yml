@@ -145,6 +145,6 @@ jobs:
           cd ${{ env.node_pkg }}
           echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
           npm set //registry.npmjs.org/:_authToken ${{ secrets.NPM_TOKEN }}
-          npm publish --access public --dry-run
+          npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
