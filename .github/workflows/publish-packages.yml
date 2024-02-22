@@ -85,7 +85,7 @@ jobs:
           command: build
           args: --manifest-path=cli/Cargo.toml --no-default-features --release --locked --target ${{ matrix.build.TARGET }}
 
-      - name: Build and publish the NPM package
+      - name: Build the NPM package
         shell: bash
         run: |
           # set the binary name
@@ -118,13 +118,6 @@ jobs:
           fi
           echo "bin_name=${bin}" >> $GITHUB_ENV
           cp "target/${{ matrix.build.TARGET }}/release/${bin}" "${node_pkg}/bin"
-          # publish the package
-          cd "${node_pkg}"
-          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
-          npm set //registry.npmjs.org/:_authToken ${{ secrets.NPM_TOKEN }}
-          npm publish --access public --dry-run
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish binary to GitHub release
         uses: svenstaro/upload-release-action@v2
@@ -132,10 +125,16 @@ jobs:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: ${{ env.node_pkg }}/bin/${{ env.bin_name }}
           overwrite: true
-          tag: ${{ github.ref }}
+          tag: "v${{ env.RELEASE_VERSION }}"
           release_name: "v${{ env.RELEASE_VERSION }}"
           asset_name: ${{ matrix.NAME }}
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
+      - name: Publish the NPM package
+        shell: bash
+        run: |
+          cd "${env.node_pkg}"
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
+          npm set //registry.npmjs.org/:_authToken ${{ secrets.NPM_TOKEN }}
+          npm publish --access public --dry-run
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
