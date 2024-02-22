@@ -110,6 +110,6 @@ jobs:
           cd "${node_pkg}"
           echo "//npm.pkg.github.com/:_authToken=${{ secrets.NPM_GITHUB_TOKEN }}" > ~/.npmrc
           npm set //npm.pkg.github.com/:_authToken ${{ secrets.NPM_GITHUB_TOKEN }}
-          npm publish --access public --dry-run
+          npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_GITHUB_TOKEN }}
