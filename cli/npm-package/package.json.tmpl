@@ -1,5 +1,5 @@
 {
-  "name": "${node_pkg}",
+  "name": "@magicblock-labs/${node_pkg}",
   "version": "${node_version}",
   "repository": {
     "type": "git",
@@ -12,5 +12,8 @@
   ],
   "cpu": [
     "${node_arch}"
-  ]
+  ],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
 }

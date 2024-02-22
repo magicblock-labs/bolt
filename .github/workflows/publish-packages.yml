@@ -64,7 +64,7 @@ jobs:
           target: ${{ matrix.build.TARGET }}
           override: true
 
-      - name: Build
+      - name: Build the Rust binary
         uses: actions-rs/cargo@v1
         with:
           command: build
@@ -75,7 +75,7 @@ jobs:
         with:
           node-version: 20
 
-      - name: Publish to NPM
+      - name: Build the NPM package
         shell: bash
         run: |
           # set the binary name
@@ -105,8 +105,13 @@ jobs:
             bin="${bin}.exe"
           fi
           cp "target/${{ matrix.build.TARGET }}/release/${bin}" "${node_pkg}/bin"
-          # publish the package
+
+      - name: Publish the package
+        shell: bash
+        run: |
           cd "${node_pkg}"
+          echo "//npm.pkg.github.com/:_authToken=${{ secrets.NPM_GITHUB_TOKEN }}" > ~/.npmrc
+          npm set //npm.pkg.github.com/:_authToken ${{ secrets.NPM_GITHUB_TOKEN }}
           npm publish --access public --dry-run
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_GITHUB_TOKEN }}
