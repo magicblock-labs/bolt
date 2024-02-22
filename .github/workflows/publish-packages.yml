@@ -64,12 +64,19 @@ jobs:
           target: ${{ matrix.build.TARGET }}
           override: true
 
+      - name: Add Ring for windows
+        shell: bash
+        run: |
+          if [ "${{ matrix.build.OS }}" = "windows-2022" ]; then
+            cargo add ring
+          fi
+
       - name: Build the Rust binary
         uses: actions-rs/cargo@v1
         with:
           command: build
           args: --manifest-path=cli/Cargo.toml --release --locked --target ${{ matrix.build.TARGET }}
-          use-cross: true # use `cross` for Linux builds
+          use-cross: ${{ matrix.build.OS == 'ubuntu-20.04' }} # use `cross` for Linux builds
 
       - uses: actions/setup-node@v4
         with:
