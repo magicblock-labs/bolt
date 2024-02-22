@@ -1,6 +1,7 @@
 name: Publish bolt-cli packages
 on:
   pull_request:
+  workflow_dispatch:
 
 env:
   release_version: 0.0.1
@@ -118,21 +119,30 @@ jobs:
           fi
           echo "bin_name=${bin}" >> $GITHUB_ENV
           cp "target/${{ matrix.build.TARGET }}/release/${bin}" "${node_pkg}/bin"
+          cp "target/${{ matrix.build.TARGET }}/release/${bin}" "${node_pkg}/bin"
+          
+          # Create the release bin file
+          release_name="bolt-${{ matrix.build.NAME }}"
+          if [ "${{ matrix.build.OS }}" = "windows-2022" ]; then
+            release_name="${release_name}.exe"
+          fi
+          echo "release_name=${release_name}" >> $GITHUB_ENV
+          mv "target/${{ matrix.build.TARGET }}/release/${bin}" "target/${{ matrix.build.TARGET }}/release/${release_name}"
 
       - name: Publish binary to GitHub release
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: ${{ env.node_pkg }}/bin/${{ env.bin_name }}
+          file: target/${{ matrix.build.TARGET }}/release/${{ env.release_name }}
           overwrite: true
           tag: "v${{ env.RELEASE_VERSION }}"
           release_name: "v${{ env.RELEASE_VERSION }}"
-          asset_name: ${{ matrix.NAME }}
+          asset_name: "bolt-${{ matrix.NAME }}"
 
       - name: Publish the NPM package
         shell: bash
         run: |
-          cd "${env.node_pkg}"
+          cd ${{ env.node_pkg }}
           echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
           npm set //registry.npmjs.org/:_authToken ${{ secrets.NPM_TOKEN }}
           npm publish --access public --dry-run

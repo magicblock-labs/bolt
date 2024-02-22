@@ -24,7 +24,7 @@ function getExePath(): string {
     extension = ".exe";
   }
 
-  const binaryName = `@magicblock-labs/bolt-${os}-${arch()}/bin/app${extension}`;
+  const binaryName = `@magicblock-labs/bolt-${os}-${arch()}/bin/bolt${extension}`;
   try {
     return require.resolve(binaryName);
   } catch (e) {
