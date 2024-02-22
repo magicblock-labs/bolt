@@ -13,54 +13,48 @@ jobs:
       fail-fast: false
       matrix:
         build:
-#          - {
-#            NAME: linux-x64-glibc,
-#            OS: ubuntu-20.04,
-#            TOOLCHAIN: stable,
-#            TARGET: x86_64-unknown-linux-gnu,
-#          }
-#          - {
-#            NAME: linux-x64-musl,
-#            OS: ubuntu-22.04,
-#            TOOLCHAIN: stable,
-#            TARGET: x86_64-unknown-linux-musl,
-#          }
-#          - {
-#            NAME: linux-arm64-glibc,
-#            OS: ubuntu-20.04,
-#            TOOLCHAIN: stable,
-#            TARGET: aarch64-unknown-linux-gnu,
-#          }
-#          - {
-#            NAME: win32-x64-msvc,
-#            OS: windows-2022,
-#            TOOLCHAIN: stable,
-#            TARGET: x86_64-pc-windows-msvc,
-#          }
-#          - {
-#            NAME: linux-arm64-musl,
-#            OS: ubuntu-22.04,
-#            TOOLCHAIN: stable,
-#            TARGET: aarch64-unknown-linux-musl,
-#          }
           - {
-            NAME: win32-arm64-msvc,
+            NAME: linux-x64-glibc,
+            OS: ubuntu-20.04,
+            TOOLCHAIN: stable,
+            TARGET: x86_64-unknown-linux-gnu,
+          }
+          - {
+            NAME: linux-x64-musl,
+            OS: ubuntu-22.04,
+            TOOLCHAIN: stable,
+            TARGET: x86_64-unknown-linux-musl,
+          }
+          - {
+            NAME: linux-arm64-glibc,
+            OS: ubuntu-20.04,
+            TOOLCHAIN: stable,
+            TARGET: aarch64-unknown-linux-gnu,
+          }
+          - {
+            NAME: win32-x64-msvc,
             OS: windows-2022,
             TOOLCHAIN: stable,
-            TARGET: aarch64-pc-windows-msvc,
+            TARGET: x86_64-pc-windows-msvc,
           }
-#          - {
-#            NAME: darwin-x64,
-#            OS: macos-11,
-#            TOOLCHAIN: stable,
-#            TARGET: x86_64-apple-darwin,
-#          }
-#          - {
-#            NAME: darwin-arm64,
-#            OS: macos-11,
-#            TOOLCHAIN: stable,
-#            TARGET: aarch64-apple-darwin,
-#          }
+          - {
+            NAME: linux-arm64-musl,
+            OS: ubuntu-22.04,
+            TOOLCHAIN: stable,
+            TARGET: aarch64-unknown-linux-musl,
+          }
+          - {
+            NAME: darwin-x64,
+            OS: macos-11,
+            TOOLCHAIN: stable,
+            TARGET: x86_64-apple-darwin,
+          }
+          - {
+            NAME: darwin-arm64,
+            OS: macos-11,
+            TOOLCHAIN: stable,
+            TARGET: aarch64-apple-darwin,
+          }
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -91,10 +85,6 @@ jobs:
           command: build
           args: --manifest-path=cli/Cargo.toml --no-default-features --release --locked --target ${{ matrix.build.TARGET }}
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
       - name: Build and publish the NPM package
         shell: bash
         run: |
@@ -115,6 +105,7 @@ jobs:
           else
             export node_pkg="${bin}-${node_os}-${node_arch}"
           fi
+          echo "node_pkg=${node_pkg}" >> $GITHUB_ENV
           # create the package directory
           mkdir -p "${node_pkg}/bin"
           # generate package.json from the template
@@ -125,11 +116,26 @@ jobs:
           if [ "${{ matrix.build.OS }}" = "windows-2022" ]; then
             bin="${bin}.exe"
           fi
+          echo "bin_name=${bin}" >> $GITHUB_ENV
           cp "target/${{ matrix.build.TARGET }}/release/${bin}" "${node_pkg}/bin"
           # publish the package
           cd "${node_pkg}"
-          echo "//npm.pkg.github.com/:_authToken=${{ secrets.NPM_GITHUB_TOKEN }}" > ~/.npmrc
-          npm set //npm.pkg.github.com/:_authToken ${{ secrets.NPM_GITHUB_TOKEN }}
-          npm publish --access public
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
+          npm set //registry.npmjs.org/:_authToken ${{ secrets.NPM_TOKEN }}
+          npm publish --access public --dry-run
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish binary to GitHub release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: ${{ env.node_pkg }}/bin/${{ env.bin_name }}
+          overwrite: true
+          tag: ${{ github.ref }}
+          release_name: "v${{ env.RELEASE_VERSION }}"
+          asset_name: ${{ matrix.NAME }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
