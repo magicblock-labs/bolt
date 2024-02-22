@@ -68,7 +68,7 @@ jobs:
         shell: bash
         run: |
           if [ "${{ matrix.build.OS }}" = "windows-2022" ]; then
-            cargo add ring
+            cargo add --package cli ring
           fi
 
       - name: Build the Rust binary
