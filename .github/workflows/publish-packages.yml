@@ -69,7 +69,7 @@ jobs:
         with:
           command: build
           args: --manifest-path=cli/Cargo.toml --release --locked --target ${{ matrix.build.TARGET }}
-          use-cross: ${{ matrix.build.OS == 'ubuntu-20.04' }} # use `cross` for Linux builds
+          #use-cross: ${{ matrix.build.OS == 'ubuntu-20.04' }} # use `cross` for Linux builds
 
       - uses: actions/setup-node@v4
         with:
@@ -99,6 +99,7 @@ jobs:
           mkdir -p "${node_pkg}/bin"
           # generate package.json from the template
           envsubst < cli/npm-package/package.json.tmpl > "${node_pkg}/package.json"
+          cat "${node_pkg}/package.json"
           # copy the binary into the package
           # note: windows binaries has '.exe' extension
           if [ "${{ matrix.build.OS }}" = "windows-2022" ]; then
