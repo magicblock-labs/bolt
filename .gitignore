@@ -16,4 +16,10 @@ tests/examples/target
 tests/examples/node_modules
 tests/examples/.yarn
 
+cli/npm-package/lib
+cli/npm-package/.npmrc
+cli/npm-package/.yarnrc
+cli/npm-package/package-lock.json
+.npmrc
+.yarnrc
 
