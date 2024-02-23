@@ -12,7 +12,7 @@
   },
   "license": "MIT",
   "bin": {
-    "bolt": "lib/bolt.js"
+    "bolt": "bolt.js"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
