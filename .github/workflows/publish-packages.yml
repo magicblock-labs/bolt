@@ -160,6 +160,7 @@ jobs:
         shell: bash
         run: |
           cd cli/npm-package
+          npm install
           npm run build
           cd lib
           echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
