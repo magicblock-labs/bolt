@@ -45,12 +45,6 @@ jobs:
             TARGET: i686-pc-windows-msvc,
           }
           - {
-            NAME: win32-arm64-msvc,
-            OS: windows-2022,
-            TOOLCHAIN: stable,
-            TARGET: aarch64-pc-windows-msvc,
-          }
-          - {
             NAME: darwin-x64,
             OS: macos-11,
             TOOLCHAIN: stable,
@@ -108,9 +102,9 @@ jobs:
           # set the package name
           # note: use 'windows' as OS name instead of 'win32'
           if [ "${{ matrix.build.OS }}" = "windows-2022" ]; then
-            export node_pkg="${bin}-windows-${node_arch}"
+            export node_pkg="${bin}-cli-windows-${node_arch}"
           else
-            export node_pkg="${bin}-${node_os}-${node_arch}"
+            export node_pkg="${bin}-cli-${node_os}-${node_arch}"
           fi
           echo "node_pkg=${node_pkg}" >> $GITHUB_ENV
           # create the package directory
@@ -149,6 +143,22 @@ jobs:
         shell: bash
         run: |
           cd ${{ env.node_pkg }}
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
+          npm set //registry.npmjs.org/:_authToken ${{ secrets.NPM_TOKEN }}
+          npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+  publish-wrapper-npm-package:
+    name: Publish wrapper NPM packages
+    runs-on: ubuntu-20.04
+    needs: publish-npm-binaries
+    steps:
+      - name: Publish the NPM package
+        shell: bash
+        run: |
+          cd cli/npm-package
+          npm run build
+          cd lib
           echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
           npm set //registry.npmjs.org/:_authToken ${{ secrets.NPM_TOKEN }}
           npm publish --access public

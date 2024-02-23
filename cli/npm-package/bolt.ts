@@ -23,8 +23,7 @@ function getExePath(): string {
     os = "windows";
     extension = ".exe";
   }
-
-  const binaryName = `@magicblock-labs/bolt-${os}-${arch()}/bin/bolt${extension}`;
+  const binaryName = `@magicblock-labs/bolt-cli-${os}-${arch()}/bin/bolt${extension}`;
   try {
     return require.resolve(binaryName);
   } catch (e) {
@@ -68,8 +67,6 @@ function tryPackageBolt(): boolean {
 }
 
 function trySystemBolt(): void {
-  console.error("Trying globally installed bolt.");
-
   const absolutePath = process.env.PATH?.split(path.delimiter)
     .filter((dir) => dir !== path.dirname(process.argv[1]))
     .find((dir) => {
@@ -83,7 +80,7 @@ function trySystemBolt(): void {
 
   if (!absolutePath) {
     console.error(
-      `Could not find globally installed bolt, install with cargo.`
+      `Could not find globally installed bolt, please install with cargo.`
     );
     process.exit(1);
   }
@@ -104,5 +101,4 @@ function trySystemBolt(): void {
 
   runBolt(absoluteBinaryPath);
 }
-
 tryPackageBolt() || trySystemBolt();
