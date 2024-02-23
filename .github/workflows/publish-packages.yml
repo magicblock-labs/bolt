@@ -9,6 +9,7 @@ env:
 jobs:
   publish-npm-binaries:
     name: Publish NPM packages
+    if: false
     runs-on: ${{ matrix.build.os }}
     strategy:
       fail-fast: false
@@ -151,8 +152,10 @@ jobs:
   publish-wrapper-npm-package:
     name: Publish wrapper NPM packages
     runs-on: ubuntu-20.04
-    needs: publish-npm-binaries
+    #needs: publish-npm-binaries
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
       - name: Publish the NPM package
         shell: bash
         run: |
