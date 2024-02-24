@@ -175,7 +175,7 @@ fn init(
             } else {
                 "yarn run jest --preset ts-jest"
             }
-            .to_owned(),
+                .to_owned(),
         );
     } else {
         cfg.scripts.insert(
@@ -185,7 +185,7 @@ fn init(
             } else {
                 "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
             }
-            .to_owned(),
+                .to_owned(),
         );
     }
 
@@ -297,8 +297,8 @@ fn init(
             .arg(format!("programs-ecs/components/{}", component_name))
             .arg("--features")
             .arg("cpi")
-            .stdout(Stdio::inherit())
-            .stderr(Stdio::inherit())
+            .stdout(std::process::Stdio::null())
+            .stderr(std::process::Stdio::null())
             .spawn()
             .map_err(|e| {
                 anyhow::format_err!(
