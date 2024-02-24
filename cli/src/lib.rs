@@ -175,7 +175,7 @@ fn init(
             } else {
                 "yarn run jest --preset ts-jest"
             }
-                .to_owned(),
+            .to_owned(),
         );
     } else {
         cfg.scripts.insert(
@@ -185,7 +185,7 @@ fn init(
             } else {
                 "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
             }
-                .to_owned(),
+            .to_owned(),
         );
     }
 
