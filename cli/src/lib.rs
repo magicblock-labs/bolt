@@ -297,8 +297,8 @@ fn init(
             .arg(format!("programs-ecs/components/{}", component_name))
             .arg("--features")
             .arg("cpi")
-            .stdout(Stdio::inherit())
-            .stderr(Stdio::inherit())
+            .stdout(std::process::Stdio::null())
+            .stderr(std::process::Stdio::null())
             .spawn()
             .map_err(|e| {
                 anyhow::format_err!(

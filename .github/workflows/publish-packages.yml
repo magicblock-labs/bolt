@@ -89,6 +89,11 @@ jobs:
           command: build
           args: --manifest-path=cli/Cargo.toml --no-default-features --release --locked --target ${{ matrix.build.TARGET }}
 
+      - name: Check versions are aligned
+        run: |
+          # Fails if versions are not aligned
+          ./scripts/version-align.sh --check
+
       - name: Build the NPM package
         shell: bash
         run: |
