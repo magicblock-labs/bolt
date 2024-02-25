@@ -163,7 +163,12 @@ jobs:
           npm i -g @coral-xyz/anchor-cli@${{ env.anchor_version }} ts-mocha typescript
           anchor test
 
+      - name: Print github.ref
+        shell: bash
+        run: echo "The current github.ref is ${{ github.ref }}"
+
       - name: Install the Bolt CLI and create & build a new project
+        shell: bash
         if: ${{ !startsWith(github.ref, 'refs/heads/release/v') }}
         run: |
           export PATH="/home/runner/.local/share/solana/install/active_release/bin:$PATH"

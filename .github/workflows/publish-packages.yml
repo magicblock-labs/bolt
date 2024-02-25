@@ -67,6 +67,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set DRY_RUN based on trigger
+        shell: bash
         run: echo "DRY_RUN=true" >> $GITHUB_ENV
         if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads/release/v')
 
@@ -168,7 +169,7 @@ jobs:
       - name: Publish the NPM package
         run: |
           echo "DRY_RUN=${DRY_RUN}"
-          cd ${{ env.node_pkg }}
+          cd ${NODE_PKG}
           echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
           npm set //registry.npmjs.org/:_authToken ${{ secrets.NPM_TOKEN }}
           if [ "${DRY_RUN}" = "true" ]; then
@@ -177,9 +178,11 @@ jobs:
           else
             npm publish --access public
           fi
+        shell: bash
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           DRY_RUN: ${{ env.DRY_RUN }}
+          NODE_PKG: ${{ env.node_pkg }}
   publish-wrapper-npm-package:
     name: Publish wrapper NPM packages
     runs-on: ubuntu-20.04
