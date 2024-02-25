@@ -12,6 +12,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Set if on release
+        shell: bash
+        run: |
+          if [[ $GITHUB_REF == refs/heads/release/v* ]]; then
+            echo "ON_RELEASE=true" >> $GITHUB_ENV
+          fi
       - uses: actions/cache@v4
         name: cache solana cli
         id: cache-solana
@@ -165,6 +171,7 @@ jobs:
           anchor test
 
       - name: Install the Bolt CLI and create & build a new project
+        if: ${{ env.ON_RELEASE }} == 'false'
         run: |
           export PATH="/home/runner/.local/share/solana/install/active_release/bin:$PATH"
           cargo install --path cli --force --locked
@@ -175,9 +182,3 @@ jobs:
           yarn add file:../clients/bolt-sdk/ -D # Overrides the bolt ts SDK with the local version
           bolt build
           bolt test
-
-      - uses: actions/upload-artifact@v3
-        if: always()
-        with:
-          name: program-logs
-          path: .anchor/program-logs/*

@@ -186,7 +186,6 @@ jobs:
             DRY_RUN_FLAG="--dry-run"
           fi
 
-          cargo publish $DRY_RUN_FLAG --manifest-path=crates/bolt-lang/attribute/account/Cargo.toml --token ${CRATES_TOKEN}
           cargo publish $DRY_RUN_FLAG --manifest-path=crates/bolt-lang/attribute/component/Cargo.toml --token ${CRATES_TOKEN}
           cargo publish $DRY_RUN_FLAG --manifest-path=crates/bolt-lang/attribute/component-deserialize/Cargo.toml --token ${CRATES_TOKEN}
           cargo publish $DRY_RUN_FLAG --manifest-path=crates/bolt-lang/attribute/component-id/Cargo.toml --token ${CRATES_TOKEN}
