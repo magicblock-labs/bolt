@@ -165,11 +165,11 @@ jobs:
 
       - name: Print github.ref
         shell: bash
-        run: echo "The current github.ref is ${{ github.ref }}"
+        run: echo "The current github.ref is $GITHUB_REF"
 
       - name: Install the Bolt CLI and create & build a new project
         shell: bash
-        if: ${{ !startsWith(github.ref, 'refs/heads/release/v') }}
+        if: ${{ !startsWith($GITHUB_REF, 'refs/heads/release/v') }}
         run: |
           export PATH="/home/runner/.local/share/solana/install/active_release/bin:$PATH"
           cargo install --path cli --force --locked
