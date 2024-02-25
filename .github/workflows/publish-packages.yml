@@ -2,6 +2,9 @@ name: Publish bolt-cli packages
 on:
   release:
     types: [ published ]
+  push:
+    branches:
+      - 'release/v*'
   workflow_dispatch:
     inputs:
       release_version:
@@ -62,6 +65,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Set DRY_RUN based on trigger
+        run: echo "DRY_RUN=true" >> $GITHUB_ENV
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads/release/v')
 
       - name: Set the release version
         shell: bash
@@ -154,6 +161,12 @@ jobs:
           echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
           npm set //registry.npmjs.org/:_authToken ${{ secrets.NPM_TOKEN }}
           npm publish --access public
+          if [ "${DRY_RUN}" = "true" ]; then
+            echo "Running npm publish in dry-run mode"
+            npm publish --access public --dry-run
+          else
+            npm publish --access public
+          fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
   publish-wrapper-npm-package:
@@ -163,6 +176,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Set DRY_RUN based on trigger
+        run: echo "DRY_RUN=true" >> $GITHUB_ENV
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads/release/v')
       - name: Publish the NPM package
         shell: bash
         run: |
@@ -172,6 +188,11 @@ jobs:
           cd lib
           echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
           npm set //registry.npmjs.org/:_authToken ${{ secrets.NPM_TOKEN }}
-          npm publish --access public
+          if [ "${DRY_RUN}" = "true" ]; then
+            echo "Running npm publish in dry-run mode"
+            npm publish --access public --dry-run
+          else
+            npm publish --access public
+          fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
