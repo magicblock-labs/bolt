@@ -181,11 +181,11 @@ jobs:
 
       - name: npm publish
         run: |
+          npm install --only=dev 
           echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
           npm set //registry.npmjs.org/:_authToken ${{ secrets.NPM_TOKEN }}
           cd clients/bolt-sdk/ && yarn build && yarn lint:fix && cd ../../ && yarn lint:fix
           cd clients/bolt-sdk/
-          npm install --only=dev 
           if [ "${DRY_RUN}" = "true" ]; then
             echo "Running npm publish in dry-run mode"
             npm publish --access public --dry-run

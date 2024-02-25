@@ -990,7 +990,7 @@ version = "0.0.1"
 
 [[package]]
 name = "bolt-helpers-system-template"
-version = "0.0.1"
+version = "0.0.2"
 dependencies = [
  "proc-macro2",
  "quote",

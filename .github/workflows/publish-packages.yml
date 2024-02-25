@@ -179,6 +179,7 @@ jobs:
           fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          DRY_RUN: ${{ env.DRY_RUN }}
   publish-wrapper-npm-package:
     name: Publish wrapper NPM packages
     runs-on: ubuntu-20.04

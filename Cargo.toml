@@ -21,8 +21,10 @@ bolt-attribute-bolt-system = { path = "crates/bolt-lang/attribute/system", versi
 bolt-attribute-bolt-system-input = { path = "crates/bolt-lang/attribute/system-input", version = "=0.0.2" }
 bolt-attribute-bolt-component-deserialize = { path = "crates/bolt-lang/attribute/component-deserialize", version = "=0.0.2" }
 bolt-attribute-bolt-component-id = { path = "crates/bolt-lang/attribute/component-id", version = "=0.0.2" }
+bolt-utils = { path = "crates/bolt-lang/utils", version = "=0.0.2" }
 world = { path = "programs/world", features = ["cpi"], version = "=0.0.2"}
 bolt-system = { path = "programs/bolt-system", features = ["cpi"], version = "=0.0.2"}
+bolt-component = { path = "programs/bolt-component", features = ["cpi"], version = "=0.0.2"}
 
 ## External crates
 anchor-lang = "0.29.0"
