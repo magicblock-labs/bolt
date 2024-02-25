@@ -108,7 +108,8 @@ jobs:
       - name: Check versions are aligned
         run: |
           # Fails if versions are not aligned
-          ./scripts/version-align.sh --check
+          cargo install git-cliff
+          ./version-align.sh --check
 
       - name: Build the NPM package
         shell: bash
