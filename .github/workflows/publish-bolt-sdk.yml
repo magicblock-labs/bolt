@@ -181,7 +181,7 @@ jobs:
 
       - name: npm publish
         run: |
-          npm install --only=dev 
+          npm install --global yarn
           echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
           npm set //registry.npmjs.org/:_authToken ${{ secrets.NPM_TOKEN }}
           cd clients/bolt-sdk/ && yarn build && yarn lint:fix && cd ../../ && yarn lint:fix

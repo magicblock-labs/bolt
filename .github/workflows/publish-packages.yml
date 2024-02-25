@@ -155,7 +155,7 @@ jobs:
           mv "target/${{ matrix.build.TARGET }}/release/${bin}" "target/${{ matrix.build.TARGET }}/release/${release_name}"
 
       - name: Publish binary to GitHub release
-        if: env.DRY_RUN != 'true'
+        if: ${{ env.DRY_RUN != 'true' }}
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
@@ -166,8 +166,8 @@ jobs:
           asset_name: "${{ env.release_name }}"
 
       - name: Publish the NPM package
-        shell: bash
         run: |
+          echo "DRY_RUN=${DRY_RUN}"
           cd ${{ env.node_pkg }}
           echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
           npm set //registry.npmjs.org/:_authToken ${{ secrets.NPM_TOKEN }}
