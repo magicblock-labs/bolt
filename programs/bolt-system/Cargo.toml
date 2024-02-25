@@ -22,4 +22,4 @@ idl-build = ["anchor-lang/idl-build"]
 
 [dependencies]
 anchor-lang = { workspace = true }
-bolt-helpers-system-template = { path = "../../crates/bolt-helpers/attribute/system-template" }
+bolt-helpers-system-template = { workspace = true, cpi = true }
