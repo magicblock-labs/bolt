@@ -169,7 +169,7 @@ jobs:
 
       - name: Install the Bolt CLI and create & build a new project
         shell: bash
-        if: ${{ !startsWith($GITHUB_REF, 'refs/heads/release/v') }}
+        if: ${{ !startsWith(github.ref, 'refs/heads/release/v') }}
         run: |
           export PATH="/home/runner/.local/share/solana/install/active_release/bin:$PATH"
           cargo install --path cli --force --locked
