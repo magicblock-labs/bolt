@@ -147,7 +147,7 @@ jobs:
           cp "target/${{ matrix.build.TARGET }}/release/${bin}" "${node_pkg}/bin"
           
           # Create the release bin file
-          release_name="bolt-${{ matrix.build.NAME }}"
+          release_name="bolt-cli-${{ matrix.build.NAME }}"
           if [ "${{ matrix.build.OS }}" = "windows-2022" ]; then
             release_name="${release_name}.exe"
           fi
@@ -155,6 +155,7 @@ jobs:
           mv "target/${{ matrix.build.TARGET }}/release/${bin}" "target/${{ matrix.build.TARGET }}/release/${release_name}"
 
       - name: Publish binary to GitHub release
+        if: env.DRY_RUN != 'true'
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
