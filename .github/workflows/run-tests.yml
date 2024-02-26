@@ -104,6 +104,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Set ON_RELEASE_BRANCH based on trigger
+        shell: bash
         run: echo "ON_RELEASE_BRANCH=true" >> $GITHUB_ENV
         if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads/release/v')
 
@@ -166,10 +167,6 @@ jobs:
           export PATH="/home/runner/.local/share/solana/install/active_release/bin:$PATH"
           npm i -g @coral-xyz/anchor-cli@${{ env.anchor_version }} ts-mocha typescript
           anchor test
-
-      - name: Print github.ref
-        shell: bash
-        run: echo "The current github.ref is $GITHUB_REF"
 
       - name: Install the Bolt CLI and create & build a new project
         shell: bash
