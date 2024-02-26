@@ -1,5 +1,6 @@
 [package]
 name = "bolt-helpers-world-apply"
+description = "A helper library for the bolt world apply istructions"
 version = { workspace = true }
 authors = { workspace = true }
 repository = { workspace = true }
