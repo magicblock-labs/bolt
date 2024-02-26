@@ -20,24 +20,24 @@ jobs:
       fail-fast: false
       matrix:
         build:
-          - {
-            NAME: linux-x64-glibc,
-            OS: ubuntu-20.04,
-            TOOLCHAIN: stable,
-            TARGET: x86_64-unknown-linux-gnu,
-          }
-          - {
-            NAME: linux-x86-glibc,
-            OS: ubuntu-22.04,
-            TOOLCHAIN: stable,
-            TARGET: i686-unknown-linux-gnu,
-          }
-          - {
-            NAME: linux-arm64-glibc,
-            OS: ubuntu-20.04,
-            TOOLCHAIN: stable,
-            TARGET: aarch64-unknown-linux-gnu,
-          }
+#          - {
+#            NAME: linux-x64-glibc,
+#            OS: ubuntu-20.04,
+#            TOOLCHAIN: stable,
+#            TARGET: x86_64-unknown-linux-gnu,
+#          }
+#          - {
+#            NAME: linux-x86-glibc,
+#            OS: ubuntu-22.04,
+#            TOOLCHAIN: stable,
+#            TARGET: i686-unknown-linux-gnu,
+#          }
+#          - {
+#            NAME: linux-arm64-glibc,
+#            OS: ubuntu-20.04,
+#            TOOLCHAIN: stable,
+#            TARGET: aarch64-unknown-linux-gnu,
+#          }
           - {
             NAME: win32-x64-msvc,
             OS: windows-2022,
@@ -50,18 +50,18 @@ jobs:
             TOOLCHAIN: stable,
             TARGET: i686-pc-windows-msvc,
           }
-          - {
-            NAME: darwin-x64,
-            OS: macos-11,
-            TOOLCHAIN: stable,
-            TARGET: x86_64-apple-darwin,
-          }
-          - {
-            NAME: darwin-arm64,
-            OS: macos-11,
-            TOOLCHAIN: stable,
-            TARGET: aarch64-apple-darwin,
-          }
+#          - {
+#            NAME: darwin-x64,
+#            OS: macos-11,
+#            TOOLCHAIN: stable,
+#            TARGET: x86_64-apple-darwin,
+#          }
+#          - {
+#            NAME: darwin-arm64,
+#            OS: macos-11,
+#            TOOLCHAIN: stable,
+#            TARGET: aarch64-apple-darwin,
+#          }
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -168,11 +168,11 @@ jobs:
 
       - name: Publish the NPM package
         run: |
-          echo "DRY_RUN=${DRY_RUN}"
-          cd ${NODE_PKG}
+          echo "DRY_RUN=${{ env.DRY_RUN }}"
+          cd ${{ env.node_pkg }}
           echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
           npm set //registry.npmjs.org/:_authToken ${{ secrets.NPM_TOKEN }}
-          if [ "${DRY_RUN}" = "true" ]; then
+          if [ "${{ env.DRY_RUN }}" = "true" ]; then
             echo "Running npm publish in dry-run mode"
             npm publish --access public --dry-run
           else
@@ -181,8 +181,6 @@ jobs:
         shell: bash
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          DRY_RUN: ${{ env.DRY_RUN }}
-          NODE_PKG: ${{ env.node_pkg }}
   publish-wrapper-npm-package:
     name: Publish wrapper NPM packages
     runs-on: ubuntu-20.04
