@@ -22,4 +22,4 @@ idl-build = ["anchor-lang/idl-build"]
 
 [dependencies]
 anchor-lang = { workspace = true, features = ["init-if-needed"] }
-bolt-system = { path = "../bolt-system", features = ["cpi"] }
+bolt-system = { workspace = true, cpi = true }

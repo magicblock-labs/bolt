@@ -11,7 +11,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/cache@v4
         name: cache solana cli
         id: cache-solana
@@ -165,6 +164,8 @@ jobs:
           anchor test
 
       - name: Install the Bolt CLI and create & build a new project
+        shell: bash
+        if: ${{ !startsWith(github.ref, 'refs/heads/release/v') && !startsWith(github.head_ref, 'release/v') }}
         run: |
           export PATH="/home/runner/.local/share/solana/install/active_release/bin:$PATH"
           cargo install --path cli --force --locked
@@ -175,9 +176,3 @@ jobs:
           yarn add file:../clients/bolt-sdk/ -D # Overrides the bolt ts SDK with the local version
           bolt build
           bolt test
-
-      - uses: actions/upload-artifact@v3
-        if: always()
-        with:
-          name: program-logs
-          path: .anchor/program-logs/*

@@ -1,7 +1,10 @@
 name: Publish Bolt SDKs
 on:
   release:
-    types: [published]
+    types: [ published ]
+  push:
+    branches:
+      - 'release/v*'
   workflow_dispatch:
 
 env:
@@ -106,6 +109,10 @@ jobs:
 
       - uses: actions/checkout@v4
 
+      - name: Set DRY_RUN based on trigger
+        run: echo "DRY_RUN=true" >> $GITHUB_ENV
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads/release/v')
+
       - name: Use Node ${{ matrix.node }}
         uses: actions/setup-node@v4
         with:
@@ -151,7 +158,8 @@ jobs:
       - name: Check versions are aligned
         run: |
           # Fails if versions are not aligned
-          ./scripts/version-align.sh --check
+          cargo install git-cliff
+          ./version-align.sh --check
 
       - name: run build
         run: |
@@ -173,9 +181,18 @@ jobs:
 
       - name: npm publish
         run: |
+          npm install --global yarn
+          npm install --global eslint
+          yarn install
           echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
           npm set //registry.npmjs.org/:_authToken ${{ secrets.NPM_TOKEN }}
           cd clients/bolt-sdk/ && yarn build && yarn lint:fix && cd ../../ && yarn lint:fix
-          cd clients/bolt-sdk/ && npm publish
+          cd clients/bolt-sdk/
+          if [ "${DRY_RUN}" = "true" ]; then
+            echo "Running npm publish in dry-run mode"
+            npm publish --access public --dry-run
+          else
+            npm publish --access public
+          fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

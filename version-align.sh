@@ -34,6 +34,8 @@ jq --arg version "$version" '(.version = $version) | (.optionalDependencies[] = 
 # Potential for collisions in Cargo.lock, use cargo update to update it
 cargo update --workspace
 
+# Generate CHANGELOG.md
+git-cliff -c cliff.toml -o CHANGELOG.md -t $version
 
 # Check if the any changes have been made to the specified files, if running with --check
 if [[ "$1" == "--check" ]]; then
@@ -42,6 +44,7 @@ if [[ "$1" == "--check" ]]; then
         "cli/npm-package/package.json.tmpl"
         "cli/npm-package/package.json"
         "Cargo.toml"
+        "CHANGELOG.toml"
     )
 
     for file in "${files_to_check[@]}"; do

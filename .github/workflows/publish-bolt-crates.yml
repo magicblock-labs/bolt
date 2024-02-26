@@ -1,7 +1,10 @@
 name: Publish Bolt crates
 on:
   release:
-    types: [published]
+    types: [ published ]
+  push:
+    branches:
+      - 'release/v*'
   workflow_dispatch:
 
 env:
@@ -91,7 +94,7 @@ jobs:
       - name: Run lint
         run: yarn lint
 
-  test:
+  test-and-publish:
     needs: [clippy-lint, yarn-lint]
     runs-on: ubuntu-latest
 
@@ -105,6 +108,10 @@ jobs:
         uses: Swatinem/rust-cache@v2
 
       - uses: actions/checkout@v4
+
+      - name: Set DRY_RUN based on trigger
+        run: echo "DRY_RUN=true" >> $GITHUB_ENV
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads/release/v')
 
       - name: Use Node ${{ matrix.node }}
         uses: actions/setup-node@v4
@@ -151,7 +158,8 @@ jobs:
       - name: Check versions are aligned
         run: |
           # Fails if versions are not aligned
-          ./scripts/version-align.sh --check
+          cargo install git-cliff
+          ./version-align.sh --check
 
       - name: run build
         run: |
@@ -173,16 +181,26 @@ jobs:
 
       - name: cargo publish
         run: |
-          cargo publish --manifest-path=crates/bolt-lang/attribute/account/Cargo.toml --token ${CRATES_TOKEN}
-          cargo publish --manifest-path=crates/bolt-lang/attribute/component/Cargo.toml --token ${CRATES_TOKEN}
-          cargo publish --manifest-path=crates/bolt-lang/attribute/component-deserialize/Cargo.toml --token ${CRATES_TOKEN}
-          cargo publish --manifest-path=crates/bolt-lang/attribute/component-id/Cargo.toml --token ${CRATES_TOKEN}
-          cargo publish --manifest-path=crates/bolt-lang/attribute/system/Cargo.toml --token ${CRATES_TOKEN}
-          cargo publish --manifest-path=crates/bolt-lang/attribute/system-input/Cargo.toml --token ${CRATES_TOKEN}
-          cargo publish --manifest-path=crates/bolt-lang/attribute/bolt-program/Cargo.toml --token ${CRATES_TOKEN}
-          cargo publish --manifest-path=programs/bolt-system/Cargo.toml --token ${CRATES_TOKEN}
-          cargo publish --manifest-path=programs/bolt-component/Cargo.toml --token ${CRATES_TOKEN}
-          cargo publish --manifest-path=programs/world/Cargo.toml --token ${CRATES_TOKEN}
-          cargo publish --manifest-path=crates/bolt-lang/Cargo.toml --token ${CRATES_TOKEN}
+          DRY_RUN_FLAG=""
+          if [ "${DRY_RUN}" = "true" ]; then
+            DRY_RUN_FLAG="--dry-run"
+          fi
+          
+          if [ "${DRY_RUN}" = "true" ]; then
+            NO_VERIFY_FLAG="--no-verify"
+          fi      
+
+          cargo publish $DRY_RUN_FLAG --manifest-path=crates/bolt-lang/attribute/component/Cargo.toml --token ${CRATES_TOKEN} $NO_VERIFY_FLAG
+          cargo publish $DRY_RUN_FLAG --manifest-path=crates/bolt-lang/attribute/component-deserialize/Cargo.toml --token ${CRATES_TOKEN} $NO_VERIFY_FLAG
+          cargo publish $DRY_RUN_FLAG --manifest-path=crates/bolt-lang/attribute/component-id/Cargo.toml --token ${CRATES_TOKEN} $NO_VERIFY_FLAG
+          cargo publish $DRY_RUN_FLAG --manifest-path=crates/bolt-lang/attribute/system/Cargo.toml --token ${CRATES_TOKEN} $NO_VERIFY_FLAG
+          cargo publish $DRY_RUN_FLAG --manifest-path=crates/bolt-lang/attribute/system-input/Cargo.toml --token ${CRATES_TOKEN} $NO_VERIFY_FLAG
+          cargo publish $DRY_RUN_FLAG --manifest-path=crates/bolt-lang/attribute/bolt-program/Cargo.toml --token ${CRATES_TOKEN} $NO_VERIFY_FLAG
+          cargo publish $DRY_RUN_FLAG --manifest-path=crates/bolt-lang/utils/Cargo.toml --token ${CRATES_TOKEN} $NO_VERIFY_FLAG
+          cargo publish $DRY_RUN_FLAG --manifest-path=programs/bolt-system/Cargo.toml --token ${CRATES_TOKEN} $NO_VERIFY_FLAG
+          cargo publish $DRY_RUN_FLAG --manifest-path=programs/bolt-component/Cargo.toml --token ${CRATES_TOKEN} $NO_VERIFY_FLAG
+          cargo publish $DRY_RUN_FLAG --manifest-path=programs/world/Cargo.toml --token ${CRATES_TOKEN} $NO_VERIFY_FLAG
+          cargo publish $DRY_RUN_FLAG --manifest-path=crates/bolt-lang/Cargo.toml --token ${CRATES_TOKEN} $NO_VERIFY_FLAG
         env:
           CRATES_TOKEN: ${{ secrets.CRATES_TOKEN }}
+          DRY_RUN: ${{ env.DRY_RUN }}

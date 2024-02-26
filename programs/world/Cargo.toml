@@ -22,9 +22,9 @@ idl-build = ["anchor-lang/idl-build"]
 
 [dependencies]
 anchor-lang = { workspace = true, features = ["init-if-needed"] }
-bolt-component = { path = "../../programs/bolt-component", features = ["cpi"]}
-bolt-helpers-world-apply = { path = "../../crates/bolt-helpers/attribute/world-apply" }
-bolt-system = { path = "../../programs/bolt-system", features = ["cpi"]}
+bolt-component = { workspace = true, cpi = true }
+bolt-helpers-world-apply = { workspace = true }
+bolt-system = { workspace = true, cpi = true }
 solana-security-txt = { workspace = true }
 tuple-conv = { workspace = true }
 
