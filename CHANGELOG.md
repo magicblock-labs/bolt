@@ -1,11 +1,16 @@
 
-## [0.0.2] - 2024-02-25
+## [0.1.0] - 2024-02-28
+
+### 📚 Documentation
+ - Improve repository structure (#21)
+
+### 👷 CI/CD
+
+## [0.0.2] - 2024-02-24
 
 ### ✨️ Features
  - Feat/consistent versioning (#18)
  - Draft workflow for building & publishing packages (#16)
-
-### 👷 CI/CD
 
 ## [0.0.1] - 2024-02-21
 
