@@ -74,7 +74,7 @@ declare_id!("{}");
 #[system]
 pub mod {} {{
 
-    pub fn execute(ctx: Context<Components>, args_p: Vec<u8>) -> Result<Components> {{
+    pub fn execute(ctx: Context<Components>, _args_p: Vec<u8>) -> Result<Components> {{
         let position = &mut ctx.accounts.position;
         position.x += 1;
         position.y += 1;
