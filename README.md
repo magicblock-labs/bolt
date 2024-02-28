@@ -18,11 +18,40 @@
 
 </div>
 
-Bolt is a high-performance and composable SVM-based framework designed to scale Fully On Chain (FOC) Games and Autonomous Worlds. 
+Bolt is a high-performance, scalable SVM-based framework designed for Fully On Chain (FOC) Games and Autonomous Worlds.
 
-## ⚡️ Early sign-ups
+With Bolt, you can create games that live forever on the blockchain. These games are platform-centric by default, empowering users to extend and modify both game content and logic. Bolt facilitates multiplayer gaming experiences with performances on pair with traditional multiplayer servers.
 
-[Form](https://i4a385hjc2e.typeform.com/to/pAFHn2mI)
+Furthermore, the framework incorporates an Entity Component System (ECS) architecture, streamlining the game structuring and assembly process and providing ready-to-use components. Developers can reuse and contribute modules and logic deployed on the blockchain.
+
+## Packages
+
+| Package                     | Description                                                                      | Version                                                                                                                                  | Docs                                                                                                            |
+|:----------------------------|:---------------------------------------------------------------------------------|:-----------------------------------------------------------------------------------------------------------------------------------------|:----------------------------------------------------------------------------------------------------------------|
+| `bolt-lang`                 | Rust primitives for creanting components, systems and writing programs on Solana | [![Crates.io](https://img.shields.io/crates/v/bolt-lang?color=blue)](https://crates.io/crates/bolt-lang)                                 | [![Docs.rs](https://img.shields.io/badge/docs-tutorials-blue)](https://book.boltengine.gg/)                                    |
+| `@magicblock-labs/bolt-sdk` | TypeScript client for Anchor programs                                            | [![npm](https://img.shields.io/npm/v/@magicblock-labs/bolt-sdk.svg?color=blue)](https://www.npmjs.com/package/@coral-xyz/anchor)         | [![Docs](https://img.shields.io/badge/docs-tutorials-blue)](https://book.boltengine.gg/getting_started/world_program.html#typescript-sdk-installation)     |
+| `@magicblock-labs/bolt-cli` | CLI to support building and managing a Bolt workspace                            | [![npm](https://img.shields.io/npm/v/@magicblock-labs/bolt-cli.svg?color=blue)](https://www.npmjs.com/package/@magicblock-labs/bolt-cli) | [![Docs](https://img.shields.io/badge/docs-tutorials-blue)](https://book.boltengine.gg/getting_started/installation.html) |
+
+## ⚡️ Installing the bolt-cli
+
+```bash
+npm install -g @magicblock-labs/bolt-cli
+```
+
+## 🔩️ Getting Started
+
+Create a project with the bolt-cli:
+
+```bash
+bolt init new-project
+```
+
+Run the tests for the generated example project:
+
+```bash
+cd new-project
+bolt test
+```
 
 ## 📘 Bolt book
 
@@ -32,8 +61,18 @@ Read the Bolt book: [book.boltengine.gg](https://book.boltengine.gg/)
 
 Read the Bolt whitepaper for a detailed overview on the architecture and the scalability solution: [Ephemeral Rollups are All you Need](https://arxiv.org/abs/2311.02650)
 
-## 🚧 Warning: under costruction
+## 🚧 Under construction
 
-Bolt is an open-source project, currently in its early development phase and subject to frequent changes as we are still working on wiring up the final system. We warmly welcomes contributors. For additional resources, join the community on [Discord](https://discord.com/invite/MBkdC3gxcv).
+Bolt is in active development, so all APIs are subject to change.
+This code is unaudited. Use at your own risk.
 
+## 💚 Open Source
+
+Open Source is at the heart of what we do at Magicblock. We believe building software in the open, with thriving communities, helps leave the world a little better than we found it.
+
+
+## ✨ Contributors & Community
+
+Thank you for your interest in contributing to Bolt!
+Please see the [CONTRIBUTING.md](./CONTRIBUTING.md) to learn how.
 
