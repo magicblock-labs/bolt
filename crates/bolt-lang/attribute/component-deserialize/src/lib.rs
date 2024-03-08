@@ -24,6 +24,9 @@ pub fn component_deserialize(_attr: TokenStream, item: TokenStream) -> TokenStre
     add_bolt_metadata(&mut input);
 
     let name = &input.ident;
+    // Assume that the component_id is the same as the struct name, minus the "Component" prefix
+    let name_str = name.to_string();
+    let component_id = name_str.strip_prefix("Component").unwrap();
     let expanded = quote! {
         #input
 
@@ -44,6 +47,21 @@ pub fn component_deserialize(_attr: TokenStream, item: TokenStream) -> TokenStre
                 let mut data: &[u8] = &buf[8..];
                 anchor_lang::AnchorDeserialize::deserialize(&mut data)
                     .map_err(|_| anchor_lang::error::ErrorCode::AccountDidNotDeserialize.into())
+            }
+        }
+
+        #[automatically_derived]
+        impl AccountSerialize for #name {
+            fn try_serialize<W>(&self, _writer: &mut W) -> Result<()> {
+                Ok(())
+            }
+        }
+
+        use std::str::FromStr;
+        #[automatically_derived]
+        impl Owner for #name {
+            fn owner() -> Pubkey {
+                Pubkey::from_str(#component_id).unwrap()
             }
         }
     };

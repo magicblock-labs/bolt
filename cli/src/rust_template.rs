@@ -1,6 +1,9 @@
 use crate::ANCHOR_VERSION;
 use crate::VERSION;
 use anchor_cli::Files;
+use anchor_syn::idl::types::{
+    Idl, IdlDefinedTypeArg, IdlField, IdlType, IdlTypeDefinition, IdlTypeDefinitionTy,
+};
 use anyhow::Result;
 use heck::{ToSnakeCase, ToUpperCamelCase};
 use std::path::{Path, PathBuf};
@@ -404,7 +407,7 @@ fn cargo_toml(name: &str) -> String {
     format!(
         r#"[package]
 name = "{0}"
-version = "0.0.1"
+version = "{2}"
 description = "Created with Bolt"
 edition = "2021"
 
@@ -479,4 +482,187 @@ pub fn registry_account() -> &'static str {
   }
 }
 "#
+}
+
+/// Automatic generation of crates from the components idl
+
+pub fn component_type(idl: &Idl, component_id: &str) -> Result<String> {
+    let component_account = &idl.accounts[0];
+    let component_code = component_to_rust_code(component_account, component_id);
+    let types_code = component_types_to_rust_code(&idl.types);
+    Ok(format!(
+        r#"use bolt_lang::*;
+
+#[component_deserialize]
+#[derive(Clone, Copy)]
+{}
+
+{}
+"#,
+        component_code, types_code
+    ))
+}
+
+/// Convert the component type definition to rust code
+fn component_to_rust_code(component: &IdlTypeDefinition, component_id: &str) -> String {
+    let mut code = String::new();
+    // Add documentation comments, if any
+    if let Some(docs) = &component.docs {
+        for doc in docs {
+            code += &format!("/// {}\n", doc);
+        }
+    }
+    // Handle generics
+    let generics = if let Some(gen) = &component.generics {
+        format!("<{}>", gen.join(", "))
+    } else {
+        String::new()
+    };
+    let composite_name = format!("Component{}", component_id);
+    if let IdlTypeDefinitionTy::Struct { fields } = &component.ty {
+        code += &format!("pub struct {}{} {{\n", composite_name, generics);
+        code += &*component_fields_to_rust_code(fields);
+        code += "}\n\n";
+        code += &format!("pub use {} as {};", composite_name, component.name);
+    }
+    code
+}
+
+/// Code to expose the generated type, to be added to lib.rs
+pub fn component_type_import(component_id: &str) -> String {
+    format!(
+        r#"#[allow(non_snake_case)]
+mod component_{0};
+#[allow(non_snake_case)]
+pub use component_{0}::*;
+"#,
+        component_id,
+    )
+}
+
+/// Convert fields to rust code
+fn component_fields_to_rust_code(fields: &[IdlField]) -> String {
+    let mut code = String::new();
+    for field in fields {
+        // Skip BoltMetadata field, as it is added automatically
+        if field.name.to_lowercase() == "boltmetadata" {
+            continue;
+        }
+        if let Some(docs) = &field.docs {
+            for doc in docs {
+                code += &format!("    /// {}\n", doc);
+            }
+        }
+        let field_type = idl_type_to_rust_type(&field.ty);
+        code += &format!("    pub {}: {},\n", field.name, field_type);
+    }
+    code
+}
+
+/// Map Idl type to rust type
+fn idl_type_to_rust_type(idl_type: &IdlType) -> String {
+    match idl_type {
+        IdlType::Bool => "bool".to_string(),
+        IdlType::U8 => "u8".to_string(),
+        IdlType::I8 => "i8".to_string(),
+        IdlType::U16 => "u16".to_string(),
+        IdlType::I16 => "i16".to_string(),
+        IdlType::U32 => "u32".to_string(),
+        IdlType::I32 => "i32".to_string(),
+        IdlType::F32 => "f32".to_string(),
+        IdlType::U64 => "u64".to_string(),
+        IdlType::I64 => "i64".to_string(),
+        IdlType::F64 => "f64".to_string(),
+        IdlType::U128 => "u128".to_string(),
+        IdlType::I128 => "i128".to_string(),
+        IdlType::U256 => "U256".to_string(),
+        IdlType::I256 => "I256".to_string(),
+        IdlType::Bytes => "Vec<u8>".to_string(),
+        IdlType::String => "String".to_string(),
+        IdlType::PublicKey => "PublicKey".to_string(),
+        IdlType::Defined(name) => name.clone(),
+        IdlType::Option(ty) => format!("Option<{}>", idl_type_to_rust_type(ty)),
+        IdlType::Vec(ty) => format!("Vec<{}>", idl_type_to_rust_type(ty)),
+        IdlType::Array(ty, size) => format!("[{}; {}]", idl_type_to_rust_type(ty), size),
+        IdlType::GenericLenArray(ty, _) => format!("Vec<{}>", idl_type_to_rust_type(ty)),
+        IdlType::Generic(name) => name.clone(),
+        IdlType::DefinedWithTypeArgs { name, args } => {
+            let args_str = args
+                .iter()
+                .map(idl_defined_type_arg_to_rust_type)
+                .collect::<Vec<_>>()
+                .join(", ");
+            format!("{}<{}>", name, args_str)
+        }
+    }
+}
+
+/// Map type args
+fn idl_defined_type_arg_to_rust_type(arg: &IdlDefinedTypeArg) -> String {
+    match arg {
+        IdlDefinedTypeArg::Generic(name) => name.clone(),
+        IdlDefinedTypeArg::Value(value) => value.clone(),
+        IdlDefinedTypeArg::Type(ty) => idl_type_to_rust_type(ty),
+    }
+}
+
+/// Convert the component types definition to rust code
+fn component_types_to_rust_code(types: &[IdlTypeDefinition]) -> String {
+    types
+        .iter()
+        // Skip BoltMetadata type, as it is added automatically
+        .filter(|ty| ty.name.to_lowercase() != "boltmetadata")
+        .map(component_type_to_rust_code)
+        .collect::<Vec<_>>()
+        .join("\n")
+}
+
+/// Convert the component type definition to rust code
+fn component_type_to_rust_code(component_type: &IdlTypeDefinition) -> String {
+    let mut code = String::new();
+    // Add documentation comments, if any
+    if let Some(docs) = &component_type.docs {
+        for doc in docs {
+            code += &format!("/// {}\n", doc);
+        }
+    }
+    // Handle generics
+    let generics = if let Some(gen) = &component_type.generics {
+        format!("<{}>", gen.join(", "))
+    } else {
+        String::new()
+    };
+    if let IdlTypeDefinitionTy::Struct { fields } = &component_type.ty {
+        code += &format!(
+            "#[component_deserialize]\n#[derive(Clone, Copy)]\npub struct {}{} {{\n",
+            component_type.name, generics
+        );
+        code += &*component_fields_to_rust_code(fields);
+        code += "}\n\n";
+    }
+    code
+}
+
+pub(crate) fn types_cargo_toml() -> String {
+    let name = "bolt-types";
+    format!(
+        r#"[package]
+name = "{0}"
+version = "{2}"
+description = "Autogenerate types for the bolt language"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "{1}"
+
+[dependencies]
+bolt-lang = "{2}"
+anchor-lang = "{3}"
+"#,
+        name,
+        name.to_snake_case(),
+        VERSION,
+        anchor_cli::VERSION,
+    )
 }

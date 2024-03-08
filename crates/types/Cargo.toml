@@ -1,0 +1,13 @@
+[package]
+name = "bolt-types"
+version = "0.1.0"
+description = "Autogenerate types for the bolt language"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "bolt_types"
+
+[dependencies]
+bolt-lang = { path = "../bolt-lang" }
+anchor-lang = "0.29.0"

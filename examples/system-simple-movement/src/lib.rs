@@ -18,21 +18,20 @@ pub mod system_simple_movement {
         ctx.accounts.position.x += dx;
         ctx.accounts.position.y += dy;
 
+        let _p = Position {
+            x: 1,
+            y: 2,
+            z: 3,
+            bolt_metadata: BoltMetadata::default(),
+        };
+
         Ok(ctx.accounts)
     }
 
     #[system_input]
     pub struct Components {
-        #[component_id(address = "Fn1JzzEdyb55fsyduWS94mYHizGhJZuhvjX6DVvrmGbQ")]
+        #[component_id("Fn1JzzEdyb55fsyduWS94mYHizGhJZuhvjX6DVvrmGbQ")]
         pub position: Position,
-    }
-
-    #[component_deserialize]
-    #[derive(Clone)]
-    pub struct Position {
-        pub x: i64,
-        pub y: i64,
-        pub z: i64,
     }
 
     // Define the structs to deserialize the arguments

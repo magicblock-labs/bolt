@@ -1,17 +1,21 @@
 mod rust_template;
 
 use crate::rust_template::{create_component, create_system};
+use anchor_cli::config;
 use anchor_cli::config::{
     BootstrapMode, Config, ConfigOverride, GenesisEntry, ProgramArch, ProgramDeployment,
     TestValidator, Validator, WithPath,
 };
 use anchor_client::Cluster;
+use anchor_syn::idl::types::Idl;
 use anyhow::{anyhow, Result};
 use clap::{Parser, Subcommand};
 use heck::{ToKebabCase, ToSnakeCase};
 use std::collections::BTreeMap;
-use std::fs::{self, File};
+use std::fs::{self, create_dir_all, File, OpenOptions};
 use std::io::Write;
+use std::io::{self, BufRead};
+use std::path::{Path, PathBuf};
 use std::process::Stdio;
 
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
@@ -49,6 +53,9 @@ pub struct SystemCommand {
 #[derive(Debug, Parser)]
 #[clap(version = VERSION)]
 pub struct Opts {
+    /// Rebuild the auto-generated types
+    #[clap(global = true, long, action)]
+    pub rebuild_types: bool,
     #[clap(flatten)]
     pub cfg_override: ConfigOverride,
     #[clap(subcommand)]
@@ -105,6 +112,7 @@ pub fn entry(opts: Opts) -> Result<()> {
                 cargo_args,
                 no_docs,
                 arch,
+                opts.rebuild_types,
             ),
             _ => {
                 let opts = anchor_cli::Opts {
@@ -415,7 +423,23 @@ pub fn build(
     cargo_args: Vec<String>,
     no_docs: bool,
     arch: ProgramArch,
+    rebuild_types: bool,
 ) -> Result<()> {
+    let cfg = Config::discover(cfg_override)?.expect("Not in workspace.");
+    let types_path = "crates/types/src";
+
+    // If rebuild_types is true and the types directory exists, remove it
+    if rebuild_types && Path::new(types_path).exists() {
+        fs::remove_dir_all(
+            PathBuf::from(types_path)
+                .parent()
+                .ok_or_else(|| anyhow::format_err!("Failed to remove types directory"))?,
+        )?;
+    }
+    create_dir_all(types_path)?;
+    build_dynamic_types(cfg, cfg_override, types_path)?;
+
+    // Build the programs
     anchor_cli::build(
         cfg_override,
         idl,
@@ -472,9 +496,9 @@ fn new_component(cfg_override: &ConfigOverride, name: String) -> Result<()> {
 
                 programs.insert(
                     name.clone(),
-                    anchor_cli::config::ProgramDeployment {
+                    ProgramDeployment {
                         address: {
-                            rust_template::create_component(&name)?;
+                            create_component(&name)?;
                             anchor_cli::rust_template::get_or_create_program_id(&name)
                         },
                         path: None,
@@ -580,4 +604,167 @@ fn set_workspace_dir_or_exit() {
             };
         }
     }
+}
+
+fn discover_cluster_url(cfg_override: &ConfigOverride) -> Result<String> {
+    let url = match Config::discover(cfg_override)? {
+        Some(cfg) => cluster_url(&cfg, &cfg.test_validator),
+        None => {
+            if let Some(cluster) = cfg_override.cluster.clone() {
+                cluster.url().to_string()
+            } else {
+                config::get_solana_cfg_url()?
+            }
+        }
+    };
+    Ok(url)
+}
+
+fn cluster_url(cfg: &Config, test_validator: &Option<TestValidator>) -> String {
+    let is_localnet = cfg.provider.cluster == Cluster::Localnet;
+    match is_localnet {
+        // Cluster is Localnet, assume the intent is to use the configuration
+        // for solana-test-validator
+        true => test_validator_rpc_url(test_validator),
+        false => cfg.provider.cluster.url().to_string(),
+    }
+}
+
+// Return the URL that solana-test-validator should be running on given the
+// configuration
+fn test_validator_rpc_url(test_validator: &Option<TestValidator>) -> String {
+    match test_validator {
+        Some(TestValidator {
+            validator: Some(validator),
+            ..
+        }) => format!("http://{}:{}", validator.bind_address, validator.rpc_port),
+        _ => "http://127.0.0.1:8899".to_string(),
+    }
+}
+
+fn build_dynamic_types(
+    cfg: WithPath<Config>,
+    cfg_override: &ConfigOverride,
+    types_path: &str,
+) -> Result<()> {
+    let cur_dir = std::env::current_dir()?;
+    for p in cfg.get_rust_program_list()? {
+        process_program_path(&p, cfg_override, types_path)?;
+    }
+    let types_path = PathBuf::from(types_path);
+    let cargo_path = types_path
+        .parent()
+        .unwrap_or(&types_path)
+        .join("Cargo.toml");
+    if !cargo_path.exists() {
+        let mut file = File::create(cargo_path)?;
+        file.write_all(rust_template::types_cargo_toml().as_bytes())?;
+    }
+    std::env::set_current_dir(cur_dir)?;
+    Ok(())
+}
+
+fn process_program_path(
+    program_path: &Path,
+    cfg_override: &ConfigOverride,
+    types_path: &str,
+) -> Result<()> {
+    let lib_rs_path = Path::new(types_path).join("lib.rs");
+    let file = File::open(program_path.join("src").join("lib.rs"))?;
+    let lines = io::BufReader::new(file).lines();
+    let mut contains_dynamic_components = false;
+    for line in lines.flatten() {
+        if let Some(component_id) = extract_component_id(&line) {
+            let file_path = PathBuf::from(format!("{}/component_{}.rs", types_path, component_id));
+            if !file_path.exists() {
+                println!("Generating type for Component: {}", component_id);
+                generate_component_type_file(&file_path, cfg_override, component_id)?;
+                append_component_to_lib_rs(&lib_rs_path, component_id)?;
+            }
+            contains_dynamic_components = true;
+        }
+    }
+    if contains_dynamic_components {
+        let program_name = program_path.file_name().unwrap().to_str().unwrap();
+        add_types_crate_dependency(program_name, &types_path.replace("/src", ""))?;
+    }
+
+    Ok(())
+}
+
+fn add_types_crate_dependency(program_name: &str, types_path: &str) -> Result<()> {
+    std::process::Command::new("cargo")
+        .arg("add")
+        .arg("--package")
+        .arg(program_name)
+        .arg("--path")
+        .arg(types_path)
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .spawn()
+        .map_err(|e| {
+            anyhow::format_err!(
+                "error adding types as dependency to the program: {}",
+                e.to_string()
+            )
+        })?;
+    Ok(())
+}
+
+fn extract_component_id(line: &str) -> Option<&str> {
+    let component_id_marker = "#[component_id(";
+    line.find(component_id_marker).map(|start| {
+        let start = start + component_id_marker.len();
+        let end = line[start..].find(')').unwrap() + start;
+        line[start..end].trim_matches('"')
+    })
+}
+
+fn fetch_idl_for_component(component_id: &str, url: &str) -> Result<String> {
+    let output = std::process::Command::new("bolt")
+        .arg("idl")
+        .arg("fetch")
+        .arg(component_id)
+        .arg("--provider.cluster")
+        .arg(url)
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .output()?;
+
+    if output.status.success() {
+        let idl_string = String::from_utf8(output.stdout)
+            .map_err(|e| anyhow!("Failed to decode IDL output as UTF-8: {}", e))?
+            .to_string();
+        Ok(idl_string)
+    } else {
+        let error_message = String::from_utf8(output.stderr)
+            .unwrap_or(String::from(format!("Error trying to dynamically generate the type \
+            for component {}, unable to fetch the idl. \nEnsure that the idl is available. Specify \
+            the appropriate cluster using the --provider.cluster option", component_id)))
+            .to_string();
+        Err(anyhow!("Command failed with error: {}", error_message))
+    }
+}
+
+fn generate_component_type_file(
+    file_path: &Path,
+    cfg_override: &ConfigOverride,
+    component_id: &str,
+) -> Result<()> {
+    let url = discover_cluster_url(cfg_override)?;
+    let idl_string = fetch_idl_for_component(component_id, &url)?;
+    let idl: Idl = serde_json::from_str(&idl_string)?;
+    let mut file = File::create(file_path)?;
+    file.write_all(rust_template::component_type(&idl, component_id)?.as_bytes())?;
+    Ok(())
+}
+
+fn append_component_to_lib_rs(lib_rs_path: &Path, component_id: &str) -> Result<()> {
+    let mut file = OpenOptions::new()
+        .write(true)
+        .create(true)
+        .append(true)
+        .open(lib_rs_path)?;
+    file.write_all(rust_template::component_type_import(component_id).as_bytes())?;
+    Ok(())
 }

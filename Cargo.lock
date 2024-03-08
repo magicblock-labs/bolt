@@ -970,6 +970,7 @@ version = "0.1.0"
 dependencies = [
  "anchor-cli",
  "anchor-client",
+ "anchor-syn 0.29.0 (git+https://github.com/coral-xyz/anchor.git)",
  "anyhow",
  "clap 4.4.11",
  "heck 0.4.1",
@@ -1030,6 +1031,14 @@ version = "0.1.0"
 dependencies = [
  "anchor-lang 0.29.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "bolt-helpers-system-template",
+]
+
+[[package]]
+name = "bolt-types"
+version = "0.1.0"
+dependencies = [
+ "anchor-lang 0.29.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "bolt-lang",
 ]
 
 [[package]]
@@ -5068,6 +5077,7 @@ version = "0.1.0"
 dependencies = [
  "anchor-lang 0.29.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "bolt-lang",
+ "bolt-types",
  "serde",
 ]
 
