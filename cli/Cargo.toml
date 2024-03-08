@@ -25,6 +25,7 @@ anchor-cli = { git = "https://github.com/coral-xyz/anchor.git" }
 anchor-client = { git = "https://github.com/coral-xyz/anchor.git" }
 anchor-syn = { git = "https://github.com/coral-xyz/anchor.git" }
 anyhow = { workspace = true }
+serde_json = { workspace = true }
 heck = { workspace = true }
 clap = { workspace = true }
 syn = { workspace = true, features = ["full", "extra-traits"] }

@@ -974,6 +974,7 @@ dependencies = [
  "anyhow",
  "clap 4.4.11",
  "heck 0.4.1",
+ "serde_json",
  "syn 1.0.109",
 ]
 

@@ -533,7 +533,6 @@ pub fn component_type_import(component_id: &str) -> String {
     format!(
         r#"#[allow(non_snake_case)]
 mod component_{0};
-#[allow(non_snake_case)]
 pub use component_{0}::*;
 "#,
         component_id,

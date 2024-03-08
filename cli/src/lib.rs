@@ -738,9 +738,12 @@ fn fetch_idl_for_component(component_id: &str, url: &str) -> Result<String> {
         Ok(idl_string)
     } else {
         let error_message = String::from_utf8(output.stderr)
-            .unwrap_or(String::from(format!("Error trying to dynamically generate the type \
+            .unwrap_or(format!(
+                "Error trying to dynamically generate the type \
             for component {}, unable to fetch the idl. \nEnsure that the idl is available. Specify \
-            the appropriate cluster using the --provider.cluster option", component_id)))
+            the appropriate cluster using the --provider.cluster option",
+                component_id
+            ))
             .to_string();
         Err(anyhow!("Command failed with error: {}", error_message))
     }
