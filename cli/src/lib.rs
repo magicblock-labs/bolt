@@ -673,7 +673,7 @@ fn process_program_path(
     let file = File::open(program_path.join("src").join("lib.rs"))?;
     let lines = io::BufReader::new(file).lines();
     let mut contains_dynamic_components = false;
-    for line in lines.flatten() {
+    for line in lines.map_while(Result::ok) {
         if let Some(component_id) = extract_component_id(&line) {
             let file_path = PathBuf::from(format!("{}/component_{}.rs", types_path, component_id));
             if !file_path.exists() {
@@ -764,7 +764,6 @@ fn generate_component_type_file(
 
 fn append_component_to_lib_rs(lib_rs_path: &Path, component_id: &str) -> Result<()> {
     let mut file = OpenOptions::new()
-        .write(true)
         .create(true)
         .append(true)
         .open(lib_rs_path)?;
