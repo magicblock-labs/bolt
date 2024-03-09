@@ -1,10 +1,13 @@
 
+## [0.1.1] - 2024-03-09
+
+### ✨️ Features
+ - Dynamic types resolver (#24)
+
 ## [0.1.0] - 2024-02-28
 
 ### 📚 Documentation
  - Improve repository structure (#21)
-
-### 👷 CI/CD
 
 ## [0.0.2] - 2024-02-24
 
