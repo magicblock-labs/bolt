@@ -1,4 +1,8 @@
+pub use anchor_lang::error::ErrorCode::AccountDidNotDeserialize as AccountDidNotDeserializeErrorCode;
 pub use anchor_lang::prelude::*;
+pub use anchor_lang::{
+    AccountDeserialize, AccountSerialize, AnchorDeserialize, AnchorSerialize, Result,
+};
 
 pub use bolt_attribute_bolt_component::component;
 pub use bolt_attribute_bolt_component_deserialize::component_deserialize;

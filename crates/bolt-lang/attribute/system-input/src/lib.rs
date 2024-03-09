@@ -1,6 +1,7 @@
 use proc_macro::TokenStream;
+
 use quote::quote;
-use syn::{parse_macro_input, Fields, ItemStruct, Lit, Meta, MetaNameValue};
+use syn::{parse_macro_input, Fields, ItemStruct, Lit, Meta, NestedMeta};
 
 /// This macro attribute is used to define a BOLT system input.
 ///
@@ -21,50 +22,44 @@ pub fn system_input(_attr: TokenStream, item: TokenStream) -> TokenStream {
     let input = parse_macro_input!(item as ItemStruct);
 
     // Ensure the struct has named fields
-    let fields = if let Fields::Named(fields) = &input.fields {
-        &fields.named
-    } else {
-        panic!("system_input macro only supports structs with named fields");
+    let fields = match &input.fields {
+        Fields::Named(fields) => &fields.named,
+        _ => panic!("system_input macro only supports structs with named fields"),
     };
     let name = &input.ident;
 
-    // Impls Owner for each account and
-    let owners_impls = fields.iter().filter_map(|field| {
-        field.attrs.iter().find_map(|attr| {
-            if let Ok(Meta::List(meta_list)) = attr.parse_meta() {
-                if meta_list.path.is_ident("component_id") {
-                    for nested_meta in meta_list.nested.iter() {
-                        if let syn::NestedMeta::Meta(Meta::NameValue(MetaNameValue {
-                            path,
-                            lit: Lit::Str(lit_str),
-                            ..
-                        })) = nested_meta
-                        {
-                            if path.is_ident("address") {
-                                let address = lit_str.value();
-                                let field_type = &field.ty;
-                                return Some(quote! {
-                                    use std::str::FromStr;
-                                    impl Owner for #field_type {
-
-                                        fn owner() -> Pubkey {
-                                            Pubkey::from_str(#address).unwrap()
-                                        }
-                                    }
-                                    impl AccountSerialize for #field_type {
-                                        fn try_serialize<W>(&self, _writer: &mut W) -> Result<()> {
-                                            Ok(())
-                                        }
-                                    }
-                                });
+    // Collect imports for components
+    let components_imports: Vec<_> = fields
+        .iter()
+        .filter_map(|field| {
+            field.attrs.iter().find_map(|attr| {
+                if let Ok(Meta::List(meta_list)) = attr.parse_meta() {
+                    if meta_list.path.is_ident("component_id") {
+                        meta_list.nested.first().and_then(|nested_meta| {
+                            if let NestedMeta::Lit(Lit::Str(lit_str)) = nested_meta {
+                                let component_type =
+                                    format!("bolt_types::Component{}", lit_str.value());
+                                if let Ok(parsed_component_type) =
+                                    syn::parse_str::<syn::Type>(&component_type)
+                                {
+                                    let field_type = &field.ty;
+                                    let component_import = quote! {
+                                        use #parsed_component_type as #field_type;
+                                    };
+                                    return Some(component_import);
+                                }
                             }
-                        }
+                            None
+                        })
+                    } else {
+                        None
                     }
+                } else {
+                    None
                 }
-            }
-            None
+            })
         })
-    });
+        .collect();
 
     // Transform fields for the struct definition
     let transformed_fields = fields.iter().map(|f| {
@@ -114,7 +109,7 @@ pub fn system_input(_attr: TokenStream, item: TokenStream) -> TokenStream {
     let output = quote! {
         #output_struct
         #output_impl
-        #(#owners_impls)*
+        #(#components_imports)*
     };
 
     TokenStream::from(output)

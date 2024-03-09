@@ -23,16 +23,8 @@ pub mod system_simple_movement {
 
     #[system_input]
     pub struct Components {
-        #[component_id(address = "Fn1JzzEdyb55fsyduWS94mYHizGhJZuhvjX6DVvrmGbQ")]
+        #[component_id("Fn1JzzEdyb55fsyduWS94mYHizGhJZuhvjX6DVvrmGbQ")]
         pub position: Position,
-    }
-
-    #[component_deserialize]
-    #[derive(Clone)]
-    pub struct Position {
-        pub x: i64,
-        pub y: i64,
-        pub z: i64,
     }
 
     // Define the structs to deserialize the arguments
