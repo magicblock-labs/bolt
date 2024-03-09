@@ -18,13 +18,6 @@ pub mod system_simple_movement {
         ctx.accounts.position.x += dx;
         ctx.accounts.position.y += dy;
 
-        let _p = Position {
-            x: 1,
-            y: 2,
-            z: 3,
-            bolt_metadata: BoltMetadata::default(),
-        };
-
         Ok(ctx.accounts)
     }
 

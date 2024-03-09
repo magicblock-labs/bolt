@@ -18,7 +18,8 @@ pub fn component_deserialize(_attr: TokenStream, item: TokenStream) -> TokenStre
     let mut input = parse_macro_input!(item as DeriveInput);
 
     // Add the AnchorDeserialize and AnchorSerialize derives to the struct
-    let additional_derives: Attribute = syn::parse_quote! { #[derive(anchor_lang::AnchorDeserialize, anchor_lang::AnchorSerialize)] };
+    let additional_derives: Attribute =
+        syn::parse_quote! { #[derive(bolt_lang::AnchorDeserialize, bolt_lang::AnchorSerialize)] };
     input.attrs.push(additional_derives);
 
     add_bolt_metadata(&mut input);
@@ -32,26 +33,26 @@ pub fn component_deserialize(_attr: TokenStream, item: TokenStream) -> TokenStre
 
         #[automatically_derived]
         impl bolt_lang::ComponentDeserialize for #name{
-            fn from_account_info(account: &anchor_lang::prelude::AccountInfo) -> anchor_lang::Result<#name> {
+            fn from_account_info(account: &bolt_lang::AccountInfo) -> bolt_lang::Result<#name> {
                 #name::try_deserialize_unchecked(&mut &*(*account.data.borrow()).as_ref()).map_err(Into::into)
             }
         }
 
         #[automatically_derived]
-        impl anchor_lang::AccountDeserialize for #name {
-            fn try_deserialize(buf: &mut &[u8]) -> anchor_lang::Result<Self> {
+        impl bolt_lang::AccountDeserialize for #name {
+            fn try_deserialize(buf: &mut &[u8]) -> bolt_lang::Result<Self> {
                 Self::try_deserialize_unchecked(buf)
             }
 
-            fn try_deserialize_unchecked(buf: &mut &[u8]) -> anchor_lang::Result<Self> {
+            fn try_deserialize_unchecked(buf: &mut &[u8]) -> bolt_lang::Result<Self> {
                 let mut data: &[u8] = &buf[8..];
-                anchor_lang::AnchorDeserialize::deserialize(&mut data)
-                    .map_err(|_| anchor_lang::error::ErrorCode::AccountDidNotDeserialize.into())
+                bolt_lang::AnchorDeserialize::deserialize(&mut data)
+                    .map_err(|_| bolt_lang::AccountDidNotDeserializeErrorCode.into())
             }
         }
 
         #[automatically_derived]
-        impl AccountSerialize for #name {
+        impl bolt_lang::AccountSerialize for #name {
             fn try_serialize<W>(&self, _writer: &mut W) -> Result<()> {
                 Ok(())
             }
