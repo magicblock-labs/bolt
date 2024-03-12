@@ -39,11 +39,15 @@ pub fn apply_system(attr: TokenStream, item: TokenStream) -> TokenStream {
         });
 
         quote! {
-        pub fn #apply_func_name(ctx: Context<#data_struct>, args: Vec<u8>) -> Result<()> {
+        pub fn #apply_func_name<'info>(ctx: Context<'_, '_, '_, 'info, #data_struct<'info>>, args: Vec<u8>) -> Result<()> {
             if !ctx.accounts.authority.is_signer && ctx.accounts.authority.key != &ID {
                 return Err(WorldError::InvalidAuthority.into());
             }
-            let res = bolt_system::cpi::#execute_func_name(ctx.accounts.build(), args)?.get().to_vec();
+            let remaining_accounts: Vec<AccountInfo<'info>> = ctx.remaining_accounts.to_vec();
+            let res = bolt_system::cpi::#execute_func_name(
+                    ctx.accounts
+                    .build()
+                    .with_remaining_accounts(remaining_accounts),args)?.get().to_vec();
             #(#updates)*
             Ok(())
         }
@@ -136,12 +140,11 @@ struct SystemTemplateInput {
     max_components: usize,
 }
 
-// Implement parsing for the macro input
 impl Parse for SystemTemplateInput {
     fn parse(input: ParseStream) -> Result<Self> {
-        let _ = input.parse::<Ident>()?; // Parse the key (e.g., "max_components")
-        let _ = input.parse::<Token![=]>()?; // Parse the '='
-        let max_components: LitInt = input.parse()?; // Parse the value
+        let _ = input.parse::<Ident>()?;
+        let _ = input.parse::<Token![=]>()?;
+        let max_components: LitInt = input.parse()?;
         let max_value = max_components.base10_parse()?;
         Ok(SystemTemplateInput {
             max_components: max_value,

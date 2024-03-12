@@ -50,14 +50,20 @@ pub mod world {
         Ok(())
     }
 
-    pub fn apply<'info>(ctx: Context<'_, '_, '_, 'info, ApplySystem<'info>>, args: Vec<u8>) -> Result<()> {
+    pub fn apply<'info>(
+        ctx: Context<'_, '_, '_, 'info, ApplySystem<'info>>,
+        args: Vec<u8>,
+    ) -> Result<()> {
         if !ctx.accounts.authority.is_signer && ctx.accounts.authority.key != &ID {
             return Err(WorldError::InvalidAuthority.into());
         }
-        msg!("Remaining accounts: {}", ctx.remaining_accounts.len());
         let remaining_accounts: Vec<AccountInfo<'info>> = ctx.remaining_accounts.to_vec();
         let res = bolt_system::cpi::execute(
-            ctx.accounts.build().with_remaining_accounts(remaining_accounts), args)?;
+            ctx.accounts
+                .build()
+                .with_remaining_accounts(remaining_accounts),
+            args,
+        )?;
 
         bolt_component::cpi::update(
             build_update_context(
