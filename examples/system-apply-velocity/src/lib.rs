@@ -1,13 +1,14 @@
+use anchor_spl::metadata::Metadata;
 use bolt_lang::*;
 use position::Position;
 use velocity::Velocity;
-use anchor_spl::{ metadata::{Metadata} };
 
 declare_id!("6LHhFVwif6N9Po3jHtSmMVtPjF6zRfL3xMosSzcrQAS8");
 
 #[system]
 pub mod system_apply_velocity {
-    pub fn execute(ctx: Context<Components>, _args: Vec<u8>) -> Result<Components>  {
+
+    pub fn execute(ctx: Context<Components>, _args: Vec<u8>) -> Result<Components> {
         ctx.accounts.velocity.x = 10;
         let mut clock = Clock::get()?;
         if !ctx.remaining_accounts.is_empty() {
@@ -22,7 +23,6 @@ pub mod system_apply_velocity {
         msg!("Remaining accounts: {}", ctx.remaining_accounts.len());
         Ok(ctx.accounts)
     }
-
 
     #[system_input]
     pub struct Components {

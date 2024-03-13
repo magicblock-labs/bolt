@@ -1,7 +1,7 @@
 use proc_macro::TokenStream;
 
 use quote::quote;
-use syn::{Fields, ItemStruct, LitStr, parse_macro_input};
+use syn::{parse_macro_input, Fields, ItemStruct, LitStr};
 
 /// This macro attribute is used to define a BOLT system extra accounts.
 ///
