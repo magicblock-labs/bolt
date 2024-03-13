@@ -1,7 +1,7 @@
 pub use anchor_lang::error::ErrorCode::AccountDidNotDeserialize as AccountDidNotDeserializeErrorCode;
 pub use anchor_lang::prelude::*;
 pub use anchor_lang::{
-    AccountDeserialize, AccountSerialize, AnchorDeserialize, AnchorSerialize, Result,
+    AccountDeserialize, AccountSerialize, AnchorDeserialize, AnchorSerialize, Result, Bumps
 };
 
 pub use bolt_attribute_bolt_component::component;
@@ -10,6 +10,8 @@ pub use bolt_attribute_bolt_component_id::component_id;
 pub use bolt_attribute_bolt_program::bolt_program;
 pub use bolt_attribute_bolt_system::system;
 pub use bolt_attribute_bolt_system_input::system_input;
+pub use bolt_attribute_bolt_extra_accounts::extra_accounts;
+pub use bolt_attribute_bolt_extra_accounts::pubkey;
 
 pub use bolt_system;
 pub use world;
@@ -20,9 +22,15 @@ pub use serde;
 pub use serde::{Deserialize as BoltDeserialize, Serialize as BoltSerialize};
 
 use std::str;
+use std::str::FromStr;
 
 mod errors;
 pub use crate::errors::BoltError;
+
+/// Export of the solana_program crate.
+pub mod solana_program {
+    pub use anchor_lang::solana_program::*;
+}
 
 /// Parses the arguments from a byte array.
 pub fn parse_args<T: serde::de::DeserializeOwned>(args_p: &[u8]) -> T {
@@ -51,4 +59,9 @@ pub trait ComponentDeserialize: Sized {
 #[derive(InitSpace, AnchorSerialize, AnchorDeserialize, Default, Copy, Clone)]
 pub struct BoltMetadata {
     pub authority: Pubkey,
+}
+
+/// Wrapper method to create a pubkey from a string
+pub fn pubkey_from_str(s: &str) -> solana_program::pubkey::Pubkey {
+    solana_program::pubkey::Pubkey::from_str(s).unwrap()
 }

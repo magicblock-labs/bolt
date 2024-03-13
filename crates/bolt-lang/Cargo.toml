@@ -18,6 +18,7 @@ bolt-attribute-bolt-system = { workspace = true }
 bolt-attribute-bolt-system-input = { workspace = true }
 bolt-attribute-bolt-component-deserialize = { workspace = true }
 bolt-attribute-bolt-component-id = { workspace = true }
+bolt-attribute-bolt-extra-accounts = { workspace = true }
 
 # Bolt Programs
 world = { workspace = true }
