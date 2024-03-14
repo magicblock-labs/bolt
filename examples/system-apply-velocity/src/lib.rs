@@ -11,9 +11,8 @@ pub mod system_apply_velocity {
     pub fn execute(ctx: Context<Components>, _args: Vec<u8>) -> Result<Components> {
         ctx.accounts.velocity.x = 10;
         let mut clock = Clock::get()?;
-        if !ctx.remaining_accounts.is_empty() {
-            let sysvar_clock_account_info = ctx.sysvar_clock()?;
-            clock = Clock::from_account_info(sysvar_clock_account_info)?;
+        if let Ok(clock_account_info) = ctx.sysvar_clock() {
+            clock = Clock::from_account_info(clock_account_info)?;
             ctx.accounts.position.z = 300;
         }
         ctx.accounts.velocity.last_applied = clock.unix_timestamp;

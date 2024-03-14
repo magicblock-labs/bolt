@@ -26,14 +26,6 @@ pub fn extra_accounts(_attr: TokenStream, item: TokenStream) -> TokenStream {
     let input = parse_macro_input!(item as ItemStruct);
     let extra_accounts_struct_name = &input.ident;
 
-    // Generate the initialize extra_accounts function
-    let initialize_extra_accounts = quote! {
-        #[automatically_derived]
-        pub fn init_extra_accounts(_ctx: Context<#extra_accounts_struct_name>) -> Result<()> {
-            Ok(())
-        }
-    };
-
     // Ensure the struct has named fields
     let fields = match &input.fields {
         Fields::Named(fields) => &fields.named,
@@ -92,8 +84,6 @@ pub fn extra_accounts(_attr: TokenStream, item: TokenStream) -> TokenStream {
 
     // Combine the struct definition and its implementation into the final TokenStream
     let output = quote! {
-        #initialize_extra_accounts
-
         #output_struct
         #output_trait
         #output_trait_implementation
