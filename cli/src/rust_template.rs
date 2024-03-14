@@ -623,7 +623,7 @@ fn idl_array_len_to_rust_len(idl_array_len: &IdlArrayLen) -> String {
 }
 
 /// Map defined type to rust type
-fn defined_to_rust_type(name: &String, generics: &Vec<IdlGenericArg>) -> String {
+fn defined_to_rust_type(name: &String, generics: &[IdlGenericArg]) -> String {
     if generics.is_empty() {
         name.clone()
     } else {

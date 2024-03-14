@@ -141,7 +141,7 @@ pub struct AddEntity<'info> {
         None => &[],
     }], bump)]
     pub entity: Account<'info, Entity>,
-    #[account(mut, address = world.pda().0)]
+    #[account(mut)]
     pub world: Account<'info, World>,
     pub system_program: Program<'info, System>,
 }

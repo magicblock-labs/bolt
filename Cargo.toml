@@ -30,8 +30,8 @@ bolt-system = { path = "programs/bolt-system", features = ["cpi"], version = "=0
 bolt-component = { path = "programs/bolt-component", features = ["cpi"], version = "=0.1.1"}
 
 ## External crates
-anchor-lang = "0.29.0"
-anchor-spl = "0.29.0"
+#anchor-lang = "0.29.0"
+anchor-lang = { git = "https://github.com/coral-xyz/anchor.git", rev = "d9a9f19" }
 solana-security-txt = "1.1.1"
 tuple-conv = "1.0.1"
 syn = { version = "1.0.60", features = ["full"] }

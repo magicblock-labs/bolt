@@ -394,7 +394,6 @@ dependencies = [
  "anchor-derive-accounts 0.29.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "anchor-derive-serde 0.29.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "anchor-derive-space 0.29.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "anchor-syn 0.29.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "arrayref",
  "base64 0.13.1",
  "bincode",
@@ -420,6 +419,7 @@ dependencies = [
  "anchor-derive-accounts 0.29.0 (git+https://github.com/coral-xyz/anchor.git?rev=d9a9f19)",
  "anchor-derive-serde 0.29.0 (git+https://github.com/coral-xyz/anchor.git?rev=d9a9f19)",
  "anchor-derive-space 0.29.0 (git+https://github.com/coral-xyz/anchor.git?rev=d9a9f19)",
+ "anchor-syn 0.29.0 (git+https://github.com/coral-xyz/anchor.git?rev=d9a9f19)",
  "arrayref",
  "base64 0.21.5",
  "bincode",
@@ -428,20 +428,6 @@ dependencies = [
  "getrandom 0.2.10",
  "solana-program",
  "thiserror",
-]
-
-[[package]]
-name = "anchor-spl"
-version = "0.29.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6c4fd6e43b2ca6220d2ef1641539e678bfc31b6cc393cf892b373b5997b6a39a"
-dependencies = [
- "anchor-lang 0.29.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "mpl-token-metadata",
- "solana-program",
- "spl-associated-token-account",
- "spl-token",
- "spl-token-2022",
 ]
 
 [[package]]
@@ -469,6 +455,7 @@ source = "git+https://github.com/coral-xyz/anchor.git?rev=d9a9f19#d9a9f193947ec8
 dependencies = [
  "anyhow",
  "bs58 0.5.0",
+ "cargo_toml",
  "heck 0.3.3",
  "proc-macro2",
  "quote",
@@ -1017,7 +1004,7 @@ dependencies = [
 name = "bolt-component"
 version = "0.1.1"
 dependencies = [
- "anchor-lang 0.29.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "anchor-lang 0.29.0 (git+https://github.com/coral-xyz/anchor.git?rev=d9a9f19)",
  "bolt-system",
 ]
 
@@ -1048,7 +1035,7 @@ name = "bolt-lang"
 version = "0.1.1"
 dependencies = [
  "ahash 0.8.6",
- "anchor-lang 0.29.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "anchor-lang 0.29.0 (git+https://github.com/coral-xyz/anchor.git?rev=d9a9f19)",
  "bolt-attribute-bolt-component",
  "bolt-attribute-bolt-component-deserialize",
  "bolt-attribute-bolt-component-id",
@@ -1066,7 +1053,7 @@ dependencies = [
 name = "bolt-system"
 version = "0.1.1"
 dependencies = [
- "anchor-lang 0.29.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "anchor-lang 0.29.0 (git+https://github.com/coral-xyz/anchor.git?rev=d9a9f19)",
  "bolt-helpers-system-template",
 ]
 
@@ -2749,19 +2736,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "mpl-token-metadata"
-version = "3.2.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ba8ee05284d79b367ae8966d558e1a305a781fc80c9df51f37775169117ba64f"
-dependencies = [
- "borsh 0.9.3",
- "num-derive 0.3.3",
- "num-traits",
- "solana-program",
- "thiserror",
-]
-
-[[package]]
 name = "new_debug_unreachable"
 version = "1.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3204,7 +3178,7 @@ dependencies = [
 name = "position"
 version = "0.1.1"
 dependencies = [
- "anchor-lang 0.29.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "anchor-lang 0.29.0 (git+https://github.com/coral-xyz/anchor.git?rev=d9a9f19)",
  "bolt-lang",
 ]
 
@@ -5085,8 +5059,7 @@ dependencies = [
 name = "system-apply-velocity"
 version = "0.1.1"
 dependencies = [
- "anchor-lang 0.29.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "anchor-spl",
+ "anchor-lang 0.29.0 (git+https://github.com/coral-xyz/anchor.git?rev=d9a9f19)",
  "bolt-lang",
  "position",
  "velocity",
@@ -5117,7 +5090,7 @@ dependencies = [
 name = "system-fly"
 version = "0.1.1"
 dependencies = [
- "anchor-lang 0.29.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "anchor-lang 0.29.0 (git+https://github.com/coral-xyz/anchor.git?rev=d9a9f19)",
  "bolt-lang",
  "position",
 ]
@@ -5126,7 +5099,7 @@ dependencies = [
 name = "system-simple-movement"
 version = "0.1.1"
 dependencies = [
- "anchor-lang 0.29.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "anchor-lang 0.29.0 (git+https://github.com/coral-xyz/anchor.git?rev=d9a9f19)",
  "bolt-lang",
  "bolt-types",
  "serde",
@@ -5622,7 +5595,7 @@ checksum = "f1bddf1187be692e79c5ffeab891132dfb0f236ed36a43c7ed39f1165ee20191"
 name = "velocity"
 version = "0.1.1"
 dependencies = [
- "anchor-lang 0.29.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "anchor-lang 0.29.0 (git+https://github.com/coral-xyz/anchor.git?rev=d9a9f19)",
  "bolt-lang",
 ]
 
@@ -6021,7 +5994,7 @@ dependencies = [
 name = "world"
 version = "0.1.1"
 dependencies = [
- "anchor-lang 0.29.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "anchor-lang 0.29.0 (git+https://github.com/coral-xyz/anchor.git?rev=d9a9f19)",
  "bolt-component",
  "bolt-helpers-world-apply",
  "bolt-system",

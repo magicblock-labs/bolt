@@ -1,4 +1,3 @@
-use anchor_spl::metadata::Metadata;
 use bolt_lang::*;
 use position::Position;
 use velocity::Velocity;
@@ -35,7 +34,5 @@ pub mod system_apply_velocity {
         pub sysvar_clock: AccountInfo,
         #[account(address = pubkey!("6LHhFVwif6N9Po3jHtSmMVtPjF6zRfL3xMosSzcrQAS8"))]
         pub some_extra_account: AccountInfo,
-        #[account(address = Metadata::id())]
-        pub program_metadata: Program<Metadata>,
     }
 }
