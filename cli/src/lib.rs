@@ -6,6 +6,7 @@ use anchor_cli::config::{
     BootstrapMode, Config, ConfigOverride, GenesisEntry, ProgramArch, ProgramDeployment,
     TestValidator, Validator, WithPath,
 };
+use anchor_cli::rust_template::TestTemplate;
 use anchor_client::Cluster;
 use anchor_syn::idl::types::Idl;
 use anyhow::{anyhow, Result};
@@ -17,7 +18,6 @@ use std::io::Write;
 use std::io::{self, BufRead};
 use std::path::{Path, PathBuf};
 use std::process::Stdio;
-use anchor_cli::rust_template::TestTemplate;
 
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 pub const ANCHOR_VERSION: &str = anchor_cli::VERSION;
@@ -177,7 +177,8 @@ fn init(
 
     let mut cfg = Config::default();
     let test_script = test_template.get_test_script(javascript);
-    cfg.scripts.insert("test".to_owned(), test_script.to_owned());
+    cfg.scripts
+        .insert("test".to_owned(), test_script.to_owned());
     let jest = TestTemplate::Jest == test_template;
     if jest {
         cfg.scripts.insert(

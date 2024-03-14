@@ -1,7 +1,10 @@
 use crate::ANCHOR_VERSION;
 use crate::VERSION;
 use anchor_cli::Files;
-use anchor_syn::idl::types::{Idl, IdlArrayLen, IdlDefinedFields, IdlGenericArg, IdlType, IdlTypeDef, IdlTypeDefGeneric, IdlTypeDefTy};
+use anchor_syn::idl::types::{
+    Idl, IdlArrayLen, IdlDefinedFields, IdlGenericArg, IdlType, IdlTypeDef, IdlTypeDefGeneric,
+    IdlTypeDefTy,
+};
 use anyhow::Result;
 use heck::{ToSnakeCase, ToUpperCamelCase};
 use std::path::{Path, PathBuf};
@@ -486,7 +489,10 @@ pub fn registry_account() -> &'static str {
 
 pub fn component_type(idl: &Idl, component_id: &str) -> Result<String> {
     let component_account = &idl.accounts[0];
-    let type_def = &idl.types.iter().rfind(|ty| ty.name == component_account.name);
+    let type_def = &idl
+        .types
+        .iter()
+        .rfind(|ty| ty.name == component_account.name);
     let type_def = match type_def {
         Some(ty) => ty,
         None => return Err(anyhow::anyhow!("Component type not found in IDL")),
@@ -515,12 +521,14 @@ fn component_to_rust_code(component: &IdlTypeDef, component_id: &str) -> String 
     }
     // Handle generics
     let generics = {
-        let generic_names: Vec<String> = component.generics.iter().map(|gen| {
-            match gen {
+        let generic_names: Vec<String> = component
+            .generics
+            .iter()
+            .map(|gen| match gen {
                 IdlTypeDefGeneric::Type { name } => name.clone(),
                 IdlTypeDefGeneric::Const { name, .. } => name.clone(),
-            }
-        }).collect();
+            })
+            .collect();
         format!("<{}>", generic_names.join(", "))
     };
     let composite_name = format!("Component{}", component_id);
@@ -561,14 +569,14 @@ fn component_fields_to_rust_code(fields: &Option<IdlDefinedFields>) -> String {
                     let field_type = idl_type_to_rust_type(&field.ty);
                     code += &format!("    pub {}: {},\n", field.name, field_type);
                 }
-            },
+            }
             IdlDefinedFields::Tuple(tuple_types) => {
                 for (index, ty) in tuple_types.iter().enumerate() {
                     let field_type = idl_type_to_rust_type(ty);
                     // Tuple fields are unnamed, so using index as part of the field name
                     code += &format!("    pub field_{}: {},\n", index, field_type);
                 }
-            },
+            }
         }
     }
     code
@@ -595,10 +603,14 @@ fn idl_type_to_rust_type(idl_type: &IdlType) -> String {
         IdlType::Bytes => "Vec<u8>".to_string(),
         IdlType::String => "String".to_string(),
         IdlType::Pubkey => "PublicKey".to_string(),
-        IdlType::Defined { name, generics} => defined_to_rust_type(name, generics),
+        IdlType::Defined { name, generics } => defined_to_rust_type(name, generics),
         IdlType::Option(ty) => format!("Option<{}>", idl_type_to_rust_type(ty)),
         IdlType::Vec(ty) => format!("Vec<{}>", idl_type_to_rust_type(ty)),
-        IdlType::Array(ty, size) => format!("[{}; {}]", idl_type_to_rust_type(ty), idl_array_len_to_rust_len(size)),
+        IdlType::Array(ty, size) => format!(
+            "[{}; {}]",
+            idl_type_to_rust_type(ty),
+            idl_array_len_to_rust_len(size)
+        ),
         IdlType::Generic(name) => name.clone(),
     }
 }
@@ -615,7 +627,15 @@ fn defined_to_rust_type(name: &String, generics: &Vec<IdlGenericArg>) -> String 
     if generics.is_empty() {
         name.clone()
     } else {
-        format!("{}<{}>", name, generics.iter().map(idl_defined_type_arg_to_rust_type).collect::<Vec<_>>().join(", "))
+        format!(
+            "{}<{}>",
+            name,
+            generics
+                .iter()
+                .map(idl_defined_type_arg_to_rust_type)
+                .collect::<Vec<_>>()
+                .join(", ")
+        )
     }
 }
 
@@ -648,12 +668,13 @@ fn component_type_to_rust_code(component_type: &IdlTypeDef) -> String {
     // Handle generics
     let gen = &component_type.generics;
     let generics = {
-        let generic_names: Vec<String> = gen.iter().map(|gen| {
-            match gen {
+        let generic_names: Vec<String> = gen
+            .iter()
+            .map(|gen| match gen {
                 IdlTypeDefGeneric::Type { name } => name.clone(),
                 IdlTypeDefGeneric::Const { name, .. } => name.clone(),
-            }
-        }).collect();
+            })
+            .collect();
         format!("<{}>", generic_names.join(", "))
     };
     if let IdlTypeDefTy::Struct { fields } = &component_type.ty {
