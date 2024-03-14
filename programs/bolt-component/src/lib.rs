@@ -65,7 +65,8 @@ pub mod bolt_component {
         /// CHECK: The authority of the component
         pub authority: AccountInfo<'info>,
         #[account(address = anchor_lang::solana_program::sysvar::instructions::id())]
-        pub instruction_sysvar_account: UncheckedAccount<'info>,
+        /// CHECK: The instruction sysvar account
+        pub instruction_sysvar_account: AccountInfo<'info>,
     }
 }
 
@@ -82,7 +83,8 @@ pub struct Initialize<'info> {
     /// CHECK: The authority of the component
     pub authority: AccountInfo<'info>,
     #[account(address = anchor_lang::solana_program::sysvar::instructions::id())]
-    pub instruction_sysvar_account: UncheckedAccount<'info>,
+    /// CHECK: The instruction sysvar account
+    pub instruction_sysvar_account: AccountInfo<'info>,
     pub system_program: Program<'info, System>,
 }
 

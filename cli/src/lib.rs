@@ -17,6 +17,7 @@ use std::io::Write;
 use std::io::{self, BufRead};
 use std::path::{Path, PathBuf};
 use std::process::Stdio;
+use anchor_cli::rust_template::TestTemplate;
 
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 pub const ANCHOR_VERSION: &str = anchor_cli::VERSION;
@@ -70,8 +71,8 @@ pub fn entry(opts: Opts) -> Result<()> {
                 javascript,
                 solidity,
                 no_git,
-                jest,
                 template,
+                test_template,
                 force,
             } => init(
                 &opts.cfg_override,
@@ -79,8 +80,8 @@ pub fn entry(opts: Opts) -> Result<()> {
                 javascript,
                 solidity,
                 no_git,
-                jest,
                 template,
+                test_template,
                 force,
             ),
             anchor_cli::Command::Build {
@@ -136,8 +137,8 @@ fn init(
     javascript: bool,
     solidity: bool,
     no_git: bool,
-    jest: bool,
     template: anchor_cli::rust_template::ProgramTemplate,
+    test_template: anchor_cli::rust_template::TestTemplate,
     force: bool,
 ) -> Result<()> {
     if !force && Config::discover(cfg_override)?.is_some() {
@@ -175,6 +176,9 @@ fn init(
     fs::create_dir_all("app")?;
 
     let mut cfg = Config::default();
+    let test_script = test_template.get_test_script(javascript);
+    cfg.scripts.insert("test".to_owned(), test_script.to_owned());
+    let jest = TestTemplate::Jest == test_template;
     if jest {
         cfg.scripts.insert(
             "test".to_owned(),

@@ -21,9 +21,9 @@ lto = true
 dev = []
 
 [dependencies]
-anchor-cli = { git = "https://github.com/coral-xyz/anchor.git", rev = "e212105" }
-anchor-client = { git = "https://github.com/coral-xyz/anchor.git", rev = "e212105" }
-anchor-syn = { git = "https://github.com/coral-xyz/anchor.git", rev = "e212105" }
+anchor-cli = { git = "https://github.com/coral-xyz/anchor.git", rev = "d9a9f19" }
+anchor-client = { git = "https://github.com/coral-xyz/anchor.git", rev = "d9a9f19" }
+anchor-syn = { git = "https://github.com/coral-xyz/anchor.git", rev = "d9a9f19" }
 anyhow = { workspace = true }
 serde_json = { workspace = true }
 heck = { workspace = true }
