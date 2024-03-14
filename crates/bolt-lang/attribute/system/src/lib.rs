@@ -119,12 +119,40 @@ impl VisitMut for SystemTransform {
         }
     }
 
-    // Visit all the functions inside the system module
+    // Visit all the functions inside the system module and inject the init_extra_accounts function
+    // if the module contains a struct with the `extra_accounts` attribute
     fn visit_item_mod_mut(&mut self, item_mod: &mut ItemMod) {
-        for item in &mut item_mod.content.as_mut().unwrap().1 {
-            if let syn::Item::Fn(item_fn) = item {
-                self.visit_item_fn_mut(item_fn)
+        let content = match item_mod.content.as_mut() {
+            Some(content) => &mut content.1,
+            None => return,
+        };
+
+        let mut extra_accounts_struct_name = None;
+
+        for item in content.iter_mut() {
+            match item {
+                syn::Item::Fn(item_fn) => self.visit_item_fn_mut(item_fn),
+                syn::Item::Struct(item_struct)
+                    if item_struct
+                        .attrs
+                        .iter()
+                        .any(|attr| attr.path.is_ident("extra_accounts")) =>
+                {
+                    extra_accounts_struct_name = Some(&item_struct.ident);
+                    break;
+                }
+                _ => {}
             }
+        }
+
+        if let Some(struct_name) = extra_accounts_struct_name {
+            let initialize_extra_accounts = quote! {
+            #[automatically_derived]
+                pub fn init_extra_accounts(_ctx: Context<#struct_name>) -> Result<()> {
+                    Ok(())
+                }
+            };
+            content.push(syn::parse2(initialize_extra_accounts).unwrap());
         }
     }
 }

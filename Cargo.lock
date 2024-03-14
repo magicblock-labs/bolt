@@ -126,9 +126,9 @@ dependencies = [
 [[package]]
 name = "anchor-attribute-access-control"
 version = "0.29.0"
-source = "git+https://github.com/coral-xyz/anchor.git#169264d730ffeae16c12a33c0c353b7d3a461532"
+source = "git+https://github.com/coral-xyz/anchor.git?rev=e212105#e21210538d0415674c5c474ec36b8dca066ea62e"
 dependencies = [
- "anchor-syn 0.29.0 (git+https://github.com/coral-xyz/anchor.git)",
+ "anchor-syn 0.29.0 (git+https://github.com/coral-xyz/anchor.git?rev=e212105)",
  "proc-macro2",
  "quote",
  "syn 1.0.109",
@@ -150,9 +150,9 @@ dependencies = [
 [[package]]
 name = "anchor-attribute-account"
 version = "0.29.0"
-source = "git+https://github.com/coral-xyz/anchor.git#169264d730ffeae16c12a33c0c353b7d3a461532"
+source = "git+https://github.com/coral-xyz/anchor.git?rev=e212105#e21210538d0415674c5c474ec36b8dca066ea62e"
 dependencies = [
- "anchor-syn 0.29.0 (git+https://github.com/coral-xyz/anchor.git)",
+ "anchor-syn 0.29.0 (git+https://github.com/coral-xyz/anchor.git?rev=e212105)",
  "bs58 0.5.0",
  "proc-macro2",
  "quote",
@@ -173,9 +173,9 @@ dependencies = [
 [[package]]
 name = "anchor-attribute-constant"
 version = "0.29.0"
-source = "git+https://github.com/coral-xyz/anchor.git#169264d730ffeae16c12a33c0c353b7d3a461532"
+source = "git+https://github.com/coral-xyz/anchor.git?rev=e212105#e21210538d0415674c5c474ec36b8dca066ea62e"
 dependencies = [
- "anchor-syn 0.29.0 (git+https://github.com/coral-xyz/anchor.git)",
+ "anchor-syn 0.29.0 (git+https://github.com/coral-xyz/anchor.git?rev=e212105)",
  "quote",
  "syn 1.0.109",
 ]
@@ -194,9 +194,9 @@ dependencies = [
 [[package]]
 name = "anchor-attribute-error"
 version = "0.29.0"
-source = "git+https://github.com/coral-xyz/anchor.git#169264d730ffeae16c12a33c0c353b7d3a461532"
+source = "git+https://github.com/coral-xyz/anchor.git?rev=e212105#e21210538d0415674c5c474ec36b8dca066ea62e"
 dependencies = [
- "anchor-syn 0.29.0 (git+https://github.com/coral-xyz/anchor.git)",
+ "anchor-syn 0.29.0 (git+https://github.com/coral-xyz/anchor.git?rev=e212105)",
  "quote",
  "syn 1.0.109",
 ]
@@ -216,9 +216,9 @@ dependencies = [
 [[package]]
 name = "anchor-attribute-event"
 version = "0.29.0"
-source = "git+https://github.com/coral-xyz/anchor.git#169264d730ffeae16c12a33c0c353b7d3a461532"
+source = "git+https://github.com/coral-xyz/anchor.git?rev=e212105#e21210538d0415674c5c474ec36b8dca066ea62e"
 dependencies = [
- "anchor-syn 0.29.0 (git+https://github.com/coral-xyz/anchor.git)",
+ "anchor-syn 0.29.0 (git+https://github.com/coral-xyz/anchor.git?rev=e212105)",
  "proc-macro2",
  "quote",
  "syn 1.0.109",
@@ -238,9 +238,9 @@ dependencies = [
 [[package]]
 name = "anchor-attribute-program"
 version = "0.29.0"
-source = "git+https://github.com/coral-xyz/anchor.git#169264d730ffeae16c12a33c0c353b7d3a461532"
+source = "git+https://github.com/coral-xyz/anchor.git?rev=e212105#e21210538d0415674c5c474ec36b8dca066ea62e"
 dependencies = [
- "anchor-syn 0.29.0 (git+https://github.com/coral-xyz/anchor.git)",
+ "anchor-syn 0.29.0 (git+https://github.com/coral-xyz/anchor.git?rev=e212105)",
  "quote",
  "syn 1.0.109",
 ]
@@ -248,11 +248,11 @@ dependencies = [
 [[package]]
 name = "anchor-cli"
 version = "0.29.0"
-source = "git+https://github.com/coral-xyz/anchor.git#169264d730ffeae16c12a33c0c353b7d3a461532"
+source = "git+https://github.com/coral-xyz/anchor.git?rev=e212105#e21210538d0415674c5c474ec36b8dca066ea62e"
 dependencies = [
  "anchor-client",
- "anchor-lang 0.29.0 (git+https://github.com/coral-xyz/anchor.git)",
- "anchor-syn 0.29.0 (git+https://github.com/coral-xyz/anchor.git)",
+ "anchor-lang 0.29.0 (git+https://github.com/coral-xyz/anchor.git?rev=e212105)",
+ "anchor-syn 0.29.0 (git+https://github.com/coral-xyz/anchor.git?rev=e212105)",
  "anyhow",
  "base64 0.21.5",
  "bincode",
@@ -285,9 +285,9 @@ dependencies = [
 [[package]]
 name = "anchor-client"
 version = "0.29.0"
-source = "git+https://github.com/coral-xyz/anchor.git#169264d730ffeae16c12a33c0c353b7d3a461532"
+source = "git+https://github.com/coral-xyz/anchor.git?rev=e212105#e21210538d0415674c5c474ec36b8dca066ea62e"
 dependencies = [
- "anchor-lang 0.29.0 (git+https://github.com/coral-xyz/anchor.git)",
+ "anchor-lang 0.29.0 (git+https://github.com/coral-xyz/anchor.git?rev=e212105)",
  "anyhow",
  "futures",
  "regex",
@@ -314,9 +314,9 @@ dependencies = [
 [[package]]
 name = "anchor-derive-accounts"
 version = "0.29.0"
-source = "git+https://github.com/coral-xyz/anchor.git#169264d730ffeae16c12a33c0c353b7d3a461532"
+source = "git+https://github.com/coral-xyz/anchor.git?rev=e212105#e21210538d0415674c5c474ec36b8dca066ea62e"
 dependencies = [
- "anchor-syn 0.29.0 (git+https://github.com/coral-xyz/anchor.git)",
+ "anchor-syn 0.29.0 (git+https://github.com/coral-xyz/anchor.git?rev=e212105)",
  "quote",
  "syn 1.0.109",
 ]
@@ -337,10 +337,10 @@ dependencies = [
 [[package]]
 name = "anchor-derive-serde"
 version = "0.29.0"
-source = "git+https://github.com/coral-xyz/anchor.git#169264d730ffeae16c12a33c0c353b7d3a461532"
+source = "git+https://github.com/coral-xyz/anchor.git?rev=e212105#e21210538d0415674c5c474ec36b8dca066ea62e"
 dependencies = [
- "anchor-syn 0.29.0 (git+https://github.com/coral-xyz/anchor.git)",
- "borsh-derive-internal 0.10.3",
+ "anchor-syn 0.29.0 (git+https://github.com/coral-xyz/anchor.git?rev=e212105)",
+ "borsh-derive-internal 0.9.3",
  "proc-macro2",
  "quote",
  "syn 1.0.109",
@@ -360,7 +360,7 @@ dependencies = [
 [[package]]
 name = "anchor-derive-space"
 version = "0.29.0"
-source = "git+https://github.com/coral-xyz/anchor.git#169264d730ffeae16c12a33c0c353b7d3a461532"
+source = "git+https://github.com/coral-xyz/anchor.git?rev=e212105#e21210538d0415674c5c474ec36b8dca066ea62e"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -396,26 +396,40 @@ dependencies = [
 [[package]]
 name = "anchor-lang"
 version = "0.29.0"
-source = "git+https://github.com/coral-xyz/anchor.git#169264d730ffeae16c12a33c0c353b7d3a461532"
+source = "git+https://github.com/coral-xyz/anchor.git?rev=e212105#e21210538d0415674c5c474ec36b8dca066ea62e"
 dependencies = [
  "ahash 0.8.6",
- "anchor-attribute-access-control 0.29.0 (git+https://github.com/coral-xyz/anchor.git)",
- "anchor-attribute-account 0.29.0 (git+https://github.com/coral-xyz/anchor.git)",
- "anchor-attribute-constant 0.29.0 (git+https://github.com/coral-xyz/anchor.git)",
- "anchor-attribute-error 0.29.0 (git+https://github.com/coral-xyz/anchor.git)",
- "anchor-attribute-event 0.29.0 (git+https://github.com/coral-xyz/anchor.git)",
- "anchor-attribute-program 0.29.0 (git+https://github.com/coral-xyz/anchor.git)",
- "anchor-derive-accounts 0.29.0 (git+https://github.com/coral-xyz/anchor.git)",
- "anchor-derive-serde 0.29.0 (git+https://github.com/coral-xyz/anchor.git)",
- "anchor-derive-space 0.29.0 (git+https://github.com/coral-xyz/anchor.git)",
+ "anchor-attribute-access-control 0.29.0 (git+https://github.com/coral-xyz/anchor.git?rev=e212105)",
+ "anchor-attribute-account 0.29.0 (git+https://github.com/coral-xyz/anchor.git?rev=e212105)",
+ "anchor-attribute-constant 0.29.0 (git+https://github.com/coral-xyz/anchor.git?rev=e212105)",
+ "anchor-attribute-error 0.29.0 (git+https://github.com/coral-xyz/anchor.git?rev=e212105)",
+ "anchor-attribute-event 0.29.0 (git+https://github.com/coral-xyz/anchor.git?rev=e212105)",
+ "anchor-attribute-program 0.29.0 (git+https://github.com/coral-xyz/anchor.git?rev=e212105)",
+ "anchor-derive-accounts 0.29.0 (git+https://github.com/coral-xyz/anchor.git?rev=e212105)",
+ "anchor-derive-serde 0.29.0 (git+https://github.com/coral-xyz/anchor.git?rev=e212105)",
+ "anchor-derive-space 0.29.0 (git+https://github.com/coral-xyz/anchor.git?rev=e212105)",
  "arrayref",
  "base64 0.21.5",
  "bincode",
- "borsh 0.10.3",
+ "borsh 0.9.3",
  "bytemuck",
  "getrandom 0.2.10",
  "solana-program",
  "thiserror",
+]
+
+[[package]]
+name = "anchor-spl"
+version = "0.29.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6c4fd6e43b2ca6220d2ef1641539e678bfc31b6cc393cf892b373b5997b6a39a"
+dependencies = [
+ "anchor-lang 0.29.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "mpl-token-metadata",
+ "solana-program",
+ "spl-associated-token-account",
+ "spl-token",
+ "spl-token-2022",
 ]
 
 [[package]]
@@ -439,7 +453,7 @@ dependencies = [
 [[package]]
 name = "anchor-syn"
 version = "0.29.0"
-source = "git+https://github.com/coral-xyz/anchor.git#169264d730ffeae16c12a33c0c353b7d3a461532"
+source = "git+https://github.com/coral-xyz/anchor.git?rev=e212105#e21210538d0415674c5c474ec36b8dca066ea62e"
 dependencies = [
  "anyhow",
  "bs58 0.5.0",
@@ -938,6 +952,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "bolt-attribute-bolt-extra-accounts"
+version = "0.1.1"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 1.0.109",
+]
+
+[[package]]
 name = "bolt-attribute-bolt-program"
 version = "0.1.1"
 dependencies = [
@@ -970,7 +993,7 @@ version = "0.1.1"
 dependencies = [
  "anchor-cli",
  "anchor-client",
- "anchor-syn 0.29.0 (git+https://github.com/coral-xyz/anchor.git)",
+ "anchor-syn 0.29.0 (git+https://github.com/coral-xyz/anchor.git?rev=e212105)",
  "anyhow",
  "clap 4.4.11",
  "heck 0.4.1",
@@ -1017,6 +1040,7 @@ dependencies = [
  "bolt-attribute-bolt-component",
  "bolt-attribute-bolt-component-deserialize",
  "bolt-attribute-bolt-component-id",
+ "bolt-attribute-bolt-extra-accounts",
  "bolt-attribute-bolt-program",
  "bolt-attribute-bolt-system",
  "bolt-attribute-bolt-system-input",
@@ -2710,6 +2734,19 @@ dependencies = [
  "libc",
  "wasi 0.11.0+wasi-snapshot-preview1",
  "windows-sys 0.48.0",
+]
+
+[[package]]
+name = "mpl-token-metadata"
+version = "3.2.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ba8ee05284d79b367ae8966d558e1a305a781fc80c9df51f37775169117ba64f"
+dependencies = [
+ "borsh 0.9.3",
+ "num-derive 0.3.3",
+ "num-traits",
+ "solana-program",
+ "thiserror",
 ]
 
 [[package]]
@@ -5037,6 +5074,7 @@ name = "system-apply-velocity"
 version = "0.1.1"
 dependencies = [
  "anchor-lang 0.29.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "anchor-spl",
  "bolt-lang",
  "position",
  "velocity",

@@ -1,5 +1,5 @@
 import * as anchor from "@coral-xyz/anchor";
-import { type Program } from "@coral-xyz/anchor";
+import { type Program, web3 } from "@coral-xyz/anchor";
 import { type PublicKey } from "@solana/web3.js";
 import { type Position } from "../target/types/position";
 import { type Velocity } from "../target/types/velocity";
@@ -228,8 +228,6 @@ describe("bolt", () => {
       boltComponentPositionProgram.programId,
       entity1
     );
-
-    console.log("Component Position E1: ", componentPositionEntity1.toBase58());
 
     await worldProgram.methods
       .initializeComponent()
@@ -478,16 +476,7 @@ describe("bolt", () => {
         instructionSysvarAccount: SYSVAR_INSTRUCTIONS_PUBKEY,
         authority: worldProgram.programId,
       })
-      .remainingAccounts([
-        {
-          pubkey: componentPositionEntity1,
-          isWritable: false,
-          isSigner: false,
-        },
-      ])
       .rpc();
-
-    console.log("Component Velocity: ", componentVelocityEntity1.toBase58());
 
     const componentData =
       await boltComponentVelocityProgram.account.velocity.fetch(
@@ -533,6 +522,38 @@ describe("bolt", () => {
     console.log("+----------------+------------+");
     console.log("|                             |");
     console.log("+-----------------------------+");
+    expect(positionData.z.toNumber()).to.not.equal(300);
+  });
+
+  it("Apply Velocity on Entity 1, with Clock external account", async () => {
+    await worldProgram.methods
+      .apply2(Buffer.alloc(0))
+      .accounts({
+        componentProgram1: boltComponentVelocityProgram.programId,
+        componentProgram2: boltComponentPositionProgram.programId,
+        boltSystem: applyVelocity,
+        boltComponent1: componentVelocityEntity1,
+        boltComponent2: componentPositionEntity1,
+        instructionSysvarAccount: SYSVAR_INSTRUCTIONS_PUBKEY,
+        authority: worldProgram.programId,
+      })
+      .remainingAccounts([
+        {
+          pubkey: new web3.PublicKey(
+            "SysvarC1ock11111111111111111111111111111111"
+          ),
+          isWritable: false,
+          isSigner: false,
+        },
+      ])
+      .rpc();
+
+    const positionData =
+      await boltComponentPositionProgram.account.position.fetch(
+        componentPositionEntity1
+      );
+    // Check if the position has changed to 300 (which means the account clock was used)
+    expect(positionData.z.toNumber()).to.equal(300);
   });
 
   // Check illegal authority usage
