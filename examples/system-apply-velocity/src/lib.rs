@@ -20,6 +20,7 @@ pub mod system_apply_velocity {
         msg!("last applied: {}", ctx.accounts.velocity.last_applied);
         msg!("Position: {}", ctx.accounts.position.x);
         msg!("Remaining accounts: {}", ctx.remaining_accounts.len());
+        msg!("Authority: {}", ctx.accounts.authority.key);
         Ok(ctx.accounts)
     }
 

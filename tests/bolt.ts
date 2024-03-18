@@ -335,9 +335,9 @@ describe("bolt", () => {
         boltSystem: systemSimpleMovement,
         boltComponent: componentPositionEntity1,
         instructionSysvarAccount: SYSVAR_INSTRUCTIONS_PUBKEY,
-        authority: worldProgram.programId,
+        authority: provider.wallet.publicKey,
       })
-      .rpc({ skipPreflight: true });
+      .rpc();
 
     expect(
       (
@@ -381,7 +381,7 @@ describe("bolt", () => {
         boltSystem: systemSimpleMovement,
         boltComponent: componentPositionEntity1,
         instructionSysvarAccount: SYSVAR_INSTRUCTIONS_PUBKEY,
-        authority: worldProgram.programId,
+        authority: provider.wallet.publicKey,
       })
       .rpc();
 
@@ -430,7 +430,7 @@ describe("bolt", () => {
         boltSystem: systemFly,
         boltComponent: componentPositionEntity1,
         instructionSysvarAccount: SYSVAR_INSTRUCTIONS_PUBKEY,
-        authority: worldProgram.programId,
+        authority: provider.wallet.publicKey,
       })
       .rpc();
 
@@ -474,7 +474,7 @@ describe("bolt", () => {
         boltComponent1: componentVelocityEntity1,
         boltComponent2: componentPositionEntity1,
         instructionSysvarAccount: SYSVAR_INSTRUCTIONS_PUBKEY,
-        authority: worldProgram.programId,
+        authority: provider.wallet.publicKey,
       })
       .rpc();
 
@@ -535,7 +535,7 @@ describe("bolt", () => {
         boltComponent1: componentVelocityEntity1,
         boltComponent2: componentPositionEntity1,
         instructionSysvarAccount: SYSVAR_INSTRUCTIONS_PUBKEY,
-        authority: worldProgram.programId,
+        authority: provider.wallet.publicKey,
       })
       .remainingAccounts([
         {
@@ -571,7 +571,7 @@ describe("bolt", () => {
           boltSystem: systemFly,
           boltComponent: componentPositionEntity5,
           instructionSysvarAccount: SYSVAR_INSTRUCTIONS_PUBKEY,
-          authority: worldProgram.programId,
+          authority: provider.wallet.publicKey,
         })
         .rpc();
     } catch (e) {

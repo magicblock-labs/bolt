@@ -92,7 +92,7 @@ pub fn apply_system(attr: TokenStream, item: TokenStream) -> TokenStream {
                 pub bolt_system: UncheckedAccount<'info>,
                 #(#fields)*
                  /// CHECK: authority check
-                pub authority: UncheckedAccount<'info>,
+                pub authority: Signer<'info>,
                 #[account(address = anchor_lang::solana_program::sysvar::instructions::id())]
                 /// CHECK: instruction sysvar check
                 pub instruction_sysvar_account: UncheckedAccount<'info>,
@@ -119,6 +119,7 @@ pub fn apply_system(attr: TokenStream, item: TokenStream) -> TokenStream {
                     let cpi_program = self.bolt_system.to_account_info();
                     let cpi_accounts = bolt_system::cpi::accounts::#set_data_struct {
                         #(#fields)*
+                        authority: self.authority.to_account_info(),
                     };
                     CpiContext::new(cpi_program, cpi_accounts)
                 }

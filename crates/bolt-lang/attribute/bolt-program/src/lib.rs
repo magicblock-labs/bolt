@@ -156,7 +156,7 @@ fn generate_update(component_type: &Type) -> (TokenStream2, TokenStream2) {
                     return Err(BoltError::InvalidCaller.into());
                 }
                 // Check if the authority is authorized to modify the data
-                if ctx.accounts.bolt_component.bolt_metadata.authority != World::id() && ctx.accounts.bolt_component.bolt_metadata.authority != *ctx.accounts.authority.key {
+                if ctx.accounts.bolt_component.bolt_metadata.authority != World::id() && (ctx.accounts.bolt_component.bolt_metadata.authority != *ctx.accounts.authority.key || !ctx.accounts.authority.is_signer) {
                     return Err(BoltError::InvalidAuthority.into());
                 }
 
