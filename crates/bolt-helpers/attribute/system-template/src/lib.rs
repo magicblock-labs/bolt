@@ -54,6 +54,8 @@ pub fn system_template(attr: TokenStream, item: TokenStream) -> TokenStream {
             #[derive(Accounts)]
             pub struct #data_struct<'info> {
                 #(#fields)*
+                #[account()]
+                pub authority: Signer<'info>,
             }
         };
         quote! {

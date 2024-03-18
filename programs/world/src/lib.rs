@@ -87,7 +87,7 @@ pub mod world {
         /// CHECK: component account
         pub bolt_component: UncheckedAccount<'info>,
         /// CHECK: authority check
-        pub authority: UncheckedAccount<'info>,
+        pub authority: Signer<'info>,
         #[account(address = anchor_lang::solana_program::sysvar::instructions::id())]
         /// CHECK: instruction sysvar check
         pub instruction_sysvar_account: UncheckedAccount<'info>,
@@ -100,6 +100,7 @@ pub mod world {
             let cpi_program = self.bolt_system.to_account_info();
             let cpi_accounts = bolt_system::cpi::accounts::SetData {
                 component: self.bolt_component.to_account_info(),
+                authority: self.authority.to_account_info(),
             };
             CpiContext::new(cpi_program, cpi_accounts)
         }
@@ -240,7 +241,7 @@ impl Entity {
 pub fn build_update_context<'info>(
     component_program: UncheckedAccount<'info>,
     component: UncheckedAccount<'info>,
-    authority: UncheckedAccount<'info>,
+    authority: Signer<'info>,
     instruction_sysvar_account: UncheckedAccount<'info>,
 ) -> CpiContext<'info, 'info, 'info, 'info, bolt_component::cpi::accounts::Update<'info>> {
     let cpi_program = component_program.to_account_info();

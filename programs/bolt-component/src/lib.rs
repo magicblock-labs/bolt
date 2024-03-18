@@ -30,6 +30,7 @@ pub mod bolt_component {
         pub bolt_component: Account<'info, Component>,
         /// CHECK: The system can modify the data of the component
         pub bolt_system: UncheckedAccount<'info>,
+        pub authority: Signer<'info>,
     }
 
     impl<'info> Apply<'info> {
@@ -39,6 +40,7 @@ pub mod bolt_component {
             let cpi_program = self.bolt_system.to_account_info();
             let cpi_accounts = bolt_system::cpi::accounts::SetData {
                 component: self.bolt_component.to_account_info().clone(),
+                authority: self.authority.to_account_info(),
             };
             CpiContext::new(cpi_program, cpi_accounts)
         }

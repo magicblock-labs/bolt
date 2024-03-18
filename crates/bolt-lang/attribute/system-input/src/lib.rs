@@ -76,6 +76,7 @@ pub fn system_input(_attr: TokenStream, item: TokenStream) -> TokenStream {
         #[derive(Accounts)]
         pub struct #name<'info> {
             #(#transformed_fields)*
+            pub authority: Signer<'info>,
         }
     };
 

@@ -18,4 +18,6 @@ pub struct SetData<'info> {
     #[account()]
     /// CHECK: unchecked account
     pub component: UncheckedAccount<'info>,
+    #[account()]
+    pub authority: Signer<'info>,
 }
