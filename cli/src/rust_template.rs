@@ -385,6 +385,7 @@ describe("{}", () => {{
           componentProgram: positionComponent.programId,
           boltSystem: systemMovement.programId,
           boltComponent: positionComponentPda,
+          authority: provider.wallet.publicKey,
       }}, {{args: new Uint8Array()}});
 
       const tx = new anchor.web3.Transaction().add(applySystemIx);
