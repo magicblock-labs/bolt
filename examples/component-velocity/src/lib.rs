@@ -3,6 +3,7 @@ use bolt_lang::*;
 declare_id!("CbHEFbSQdRN4Wnoby9r16umnJ1zWbULBHg4yqzGQonU1");
 
 #[component(component_id = "component-velocity")]
+#[derive(Default)]
 pub struct Velocity {
     pub x: i64,
     pub y: i64,
