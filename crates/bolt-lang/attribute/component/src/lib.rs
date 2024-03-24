@@ -55,7 +55,7 @@ pub fn component(attr: TokenStream, item: TokenStream) -> TokenStream {
     let component_id_value = component_id_value.unwrap_or_else(|| "".to_string());
 
     let additional_macro: Attribute = parse_quote! { #[account] };
-    let additional_derives: Attribute = parse_quote! { #[derive(InitSpace, Default)] };
+    let additional_derives: Attribute = parse_quote! { #[derive(InitSpace)] };
     input.attrs.push(additional_derives);
 
     add_bolt_metadata(&mut input);

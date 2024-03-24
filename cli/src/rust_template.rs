@@ -50,6 +50,7 @@ fn create_component_template_simple(name: &str, program_path: &Path) -> Files {
 declare_id!("{}");
 
 #[component]
+#[derive(Default)]
 pub struct {} {{
     pub x: i64,
     pub y: i64,
