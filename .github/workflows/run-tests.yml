@@ -6,7 +6,7 @@ on:
   pull_request:
 
 env:
-  solana_version: v1.18.1
+  solana_version: v1.18.8
   anchor_version: 0.29.0
 
 jobs:
@@ -45,7 +45,7 @@ jobs:
           yarn --frozen-lockfile --network-concurrency 2
 
       - name: install rust
-        uses: dtolnay/rust-toolchain@1.75.0
+        uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: stable
 
@@ -97,7 +97,7 @@ jobs:
 
     steps:
       - name: install rust
-        uses: dtolnay/rust-toolchain@1.75.0
+        uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: stable
 
