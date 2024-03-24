@@ -46,7 +46,7 @@ jobs:
           yarn --frozen-lockfile --network-concurrency 2
 
       - name: install rust
-        uses: dtolnay/rust-toolchain@${{ env.rust_version }}
+        uses: dtolnay/rust-toolchain@1.75.0
         with:
           toolchain: stable
 
@@ -98,7 +98,7 @@ jobs:
 
     steps:
       - name: install rust
-        uses: dtolnay/rust-toolchain@${{ env.rust_version }}
+        uses: dtolnay/rust-toolchain@1.75.0
         with:
           toolchain: stable
 
