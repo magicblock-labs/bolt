@@ -26,7 +26,7 @@ pub fn component_deserialize(_attr: TokenStream, item: TokenStream) -> TokenStre
     // Assume that the component_id is the same as the struct name, minus the "Component" prefix
     let name_str = name.to_string();
     let component_id = name_str.strip_prefix("Component").unwrap_or("");
-    let mut owner_definition= quote! {};
+    let mut owner_definition = quote! {};
     if !component_id.is_empty() {
         add_bolt_metadata(&mut input);
         owner_definition = quote! {
