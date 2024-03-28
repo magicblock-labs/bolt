@@ -1,5 +1,6 @@
 use crate::VERSION;
-use anchor_cli::Files;
+use anchor_cli::rust_template::{get_or_create_program_id, ProgramTemplate};
+use anchor_cli::{create_files, Files};
 use anchor_syn::idl::types::{
     Idl, IdlArrayLen, IdlDefinedFields, IdlGenericArg, IdlType, IdlTypeDef, IdlTypeDefGeneric,
     IdlTypeDefTy,
@@ -44,6 +45,23 @@ pub(crate) fn create_system(name: &str) -> Result<()> {
 
     let template_files = create_system_template_simple(name, &program_path);
     anchor_cli::create_files(&[common_files, template_files].concat())
+}
+
+/// Create an anchor program
+pub fn create_program(name: &str, template: ProgramTemplate) -> Result<()> {
+    let program_path = Path::new("programs").join(name);
+    let common_files = vec![
+        ("Cargo.toml".into(), workspace_manifest().into()),
+        (program_path.join("Cargo.toml"), cargo_toml(name)),
+        (program_path.join("Xargo.toml"), xargo_toml().into()),
+    ];
+
+    let template_files = match template {
+        ProgramTemplate::Single => create_program_template_single(name, &program_path),
+        ProgramTemplate::Multiple => create_program_template_multiple(name, &program_path),
+    };
+
+    create_files(&[common_files, template_files].concat())
 }
 
 /// Create a component which holds position data.
@@ -102,6 +120,111 @@ pub mod {} {{
             name.to_snake_case(),
         ),
     )]
+}
+
+fn create_program_template_single(name: &str, program_path: &Path) -> Files {
+    vec![(
+        program_path.join("src").join("lib.rs"),
+        format!(
+            r#"use anchor_lang::prelude::*;
+
+declare_id!("{}");
+
+#[program]
+pub mod {} {{
+    use super::*;
+
+    pub fn initialize(ctx: Context<Initialize>) -> Result<()> {{
+        Ok(())
+    }}
+}}
+
+#[derive(Accounts)]
+pub struct Initialize {{}}
+"#,
+            get_or_create_program_id(name),
+            name.to_snake_case(),
+        ),
+    )]
+}
+
+/// Create a program with multiple files for instructions, state...
+fn create_program_template_multiple(name: &str, program_path: &Path) -> Files {
+    let src_path = program_path.join("src");
+    vec![
+        (
+            src_path.join("lib.rs"),
+            format!(
+                r#"pub mod constants;
+pub mod error;
+pub mod instructions;
+pub mod state;
+
+use anchor_lang::prelude::*;
+
+pub use constants::*;
+pub use instructions::*;
+pub use state::*;
+
+declare_id!("{}");
+
+#[program]
+pub mod {} {{
+    use super::*;
+
+    pub fn initialize(ctx: Context<Initialize>) -> Result<()> {{
+        initialize::handler(ctx)
+    }}
+}}
+"#,
+                get_or_create_program_id(name),
+                name.to_snake_case(),
+            ),
+        ),
+        (
+            src_path.join("constants.rs"),
+            r#"use anchor_lang::prelude::*;
+
+#[constant]
+pub const SEED: &str = "anchor";
+"#
+            .into(),
+        ),
+        (
+            src_path.join("error.rs"),
+            r#"use anchor_lang::prelude::*;
+
+#[error_code]
+pub enum ErrorCode {
+    #[msg("Custom error message")]
+    CustomError,
+}
+"#
+            .into(),
+        ),
+        (
+            src_path.join("instructions").join("mod.rs"),
+            r#"pub mod initialize;
+
+pub use initialize::*;
+"#
+            .into(),
+        ),
+        (
+            src_path.join("instructions").join("initialize.rs"),
+            r#"use anchor_lang::prelude::*;
+
+#[derive(Accounts)]
+pub struct Initialize {}
+
+pub fn handler(ctx: Context<Initialize>) -> Result<()> {
+    Ok(())
+}
+"#
+            .into(),
+        ),
+        (src_path.join("state").join("mod.rs"), r#""#.into()),
+    ]
 }
 
 const fn workspace_manifest() -> &'static str {

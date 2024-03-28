@@ -297,7 +297,7 @@ fn init(
     } else {
         create_system(system_name)?;
         create_component(component_name)?;
-        anchor_cli::rust_template::create_program(&project_name, template)?;
+        rust_template::create_program(&project_name, template)?;
 
         // Add the component as a dependency to the system
         std::process::Command::new("cargo")
