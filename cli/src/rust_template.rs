@@ -808,7 +808,7 @@ fn component_type_to_rust_code(component_type: &IdlTypeDef) -> String {
     };
     if let IdlTypeDefTy::Struct { fields } = &component_type.ty {
         code += &format!(
-            "#[derive(Clone, Copy)]\npub struct {}{} {{\n",
+            "#[component_deserialize]\n#[derive(Clone, Copy)]\npub struct {}{} {{\n",
             component_type.name, generics
         );
         code += &*component_fields_to_rust_code(fields);
