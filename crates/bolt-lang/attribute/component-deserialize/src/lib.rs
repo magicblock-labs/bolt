@@ -58,6 +58,11 @@ pub fn component_deserialize(_attr: TokenStream, item: TokenStream) -> TokenStre
             }
         }
 
+        #[automatically_derived]
+        impl anchor_lang::Discriminator for #name {
+            const DISCRIMINATOR: [u8; 8] = [0; 8];
+        }
+
         use std::str::FromStr;
         #[automatically_derived]
         impl Owner for #name {

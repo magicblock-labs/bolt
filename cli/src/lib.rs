@@ -70,8 +70,8 @@ pub fn entry(opts: Opts) -> Result<()> {
                 javascript,
                 solidity,
                 no_git,
-                jest,
                 template,
+                test_template,
                 force,
             } => init(
                 &opts.cfg_override,
@@ -79,12 +79,13 @@ pub fn entry(opts: Opts) -> Result<()> {
                 javascript,
                 solidity,
                 no_git,
-                jest,
                 template,
+                test_template,
                 force,
             ),
             anchor_cli::Command::Build {
                 idl,
+                no_idl,
                 idl_ts,
                 verifiable,
                 program_name,
@@ -98,6 +99,7 @@ pub fn entry(opts: Opts) -> Result<()> {
                 arch,
             } => build(
                 &opts.cfg_override,
+                no_idl,
                 idl,
                 idl_ts,
                 verifiable,
@@ -136,8 +138,8 @@ fn init(
     javascript: bool,
     solidity: bool,
     no_git: bool,
-    jest: bool,
     template: anchor_cli::rust_template::ProgramTemplate,
+    test_template: anchor_cli::rust_template::TestTemplate,
     force: bool,
 ) -> Result<()> {
     if !force && Config::discover(cfg_override)?.is_some() {
@@ -175,6 +177,7 @@ fn init(
     fs::create_dir_all("app")?;
 
     let mut cfg = Config::default();
+    let jest = test_template == anchor_cli::rust_template::TestTemplate::Jest;
     if jest {
         cfg.scripts.insert(
             "test".to_owned(),
@@ -409,6 +412,7 @@ fn init(
 #[allow(clippy::too_many_arguments)]
 pub fn build(
     cfg_override: &ConfigOverride,
+    no_idl: bool,
     idl: Option<String>,
     idl_ts: Option<String>,
     verifiable: bool,
@@ -442,6 +446,7 @@ pub fn build(
     // Build the programs
     anchor_cli::build(
         cfg_override,
+        no_idl,
         idl,
         idl_ts,
         verifiable,

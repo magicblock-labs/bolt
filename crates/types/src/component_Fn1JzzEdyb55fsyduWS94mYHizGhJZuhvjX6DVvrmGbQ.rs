@@ -9,3 +9,10 @@ pub struct ComponentFn1JzzEdyb55fsyduWS94mYHizGhJZuhvjX6DVvrmGbQ {
 }
 
 pub use ComponentFn1JzzEdyb55fsyduWS94mYHizGhJZuhvjX6DVvrmGbQ as Position;
+
+#[derive(Clone, Copy)]
+pub struct Entity {
+    pub id: u64,
+}
+
+
