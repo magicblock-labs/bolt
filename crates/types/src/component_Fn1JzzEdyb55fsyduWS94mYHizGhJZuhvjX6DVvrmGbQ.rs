@@ -14,5 +14,3 @@ pub use ComponentFn1JzzEdyb55fsyduWS94mYHizGhJZuhvjX6DVvrmGbQ as Position;
 pub struct Entity {
     pub id: u64,
 }
-
-

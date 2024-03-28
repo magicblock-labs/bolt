@@ -1,14 +1,17 @@
-use crate::ANCHOR_VERSION;
 use crate::VERSION;
 use anchor_cli::Files;
-use anchor_syn::idl::types::{Idl, IdlArrayLen, IdlDefinedFields, IdlGenericArg, IdlType, IdlTypeDef, IdlTypeDefGeneric, IdlTypeDefTy};
+use anchor_syn::idl::types::{
+    Idl, IdlArrayLen, IdlDefinedFields, IdlGenericArg, IdlType, IdlTypeDef, IdlTypeDefGeneric,
+    IdlTypeDefTy,
+};
 use anyhow::Result;
 use heck::{ToSnakeCase, ToUpperCamelCase};
 use std::path::{Path, PathBuf};
 
 // Anchor CLI version
 // TODO: use the stable version once the new IDL standard is released
-pub const ANCHOR_CLI_VERSION: &str = "{ git = \"https://github.com/coral-xyz/anchor.git\", rev = \"0f60909\" }";
+pub const ANCHOR_CLI_VERSION: &str =
+    "{ git = \"https://github.com/coral-xyz/anchor.git\", rev = \"0f60909\" }";
 pub const TS_ANCHOR_VERSION: &str = "0.29.1";
 
 /// Create a component from the given name.
@@ -494,8 +497,13 @@ pub fn registry_account() -> &'static str {
 /// Automatic generation of crates from the components idl
 
 pub fn component_type(idl: &Idl, component_id: &str) -> Result<String> {
-    let component_account= idl.accounts.iter().filter(|a| a.name.to_lowercase() != "Entity").last();
-    let component_account = component_account.ok_or_else(|| anyhow::anyhow!("Component account not found in IDL"))?;
+    let component_account = idl
+        .accounts
+        .iter()
+        .filter(|a| a.name.to_lowercase() != "Entity")
+        .last();
+    let component_account =
+        component_account.ok_or_else(|| anyhow::anyhow!("Component account not found in IDL"))?;
 
     let type_def = &idl
         .types
@@ -641,7 +649,6 @@ pub fn convert_idl_type_to_str(ty: &IdlType) -> String {
         IdlType::Generic(ty) => ty.into(),
     }
 }
-
 
 /// Convert the component types definition to rust code
 fn component_types_to_rust_code(types: &[IdlTypeDef], component_name: &str) -> String {
