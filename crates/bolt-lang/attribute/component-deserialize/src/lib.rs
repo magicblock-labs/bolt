@@ -22,12 +22,23 @@ pub fn component_deserialize(_attr: TokenStream, item: TokenStream) -> TokenStre
         syn::parse_quote! { #[derive(bolt_lang::AnchorDeserialize, bolt_lang::AnchorSerialize)] };
     input.attrs.push(additional_derives);
 
-    add_bolt_metadata(&mut input);
-
-    let name = &input.ident;
+    let name = &input.ident.clone();
     // Assume that the component_id is the same as the struct name, minus the "Component" prefix
     let name_str = name.to_string();
-    let component_id = name_str.strip_prefix("Component").unwrap();
+    let component_id = name_str.strip_prefix("Component").unwrap_or("");
+    let mut owner_definition = quote! {};
+    if !component_id.is_empty() {
+        add_bolt_metadata(&mut input);
+        owner_definition = quote! {
+            use std::str::FromStr;
+            #[automatically_derived]
+            impl Owner for #name {
+                fn owner() -> Pubkey {
+                    Pubkey::from_str(#component_id).unwrap()
+                }
+            }
+        };
+    }
     let expanded = quote! {
         #input
 
@@ -58,13 +69,12 @@ pub fn component_deserialize(_attr: TokenStream, item: TokenStream) -> TokenStre
             }
         }
 
-        use std::str::FromStr;
         #[automatically_derived]
-        impl Owner for #name {
-            fn owner() -> Pubkey {
-                Pubkey::from_str(#component_id).unwrap()
-            }
+        impl anchor_lang::Discriminator for #name {
+            const DISCRIMINATOR: [u8; 8] = [0; 8];
         }
+
+        #owner_definition
     };
 
     expanded.into()

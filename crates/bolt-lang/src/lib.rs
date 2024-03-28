@@ -18,9 +18,6 @@ pub use world;
 pub use world::program::World;
 pub use world::Entity;
 
-pub use serde;
-pub use serde::{Deserialize as BoltDeserialize, Serialize as BoltSerialize};
-
 use std::str;
 use std::str::FromStr;
 
