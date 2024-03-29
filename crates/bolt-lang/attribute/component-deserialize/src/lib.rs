@@ -19,7 +19,7 @@ pub fn component_deserialize(_attr: TokenStream, item: TokenStream) -> TokenStre
 
     // Add the AnchorDeserialize and AnchorSerialize derives to the struct
     let additional_derives: Attribute =
-        syn::parse_quote! { #[derive(bolt_lang::AnchorDeserialize, bolt_lang::AnchorSerialize)] };
+        syn::parse_quote! { #[derive(bolt_lang::InitSpace, bolt_lang::AnchorDeserialize, bolt_lang::AnchorSerialize, Clone, Copy)] };
     input.attrs.push(additional_derives);
 
     let name = &input.ident.clone();
