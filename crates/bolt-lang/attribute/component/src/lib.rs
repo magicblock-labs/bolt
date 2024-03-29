@@ -102,33 +102,40 @@ pub fn component(attr: TokenStream, item: TokenStream) -> TokenStream {
 /// Create a fn `new` to initialize the struct without bolt_metadata field
 fn define_new_fn(input: &DeriveInput) -> proc_macro2::TokenStream {
     let struct_name = &input.ident;
+    let init_struct_name = syn::Ident::new(&format!("{}Init", struct_name), struct_name.span());
 
     if let syn::Data::Struct(ref data) = input.data {
         if let syn::Fields::Named(ref fields) = data.fields {
-            // Generate function parameters and struct initialization code for each field
-            let params = fields.named.iter().map(|f| {
+            // Generate fields for the init struct
+            let init_struct_fields = fields.named.iter().map(|f| {
                 let name = &f.ident;
                 let ty = &f.ty;
-                quote! { #name: #ty }
+                quote! { pub #name: #ty }
             });
 
-            let init_fields = fields.named.iter().map(|f| {
+            // Generate struct initialization code using the init struct
+            let struct_init_fields = fields.named.iter().map(|f| {
                 let name = &f.ident;
-                quote! { #name: #name }
+                quote! { #name: init_struct.#name }
             });
 
-            // Generate the new function
-            let new_fn = quote! {
+            // Generate the new function and the init struct
+            let gen = quote! {
+                // Define a new struct to hold initialization parameters
+                pub struct #init_struct_name {
+                    #(#init_struct_fields),*
+                }
+
                 impl #struct_name {
-                    pub fn new(#(#params),*) -> Self {
+                    pub fn new(init_struct: #init_struct_name) -> Self {
                         Self {
-                            #(#init_fields,)*
+                            #(#struct_init_fields,)*
                             bolt_metadata: BoltMetadata::default(),
                         }
                     }
                 }
             };
-            return new_fn;
+            return gen;
         }
     }
     quote! {}
