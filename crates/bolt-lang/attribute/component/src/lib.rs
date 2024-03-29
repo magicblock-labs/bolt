@@ -1,7 +1,9 @@
-use bolt_utils::add_bolt_metadata;
 use proc_macro::TokenStream;
+
 use quote::quote;
 use syn::{parse_macro_input, parse_quote, Attribute, DeriveInput, Lit, Meta, NestedMeta};
+
+use bolt_utils::add_bolt_metadata;
 
 /// This Component attribute is used to automatically generate the seed and size functions
 ///
@@ -58,6 +60,10 @@ pub fn component(attr: TokenStream, item: TokenStream) -> TokenStream {
     let additional_derives: Attribute = parse_quote! { #[derive(InitSpace)] };
     input.attrs.push(additional_derives);
 
+    let new_fn = define_new_fn(&input);
+    // print new_fn
+    println!("{:?}", new_fn);
+
     add_bolt_metadata(&mut input);
 
     let name = &input.ident;
@@ -76,6 +82,8 @@ pub fn component(attr: TokenStream, item: TokenStream) -> TokenStream {
         #additional_macro
         #input
 
+        #new_fn
+
         #[automatically_derived]
         impl ComponentTraits for #name {
             fn seed() -> &'static [u8] {
@@ -86,6 +94,49 @@ pub fn component(attr: TokenStream, item: TokenStream) -> TokenStream {
                 8 + <#name>::INIT_SPACE
             }
         }
+
     };
     expanded.into()
+}
+
+/// Create a fn `new` to initialize the struct without bolt_metadata field
+fn define_new_fn(input: &DeriveInput) -> proc_macro2::TokenStream {
+    let struct_name = &input.ident;
+    let init_struct_name = syn::Ident::new(&format!("{}Init", struct_name), struct_name.span());
+
+    if let syn::Data::Struct(ref data) = input.data {
+        if let syn::Fields::Named(ref fields) = data.fields {
+            // Generate fields for the init struct
+            let init_struct_fields = fields.named.iter().map(|f| {
+                let name = &f.ident;
+                let ty = &f.ty;
+                quote! { pub #name: #ty }
+            });
+
+            // Generate struct initialization code using the init struct
+            let struct_init_fields = fields.named.iter().map(|f| {
+                let name = &f.ident;
+                quote! { #name: init_struct.#name }
+            });
+
+            // Generate the new function and the init struct
+            let gen = quote! {
+                // Define a new struct to hold initialization parameters
+                pub struct #init_struct_name {
+                    #(#init_struct_fields),*
+                }
+
+                impl #struct_name {
+                    pub fn new(init_struct: #init_struct_name) -> Self {
+                        Self {
+                            #(#struct_init_fields,)*
+                            bolt_metadata: BoltMetadata::default(),
+                        }
+                    }
+                }
+            };
+            return gen;
+        }
+    }
+    quote! {}
 }
