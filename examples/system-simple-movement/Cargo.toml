@@ -23,5 +23,5 @@ idl-build = ["anchor-lang/idl-build"]
 [dependencies]
 anchor-lang = { workspace = true }
 bolt-lang = { path = "../../crates/bolt-lang" }
-bolt-types = { version = "0.1.0", path = "../../crates/types" }
+bolt-types = { version = "0.1.1", path = "../../crates/types" }
 serde = { version = "*", features = ["derive"] }

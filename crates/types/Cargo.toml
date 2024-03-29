@@ -1,6 +1,6 @@
 [package]
 name = "bolt-types"
-version = "0.1.0"
+version = "0.1.1"
 description = "Autogenerate types for the bolt language"
 edition = "2021"
 
@@ -9,5 +9,5 @@ crate-type = ["cdylib", "lib"]
 name = "bolt_types"
 
 [dependencies]
-bolt-lang = { path = "../bolt-lang" }
-anchor-lang = "0.29.0"
+bolt-lang = { path = "../../crates/bolt-lang" }
+anchor-lang = { git = "https://github.com/coral-xyz/anchor.git", rev = "0f60909" }

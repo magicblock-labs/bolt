@@ -37,6 +37,10 @@ pub mod world {
 
     #[allow(unused_variables)]
     pub fn add_entity(ctx: Context<AddEntity>, extra_seed: Option<String>) -> Result<()> {
+        require!(
+            ctx.accounts.world.key() == ctx.accounts.world.pda().0,
+            WorldError::WorldAccountMismatch
+        );
         ctx.accounts.entity.id = ctx.accounts.world.entities;
         ctx.accounts.world.entities += 1;
         Ok(())
@@ -142,7 +146,7 @@ pub struct AddEntity<'info> {
         None => &[],
     }], bump)]
     pub entity: Account<'info, Entity>,
-    #[account(mut, address = world.pda().0)]
+    #[account(mut)]
     pub world: Account<'info, World>,
     pub system_program: Program<'info, System>,
 }
