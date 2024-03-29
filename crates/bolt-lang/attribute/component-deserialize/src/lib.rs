@@ -18,8 +18,7 @@ pub fn component_deserialize(_attr: TokenStream, item: TokenStream) -> TokenStre
     let mut input = parse_macro_input!(item as DeriveInput);
 
     // Add the AnchorDeserialize and AnchorSerialize derives to the struct
-    let additional_derives: Attribute =
-        syn::parse_quote! { #[derive(bolt_lang::InitSpace, bolt_lang::AnchorDeserialize, bolt_lang::AnchorSerialize, Clone, Copy)] };
+    let additional_derives: Attribute = syn::parse_quote! { #[derive(bolt_lang::InitSpace, bolt_lang::AnchorDeserialize, bolt_lang::AnchorSerialize, Clone, Copy)] };
     input.attrs.push(additional_derives);
 
     let name = &input.ident.clone();
