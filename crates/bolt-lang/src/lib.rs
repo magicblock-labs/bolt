@@ -18,6 +18,8 @@ pub use world;
 pub use world::program::World;
 pub use world::Entity;
 
+pub use serde;
+
 use std::str;
 use std::str::FromStr;
 

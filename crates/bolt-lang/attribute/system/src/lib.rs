@@ -1,6 +1,6 @@
 use proc_macro::TokenStream;
 use proc_macro2::Ident;
-use quote::quote;
+use quote::{quote, ToTokens};
 use syn::{
     parse_macro_input, parse_quote, visit_mut::VisitMut, Expr, FnArg, GenericArgument, ItemFn,
     ItemMod, ItemStruct, PathArguments, ReturnType, Stmt, Type, TypePath,
@@ -104,7 +104,7 @@ impl VisitMut for SystemTransform {
                             item_fn.sig.ident.span(),
                         );
                     }
-                    if !Self::check_is_vec_u8(type_path) {
+                    if !Self::check_is_result_vec_u8(type_path) {
                         Self::modify_fn_return_type(item_fn, self.return_values);
                         // Modify the return statement inside the function body
                         let block = &mut item_fn.block;
@@ -116,6 +116,8 @@ impl VisitMut for SystemTransform {
                     }
                 }
             }
+            // If second argument is not Vec<u8>, modify it to be so and use parse_args
+            Self::modify_args(item_fn);
         }
     }
 
@@ -159,7 +161,7 @@ impl VisitMut for SystemTransform {
 
 impl SystemTransform {
     // Helper function to check if a type is `Vec<u8>` or `(Vec<u8>, Vec<u8>, ...)`
-    fn check_is_vec_u8(ty: &TypePath) -> bool {
+    fn check_is_result_vec_u8(ty: &TypePath) -> bool {
         if let Some(segment) = ty.path.segments.last() {
             if segment.ident == "Result" {
                 if let PathArguments::AngleBracketed(args) = &segment.arguments {
@@ -242,6 +244,40 @@ impl SystemTransform {
             _ => {}
         }
         None
+    }
+
+    fn modify_args(item_fn: &mut ItemFn) {
+        if item_fn.sig.inputs.len() >= 2 {
+            let second_arg = &mut item_fn.sig.inputs[1];
+            let is_vec_u8 = if let FnArg::Typed(syn::PatType { ty, .. }) = second_arg {
+                match &**ty {
+                    Type::Path(type_path) => {
+                        if let Some(segment) = type_path.path.segments.first() {
+                            segment.ident == "Vec" && Self::is_u8_vec(segment)
+                        } else { false }
+                    },
+                    _ => false,
+                }
+            } else {
+                false
+            };
+            if !is_vec_u8 {
+                if let FnArg::Typed(pat_type) = second_arg {
+                    let original_type = pat_type.ty.to_token_stream();
+                    let arg_original_name = pat_type.pat.to_token_stream();
+                    if let syn::Pat::Ident(ref mut pat_ident) = *pat_type.pat {
+                        let new_ident_name = format!("_{}", pat_ident.ident);
+                        pat_ident.ident = Ident::new(&new_ident_name, proc_macro2::Span::call_site());
+                    }
+                    let arg_name = pat_type.pat.to_token_stream();
+                    pat_type.ty = Box::new(syn::parse_quote! { Vec<u8> });
+                    let parse_stmt: Stmt = parse_quote! {
+                            let #arg_original_name = parse_args::<#original_type>(&#arg_name);
+                        };
+                    item_fn.block.stmts.insert(0, parse_stmt);
+                }
+            }
+        }
     }
 }
 
