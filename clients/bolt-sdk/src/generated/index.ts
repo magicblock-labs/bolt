@@ -2,6 +2,7 @@ import { PublicKey } from "@solana/web3.js";
 import type BN from "bn.js";
 export * from "./accounts";
 export * from "./instructions";
+export * from "./transactions/transactions";
 
 /**
  * Program address
@@ -67,4 +68,20 @@ export function FindComponentPda(
     [Buffer.from(componentId), entity.toBytes()],
     componentProgramId
   )[0];
+}
+
+/**
+ * Serialize arguments to a buffer
+ * @param args
+ * @constructor
+ */
+export function SerializeArgs(args: any = {}) {
+  const jsonString = JSON.stringify(args);
+  const encoder = new TextEncoder();
+  const binaryData = encoder.encode(jsonString);
+  return Buffer.from(
+    binaryData.buffer,
+    binaryData.byteOffset,
+    binaryData.byteLength
+  );
 }
