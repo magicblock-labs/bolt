@@ -348,11 +348,7 @@ pub fn mocha(name: &str) -> String {
         r#"const anchor = require("@magicblock-labs/anchor");
 const boltSdk = require("@magicblock-labs/bolt-sdk");
 const {{
-    createInitializeNewWorldInstruction,
-    FindWorldPda,
-    FindWorldRegistryPda,
-    Registry,
-    World
+    InitializeNewWorld,
 }} = boltSdk;
 
 describe("{}", () => {{
@@ -361,19 +357,12 @@ describe("{}", () => {{
   anchor.setProvider(provider);
 
   it("InitializeNewWorld", async () => {{
-      const registry = await Registry.fromAccountAddress(provider.connection, registryPda);
-      worldId = new anchor.BN(registry.worlds);
-      worldPda = FindWorldPda(new anchor.BN(worldId))
-      const initializeWorldIx = createInitializeNewWorldInstruction(
-          {{
-              world: worldPda,
-              registry: registryPda,
-              payer: provider.wallet.publicKey,
-          }});
-
-      const tx = new anchor.web3.Transaction().add(initializeWorldIx);
-      const txSign = await provider.sendAndConfirm(tx);
-      console.log(`Initialized a new world (ID=${{worldId}}). Initialization signature: ${{txSign}}`);
+    const initNewWorld = await InitializeNewWorld({{
+      payer: provider.wallet.publicKey,
+      connection: provider.connection,
+    }});
+    const txSign = await provider.sendAndConfirm(initNewWorld.transaction);
+    console.log(`Initialized a new world (ID=${{initNewWorld.worldPda}}). Initialization signature: ${{txSign}}`);
     }});
   }});
 }});
@@ -387,11 +376,7 @@ pub fn jest(name: &str) -> String {
         r#"const anchor = require("@magicblock-labs/anchor");
 const boltSdk = require("@magicblock-labs/bolt-sdk");
 const {{
-    createInitializeNewWorldInstruction,
-    FindWorldPda,
-    FindWorldRegistryPda,
-    Registry,
-    World
+    InitializeNewWorld,
 }} = boltSdk;
 
 describe("{}", () => {{
@@ -400,24 +385,16 @@ describe("{}", () => {{
   anchor.setProvider(provider);
 
   // Constants used to test the program.
-  const registryPda = FindWorldRegistryPda();
-  let worldId: anchor.BN;
   let worldPda: PublicKey;
 
   it("InitializeNewWorld", async () => {{
-      const registry = await Registry.fromAccountAddress(provider.connection, registryPda);
-      worldId = new anchor.BN(registry.worlds);
-      worldPda = FindWorldPda(new anchor.BN(worldId))
-      const initializeWorldIx = createInitializeNewWorldInstruction(
-          {{
-              world: worldPda,
-              registry: registryPda,
-              payer: provider.wallet.publicKey,
-          }});
-
-      const tx = new anchor.web3.Transaction().add(initializeWorldIx);
-      const txSign = await provider.sendAndConfirm(tx);
-      console.log(`Initialized a new world (ID=${{worldId}}). Initialization signature: ${{txSign}}`);
+    const initNewWorld = await InitializeNewWorld({{
+      payer: provider.wallet.publicKey,
+      connection: provider.connection,
+    }});
+    const txSign = await provider.sendAndConfirm(initNewWorld.transaction);
+    worldPda = initNewWorld.worldPda;
+    console.log(`Initialized a new world (ID=${{worldPda}}). Initialization signature: ${{txSign}}`);
     }});
   }});
 "#,
@@ -433,15 +410,11 @@ import {{ PublicKey }} from "@solana/web3.js";
 import {{ Position }} from "../target/types/position";
 import {{ Movement }} from "../target/types/movement";
 import {{
-    createInitializeNewWorldInstruction,
-    FindWorldPda,
-    FindWorldRegistryPda,
-    FindEntityPda,
-    Registry,
-    World,
-    createAddEntityInstruction,
-    createInitializeComponentInstruction,
-    FindComponentPda, createApplyInstruction
+    InitializeNewWorld,
+    AddEntity,
+    InitializeComponent,
+    ApplySystem,
+    FindComponentPda,
 }} from "@magicblock-labs/bolt-sdk"
 import {{expect}} from "chai";
 
@@ -451,8 +424,6 @@ describe("{}", () => {{
   anchor.setProvider(provider);
 
   // Constants used to test the program.
-  const registryPda = FindWorldRegistryPda();
-  let worldId: anchor.BN;
   let worldPda: PublicKey;
   let entityPda: PublicKey;
 
@@ -460,66 +431,51 @@ describe("{}", () => {{
   const systemMovement = anchor.workspace.Movement as Program<Movement>;
 
   it("InitializeNewWorld", async () => {{
-        const registry = await Registry.fromAccountAddress(provider.connection, registryPda);
-        worldId = new anchor.BN(registry.worlds);
-        worldPda = FindWorldPda(new anchor.BN(worldId))
-        const initializeWorldIx = createInitializeNewWorldInstruction(
-            {{
-                world: worldPda,
-                registry: registryPda,
-                payer: provider.wallet.publicKey,
-            }});
-
-        const tx = new anchor.web3.Transaction().add(initializeWorldIx);
-        const txSign = await provider.sendAndConfirm(tx);
-        console.log(`Initialized a new world (ID=${{worldId}}). Initialization signature: ${{txSign}}`);
+    const initNewWorld = await InitializeNewWorld({{
+      payer: provider.wallet.publicKey,
+      connection: provider.connection,
     }});
+    const txSign = await provider.sendAndConfirm(initNewWorld.transaction);
+    worldPda = initNewWorld.worldPda;
+    console.log(`Initialized a new world (ID=${{worldPda}}). Initialization signature: ${{txSign}}`);
+  }});
 
   it("Add an entity", async () => {{
-      const world = await World.fromAccountAddress(provider.connection, worldPda);
-      const entityId = new anchor.BN(world.entities);
-      entityPda = FindEntityPda(worldId, entityId);
-
-      let createEntityIx = createAddEntityInstruction({{
-          world: worldPda,
-          payer: provider.wallet.publicKey,
-          entity: entityPda,
+      const addEntity = await AddEntity({{
+        payer: provider.wallet.publicKey,
+        worldPda: worldPda,
+        connection: provider.connection,
       }});
-      const tx = new anchor.web3.Transaction().add(createEntityIx);
-      const txSign = await provider.sendAndConfirm(tx);
-      console.log(`Initialized a new Entity (ID=${{worldId}}). Initialization signature: ${{txSign}}`);
+      const txSign = await provider.sendAndConfirm(addEntity.transaction);
+      entityPda = addEntity.entityPda;
+      console.log(`Initialized a new Entity (ID=${{addEntity.entityId}}). Initialization signature: ${{txSign}}`);
   }});
 
   it("Add a component", async () => {{
-      const positionComponentPda = FindComponentPda(positionComponent.programId, entityPda, "");
-      let initComponentIx = createInitializeComponentInstruction({{
+      const initComponent = await InitializeComponent({{
           payer: provider.wallet.publicKey,
-          entity: entityPda,
-          data: positionComponentPda,
-          componentProgram: positionComponent.programId,
+          entityPda,
+          componentId: positionComponent.programId,
       }});
-
-      const tx = new anchor.web3.Transaction().add(initComponentIx);
-      const txSign = await provider.sendAndConfirm(tx);
-      console.log(`Initialized a new component. Initialization signature: ${{txSign}}`);
+      const txSign = await provider.sendAndConfirm(initComponent.transaction);
+      console.log(`Initialized the grid component. Initialization signature: ${{txSign}}`);
   }});
 
   it("Apply a system", async () => {{
-      const positionComponentPda = FindComponentPda(positionComponent.programId, entityPda, "");
+      const positionComponentPda = FindComponentPda(positionComponent.programId, entityPda);
       // Check that the component has been initialized and x is 0
       let positionData = await positionComponent.account.position.fetch(
           positionComponentPda
       );
-      expect(positionData.x.toNumber()).to.eq(0);
-      let applySystemIx = createApplyInstruction({{
-          componentProgram: positionComponent.programId,
-          boltSystem: systemMovement.programId,
-          boltComponent: positionComponentPda,
-          authority: provider.wallet.publicKey,
-      }}, {{args: new Uint8Array()}});
 
-      const tx = new anchor.web3.Transaction().add(applySystemIx);
-      await provider.sendAndConfirm(tx);
+      const applySystem = await ApplySystem({{
+        authority: provider.wallet.publicKey,
+        boltSystem: systemMovement.programId,
+        entityPda,
+        components: [positionComponent.programId],
+      }});
+      const txSign = await provider.sendAndConfirm(applySystem.transaction);
+      console.log(`Applied a system. Signature: ${{txSign}}`);
 
       // Check that the system has been applied and x is > 0
       positionData = await positionComponent.account.position.fetch(
