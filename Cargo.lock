@@ -793,6 +793,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8d696c370c750c948ada61c69a0ee2cbbb9c50b1019ddb86d9317157a99c2cae"
 
 [[package]]
+name = "bolt-attribute-bolt-arguments"
+version = "0.1.1"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 1.0.109",
+]
+
+[[package]]
 name = "bolt-attribute-bolt-component"
 version = "0.1.1"
 dependencies = [
@@ -907,6 +916,7 @@ version = "0.1.1"
 dependencies = [
  "ahash 0.8.6",
  "anchor-lang",
+ "bolt-attribute-bolt-arguments",
  "bolt-attribute-bolt-component",
  "bolt-attribute-bolt-component-deserialize",
  "bolt-attribute-bolt-component-id",

@@ -39,7 +39,7 @@ pub(crate) fn create_system(name: &str) -> Result<()> {
             PathBuf::from("Cargo.toml".to_string()),
             workspace_manifest().to_string(),
         ),
-        (program_path.join("Cargo.toml"), cargo_toml(name)),
+        (program_path.join("Cargo.toml"), cargo_toml_with_serde(name)),
         (program_path.join("Xargo.toml"), xargo_toml().to_string()),
     ] as Files;
 
@@ -557,6 +557,41 @@ idl-build = ["anchor-lang/idl-build"]
 [dependencies]
 bolt-lang = "{2}"
 anchor-lang = {3}
+"#,
+        name,
+        name.to_snake_case(),
+        VERSION,
+        // Todo use stable version once new IDL standard is released
+        //anchor_cli::VERSION,
+        ANCHOR_CLI_VERSION
+    )
+}
+
+/// TODO: Remove serde dependency
+fn cargo_toml_with_serde(name: &str) -> String {
+    format!(
+        r#"[package]
+name = "{0}"
+version = "{2}"
+description = "Created with Bolt"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "{1}"
+
+[features]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+default = []
+idl-build = ["anchor-lang/idl-build"]
+
+[dependencies]
+bolt-lang = "{2}"
+anchor-lang = {3}
+serde = {{ version = "1.0", features = ["derive"] }}
 "#,
         name,
         name.to_snake_case(),

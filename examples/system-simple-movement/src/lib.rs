@@ -5,9 +5,7 @@ declare_id!("FSa6qoJXFBR3a7ThQkTAMrC15p6NkchPEjBdd4n6dXxA");
 #[system]
 pub mod system_simple_movement {
 
-    pub fn execute(ctx: Context<Components>, args_p: Vec<u8>) -> Result<Components> {
-        let args = parse_args::<Args>(&args_p);
-
+    pub fn execute(ctx: Context<Components>, args: Args) -> Result<Components> {
         // Compute the new position based on the direction
         let (dx, dy) = match args.direction {
             Direction::Left => (-1, 0),
@@ -28,12 +26,12 @@ pub mod system_simple_movement {
     }
 
     // Define the structs to deserialize the arguments
-    #[derive(serde::Serialize, serde::Deserialize)]
+    #[arguments]
     struct Args {
         direction: Direction,
     }
 
-    #[derive(serde::Serialize, serde::Deserialize)]
+    #[arguments]
     pub enum Direction {
         Left,
         Right,
