@@ -26,12 +26,12 @@ pub mod system_simple_movement {
     }
 
     // Define the structs to deserialize the arguments
-    #[derive(bolt_lang::serde::Deserialize)]
+    #[arguments]
     struct Args {
         direction: Direction,
     }
 
-    #[derive(bolt_lang::serde::Deserialize)]
+    #[arguments]
     pub enum Direction {
         Left,
         Right,

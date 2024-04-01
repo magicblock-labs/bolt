@@ -4,6 +4,7 @@ pub use anchor_lang::{
     AccountDeserialize, AccountSerialize, AnchorDeserialize, AnchorSerialize, Bumps, Result,
 };
 
+pub use bolt_attribute_bolt_arguments::arguments;
 pub use bolt_attribute_bolt_component::component;
 pub use bolt_attribute_bolt_component_deserialize::component_deserialize;
 pub use bolt_attribute_bolt_component_id::component_id;

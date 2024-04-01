@@ -61,8 +61,6 @@ pub fn component(attr: TokenStream, item: TokenStream) -> TokenStream {
     input.attrs.push(additional_derives);
 
     let new_fn = define_new_fn(&input);
-    // print new_fn
-    println!("{:?}", new_fn);
 
     add_bolt_metadata(&mut input);
 

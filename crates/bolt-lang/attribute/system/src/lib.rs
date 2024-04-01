@@ -254,8 +254,10 @@ impl SystemTransform {
                     Type::Path(type_path) => {
                         if let Some(segment) = type_path.path.segments.first() {
                             segment.ident == "Vec" && Self::is_u8_vec(segment)
-                        } else { false }
-                    },
+                        } else {
+                            false
+                        }
+                    }
                     _ => false,
                 }
             } else {
@@ -267,13 +269,14 @@ impl SystemTransform {
                     let arg_original_name = pat_type.pat.to_token_stream();
                     if let syn::Pat::Ident(ref mut pat_ident) = *pat_type.pat {
                         let new_ident_name = format!("_{}", pat_ident.ident);
-                        pat_ident.ident = Ident::new(&new_ident_name, proc_macro2::Span::call_site());
+                        pat_ident.ident =
+                            Ident::new(&new_ident_name, proc_macro2::Span::call_site());
                     }
                     let arg_name = pat_type.pat.to_token_stream();
                     pat_type.ty = Box::new(syn::parse_quote! { Vec<u8> });
                     let parse_stmt: Stmt = parse_quote! {
-                            let #arg_original_name = parse_args::<#original_type>(&#arg_name);
-                        };
+                        let #arg_original_name = parse_args::<#original_type>(&#arg_name);
+                    };
                     item_fn.block.stmts.insert(0, parse_stmt);
                 }
             }
