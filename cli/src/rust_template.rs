@@ -12,7 +12,7 @@ use std::path::{Path, PathBuf};
 // Anchor CLI version
 // TODO: use the stable version once the new IDL standard is released
 pub const ANCHOR_CLI_VERSION: &str =
-    "{ git = \"https://github.com/coral-xyz/anchor.git\", rev = \"0f60909\" }";
+    "{ git = { version = \"0.29.0\", \"https://github.com/coral-xyz/anchor.git\", rev = \"0f60909\" }";
 pub const TS_ANCHOR_VERSION: &str = "0.29.1";
 
 /// Create a component from the given name.
