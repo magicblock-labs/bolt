@@ -146,7 +146,7 @@ exports.ApplySystem =
 var index_1 = require("../index");
 var bn_js_1 = __importDefault(require("bn.js"));
 var web3_js_1 = require("@solana/web3.js");
-var MAX_COMPONENTS = 3;
+var MAX_COMPONENTS = 5;
 function InitializeNewWorld(_a) {
   var payer = _a.payer,
     connection = _a.connection;
@@ -272,6 +272,8 @@ function ApplySystem(_a) {
         createApplyInstruction: index_1.createApplyInstruction,
         createApply2Instruction: index_1.createApply2Instruction,
         createApply3Instruction: index_1.createApply3Instruction,
+        createApply4Instruction: index_1.createApply4Instruction,
+        createApply5Instruction: index_1.createApply5Instruction,
       };
       if (components.length === 0) throw new Error("No components provided");
       if (seed == null) seed = new Array(components.length).fill("");

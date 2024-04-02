@@ -8,6 +8,7 @@ module.exports = {
   idlGenerator: "anchor",
   programName: "world",
   programId: "WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n",
+  removeExistingIdl: false,
   idlDir,
   sdkDir,
   binaryInstallDir,

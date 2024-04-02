@@ -12,12 +12,14 @@ import {
   createApplyInstruction,
   createApply2Instruction,
   createApply3Instruction,
+  createApply4Instruction,
+  createApply5Instruction,
 } from "../index";
 import BN from "bn.js";
 import { type PublicKey, Transaction, type Connection } from "@solana/web3.js";
 import type web3 from "@solana/web3.js";
 
-const MAX_COMPONENTS = 3;
+const MAX_COMPONENTS = 5;
 
 /**
  * Create the transaction to Initialize a new world
@@ -153,6 +155,8 @@ export async function ApplySystem({
     createApplyInstruction,
     createApply2Instruction,
     createApply3Instruction,
+    createApply4Instruction,
+    createApply5Instruction,
   };
   if (components.length === 0) throw new Error("No components provided");
   if (seed == null) seed = new Array(components.length).fill("");

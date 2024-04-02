@@ -34,6 +34,8 @@ __exportStar(require("./addEntity"), exports);
 __exportStar(require("./apply"), exports);
 __exportStar(require("./apply2"), exports);
 __exportStar(require("./apply3"), exports);
+__exportStar(require("./apply4"), exports);
+__exportStar(require("./apply5"), exports);
 __exportStar(require("./initializeComponent"), exports);
 __exportStar(require("./initializeNewWorld"), exports);
 __exportStar(require("./initializeRegistry"), exports);

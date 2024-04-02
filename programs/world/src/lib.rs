@@ -19,7 +19,7 @@ security_txt! {
 
 mod error;
 
-#[apply_system(max_components = 3)]
+#[apply_system(max_components = 5)]
 #[program]
 pub mod world {
     use super::*;
