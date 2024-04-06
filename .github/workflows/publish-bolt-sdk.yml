@@ -175,8 +175,6 @@ jobs:
 
       - name: npm publish
         run: |
-          npm install --global yarn
-          npm install --global eslint
           yarn install
           echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
           npm set //registry.npmjs.org/:_authToken ${{ secrets.NPM_TOKEN }}
