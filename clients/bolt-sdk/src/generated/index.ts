@@ -1,5 +1,5 @@
 import { PublicKey } from "@solana/web3.js";
-import type BN from "bn.js";
+import BN from "bn.js";
 export * from "./accounts";
 export * from "./instructions";
 export * from "./transactions/transactions";
@@ -34,27 +34,33 @@ export function FindWorldRegistryPda(
 }
 
 export function FindWorldPda(
-  id: BN,
+  id: BN | string | number | Uint8Array,
   programId: PublicKey = new PublicKey(PROGRAM_ID)
 ) {
+  id = CastToBN(id);
+  const idBuffer = Buffer.from(id.toArrayLike(Buffer, "be", 8));
   return PublicKey.findProgramAddressSync(
-    [Buffer.from("world"), id.toBuffer("be", 8)],
+    [Buffer.from("world"), idBuffer],
     programId
   )[0];
 }
 
 export function FindEntityPda(
-  worldId: BN,
-  entityId: BN,
+  worldId: BN | string | number | Uint8Array,
+  entityId: BN | string | number | Uint8Array,
   extraSeed?: string,
   programId: PublicKey = new PublicKey(PROGRAM_ID)
 ) {
-  const seeds = [Buffer.from("entity"), worldId.toBuffer("be", 8)];
+  worldId = CastToBN(worldId);
+  entityId = CastToBN(entityId);
+  const worldIdBuffer = Buffer.from(worldId.toArrayLike(Buffer, "be", 8));
+  const entityIdBuffer = Buffer.from(entityId.toArrayLike(Buffer, "be", 8));
+  const seeds = [Buffer.from("entity"), worldIdBuffer];
   if (extraSeed != null) {
     seeds.push(Buffer.from(new Uint8Array(8)));
     seeds.push(Buffer.from(extraSeed));
   } else {
-    seeds.push(entityId.toBuffer("be", 8));
+    seeds.push(entityIdBuffer);
   }
   return PublicKey.findProgramAddressSync(seeds, programId)[0];
 }
@@ -68,6 +74,13 @@ export function FindComponentPda(
     [Buffer.from(componentId), entity.toBytes()],
     componentProgramId
   )[0];
+}
+
+function CastToBN(id: BN | string | number | Uint8Array) {
+  if (!(id instanceof BN)) {
+    id = new BN(id);
+  }
+  return id;
 }
 
 /**

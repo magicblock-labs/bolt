@@ -1,6 +1,6 @@
 /// <reference types="node" />
 import { PublicKey } from "@solana/web3.js";
-import type BN from "bn.js";
+import BN from "bn.js";
 export * from "./accounts";
 export * from "./instructions";
 export * from "./transactions/transactions";
@@ -9,10 +9,13 @@ export declare const PROGRAM_ADDRESS =
 export declare const SYSVAR_INSTRUCTIONS_PUBKEY: PublicKey;
 export declare const PROGRAM_ID: PublicKey;
 export declare function FindWorldRegistryPda(programId?: PublicKey): PublicKey;
-export declare function FindWorldPda(id: BN, programId?: PublicKey): PublicKey;
+export declare function FindWorldPda(
+  id: BN | string | number | Uint8Array,
+  programId?: PublicKey
+): PublicKey;
 export declare function FindEntityPda(
-  worldId: BN,
-  entityId: BN,
+  worldId: BN | string | number | Uint8Array,
+  entityId: BN | string | number | Uint8Array,
   extraSeed?: string,
   programId?: PublicKey
 ): PublicKey;

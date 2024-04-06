@@ -29,6 +29,11 @@ var __exportStar =
       if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p))
         __createBinding(exports, m, p);
   };
+var __importDefault =
+  (this && this.__importDefault) ||
+  function (mod) {
+    return mod && mod.__esModule ? mod : { default: mod };
+  };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SerializeArgs =
   exports.FindComponentPda =
@@ -40,6 +45,7 @@ exports.SerializeArgs =
   exports.PROGRAM_ADDRESS =
     void 0;
 var web3_js_1 = require("@solana/web3.js");
+var bn_js_1 = __importDefault(require("bn.js"));
 __exportStar(require("./accounts"), exports);
 __exportStar(require("./instructions"), exports);
 __exportStar(require("./transactions/transactions"), exports);
@@ -62,8 +68,10 @@ function FindWorldPda(id, programId) {
   if (programId === void 0) {
     programId = new web3_js_1.PublicKey(exports.PROGRAM_ID);
   }
+  id = CastToBN(id);
+  var idBuffer = Buffer.from(id.toArrayLike(Buffer, "be", 8));
   return web3_js_1.PublicKey.findProgramAddressSync(
-    [Buffer.from("world"), id.toBuffer("be", 8)],
+    [Buffer.from("world"), idBuffer],
     programId
   )[0];
 }
@@ -72,12 +80,16 @@ function FindEntityPda(worldId, entityId, extraSeed, programId) {
   if (programId === void 0) {
     programId = new web3_js_1.PublicKey(exports.PROGRAM_ID);
   }
-  var seeds = [Buffer.from("entity"), worldId.toBuffer("be", 8)];
+  worldId = CastToBN(worldId);
+  entityId = CastToBN(entityId);
+  var worldIdBuffer = Buffer.from(worldId.toArrayLike(Buffer, "be", 8));
+  var entityIdBuffer = Buffer.from(entityId.toArrayLike(Buffer, "be", 8));
+  var seeds = [Buffer.from("entity"), worldIdBuffer];
   if (extraSeed != null) {
     seeds.push(Buffer.from(new Uint8Array(8)));
     seeds.push(Buffer.from(extraSeed));
   } else {
-    seeds.push(entityId.toBuffer("be", 8));
+    seeds.push(entityIdBuffer);
   }
   return web3_js_1.PublicKey.findProgramAddressSync(seeds, programId)[0];
 }
@@ -92,6 +104,12 @@ function FindComponentPda(componentProgramId, entity, componentId) {
   )[0];
 }
 exports.FindComponentPda = FindComponentPda;
+function CastToBN(id) {
+  if (!(id instanceof bn_js_1.default)) {
+    id = new bn_js_1.default(id);
+  }
+  return id;
+}
 function SerializeArgs(args) {
   if (args === void 0) {
     args = {};

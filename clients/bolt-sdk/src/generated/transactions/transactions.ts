@@ -1,5 +1,10 @@
 import {
   createAddEntityInstruction,
+  createApply2Instruction,
+  createApply3Instruction,
+  createApply4Instruction,
+  createApply5Instruction,
+  createApplyInstruction,
   createInitializeComponentInstruction,
   createInitializeNewWorldInstruction,
   FindComponentPda,
@@ -9,15 +14,10 @@ import {
   Registry,
   SerializeArgs,
   World,
-  createApplyInstruction,
-  createApply2Instruction,
-  createApply3Instruction,
-  createApply4Instruction,
-  createApply5Instruction,
 } from "../index";
 import BN from "bn.js";
-import { type PublicKey, Transaction, type Connection } from "@solana/web3.js";
 import type web3 from "@solana/web3.js";
+import { type Connection, type PublicKey, Transaction } from "@solana/web3.js";
 
 const MAX_COMPONENTS = 5;
 
@@ -87,7 +87,7 @@ export async function AddEntity({
  * @param payer
  * @param entityPda
  * @param componentId
- * @param seed
+ * @param seeds
  * @param authority
  * @param anchorRemainingAccounts
  * @constructor
@@ -123,34 +123,25 @@ export async function InitializeComponent({
   };
 }
 
-/**
- * Apply a system to an entity and its components
- * @param authority
- * @param boltSystem
- * @param entityPda
- * @param components
- * @param args
- * @param extraAccounts
- * @param seed
- * @constructor
- */
-export async function ApplySystem({
-  authority,
-  boltSystem,
-  entityPda,
-  components,
-  args = {},
-  extraAccounts,
-  seed,
-}: {
-  authority: PublicKey;
-  boltSystem: PublicKey;
-  entityPda: PublicKey;
+interface ApplySystemInstruction {
+  entity: PublicKey;
   components: PublicKey[];
-  args?: object;
+  system: PublicKey;
+  authority: PublicKey;
+  seeds?: string[];
   extraAccounts?: web3.AccountMeta[];
-  seed?: string[];
-}): Promise<{ transaction: Transaction }> {
+  args?: object;
+}
+
+export function createApplySystemInstruction({
+  entity,
+  components,
+  system,
+  seeds,
+  authority,
+  extraAccounts,
+  args,
+}: ApplySystemInstruction): web3.TransactionInstruction {
   const instructionFunctions = {
     createApplyInstruction,
     createApply2Instruction,
@@ -159,15 +150,15 @@ export async function ApplySystem({
     createApply5Instruction,
   };
   if (components.length === 0) throw new Error("No components provided");
-  if (seed == null) seed = new Array(components.length).fill("");
-  if (seed.length !== components.length)
+  if (seeds == null) seeds = new Array(components.length).fill("");
+  if (seeds.length !== components.length)
     throw new Error("Seed length does not match components length");
   const componentPdas: PublicKey[] = [];
-  components.forEach((component) => {
-    const componentPda = FindComponentPda(component, entityPda, "");
-    componentPdas.push(componentPda);
-  });
 
+  for (let i = 0; i < components.length; i++) {
+    const componentPda = FindComponentPda(components[i], entity, seeds[i]);
+    componentPdas.push(componentPda);
+  }
   if (components.length < 1 || components.length > MAX_COMPONENTS) {
     throw new Error(
       `Not implemented for component counts outside 1-${MAX_COMPONENTS}`
@@ -176,7 +167,7 @@ export async function ApplySystem({
 
   const instructionArgs = {
     authority,
-    boltSystem,
+    boltSystem: system,
     anchorRemainingAccounts: extraAccounts,
   };
 
@@ -188,10 +179,48 @@ export async function ApplySystem({
   });
 
   const functionName = getApplyInstructionFunctionName(components.length);
-  const applySystemIx = instructionFunctions[functionName](instructionArgs, {
+  return instructionFunctions[functionName](instructionArgs, {
     args: SerializeArgs(args),
   });
+}
 
+/**
+ * Apply a system to an entity and its components
+ * @param authority
+ * @param system
+ * @param entity
+ * @param components
+ * @param args
+ * @param extraAccounts
+ * @param seeds
+ * @constructor
+ */
+export async function ApplySystem({
+  authority,
+  system,
+  entity,
+  components,
+  args = {},
+  extraAccounts,
+  seeds,
+}: {
+  authority: PublicKey;
+  system: PublicKey;
+  entity: PublicKey;
+  components: PublicKey[];
+  args?: object;
+  extraAccounts?: web3.AccountMeta[];
+  seeds?: string[];
+}): Promise<{ transaction: Transaction }> {
+  const applySystemIx = createApplySystemInstruction({
+    entity,
+    components,
+    system,
+    authority,
+    seeds,
+    extraAccounts,
+    args,
+  });
   return {
     transaction: new Transaction().add(applySystemIx),
   };
