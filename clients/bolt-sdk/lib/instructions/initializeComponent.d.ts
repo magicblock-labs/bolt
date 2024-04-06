@@ -5,7 +5,7 @@ export declare const initializeComponentStruct: beet.BeetArgsStruct<{
 }>;
 export interface InitializeComponentInstructionAccounts {
   payer: web3.PublicKey;
-  data: web3.PublicKey;
+  data?: web3.PublicKey;
   entity: web3.PublicKey;
   componentProgram: web3.PublicKey;
   authority?: web3.PublicKey;

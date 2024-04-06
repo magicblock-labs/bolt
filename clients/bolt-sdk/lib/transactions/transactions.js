@@ -139,6 +139,7 @@ var __importDefault =
   };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ApplySystem =
+  exports.createApplySystemInstruction =
   exports.InitializeComponent =
   exports.AddEntity =
   exports.InitializeNewWorld =
@@ -184,23 +185,23 @@ function InitializeNewWorld(_a) {
 exports.InitializeNewWorld = InitializeNewWorld;
 function AddEntity(_a) {
   var payer = _a.payer,
-    worldPda = _a.worldPda,
+    world = _a.world,
     connection = _a.connection;
   return __awaiter(this, void 0, void 0, function () {
-    var world, entityId, entityPda, createEntityIx;
+    var worldInstance, entityId, entityPda, createEntityIx;
     return __generator(this, function (_b) {
       switch (_b.label) {
         case 0:
-          return [4, index_1.World.fromAccountAddress(connection, worldPda)];
+          return [4, index_1.World.fromAccountAddress(connection, world)];
         case 1:
-          world = _b.sent();
-          entityId = new bn_js_1.default(world.entities);
+          worldInstance = _b.sent();
+          entityId = new bn_js_1.default(worldInstance.entities);
           entityPda = (0, index_1.FindEntityPda)(
-            new bn_js_1.default(world.id),
+            new bn_js_1.default(worldInstance.id),
             entityId
           );
           createEntityIx = (0, index_1.createAddEntityInstruction)({
-            world: worldPda,
+            world: world,
             payer: payer,
             entity: entityPda,
           });
@@ -219,7 +220,7 @@ function AddEntity(_a) {
 exports.AddEntity = AddEntity;
 function InitializeComponent(_a) {
   var payer = _a.payer,
-    entityPda = _a.entityPda,
+    entity = _a.entity,
     componentId = _a.componentId,
     _b = _a.seed,
     seed = _b === void 0 ? "" : _b,
@@ -228,14 +229,10 @@ function InitializeComponent(_a) {
   return __awaiter(this, void 0, void 0, function () {
     var componentPda, initComponentIx;
     return __generator(this, function (_c) {
-      componentPda = (0, index_1.FindComponentPda)(
-        componentId,
-        entityPda,
-        seed
-      );
+      componentPda = (0, index_1.FindComponentPda)(componentId, entity, seed);
       initComponentIx = (0, index_1.createInitializeComponentInstruction)({
         payer: payer,
-        entity: entityPda,
+        entity: entity,
         data: componentPda,
         componentProgram: componentId,
         authority: authority,
@@ -252,63 +249,76 @@ function InitializeComponent(_a) {
   });
 }
 exports.InitializeComponent = InitializeComponent;
+function createApplySystemInstruction(_a) {
+  var entity = _a.entity,
+    components = _a.components,
+    system = _a.system,
+    seeds = _a.seeds,
+    authority = _a.authority,
+    extraAccounts = _a.extraAccounts,
+    args = _a.args;
+  var instructionFunctions = {
+    createApplyInstruction: index_1.createApplyInstruction,
+    createApply2Instruction: index_1.createApply2Instruction,
+    createApply3Instruction: index_1.createApply3Instruction,
+    createApply4Instruction: index_1.createApply4Instruction,
+    createApply5Instruction: index_1.createApply5Instruction,
+  };
+  if (components.length === 0) throw new Error("No components provided");
+  if (seeds == null) seeds = new Array(components.length).fill("");
+  if (seeds.length !== components.length)
+    throw new Error("Seed length does not match components length");
+  var componentPdas = [];
+  for (var i = 0; i < components.length; i++) {
+    var componentPda = (0, index_1.FindComponentPda)(
+      components[i],
+      entity,
+      seeds[i]
+    );
+    componentPdas.push(componentPda);
+  }
+  if (components.length < 1 || components.length > MAX_COMPONENTS) {
+    throw new Error(
+      "Not implemented for component counts outside 1-".concat(MAX_COMPONENTS)
+    );
+  }
+  var instructionArgs = {
+    authority: authority,
+    boltSystem: system,
+    anchorRemainingAccounts: extraAccounts,
+  };
+  components.forEach(function (component, index) {
+    instructionArgs[getBoltComponentProgramName(index, components.length)] =
+      component;
+    instructionArgs[getBoltComponentName(index, components.length)] =
+      componentPdas[index];
+  });
+  var functionName = getApplyInstructionFunctionName(components.length);
+  return instructionFunctions[functionName](instructionArgs, {
+    args: (0, index_1.SerializeArgs)(args),
+  });
+}
+exports.createApplySystemInstruction = createApplySystemInstruction;
 function ApplySystem(_a) {
   var authority = _a.authority,
-    boltSystem = _a.boltSystem,
-    entityPda = _a.entityPda,
+    system = _a.system,
+    entity = _a.entity,
     components = _a.components,
     _b = _a.args,
     args = _b === void 0 ? {} : _b,
     extraAccounts = _a.extraAccounts,
-    seed = _a.seed;
+    seeds = _a.seeds;
   return __awaiter(this, void 0, void 0, function () {
-    var instructionFunctions,
-      componentPdas,
-      instructionArgs,
-      functionName,
-      applySystemIx;
+    var applySystemIx;
     return __generator(this, function (_c) {
-      instructionFunctions = {
-        createApplyInstruction: index_1.createApplyInstruction,
-        createApply2Instruction: index_1.createApply2Instruction,
-        createApply3Instruction: index_1.createApply3Instruction,
-        createApply4Instruction: index_1.createApply4Instruction,
-        createApply5Instruction: index_1.createApply5Instruction,
-      };
-      if (components.length === 0) throw new Error("No components provided");
-      if (seed == null) seed = new Array(components.length).fill("");
-      if (seed.length !== components.length)
-        throw new Error("Seed length does not match components length");
-      componentPdas = [];
-      components.forEach(function (component) {
-        var componentPda = (0, index_1.FindComponentPda)(
-          component,
-          entityPda,
-          ""
-        );
-        componentPdas.push(componentPda);
-      });
-      if (components.length < 1 || components.length > MAX_COMPONENTS) {
-        throw new Error(
-          "Not implemented for component counts outside 1-".concat(
-            MAX_COMPONENTS
-          )
-        );
-      }
-      instructionArgs = {
+      applySystemIx = createApplySystemInstruction({
+        entity: entity,
+        components: components,
+        system: system,
         authority: authority,
-        boltSystem: boltSystem,
-        anchorRemainingAccounts: extraAccounts,
-      };
-      components.forEach(function (component, index) {
-        instructionArgs[getBoltComponentProgramName(index, components.length)] =
-          component;
-        instructionArgs[getBoltComponentName(index, components.length)] =
-          componentPdas[index];
-      });
-      functionName = getApplyInstructionFunctionName(components.length);
-      applySystemIx = instructionFunctions[functionName](instructionArgs, {
-        args: (0, index_1.SerializeArgs)(args),
+        seeds: seeds,
+        extraAccounts: extraAccounts,
+        args: args,
       });
       return [
         2,

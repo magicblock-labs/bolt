@@ -1,6 +1,6 @@
 import BN from "bn.js";
-import { type PublicKey, Transaction, type Connection } from "@solana/web3.js";
 import type web3 from "@solana/web3.js";
+import { type Connection, type PublicKey, Transaction } from "@solana/web3.js";
 export declare function InitializeNewWorld({
   payer,
   connection,
@@ -14,11 +14,11 @@ export declare function InitializeNewWorld({
 }>;
 export declare function AddEntity({
   payer,
-  worldPda,
+  world,
   connection,
 }: {
   payer: PublicKey;
-  worldPda: PublicKey;
+  world: PublicKey;
   connection: Connection;
 }): Promise<{
   transaction: Transaction;
@@ -27,14 +27,14 @@ export declare function AddEntity({
 }>;
 export declare function InitializeComponent({
   payer,
-  entityPda,
+  entity,
   componentId,
   seed,
   authority,
   anchorRemainingAccounts,
 }: {
   payer: PublicKey;
-  entityPda: PublicKey;
+  entity: PublicKey;
   componentId: PublicKey;
   seed?: string;
   authority?: web3.PublicKey;
@@ -43,23 +43,42 @@ export declare function InitializeComponent({
   transaction: Transaction;
   componentPda: PublicKey;
 }>;
+interface ApplySystemInstruction {
+  entity: PublicKey;
+  components: PublicKey[];
+  system: PublicKey;
+  authority: PublicKey;
+  seeds?: string[];
+  extraAccounts?: web3.AccountMeta[];
+  args?: object;
+}
+export declare function createApplySystemInstruction({
+  entity,
+  components,
+  system,
+  seeds,
+  authority,
+  extraAccounts,
+  args,
+}: ApplySystemInstruction): web3.TransactionInstruction;
 export declare function ApplySystem({
   authority,
-  boltSystem,
-  entityPda,
+  system,
+  entity,
   components,
   args,
   extraAccounts,
-  seed,
+  seeds,
 }: {
   authority: PublicKey;
-  boltSystem: PublicKey;
-  entityPda: PublicKey;
+  system: PublicKey;
+  entity: PublicKey;
   components: PublicKey[];
   args?: object;
   extraAccounts?: web3.AccountMeta[];
-  seed?: string[];
+  seeds?: string[];
 }): Promise<{
   transaction: Transaction;
 }>;
+export {};
 //# sourceMappingURL=transactions.d.ts.map

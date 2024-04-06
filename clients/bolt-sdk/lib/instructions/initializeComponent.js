@@ -59,7 +59,7 @@ exports.initializeComponentInstructionDiscriminator = [
   36, 143, 233, 113, 12, 234, 61, 30,
 ];
 function createInitializeComponentInstruction(accounts, programId) {
-  var _a, _b, _c;
+  var _a, _b, _c, _d;
   if (programId === void 0) {
     programId = new web3.PublicKey(
       "WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n"
@@ -76,7 +76,13 @@ function createInitializeComponentInstruction(accounts, programId) {
       isSigner: true,
     },
     {
-      pubkey: accounts.data,
+      pubkey:
+        (_a = accounts.data) !== null && _a !== void 0
+          ? _a
+          : (0, index_1.FindComponentPda)(
+              accounts.componentProgram,
+              accounts.entity
+            ),
       isWritable: true,
       isSigner: false,
     },
@@ -92,22 +98,22 @@ function createInitializeComponentInstruction(accounts, programId) {
     },
     {
       pubkey:
-        (_a = accounts.authority) !== null && _a !== void 0 ? _a : programId,
+        (_b = accounts.authority) !== null && _b !== void 0 ? _b : programId,
       isWritable: false,
       isSigner: false,
     },
     {
       pubkey:
-        (_b = accounts.instructionSysvarAccount) !== null && _b !== void 0
-          ? _b
+        (_c = accounts.instructionSysvarAccount) !== null && _c !== void 0
+          ? _c
           : index_1.SYSVAR_INSTRUCTIONS_PUBKEY,
       isWritable: false,
       isSigner: false,
     },
     {
       pubkey:
-        (_c = accounts.systemProgram) !== null && _c !== void 0
-          ? _c
+        (_d = accounts.systemProgram) !== null && _d !== void 0
+          ? _d
           : web3.SystemProgram.programId,
       isWritable: false,
       isSigner: false,
@@ -115,11 +121,11 @@ function createInitializeComponentInstruction(accounts, programId) {
   ];
   if (accounts.anchorRemainingAccounts != null) {
     for (
-      var _i = 0, _d = accounts.anchorRemainingAccounts;
-      _i < _d.length;
+      var _i = 0, _e = accounts.anchorRemainingAccounts;
+      _i < _e.length;
       _i++
     ) {
-      var acc = _d[_i];
+      var acc = _e[_i];
       keys.push(acc);
     }
   }

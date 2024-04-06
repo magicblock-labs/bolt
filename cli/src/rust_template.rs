@@ -443,7 +443,7 @@ describe("{}", () => {{
   it("Add an entity", async () => {{
       const addEntity = await AddEntity({{
         payer: provider.wallet.publicKey,
-        worldPda: worldPda,
+        world: worldPda,
         connection: provider.connection,
       }});
       const txSign = await provider.sendAndConfirm(addEntity.transaction);
@@ -454,7 +454,7 @@ describe("{}", () => {{
   it("Add a component", async () => {{
       const initComponent = await InitializeComponent({{
           payer: provider.wallet.publicKey,
-          entityPda,
+          entity: entityPda,
           componentId: positionComponent.programId,
       }});
       const txSign = await provider.sendAndConfirm(initComponent.transaction);
@@ -470,8 +470,8 @@ describe("{}", () => {{
 
       const applySystem = await ApplySystem({{
         authority: provider.wallet.publicKey,
-        boltSystem: systemMovement.programId,
-        entityPda,
+        system: systemMovement.programId,
+        entity: entityPda,
         components: [positionComponent.programId],
       }});
       const txSign = await provider.sendAndConfirm(applySystem.transaction);

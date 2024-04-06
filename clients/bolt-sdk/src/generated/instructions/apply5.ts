@@ -71,7 +71,7 @@ export interface Apply5InstructionAccounts {
 }
 
 export const apply5InstructionDiscriminator = [
-  223, 104, 24, 79, 252, 196, 14, 109,
+  70, 164, 214, 28, 136, 116, 84, 153,
 ];
 
 /**

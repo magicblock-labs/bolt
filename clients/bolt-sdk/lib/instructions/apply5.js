@@ -73,7 +73,7 @@ exports.apply5Struct = new beet.FixableBeetArgsStruct(
   ],
   "Apply5InstructionArgs"
 );
-exports.apply5InstructionDiscriminator = [223, 104, 24, 79, 252, 196, 14, 109];
+exports.apply5InstructionDiscriminator = [70, 164, 214, 28, 136, 116, 84, 153];
 function createApply5Instruction(accounts, args, programId) {
   var _a, _b;
   if (programId === void 0) {
