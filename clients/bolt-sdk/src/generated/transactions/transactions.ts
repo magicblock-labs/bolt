@@ -59,19 +59,19 @@ export async function InitializeNewWorld({
  */
 export async function AddEntity({
   payer,
-  worldPda,
+  world,
   connection,
 }: {
   payer: PublicKey;
-  worldPda: PublicKey;
+  world: PublicKey;
   connection: Connection;
 }): Promise<{ transaction: Transaction; entityPda: PublicKey; entityId: BN }> {
-  const world = await World.fromAccountAddress(connection, worldPda);
-  const entityId = new BN(world.entities);
-  const entityPda = FindEntityPda(new BN(world.id), entityId);
+  const worldInstance = await World.fromAccountAddress(connection, world);
+  const entityId = new BN(worldInstance.entities);
+  const entityPda = FindEntityPda(new BN(worldInstance.id), entityId);
 
   const createEntityIx = createAddEntityInstruction({
-    world: worldPda,
+    world,
     payer,
     entity: entityPda,
   });
@@ -94,23 +94,23 @@ export async function AddEntity({
  */
 export async function InitializeComponent({
   payer,
-  entityPda,
+  entity,
   componentId,
   seed = "",
   authority,
   anchorRemainingAccounts,
 }: {
   payer: PublicKey;
-  entityPda: PublicKey;
+  entity: PublicKey;
   componentId: PublicKey;
   seed?: string;
   authority?: web3.PublicKey;
   anchorRemainingAccounts?: web3.AccountMeta[];
 }): Promise<{ transaction: Transaction; componentPda: PublicKey }> {
-  const componentPda = FindComponentPda(componentId, entityPda, seed);
+  const componentPda = FindComponentPda(componentId, entity, seed);
   const initComponentIx = createInitializeComponentInstruction({
     payer,
-    entity: entityPda,
+    entity,
     data: componentPda,
     componentProgram: componentId,
     authority,

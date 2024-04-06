@@ -14,11 +14,11 @@ export declare function InitializeNewWorld({
 }>;
 export declare function AddEntity({
   payer,
-  worldPda,
+  world,
   connection,
 }: {
   payer: PublicKey;
-  worldPda: PublicKey;
+  world: PublicKey;
   connection: Connection;
 }): Promise<{
   transaction: Transaction;
@@ -27,14 +27,14 @@ export declare function AddEntity({
 }>;
 export declare function InitializeComponent({
   payer,
-  entityPda,
+  entity,
   componentId,
   seed,
   authority,
   anchorRemainingAccounts,
 }: {
   payer: PublicKey;
-  entityPda: PublicKey;
+  entity: PublicKey;
   componentId: PublicKey;
   seed?: string;
   authority?: web3.PublicKey;

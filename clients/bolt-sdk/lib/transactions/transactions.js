@@ -185,23 +185,23 @@ function InitializeNewWorld(_a) {
 exports.InitializeNewWorld = InitializeNewWorld;
 function AddEntity(_a) {
   var payer = _a.payer,
-    worldPda = _a.worldPda,
+    world = _a.world,
     connection = _a.connection;
   return __awaiter(this, void 0, void 0, function () {
-    var world, entityId, entityPda, createEntityIx;
+    var worldInstance, entityId, entityPda, createEntityIx;
     return __generator(this, function (_b) {
       switch (_b.label) {
         case 0:
-          return [4, index_1.World.fromAccountAddress(connection, worldPda)];
+          return [4, index_1.World.fromAccountAddress(connection, world)];
         case 1:
-          world = _b.sent();
-          entityId = new bn_js_1.default(world.entities);
+          worldInstance = _b.sent();
+          entityId = new bn_js_1.default(worldInstance.entities);
           entityPda = (0, index_1.FindEntityPda)(
-            new bn_js_1.default(world.id),
+            new bn_js_1.default(worldInstance.id),
             entityId
           );
           createEntityIx = (0, index_1.createAddEntityInstruction)({
-            world: worldPda,
+            world: world,
             payer: payer,
             entity: entityPda,
           });
@@ -220,7 +220,7 @@ function AddEntity(_a) {
 exports.AddEntity = AddEntity;
 function InitializeComponent(_a) {
   var payer = _a.payer,
-    entityPda = _a.entityPda,
+    entity = _a.entity,
     componentId = _a.componentId,
     _b = _a.seed,
     seed = _b === void 0 ? "" : _b,
@@ -229,14 +229,10 @@ function InitializeComponent(_a) {
   return __awaiter(this, void 0, void 0, function () {
     var componentPda, initComponentIx;
     return __generator(this, function (_c) {
-      componentPda = (0, index_1.FindComponentPda)(
-        componentId,
-        entityPda,
-        seed
-      );
+      componentPda = (0, index_1.FindComponentPda)(componentId, entity, seed);
       initComponentIx = (0, index_1.createInitializeComponentInstruction)({
         payer: payer,
-        entity: entityPda,
+        entity: entity,
         data: componentPda,
         componentProgram: componentId,
         authority: authority,
