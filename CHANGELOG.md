@@ -1,4 +1,9 @@
 
+## [0.1.4] - 2024-04-06
+
+### ✨️ Features
+ - Improve Bolt typescript SDK (#41)
+
 ## [0.1.3] - 2024-04-02
 
 
