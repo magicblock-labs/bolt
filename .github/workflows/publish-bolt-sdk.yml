@@ -175,10 +175,11 @@ jobs:
 
       - name: npm publish
         run: |
-          yarn install
+          npm install --global eslint@^8.33.0
+          npm install
           echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
           npm set //registry.npmjs.org/:_authToken ${{ secrets.NPM_TOKEN }}
-          cd clients/bolt-sdk/ && yarn build && yarn lint:fix && cd ../../ && yarn lint:fix
+          cd clients/bolt-sdk/ && npm run build && npm run lint:fix && cd ../../ && npm run lint:fix
           cd clients/bolt-sdk/
           if [ "${DRY_RUN}" = "true" ]; then
             echo "Running npm publish in dry-run mode"
