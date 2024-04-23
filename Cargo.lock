@@ -931,6 +931,7 @@ dependencies = [
 name = "bolt-lang"
 version = "0.1.4"
 dependencies = [
+ "ahash 0.8.11",
  "anchor-lang",
  "bolt-attribute-bolt-arguments",
  "bolt-attribute-bolt-component",

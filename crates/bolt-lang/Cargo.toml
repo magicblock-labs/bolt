@@ -28,3 +28,4 @@ bolt-system = { workspace = true }
 # Other dependencies
 serde = { workspace = true }
 serde_json = {workspace = true }
+ahash = { workspace = true }
