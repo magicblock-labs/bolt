@@ -7,6 +7,7 @@ use anchor_cli::config::{
     TestValidator, Validator, WithPath,
 };
 use anchor_client::Cluster;
+use anchor_lang_idl::types::Idl;
 use anyhow::{anyhow, Result};
 use clap::{Parser, Subcommand};
 use heck::{ToKebabCase, ToSnakeCase};
@@ -16,7 +17,6 @@ use std::io::Write;
 use std::io::{self, BufRead};
 use std::path::{Path, PathBuf};
 use std::process::Stdio;
-use anchor_lang_idl::types::Idl;
 
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 pub const ANCHOR_VERSION: &str = anchor_cli::VERSION;
