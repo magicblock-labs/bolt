@@ -341,7 +341,7 @@ pub fn ts_package_json(jest: bool) -> String {
 
 pub fn mocha(name: &str) -> String {
     format!(
-        r#"const anchor = require("@magicblock-labs/anchor");
+        r#"const anchor = require("@coral-xyz/anchor");
 const boltSdk = require("@magicblock-labs/bolt-sdk");
 const {{
     InitializeNewWorld,
@@ -369,7 +369,7 @@ describe("{}", () => {{
 
 pub fn jest(name: &str) -> String {
     format!(
-        r#"const anchor = require("@magicblock-labs/anchor");
+        r#"const anchor = require("@coral-xyz/anchor");
 const boltSdk = require("@magicblock-labs/bolt-sdk");
 const {{
     InitializeNewWorld,
@@ -400,8 +400,8 @@ describe("{}", () => {{
 
 pub fn ts_mocha(name: &str) -> String {
     format!(
-        r#"import * as anchor from "@magicblock-labs/anchor";
-import {{ Program }} from "@magicblock-labs/anchor";
+        r#"import * as anchor from "@coral-xyz/anchor";
+import {{ Program }} from "@coral-xyz/anchor";
 import {{ PublicKey }} from "@solana/web3.js";
 import {{ Position }} from "../target/types/position";
 import {{ Movement }} from "../target/types/movement";

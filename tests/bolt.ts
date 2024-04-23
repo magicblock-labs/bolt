@@ -1,5 +1,5 @@
-import * as anchor from "@magicblock-labs/anchor";
-import { type Program, web3 } from "@magicblock-labs/anchor";
+import * as anchor from "@coral-xyz/anchor";
+import { type Program, web3 } from "@coral-xyz/anchor";
 import { type PublicKey } from "@solana/web3.js";
 import { type Position } from "../target/types/position";
 import { type Velocity } from "../target/types/velocity";
