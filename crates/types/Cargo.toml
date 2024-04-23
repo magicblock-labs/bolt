@@ -10,4 +10,4 @@ name = "bolt_types"
 
 [dependencies]
 bolt-lang = { path = "../../crates/bolt-lang" }
-anchor-lang = { git = "https://github.com/coral-xyz/anchor.git", rev = "0f60909" }
+anchor-lang = { workpace = true }
