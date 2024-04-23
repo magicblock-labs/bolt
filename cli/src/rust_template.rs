@@ -508,7 +508,7 @@ idl-build = ["anchor-lang/idl-build"]
 
 [dependencies]
 bolt-lang = "{2}"
-anchor-lang = {3}
+anchor-lang = "{3}"
 "#,
         name,
         name.to_snake_case(),
