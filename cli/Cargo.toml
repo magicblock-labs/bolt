@@ -25,7 +25,6 @@ anchor-cli = { workspace = true }
 anchor-client = { workspace = true }
 anchor-syn = { workspace = true }
 anchor-lang-idl = { workspace = true, features = ["build"] }
-solana-client = "1.16"
 anyhow = { workspace = true }
 serde_json = { workspace = true }
 heck = { workspace = true }
