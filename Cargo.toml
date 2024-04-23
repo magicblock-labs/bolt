@@ -7,7 +7,7 @@ members = [
 ]
 
 [workspace.package]
-version = "0.1.4"
+version = "0.1.5"
 authors = ["Magicblock Labs <dev@magicblock.gg>"]
 repository = "https://github.com/magicblock-labs/bolt"
 homepage = "https://www.magicblock.gg/"
@@ -15,20 +15,20 @@ license = "MIT"
 edition = "2021"
 
 [workspace.dependencies]
-bolt-attribute-bolt-program = { path = "crates/bolt-lang/attribute/bolt-program", version = "=0.1.4" }
-bolt-attribute-bolt-component = { path = "crates/bolt-lang/attribute/component", version = "=0.1.4" }
-bolt-attribute-bolt-system = { path = "crates/bolt-lang/attribute/system", version = "=0.1.4"}
-bolt-attribute-bolt-system-input = { path = "crates/bolt-lang/attribute/system-input", version = "=0.1.4" }
-bolt-attribute-bolt-extra-accounts = { path = "crates/bolt-lang/attribute/extra-accounts", version = "=0.1.4" }
-bolt-attribute-bolt-arguments = { path = "crates/bolt-lang/attribute/arguments", version = "=0.1.4" }
-bolt-attribute-bolt-component-deserialize = { path = "crates/bolt-lang/attribute/component-deserialize", version = "=0.1.4" }
-bolt-attribute-bolt-component-id = { path = "crates/bolt-lang/attribute/component-id", version = "=0.1.4" }
-bolt-helpers-system-template = { path = "crates/bolt-helpers/attribute/system-template", version = "=0.1.4" }
-bolt-helpers-world-apply = { path = "crates/bolt-helpers/attribute/world-apply", version = "=0.1.4" }
-bolt-utils = { path = "crates/bolt-lang/utils", version = "=0.1.4" }
-world = { path = "programs/world", features = ["cpi"], version = "=0.1.4"}
-bolt-system = { path = "programs/bolt-system", features = ["cpi"], version = "=0.1.4"}
-bolt-component = { path = "programs/bolt-component", features = ["cpi"], version = "=0.1.4"}
+bolt-attribute-bolt-program = { path = "crates/bolt-lang/attribute/bolt-program", version = "=0.1.5" }
+bolt-attribute-bolt-component = { path = "crates/bolt-lang/attribute/component", version = "=0.1.5" }
+bolt-attribute-bolt-system = { path = "crates/bolt-lang/attribute/system", version = "=0.1.5"}
+bolt-attribute-bolt-system-input = { path = "crates/bolt-lang/attribute/system-input", version = "=0.1.5" }
+bolt-attribute-bolt-extra-accounts = { path = "crates/bolt-lang/attribute/extra-accounts", version = "=0.1.5" }
+bolt-attribute-bolt-arguments = { path = "crates/bolt-lang/attribute/arguments", version = "=0.1.5" }
+bolt-attribute-bolt-component-deserialize = { path = "crates/bolt-lang/attribute/component-deserialize", version = "=0.1.5" }
+bolt-attribute-bolt-component-id = { path = "crates/bolt-lang/attribute/component-id", version = "=0.1.5" }
+bolt-helpers-system-template = { path = "crates/bolt-helpers/attribute/system-template", version = "=0.1.5" }
+bolt-helpers-world-apply = { path = "crates/bolt-helpers/attribute/world-apply", version = "=0.1.5" }
+bolt-utils = { path = "crates/bolt-lang/utils", version = "=0.1.5" }
+world = { path = "programs/world", features = ["cpi"], version = "=0.1.5"}
+bolt-system = { path = "programs/bolt-system", features = ["cpi"], version = "=0.1.5"}
+bolt-component = { path = "programs/bolt-component", features = ["cpi"], version = "=0.1.5"}
 
 ## External crates
 anchor-lang = { version = "=0.30.0", features = ["init-if-needed"] }
