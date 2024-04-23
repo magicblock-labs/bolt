@@ -26,8 +26,6 @@ world = { workspace = true }
 bolt-system = { workspace = true }
 
 # Other dependencies
-serde = {workspace = true }
+serde = { workspace = true }
 serde_json = {workspace = true }
-
-# TODO: Remove once https://github.com/solana-labs/solana/issues/33504 is resolved.
-ahash = {workspace = true }
+ahash = { workspace = true }

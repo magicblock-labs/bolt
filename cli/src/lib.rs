@@ -7,7 +7,7 @@ use anchor_cli::config::{
     TestValidator, Validator, WithPath,
 };
 use anchor_client::Cluster;
-use anchor_syn::idl::types::Idl;
+use anchor_lang_idl::types::Idl;
 use anyhow::{anyhow, Result};
 use clap::{Parser, Subcommand};
 use heck::{ToKebabCase, ToSnakeCase};

@@ -6,7 +6,7 @@ on:
   pull_request:
 
 env:
-  solana_version: v1.18.8
+  solana_version: v1.18.9
 
 jobs:
   install:
@@ -161,14 +161,15 @@ jobs:
 
       - name: Install the Bolt CLI and create & build a new project
         shell: bash
-        if: ${{ !startsWith(github.ref, 'refs/heads/release/v') && !startsWith(github.head_ref, 'release/v') }}
         run: |
           export PATH="/home/runner/.local/share/solana/install/active_release/bin:$PATH"
           cargo install --path cli --force --locked
           bolt init test-project --force
           cd test-project
-          cargo add --package position --path "../crates/bolt-lang" # Overrides the version with the local version
-          cargo add --package movement --path "../crates/bolt-lang" # -
+          cargo add --package test-project --path "../crates/bolt-lang" || true # Overrides the version with the local version
+          cargo add --package movement --path "../crates/bolt-lang" || true # -
+          cargo add --package position --path "../crates/bolt-lang" || true # -
+          cargo update
           yarn add file:../clients/bolt-sdk/ -D # Overrides the bolt ts SDK with the local version
           bolt build
           bolt test

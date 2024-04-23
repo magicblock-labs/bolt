@@ -1,7 +1,7 @@
 use crate::VERSION;
 use anchor_cli::rust_template::{get_or_create_program_id, ProgramTemplate};
 use anchor_cli::{create_files, Files};
-use anchor_syn::idl::types::{
+use anchor_lang_idl::types::{
     Idl, IdlArrayLen, IdlDefinedFields, IdlGenericArg, IdlType, IdlTypeDef, IdlTypeDefGeneric,
     IdlTypeDefTy,
 };
@@ -9,11 +9,7 @@ use anyhow::Result;
 use heck::{ToSnakeCase, ToUpperCamelCase};
 use std::path::{Path, PathBuf};
 
-// Anchor CLI version
-// TODO: use the stable version once the new IDL standard is released
-pub const ANCHOR_CLI_VERSION: &str =
-    "{ version = \"0.29.0\", git = \"https://github.com/coral-xyz/anchor.git\", rev = \"0f60909\" }";
-pub const TS_ANCHOR_VERSION: &str = "0.29.1";
+pub const ANCHOR_VERSION: &str = anchor_cli::VERSION;
 
 /// Create a component from the given name.
 pub fn create_component(name: &str) -> Result<()> {
@@ -256,7 +252,7 @@ pub fn package_json(jest: bool) -> String {
             "lint": "prettier */*.js \"*/**/*{{.js,.ts}}\" --check"
         }},
         "dependencies": {{
-            "@magicblock-labs/anchor": "^{TS_ANCHOR_VERSION}"
+            "@coral-xyz/anchor": "^{ANCHOR_VERSION}"
         }},
         "devDependencies": {{
             "jest": "^29.0.3",
@@ -273,7 +269,7 @@ pub fn package_json(jest: bool) -> String {
         "lint": "prettier */*.js \"*/**/*{{.js,.ts}}\" --check"
     }},
     "dependencies": {{
-        "@magicblock-labs/anchor": "^{TS_ANCHOR_VERSION}"
+        "@coral-xyz/anchor": "^{ANCHOR_VERSION}"
     }},
     "devDependencies": {{
         "chai": "^4.3.4",
@@ -298,7 +294,7 @@ pub fn ts_package_json(jest: bool) -> String {
             "lint": "prettier */*.js \"*/**/*{{.js,.ts}}\" --check"
         }},
         "dependencies": {{
-            "@magicblock-labs/anchor": "^{TS_ANCHOR_VERSION}"
+            "@coral-xyz/anchor": "^{ANCHOR_VERSION}"
         }},
         "devDependencies": {{
             "@types/bn.js": "^5.1.0",
@@ -322,7 +318,7 @@ pub fn ts_package_json(jest: bool) -> String {
         "lint": "prettier */*.js \"*/**/*{{.js,.ts}}\" --check"
     }},
     "dependencies": {{
-        "@magicblock-labs/anchor": "^{TS_ANCHOR_VERSION}"
+        "@coral-xyz/anchor": "^{ANCHOR_VERSION}"
     }},
     "devDependencies": {{
         "chai": "^4.3.4",
@@ -345,7 +341,7 @@ pub fn ts_package_json(jest: bool) -> String {
 
 pub fn mocha(name: &str) -> String {
     format!(
-        r#"const anchor = require("@magicblock-labs/anchor");
+        r#"const anchor = require("@coral-xyz/anchor");
 const boltSdk = require("@magicblock-labs/bolt-sdk");
 const {{
     InitializeNewWorld,
@@ -373,7 +369,7 @@ describe("{}", () => {{
 
 pub fn jest(name: &str) -> String {
     format!(
-        r#"const anchor = require("@magicblock-labs/anchor");
+        r#"const anchor = require("@coral-xyz/anchor");
 const boltSdk = require("@magicblock-labs/bolt-sdk");
 const {{
     InitializeNewWorld,
@@ -404,8 +400,8 @@ describe("{}", () => {{
 
 pub fn ts_mocha(name: &str) -> String {
     format!(
-        r#"import * as anchor from "@magicblock-labs/anchor";
-import {{ Program }} from "@magicblock-labs/anchor";
+        r#"import * as anchor from "@coral-xyz/anchor";
+import {{ Program }} from "@coral-xyz/anchor";
 import {{ PublicKey }} from "@solana/web3.js";
 import {{ Position }} from "../target/types/position";
 import {{ Movement }} from "../target/types/movement";
@@ -512,14 +508,12 @@ idl-build = ["anchor-lang/idl-build"]
 
 [dependencies]
 bolt-lang = "{2}"
-anchor-lang = {3}
+anchor-lang = "{3}"
 "#,
         name,
         name.to_snake_case(),
         VERSION,
-        // Todo use stable version once new IDL standard is released
-        //anchor_cli::VERSION,
-        ANCHOR_CLI_VERSION
+        ANCHOR_VERSION
     )
 }
 
@@ -546,15 +540,13 @@ idl-build = ["anchor-lang/idl-build"]
 
 [dependencies]
 bolt-lang = "{2}"
-anchor-lang = {3}
+anchor-lang = "{3}"
 serde = {{ version = "1.0", features = ["derive"] }}
 "#,
         name,
         name.to_snake_case(),
         VERSION,
-        // Todo use stable version once new IDL standard is released
-        //anchor_cli::VERSION,
-        ANCHOR_CLI_VERSION
+        ANCHOR_VERSION
     )
 }
 
@@ -761,6 +753,7 @@ pub fn convert_idl_type_to_str(ty: &IdlType) -> String {
             .map(|generics| format!("{name}<{generics}>"))
             .unwrap_or(name.into()),
         IdlType::Generic(ty) => ty.into(),
+        _ => unimplemented!("{ty:?}"),
     }
 }
 
@@ -823,13 +816,11 @@ name = "{1}"
 
 [dependencies]
 bolt-lang = "{2}"
-anchor-lang = {3}
+anchor-lang = "{3}"
 "#,
         name,
         name.to_snake_case(),
         VERSION,
-        // TODO: use the stable version once the new IDL standard is released
-        //anchor_cli::VERSION,
-        ANCHOR_CLI_VERSION
+        ANCHOR_VERSION
     )
 }
