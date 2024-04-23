@@ -810,7 +810,7 @@ checksum = "8d696c370c750c948ada61c69a0ee2cbbb9c50b1019ddb86d9317157a99c2cae"
 
 [[package]]
 name = "bolt-attribute-bolt-arguments"
-version = "0.1.4"
+version = "0.1.5"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -819,7 +819,7 @@ dependencies = [
 
 [[package]]
 name = "bolt-attribute-bolt-component"
-version = "0.1.4"
+version = "0.1.5"
 dependencies = [
  "bolt-utils",
  "proc-macro2",
@@ -829,7 +829,7 @@ dependencies = [
 
 [[package]]
 name = "bolt-attribute-bolt-component-deserialize"
-version = "0.1.4"
+version = "0.1.5"
 dependencies = [
  "bolt-utils",
  "proc-macro2",
@@ -839,7 +839,7 @@ dependencies = [
 
 [[package]]
 name = "bolt-attribute-bolt-component-id"
-version = "0.1.4"
+version = "0.1.5"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -848,7 +848,7 @@ dependencies = [
 
 [[package]]
 name = "bolt-attribute-bolt-extra-accounts"
-version = "0.1.4"
+version = "0.1.5"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -857,7 +857,7 @@ dependencies = [
 
 [[package]]
 name = "bolt-attribute-bolt-program"
-version = "0.1.4"
+version = "0.1.5"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -866,7 +866,7 @@ dependencies = [
 
 [[package]]
 name = "bolt-attribute-bolt-system"
-version = "0.1.4"
+version = "0.1.5"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -875,7 +875,7 @@ dependencies = [
 
 [[package]]
 name = "bolt-attribute-bolt-system-input"
-version = "0.1.4"
+version = "0.1.5"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -884,7 +884,7 @@ dependencies = [
 
 [[package]]
 name = "bolt-cli"
-version = "0.1.4"
+version = "0.1.5"
 dependencies = [
  "anchor-cli",
  "anchor-client",
@@ -899,7 +899,7 @@ dependencies = [
 
 [[package]]
 name = "bolt-component"
-version = "0.1.4"
+version = "0.1.5"
 dependencies = [
  "anchor-lang",
  "bolt-system",
@@ -911,7 +911,7 @@ version = "0.0.1"
 
 [[package]]
 name = "bolt-helpers-system-template"
-version = "0.1.4"
+version = "0.1.5"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -920,7 +920,7 @@ dependencies = [
 
 [[package]]
 name = "bolt-helpers-world-apply"
-version = "0.1.4"
+version = "0.1.5"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -929,7 +929,7 @@ dependencies = [
 
 [[package]]
 name = "bolt-lang"
-version = "0.1.4"
+version = "0.1.5"
 dependencies = [
  "ahash 0.8.11",
  "anchor-lang",
@@ -949,7 +949,7 @@ dependencies = [
 
 [[package]]
 name = "bolt-system"
-version = "0.1.4"
+version = "0.1.5"
 dependencies = [
  "anchor-lang",
  "bolt-helpers-system-template",
@@ -965,7 +965,7 @@ dependencies = [
 
 [[package]]
 name = "bolt-utils"
-version = "0.1.4"
+version = "0.1.5"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -3108,7 +3108,7 @@ dependencies = [
 
 [[package]]
 name = "position"
-version = "0.1.4"
+version = "0.1.5"
 dependencies = [
  "anchor-lang",
  "bolt-lang",
@@ -5219,7 +5219,7 @@ dependencies = [
 
 [[package]]
 name = "system-apply-velocity"
-version = "0.1.4"
+version = "0.1.5"
 dependencies = [
  "anchor-lang",
  "anchor-spl",
@@ -5251,7 +5251,7 @@ dependencies = [
 
 [[package]]
 name = "system-fly"
-version = "0.1.4"
+version = "0.1.5"
 dependencies = [
  "anchor-lang",
  "bolt-lang",
@@ -5260,7 +5260,7 @@ dependencies = [
 
 [[package]]
 name = "system-simple-movement"
-version = "0.1.4"
+version = "0.1.5"
 dependencies = [
  "anchor-lang",
  "bolt-lang",
@@ -5782,7 +5782,7 @@ checksum = "f1bddf1187be692e79c5ffeab891132dfb0f236ed36a43c7ed39f1165ee20191"
 
 [[package]]
 name = "velocity"
-version = "0.1.4"
+version = "0.1.5"
 dependencies = [
  "anchor-lang",
  "bolt-lang",
@@ -6131,7 +6131,7 @@ dependencies = [
 
 [[package]]
 name = "world"
-version = "0.1.4"
+version = "0.1.5"
 dependencies = [
  "anchor-lang",
  "bolt-component",
