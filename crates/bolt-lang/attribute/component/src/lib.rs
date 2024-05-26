@@ -1,7 +1,10 @@
 use proc_macro::TokenStream;
 
-use quote::{quote};
-use syn::{parse_macro_input, parse_quote, Attribute, DeriveInput, Lit, Meta, NestedMeta, MetaNameValue, MetaList};
+use quote::quote;
+use syn::{
+    parse_macro_input, parse_quote, Attribute, DeriveInput, Lit, Meta, MetaList, MetaNameValue,
+    NestedMeta,
+};
 
 use bolt_utils::add_bolt_metadata;
 

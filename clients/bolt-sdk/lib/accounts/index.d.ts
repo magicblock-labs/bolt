@@ -5,8 +5,8 @@ export * from "./Entity";
 export * from "./Registry";
 export * from "./World";
 export declare const accountProviders: {
-    Entity: typeof Entity;
-    Registry: typeof Registry;
-    World: typeof World;
+  Entity: typeof Entity;
+  Registry: typeof Registry;
+  World: typeof World;
 };
 //# sourceMappingURL=index.d.ts.map

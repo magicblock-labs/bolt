@@ -1,11 +1,8 @@
 use proc_macro::TokenStream;
 
 use proc_macro2::TokenStream as TokenStream2;
-use quote::{quote};
-use syn::{
-    AttributeArgs, ItemMod, NestedMeta,
-    parse_macro_input, Type,
-};
+use quote::quote;
+use syn::{parse_macro_input, AttributeArgs, ItemMod, NestedMeta, Type};
 
 /// This macro attribute is used to inject instructions and struct needed to delegate BOLT component.
 ///
@@ -25,7 +22,8 @@ use syn::{
 pub fn delegate(args: TokenStream, input: TokenStream) -> TokenStream {
     let ast = parse_macro_input!(input as syn::ItemMod);
     let args = parse_macro_input!(args as syn::AttributeArgs);
-    let component_type = extract_type_name(&args).expect("Expected a component type in macro arguments");
+    let component_type =
+        extract_type_name(&args).expect("Expected a component type in macro arguments");
     let modified = modify_component_module(ast, &component_type);
     TokenStream::from(quote! {
         #modified
@@ -38,10 +36,15 @@ fn modify_component_module(mut module: ItemMod, component_type: &Type) -> ItemMo
     let (undelegate_fn, undelegate_struct) = generate_undelegate();
     module.content = module.content.map(|(brace, mut items)| {
         items.extend(
-            vec![delegate_fn, delegate_struct, undelegate_fn, undelegate_struct]
-                .into_iter()
-                .map(|item| syn::parse2(item).unwrap())
-                .collect::<Vec<_>>(),
+            vec![
+                delegate_fn,
+                delegate_struct,
+                undelegate_fn,
+                undelegate_struct,
+            ]
+            .into_iter()
+            .map(|item| syn::parse2(item).unwrap())
+            .collect::<Vec<_>>(),
         );
         (brace, items)
     });
