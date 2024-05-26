@@ -11,7 +11,9 @@ import { type World } from "../target/types/world";
 import { expect } from "chai";
 import BN from "bn.js";
 import {
+  createDelegateInstruction,
   createInitializeRegistryInstruction,
+  DELEGATION_PROGRAM_ID,
   FindComponentPda,
   FindEntityPda,
   FindWorldPda,
@@ -635,5 +637,21 @@ describe("bolt", () => {
       invalid = true;
     }
     expect(invalid).to.equal(true);
+  });
+
+  // Check component deletion
+  it("Check component delegation", async () => {
+    const delegateIx = createDelegateInstruction({
+      entity: entity1,
+      account: componentPositionEntity1,
+      ownerProgram: boltComponentPositionProgram.programId,
+      payer: provider.wallet.publicKey,
+    });
+    const tx = new anchor.web3.Transaction().add(delegateIx);
+    await provider.sendAndConfirm(tx, [], { skipPreflight: true });
+    const acc = await provider.connection.getAccountInfo(
+      componentPositionEntity1
+    );
+    expect(acc.owner.toString()).to.equal(DELEGATION_PROGRAM_ID);
   });
 });

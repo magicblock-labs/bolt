@@ -2,7 +2,7 @@ use bolt_lang::*;
 
 declare_id!("Fn1JzzEdyb55fsyduWS94mYHizGhJZuhvjX6DVvrmGbQ");
 
-#[component]
+#[component(delegate)]
 #[derive(Copy, Default)]
 pub struct Position {
     pub x: i64,

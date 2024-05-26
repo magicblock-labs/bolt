@@ -3,6 +3,8 @@ import BN from "bn.js";
 export * from "./accounts";
 export * from "./instructions";
 export * from "./transactions/transactions";
+export * from "./delegation/delegate";
+export * from "./delegation/instructions";
 
 /**
  * Program address

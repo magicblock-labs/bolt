@@ -1,15 +1,4 @@
 "use strict";
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -34,64 +23,68 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createApply2Instruction = exports.apply2InstructionDiscriminator = exports.apply2Struct = void 0;
+exports.createDelegateInstruction = exports.delegateInstructionDiscriminator = exports.DelegateArgsStruct = void 0;
 var beet = __importStar(require("@metaplex-foundation/beet"));
 var web3 = __importStar(require("@solana/web3.js"));
-var index_1 = require("../index");
-exports.apply2Struct = new beet.FixableBeetArgsStruct([
-    ["instructionDiscriminator", beet.uniformFixedSizeArray(beet.u8, 8)],
-    ["args", beet.bytes],
-], "Apply2InstructionArgs");
-exports.apply2InstructionDiscriminator = [
-    120, 32, 116, 154, 158, 159, 208, 73,
+var delegate_1 = require("./delegate");
+exports.DelegateArgsStruct = new beet.BeetArgsStruct([["instructionDiscriminator", beet.uniformFixedSizeArray(beet.u8, 8)]], "DelegateInstructionArgs");
+exports.delegateInstructionDiscriminator = [
+    90, 147, 75, 178, 85, 88, 4, 137,
 ];
-function createApply2Instruction(accounts, args, programId) {
-    var _a, _b;
-    if (programId === void 0) { programId = new web3.PublicKey("WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n"); }
-    var data = exports.apply2Struct.serialize(__assign({ instructionDiscriminator: exports.apply2InstructionDiscriminator }, args))[0];
+function createDelegateInstruction(accounts, programId) {
+    var _a, _b, _c, _d, _e;
+    if (programId === void 0) { programId = accounts.ownerProgram; }
+    var data = exports.DelegateArgsStruct.serialize({
+        instructionDiscriminator: exports.delegateInstructionDiscriminator,
+    })[0];
+    var _f = (0, delegate_1.getDelegationAccounts)(accounts.account, accounts.ownerProgram), delegationPda = _f.delegationPda, delegatedAccountSeedsPda = _f.delegatedAccountSeedsPda, bufferPda = _f.bufferPda;
     var keys = [
         {
-            pubkey: accounts.boltSystem,
+            pubkey: accounts.payer,
+            isWritable: false,
+            isSigner: true,
+        },
+        {
+            pubkey: accounts.entity,
             isWritable: false,
             isSigner: false,
         },
         {
-            pubkey: accounts.componentProgram1,
-            isWritable: false,
-            isSigner: false,
-        },
-        {
-            pubkey: accounts.boltComponent1,
+            pubkey: accounts.account,
             isWritable: true,
             isSigner: false,
         },
         {
-            pubkey: accounts.componentProgram2,
+            pubkey: accounts.ownerProgram,
             isWritable: false,
             isSigner: false,
         },
         {
-            pubkey: accounts.boltComponent2,
+            pubkey: (_a = accounts.buffer) !== null && _a !== void 0 ? _a : bufferPda,
             isWritable: true,
             isSigner: false,
         },
         {
-            pubkey: (_a = accounts.authority) !== null && _a !== void 0 ? _a : programId,
+            pubkey: (_b = accounts.delegation_record) !== null && _b !== void 0 ? _b : delegationPda,
+            isWritable: true,
+            isSigner: false,
+        },
+        {
+            pubkey: (_c = accounts.delegate_account_seeds) !== null && _c !== void 0 ? _c : delegatedAccountSeedsPda,
+            isWritable: true,
+            isSigner: false,
+        },
+        {
+            pubkey: (_d = accounts.delegation_program) !== null && _d !== void 0 ? _d : new web3.PublicKey(delegate_1.DELEGATION_PROGRAM_ID),
             isWritable: false,
             isSigner: false,
         },
         {
-            pubkey: (_b = accounts.instructionSysvarAccount) !== null && _b !== void 0 ? _b : index_1.SYSVAR_INSTRUCTIONS_PUBKEY,
+            pubkey: (_e = accounts.system_program) !== null && _e !== void 0 ? _e : web3.SystemProgram.programId,
             isWritable: false,
             isSigner: false,
         },
     ];
-    if (accounts.anchorRemainingAccounts != null) {
-        for (var _i = 0, _c = accounts.anchorRemainingAccounts; _i < _c.length; _i++) {
-            var acc = _c[_i];
-            keys.push(acc);
-        }
-    }
     var ix = new web3.TransactionInstruction({
         programId: programId,
         keys: keys,
@@ -99,5 +92,5 @@ function createApply2Instruction(accounts, args, programId) {
     });
     return ix;
 }
-exports.createApply2Instruction = createApply2Instruction;
-//# sourceMappingURL=apply2.js.map
+exports.createDelegateInstruction = createDelegateInstruction;
+//# sourceMappingURL=instructions.js.map

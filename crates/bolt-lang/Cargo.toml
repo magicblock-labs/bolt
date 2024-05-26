@@ -13,6 +13,7 @@ anchor-lang = { workspace = true }
 
 # Bolt Attributes
 bolt-attribute-bolt-program = { workspace = true }
+bolt-attribute-bolt-delegate = { workspace = true }
 bolt-attribute-bolt-component = { workspace = true }
 bolt-attribute-bolt-system = { workspace = true }
 bolt-attribute-bolt-system-input = { workspace = true }
@@ -24,6 +25,9 @@ bolt-attribute-bolt-arguments = { workspace = true }
 # Bolt Programs
 world = { workspace = true }
 bolt-system = { workspace = true }
+
+# Delegation
+delegation-program-sdk = { workspace = true }
 
 # Other dependencies
 serde = { workspace = true }

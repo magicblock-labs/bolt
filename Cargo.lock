@@ -847,6 +847,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "bolt-attribute-bolt-delegate"
+version = "0.1.5"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 1.0.109",
+]
+
+[[package]]
 name = "bolt-attribute-bolt-extra-accounts"
 version = "0.1.5"
 dependencies = [
@@ -937,11 +946,13 @@ dependencies = [
  "bolt-attribute-bolt-component",
  "bolt-attribute-bolt-component-deserialize",
  "bolt-attribute-bolt-component-id",
+ "bolt-attribute-bolt-delegate",
  "bolt-attribute-bolt-extra-accounts",
  "bolt-attribute-bolt-program",
  "bolt-attribute-bolt-system",
  "bolt-attribute-bolt-system-input",
  "bolt-system",
+ "delegation-program-sdk",
  "serde",
  "serde_json",
  "world",
@@ -1560,6 +1571,16 @@ name = "data-encoding"
 version = "2.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7e962a19be5cfc3f3bf6dd8f61eb50107f356ad6270fbb3ed41476571db78be5"
+
+[[package]]
+name = "delegation-program-sdk"
+version = "0.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ff8270a70bb99659d8235b1a805d6e4c3e7744bb3d9ba57604570903bf5e166f"
+dependencies = [
+ "borsh 0.10.3",
+ "solana-program",
+]
 
 [[package]]
 name = "der"

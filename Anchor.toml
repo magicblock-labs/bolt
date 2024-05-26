@@ -26,5 +26,10 @@ wallet = "./tests/fixtures/provider.json"
 [workspace]
 members = ["programs/bolt-component", "programs/bolt-system", "programs/world", "examples/component-position", "examples/component-velocity", "examples/system-apply-velocity", "examples/system-fly", "examples/system-simple-movement"]
 
+[[test.genesis]]
+address = "DELeGGvXpWV2fqJUhqcF5ZSYMS4JTLjteaAMARRSaeSh"
+program = "/Users/gabrielepicco/Downloads/delegator/target/deploy/dlp.so"
+upgradeable = false
+
 [scripts]
 test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/bolt.ts"

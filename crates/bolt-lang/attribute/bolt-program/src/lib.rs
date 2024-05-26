@@ -18,7 +18,7 @@ use syn::{
 ///     use super::*;
 /// }
 ///
-/// #[account]
+/// 
 /// #[component]
 /// pub struct Position {
 ///     pub x: i64,
