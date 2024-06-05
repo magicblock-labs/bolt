@@ -33,7 +33,7 @@ members = ["programs/bolt-component", "programs/bolt-system", "programs/world", 
 
 [[test.genesis]]
 address = "DELeGGvXpWV2fqJUhqcF5ZSYMS4JTLjteaAMARRSaeSh"
-program = "/Users/gabrielepicco/Downloads/delegator/target/deploy/dlp.so"
+program = "tests/fixtures/delegation.so"
 upgradeable = false
 
 [[test.validator.account]]
