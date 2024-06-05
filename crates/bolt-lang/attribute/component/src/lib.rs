@@ -1,7 +1,10 @@
 use proc_macro::TokenStream;
 
 use quote::quote;
-use syn::{parse_macro_input, parse_quote, Attribute, DeriveInput, Lit, Meta, NestedMeta};
+use syn::{
+    parse_macro_input, parse_quote, Attribute, DeriveInput, Lit, Meta, MetaList, MetaNameValue,
+    NestedMeta,
+};
 
 use bolt_utils::add_bolt_metadata;
 
@@ -10,8 +13,8 @@ use bolt_utils::add_bolt_metadata;
 /// The component_id can be used to define the seed used to generate the PDA which stores the component data.
 /// The macro also adds the InitSpace and Default derives to the struct.
 ///
-/// #[component_deserialize]
-/// #[derive(Clone)]
+/// #[component]
+/// #[derive(Default, Copy)]
 /// pub struct Position {
 ///     pub x: i64,
 ///     pub y: i64,
@@ -22,35 +25,20 @@ use bolt_utils::add_bolt_metadata;
 pub fn component(attr: TokenStream, item: TokenStream) -> TokenStream {
     let mut input = parse_macro_input!(item as DeriveInput);
     let mut component_id_value = None;
+    let mut delegate_set = false;
 
     if !attr.is_empty() {
         let attr_meta = parse_macro_input!(attr as Meta);
-
+        delegate_set = is_delegate_set(&attr_meta);
         component_id_value = match attr_meta {
             Meta::Path(_) => None,
-            Meta::NameValue(meta_name_value) if meta_name_value.path.is_ident("component_id") => {
-                if let Lit::Str(lit) = meta_name_value.lit {
-                    Some(lit.value())
-                } else {
-                    None
+            Meta::NameValue(meta_name_value) => extract_component_id(&meta_name_value),
+            Meta::List(meta_list) => {
+                if !delegate_set {
+                    delegate_set = is_delegate_set(&Meta::List(meta_list.clone()));
                 }
+                find_component_id_in_list(meta_list)
             }
-            Meta::List(meta) => meta.nested.into_iter().find_map(|nested_meta| {
-                if let NestedMeta::Meta(Meta::NameValue(meta_name_value)) = nested_meta {
-                    if meta_name_value.path.is_ident("component_id") {
-                        if let Lit::Str(lit) = meta_name_value.lit {
-                            Some(lit.value())
-                        } else {
-                            None
-                        }
-                    } else {
-                        None
-                    }
-                } else {
-                    None
-                }
-            }),
-            _ => None,
         };
     }
 
@@ -67,15 +55,25 @@ pub fn component(attr: TokenStream, item: TokenStream) -> TokenStream {
     let name = &input.ident;
     let component_name = syn::Ident::new(&name.to_string().to_lowercase(), input.ident.span());
 
-    let anchor_program = quote! {
-        #[bolt_program(#name)]
-        pub mod #component_name {
-            use super::*;
+    let bolt_program = if delegate_set {
+        quote! {
+            #[delegate(#name)]
+            #[bolt_program(#name)]
+            pub mod #component_name {
+                use super::*;
+            }
+        }
+    } else {
+        quote! {
+            #[bolt_program(#name)]
+            pub mod #component_name {
+                use super::*;
+            }
         }
     };
 
     let expanded = quote! {
-        #anchor_program
+        #bolt_program
 
         #additional_macro
         #input
@@ -137,4 +135,37 @@ fn define_new_fn(input: &DeriveInput) -> proc_macro2::TokenStream {
         }
     }
     quote! {}
+}
+
+fn is_delegate_set(meta: &Meta) -> bool {
+    match meta {
+        Meta::Path(path) => path.is_ident("delegate"),
+        Meta::List(meta_list) => meta_list.nested.iter().any(|nested_meta| {
+            if let NestedMeta::Meta(Meta::Path(path)) = nested_meta {
+                path.is_ident("delegate")
+            } else {
+                false
+            }
+        }),
+        _ => false,
+    }
+}
+
+fn extract_component_id(meta_name_value: &MetaNameValue) -> Option<String> {
+    if meta_name_value.path.is_ident("component_id") {
+        if let Lit::Str(lit) = &meta_name_value.lit {
+            return Some(lit.value());
+        }
+    }
+    None
+}
+
+fn find_component_id_in_list(meta_list: MetaList) -> Option<String> {
+    meta_list.nested.into_iter().find_map(|nested_meta| {
+        if let NestedMeta::Meta(Meta::NameValue(meta_name_value)) = nested_meta {
+            extract_component_id(&meta_name_value)
+        } else {
+            None
+        }
+    })
 }

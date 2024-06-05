@@ -23,8 +23,26 @@ url = "https://api.apr.dev"
 cluster = "localnet"
 wallet = "./tests/fixtures/provider.json"
 
+[test]
+startup_wait = 5000
+shutdown_wait = 2000
+upgradeable = false
+
 [workspace]
 members = ["programs/bolt-component", "programs/bolt-system", "programs/world", "examples/component-position", "examples/component-velocity", "examples/system-apply-velocity", "examples/system-fly", "examples/system-simple-movement"]
+
+[[test.genesis]]
+address = "DELeGGvXpWV2fqJUhqcF5ZSYMS4JTLjteaAMARRSaeSh"
+program = "tests/fixtures/delegation.so"
+upgradeable = false
+
+[[test.validator.account]]
+address = "EEmsg7GbxEAw5f9hGfZRmJRJ27HK8KeGDp7ViW9X2mYa"
+filename = "tests/fixtures/commit_record.json"
+
+[[test.validator.account]]
+address = "7nQvHcfEqtFmY2q6hiQbidu8BCNdqegnEFfH7HkByFn5"
+filename = "tests/fixtures/committed_state.json"
 
 [scripts]
 test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/bolt.ts"

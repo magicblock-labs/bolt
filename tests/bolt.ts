@@ -11,13 +11,16 @@ import { type World } from "../target/types/world";
 import { expect } from "chai";
 import BN from "bn.js";
 import {
+  createDelegateInstruction,
   createInitializeRegistryInstruction,
+  DELEGATION_PROGRAM_ID,
   FindComponentPda,
   FindEntityPda,
   FindWorldPda,
   FindWorldRegistryPda,
   SYSVAR_INSTRUCTIONS_PUBKEY,
 } from "../clients/bolt-sdk";
+import { createUndelegateInstruction } from "../clients/bolt-sdk/lib/delegation/undelegate";
 
 enum Direction {
   Left = "Left",
@@ -81,7 +84,7 @@ describe("bolt", () => {
     const registryPda = FindWorldRegistryPda(worldProgram.programId);
 
     const worldPda = FindWorldPda(new BN(0), worldProgram.programId);
-    await worldProgram.methods
+    const res = await worldProgram.methods
       .initializeNewWorld()
       .accounts({
         world: worldPda,
@@ -89,6 +92,7 @@ describe("bolt", () => {
         payer: provider.wallet.publicKey,
       })
       .rpc();
+    console.log(res);
   });
 
   it("InitializeNewWorld 2", async () => {
@@ -635,5 +639,37 @@ describe("bolt", () => {
       invalid = true;
     }
     expect(invalid).to.equal(true);
+  });
+
+  // Check component delegation
+  it("Check component delegation", async () => {
+    const delegateIx = createDelegateInstruction({
+      entity: entity1,
+      account: componentPositionEntity1,
+      ownerProgram: boltComponentPositionProgram.programId,
+      payer: provider.wallet.publicKey,
+    });
+    const tx = new anchor.web3.Transaction().add(delegateIx);
+    await provider.sendAndConfirm(tx, [], { skipPreflight: true });
+    const acc = await provider.connection.getAccountInfo(
+      componentPositionEntity1
+    );
+    expect(acc.owner.toString()).to.equal(DELEGATION_PROGRAM_ID);
+  });
+
+  // Check component undelegation
+  it("Check component undelegation", async () => {
+    const delegateIx = createUndelegateInstruction({
+      payer: provider.wallet.publicKey,
+      delegatedAccount: componentPositionEntity1,
+      ownerProgram: boltComponentPositionProgram.programId,
+      reimbursement: provider.wallet.publicKey,
+    });
+    const tx = new anchor.web3.Transaction().add(delegateIx);
+    await provider.sendAndConfirm(tx, [], { skipPreflight: true });
+    const acc = await provider.connection.getAccountInfo(
+      componentPositionEntity1
+    );
+    expect(acc.owner).to.deep.equal(boltComponentPositionProgram.programId);
   });
 });

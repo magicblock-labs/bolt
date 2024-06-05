@@ -8,6 +8,7 @@ pub use bolt_attribute_bolt_arguments::arguments;
 pub use bolt_attribute_bolt_component::component;
 pub use bolt_attribute_bolt_component_deserialize::component_deserialize;
 pub use bolt_attribute_bolt_component_id::component_id;
+pub use bolt_attribute_bolt_delegate::delegate;
 pub use bolt_attribute_bolt_extra_accounts::extra_accounts;
 pub use bolt_attribute_bolt_extra_accounts::pubkey;
 pub use bolt_attribute_bolt_program::bolt_program;
@@ -18,6 +19,8 @@ pub use bolt_system;
 pub use world;
 pub use world::program::World;
 pub use world::Entity;
+
+pub use delegation_program_sdk::{delegate_account, undelegate_account};
 
 pub use serde;
 

@@ -49,6 +49,8 @@ var bn_js_1 = __importDefault(require("bn.js"));
 __exportStar(require("./accounts"), exports);
 __exportStar(require("./instructions"), exports);
 __exportStar(require("./transactions/transactions"), exports);
+__exportStar(require("./delegation/accounts"), exports);
+__exportStar(require("./delegation/delegate"), exports);
 exports.PROGRAM_ADDRESS = "WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n";
 exports.SYSVAR_INSTRUCTIONS_PUBKEY = new web3_js_1.PublicKey(
   "Sysvar1nstructions1111111111111111111111111"

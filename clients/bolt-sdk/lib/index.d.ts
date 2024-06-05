@@ -4,6 +4,8 @@ import BN from "bn.js";
 export * from "./accounts";
 export * from "./instructions";
 export * from "./transactions/transactions";
+export * from "./delegation/accounts";
+export * from "./delegation/delegate";
 export declare const PROGRAM_ADDRESS =
   "WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n";
 export declare const SYSVAR_INSTRUCTIONS_PUBKEY: PublicKey;
