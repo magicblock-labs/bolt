@@ -51,7 +51,7 @@ anyhow = "1.0.32"
 heck = "0.5.0"
 clap = { version = "4.2.4", features = ["derive"] }
 ahash = "=0.8.11"
-delegation-program-sdk = "=0.0.1"
+delegation-program-sdk = "=0.0.2"
 
 [profile.release]
 overflow-checks = true

@@ -99,7 +99,7 @@ fn generate_delegate(component_type: &Type) -> (TokenStream2, TokenStream2) {
     (
         quote! {
             #[automatically_derived]
-            pub fn delegate(ctx: Context<DelegateInput>) -> Result<()> {
+            pub fn delegate(ctx: Context<DelegateInput>, valid_until: i64, commit_frequency_ms: u32) -> Result<()> {
 
                 let [payer, entity, account, owner_program, buffer, delegation_record, delegate_account_seeds, delegation_program, system_program] = [
                     &ctx.accounts.payer,
@@ -125,6 +125,8 @@ fn generate_delegate(component_type: &Type) -> (TokenStream2, TokenStream2) {
                     delegation_program,
                     system_program,
                     pda_seeds,
+                    valid_until,
+                    commit_frequency_ms,
                 )?;
                 Ok(())
             }

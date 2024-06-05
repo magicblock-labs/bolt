@@ -44,33 +44,37 @@ var __importStar =
     return result;
   };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createDelegateInstruction =
-  exports.delegateInstructionDiscriminator =
-  exports.DelegateArgsStruct =
+exports.createUndelegateInstruction =
+  exports.undelegateInstructionDiscriminator =
+  exports.undelegateStruct =
     void 0;
 var beet = __importStar(require("@metaplex-foundation/beet"));
 var web3 = __importStar(require("@solana/web3.js"));
-var delegate_1 = require("./delegate");
-exports.DelegateArgsStruct = new beet.BeetArgsStruct(
+var accounts_1 = require("./accounts");
+var web3_js_1 = require("@solana/web3.js");
+exports.undelegateStruct = new beet.FixableBeetArgsStruct(
   [["instructionDiscriminator", beet.uniformFixedSizeArray(beet.u8, 8)]],
-  "DelegateInstructionArgs"
+  "UndelegateInstructionArgs"
 );
-exports.delegateInstructionDiscriminator = [90, 147, 75, 178, 85, 88, 4, 137];
-function createDelegateInstruction(accounts, programId) {
-  var _a, _b, _c, _d, _e;
+exports.undelegateInstructionDiscriminator = [3, 0, 0, 0, 0, 0, 0, 0];
+function createUndelegateInstruction(accounts, programId) {
+  var _a, _b, _c, _d, _e, _f;
   if (programId === void 0) {
-    programId = accounts.ownerProgram;
+    programId = new web3_js_1.PublicKey(accounts_1.DELEGATION_PROGRAM_ID);
   }
-  var data = exports.DelegateArgsStruct.serialize({
-    instructionDiscriminator: exports.delegateInstructionDiscriminator,
+  var data = exports.undelegateStruct.serialize({
+    instructionDiscriminator: exports.undelegateInstructionDiscriminator,
   })[0];
-  var _f = (0, delegate_1.getDelegationAccounts)(
-      accounts.account,
-      accounts.ownerProgram
+  var _g = (0, accounts_1.getDelegationAccounts)(
+      accounts.delegatedAccount,
+      accounts.ownerProgram,
+      false
     ),
-    delegationPda = _f.delegationPda,
-    delegatedAccountSeedsPda = _f.delegatedAccountSeedsPda,
-    bufferPda = _f.bufferPda;
+    delegationPda = _g.delegationPda,
+    delegatedAccountSeedsPda = _g.delegatedAccountSeedsPda,
+    bufferPda = _g.bufferPda,
+    commitStateRecordPda = _g.commitStateRecordPda,
+    commitStatePda = _g.commitStatePda;
   var keys = [
     {
       pubkey: accounts.payer,
@@ -78,12 +82,7 @@ function createDelegateInstruction(accounts, programId) {
       isSigner: true,
     },
     {
-      pubkey: accounts.entity,
-      isWritable: false,
-      isSigner: false,
-    },
-    {
-      pubkey: accounts.account,
+      pubkey: accounts.delegatedAccount,
       isWritable: true,
       isSigner: false,
     },
@@ -99,43 +98,55 @@ function createDelegateInstruction(accounts, programId) {
     },
     {
       pubkey:
-        (_b = accounts.delegation_record) !== null && _b !== void 0
+        (_b = accounts.commitStatePda) !== null && _b !== void 0
           ? _b
+          : commitStatePda,
+      isWritable: true,
+      isSigner: false,
+    },
+    {
+      pubkey:
+        (_c = accounts.commitStateRecordPda) !== null && _c !== void 0
+          ? _c
+          : commitStateRecordPda,
+      isWritable: true,
+      isSigner: false,
+    },
+    {
+      pubkey:
+        (_d = accounts.delegationRecord) !== null && _d !== void 0
+          ? _d
           : delegationPda,
       isWritable: true,
       isSigner: false,
     },
     {
       pubkey:
-        (_c = accounts.delegate_account_seeds) !== null && _c !== void 0
-          ? _c
+        (_e = accounts.delegateAccountSeeds) !== null && _e !== void 0
+          ? _e
           : delegatedAccountSeedsPda,
       isWritable: true,
       isSigner: false,
     },
     {
-      pubkey:
-        (_d = accounts.delegation_program) !== null && _d !== void 0
-          ? _d
-          : new web3.PublicKey(delegate_1.DELEGATION_PROGRAM_ID),
+      pubkey: accounts.reimbursement,
       isWritable: false,
       isSigner: false,
     },
     {
       pubkey:
-        (_e = accounts.system_program) !== null && _e !== void 0
-          ? _e
+        (_f = accounts.systemProgram) !== null && _f !== void 0
+          ? _f
           : web3.SystemProgram.programId,
       isWritable: false,
       isSigner: false,
     },
   ];
-  var ix = new web3.TransactionInstruction({
+  return new web3.TransactionInstruction({
     programId: programId,
     keys: keys,
     data: data,
   });
-  return ix;
 }
-exports.createDelegateInstruction = createDelegateInstruction;
-//# sourceMappingURL=instructions.js.map
+exports.createUndelegateInstruction = createUndelegateInstruction;
+//# sourceMappingURL=undelegate.js.map
