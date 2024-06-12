@@ -192,6 +192,7 @@ jobs:
           cargo publish $DRY_RUN_FLAG --manifest-path=crates/bolt-lang/attribute/extra-accounts/Cargo.toml --token $CRATES_TOKEN $NO_VERIFY_FLAG
           cargo publish $DRY_RUN_FLAG --manifest-path=crates/bolt-lang/attribute/arguments/Cargo.toml --token $CRATES_TOKEN $NO_VERIFY_FLAG
           cargo publish $DRY_RUN_FLAG --manifest-path=crates/bolt-lang/attribute/bolt-program/Cargo.toml --token $CRATES_TOKEN $NO_VERIFY_FLAG
+          cargo publish $DRY_RUN_FLAG --manifest-path=crates/bolt-lang/attribute/delegate/Cargo.toml --token $CRATES_TOKEN $NO_VERIFY_FLAG
           cargo publish $DRY_RUN_FLAG --manifest-path=crates/bolt-helpers/attribute/system-template/Cargo.toml --token $CRATES_TOKEN $NO_VERIFY_FLAG
           cargo publish $DRY_RUN_FLAG --manifest-path=crates/bolt-helpers/attribute/world-apply/Cargo.toml --token $CRATES_TOKEN $NO_VERIFY_FLAG
           cargo publish $DRY_RUN_FLAG --manifest-path=programs/bolt-system/Cargo.toml --token $CRATES_TOKEN $NO_VERIFY_FLAG
