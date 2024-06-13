@@ -182,13 +182,13 @@ function createApplySystemInstruction({
     for (const componentIndex in entity.components) {
       const component = entity.components[componentIndex];
       const componentPda = FindComponentPda(
-        component.programId,
+        component.id,
         entity.entity,
         component.seed ?? ""
       );
       instructionArgs[
         getBoltComponentProgramName(componentCount, componentCount)
-      ] = component.programId;
+      ] = component.id;
       instructionArgs[getBoltComponentName(componentCount, componentCount)] =
         componentPda;
       componentCount++;
@@ -213,7 +213,7 @@ interface ApplySystemEntity {
   components: ApplySystemComponent[];
 }
 interface ApplySystemComponent {
-  programId: PublicKey;
+  id: PublicKey;
   seed?: string;
 }
 
