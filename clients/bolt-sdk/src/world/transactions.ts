@@ -131,7 +131,7 @@ export async function InitializeComponent({
 
 interface ApplySystemInstruction {
   authority: PublicKey;
-  system: PublicKey;
+  systemId: PublicKey;
   entities: ApplySystemEntity[];
   extraAccounts?: web3.AccountMeta[];
   args?: object;
@@ -151,7 +151,7 @@ function getBoltComponentProgramName(index: number, componentsCount: number) {
 }
 function createApplySystemInstruction({
   authority,
-  system,
+  systemId,
   entities,
   extraAccounts,
   args,
@@ -172,7 +172,7 @@ function createApplySystemInstruction({
 
   const instructionArgs = {
     authority,
-    boltSystem: system,
+    boltSystem: systemId,
     instructionSysvarAccount: SYSVAR_INSTRUCTIONS_PUBKEY,
     anchorRemainingAccounts: extraAccounts,
   };
@@ -220,7 +220,7 @@ interface ApplySystemComponent {
 /**
  * Apply a system to a set of components
  * @param authority
- * @param system
+ * @param systemId
  * @param entities
  * @param extraAccounts
  * @param args
@@ -228,20 +228,20 @@ interface ApplySystemComponent {
  */
 export async function ApplySystem({
   authority,
-  system,
+  systemId,
   entities,
   extraAccounts,
   args = {},
 }: {
   authority: PublicKey;
-  system: PublicKey;
+  systemId: PublicKey;
   entities: ApplySystemEntity[];
   extraAccounts?: web3.AccountMeta[];
   args?: object;
 }): Promise<{ transaction: Transaction }> {
   const applySystemIx = createApplySystemInstruction({
     authority,
-    system,
+    systemId,
     entities,
     extraAccounts,
     args,
