@@ -7,7 +7,7 @@
 
 import * as beet from "@metaplex-foundation/beet";
 import * as web3 from "@solana/web3.js";
-import { SYSVAR_INSTRUCTIONS_PUBKEY } from "../index";
+import { SYSVAR_INSTRUCTIONS_PUBKEY } from "../../index";
 
 /**
  * @category Instructions

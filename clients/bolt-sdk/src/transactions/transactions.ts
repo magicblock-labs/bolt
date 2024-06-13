@@ -126,13 +126,12 @@ export async function InitializeComponent({
 interface ApplySystemInstruction {
   entity: PublicKey;
   components: PublicKey[];
+  seeds?: string[];
   system: PublicKey;
   authority: PublicKey;
-  seeds?: string[];
   extraAccounts?: web3.AccountMeta[];
   args?: object;
 }
-
 export function createApplySystemInstruction({
   entity,
   components,

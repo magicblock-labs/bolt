@@ -1,10 +1,10 @@
 import { PublicKey } from "@solana/web3.js";
 import BN from "bn.js";
-export * from "./accounts";
-export * from "./instructions";
+export * from "./generated/accounts";
+export * from "./generated/instructions";
 export * from "./transactions/transactions";
-export * from "./delegation/accounts";
-export * from "./delegation/delegate";
+export * from "./generated/delegation/accounts";
+export * from "./generated/delegation/delegate";
 
 /**
  * Program address
