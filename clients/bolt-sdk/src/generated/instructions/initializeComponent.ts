@@ -7,7 +7,6 @@
 
 import * as beet from "@metaplex-foundation/beet";
 import * as web3 from "@solana/web3.js";
-import { FindComponentPda, SYSVAR_INSTRUCTIONS_PUBKEY } from "../../index";
 
 /**
  * @category Instructions
@@ -35,11 +34,11 @@ export const initializeComponentStruct = new beet.BeetArgsStruct<{
  */
 export interface InitializeComponentInstructionAccounts {
   payer: web3.PublicKey;
-  data?: web3.PublicKey;
+  data: web3.PublicKey;
   entity: web3.PublicKey;
   componentProgram: web3.PublicKey;
-  authority?: web3.PublicKey;
-  instructionSysvarAccount?: web3.PublicKey;
+  authority: web3.PublicKey;
+  instructionSysvarAccount: web3.PublicKey;
   systemProgram?: web3.PublicKey;
   anchorRemainingAccounts?: web3.AccountMeta[];
 }
@@ -70,9 +69,7 @@ export function createInitializeComponentInstruction(
       isSigner: true,
     },
     {
-      pubkey:
-        accounts.data ??
-        FindComponentPda(accounts.componentProgram, accounts.entity),
+      pubkey: accounts.data,
       isWritable: true,
       isSigner: false,
     },
@@ -87,12 +84,12 @@ export function createInitializeComponentInstruction(
       isSigner: false,
     },
     {
-      pubkey: accounts.authority ?? programId,
+      pubkey: accounts.authority,
       isWritable: false,
       isSigner: false,
     },
     {
-      pubkey: accounts.instructionSysvarAccount ?? SYSVAR_INSTRUCTIONS_PUBKEY,
+      pubkey: accounts.instructionSysvarAccount,
       isWritable: false,
       isSigner: false,
     },

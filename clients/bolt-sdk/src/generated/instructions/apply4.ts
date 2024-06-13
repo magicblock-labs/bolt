@@ -7,7 +7,6 @@
 
 import * as beet from "@metaplex-foundation/beet";
 import * as web3 from "@solana/web3.js";
-import { SYSVAR_INSTRUCTIONS_PUBKEY } from "../../index";
 
 /**
  * @category Instructions
@@ -61,8 +60,8 @@ export interface Apply4InstructionAccounts {
   boltComponent3: web3.PublicKey;
   componentProgram4: web3.PublicKey;
   boltComponent4: web3.PublicKey;
-  authority?: web3.PublicKey;
-  instructionSysvarAccount?: web3.PublicKey;
+  authority: web3.PublicKey;
+  instructionSysvarAccount: web3.PublicKey;
   anchorRemainingAccounts?: web3.AccountMeta[];
 }
 
@@ -136,12 +135,12 @@ export function createApply4Instruction(
       isSigner: false,
     },
     {
-      pubkey: accounts.authority ?? programId,
+      pubkey: accounts.authority,
       isWritable: false,
       isSigner: false,
     },
     {
-      pubkey: accounts.instructionSysvarAccount ?? SYSVAR_INSTRUCTIONS_PUBKEY,
+      pubkey: accounts.instructionSysvarAccount,
       isWritable: false,
       isSigner: false,
     },
