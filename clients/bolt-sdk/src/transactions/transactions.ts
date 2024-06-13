@@ -13,11 +13,13 @@ import {
   FindWorldRegistryPda,
   Registry,
   SerializeArgs,
+  SYSVAR_INSTRUCTIONS_PUBKEY,
   World,
 } from "../index";
 import BN from "bn.js";
 import type web3 from "@solana/web3.js";
 import { type Connection, type PublicKey, Transaction } from "@solana/web3.js";
+import { PROGRAM_ID } from "generated";
 
 const MAX_COMPONENTS = 5;
 
@@ -70,11 +72,14 @@ export async function AddEntity({
   const entityId = new BN(worldInstance.entities);
   const entityPda = FindEntityPda(new BN(worldInstance.id), entityId);
 
-  const createEntityIx = createAddEntityInstruction({
-    world,
-    payer,
-    entity: entityPda,
-  });
+  const createEntityIx = createAddEntityInstruction(
+    {
+      world,
+      payer,
+      entity: entityPda,
+    },
+    { extraSeed: null }
+  );
   return {
     transaction: new Transaction().add(createEntityIx),
     entityPda,
@@ -113,7 +118,8 @@ export async function InitializeComponent({
     entity,
     data: componentPda,
     componentProgram: componentId,
-    authority,
+    authority: authority ?? PROGRAM_ID,
+    instructionSysvarAccount: SYSVAR_INSTRUCTIONS_PUBKEY,
     anchorRemainingAccounts,
   });
 
@@ -165,8 +171,9 @@ export function createApplySystemInstruction({
   }
 
   const instructionArgs = {
-    authority,
+    authority: authority ?? PROGRAM_ID,
     boltSystem: system,
+    instructionSysvarAccount: SYSVAR_INSTRUCTIONS_PUBKEY,
     anchorRemainingAccounts: extraAccounts,
   };
 
