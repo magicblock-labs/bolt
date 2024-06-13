@@ -4,8 +4,8 @@ import { PROGRAM_ID } from "generated";
 export * from "./generated/accounts";
 export * from "./generated/instructions";
 export * from "./transactions/transactions";
-export * from "./generated/delegation/accounts";
-export * from "./generated/delegation/delegate";
+export * from "./delegation/accounts";
+export * from "./delegation/delegate";
 
 export const SYSVAR_INSTRUCTIONS_PUBKEY = new PublicKey(
   "Sysvar1nstructions1111111111111111111111111"
