@@ -62,10 +62,12 @@ export async function InitializeNewWorld({
 export async function AddEntity({
   payer,
   world,
+  seed,
   connection,
 }: {
   payer: PublicKey;
   world: PublicKey;
+  seed?: string;
   connection: Connection;
 }): Promise<{ transaction: Transaction; entityPda: PublicKey; entityId: BN }> {
   const worldInstance = await World.fromAccountAddress(connection, world);
@@ -78,7 +80,7 @@ export async function AddEntity({
       payer,
       entity: entityPda,
     },
-    { extraSeed: null }
+    { extraSeed: seed ?? null }
   );
   return {
     transaction: new Transaction().add(createEntityIx),
@@ -157,10 +159,9 @@ function createApplySystemInstruction({
   args,
 }: ApplySystemInstruction): web3.TransactionInstruction {
   let componentCount = 0;
-  for (const entityIndex in entities) {
-    const entity = entities[entityIndex];
+  entities.forEach(function (entity) {
     componentCount += entity.components.length;
-  }
+  });
   if (componentCount <= 0) {
     throw new Error("No components provided");
   }
@@ -177,10 +178,8 @@ function createApplySystemInstruction({
     anchorRemainingAccounts: extraAccounts,
   };
 
-  for (const entityIndex in entities) {
-    const entity = entities[entityIndex];
-    for (const componentIndex in entity.components) {
-      const component = entity.components[componentIndex];
+  entities.forEach(function (entity) {
+    entity.components.forEach(function (component) {
       const componentPda = FindComponentPda(
         component.id,
         entity.entity,
@@ -191,9 +190,8 @@ function createApplySystemInstruction({
       ] = component.id;
       instructionArgs[getBoltComponentName(componentCount, componentCount)] =
         componentPda;
-      componentCount++;
-    }
-  }
+    });
+  });
 
   const instructionFunctions = {
     createApplyInstruction,

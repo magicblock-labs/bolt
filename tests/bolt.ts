@@ -11,6 +11,7 @@ import { type World } from "../target/types/world";
 import { expect } from "chai";
 import BN from "bn.js";
 import {
+  AddEntity,
   createDelegateInstruction,
   createInitializeRegistryInstruction,
   DELEGATION_PROGRAM_ID,
@@ -18,6 +19,7 @@ import {
   FindEntityPda,
   FindWorldPda,
   FindWorldRegistryPda,
+  InitializeNewWorld,
   SYSVAR_INSTRUCTIONS_PUBKEY,
 } from "../clients/bolt-sdk";
 import { createUndelegateInstruction } from "../clients/bolt-sdk/lib/delegation/undelegate";
@@ -61,9 +63,10 @@ describe("bolt", () => {
     anchor.workspace.SystemApplyVelocity as Program<SystemApplyVelocity>
   ).programId;
 
-  let entity1: PublicKey;
-  let entity2: PublicKey;
-  let entity5: PublicKey;
+  let worldPda: PublicKey;
+  let entity1Pda: PublicKey;
+  let entity2Pda: PublicKey;
+  let entity5Pda: PublicKey;
   let componentPositionEntity1: PublicKey;
   let componentPositionEntity2: PublicKey;
   let componentPositionEntity5: PublicKey;
@@ -75,118 +78,74 @@ describe("bolt", () => {
       registry: registryPda,
       payer: provider.wallet.publicKey,
     });
-
     const tx = new anchor.web3.Transaction().add(initializeRegistryIx);
     await provider.sendAndConfirm(tx);
   });
 
   it("InitializeNewWorld", async () => {
-    const registryPda = FindWorldRegistryPda(worldProgram.programId);
-
-    const worldPda = FindWorldPda(new BN(0), worldProgram.programId);
-    const res = await worldProgram.methods
-      .initializeNewWorld()
-      .accounts({
-        world: worldPda,
-        registry: registryPda,
-        payer: provider.wallet.publicKey,
-      })
-      .rpc();
-    console.log(res);
+    const initializeNewWorld = await InitializeNewWorld({
+      payer: provider.wallet.publicKey,
+      connection: provider.connection,
+    });
+    await provider.sendAndConfirm(initializeNewWorld.transaction);
+    worldPda = initializeNewWorld.worldPda; // Saved for later
   });
 
   it("InitializeNewWorld 2", async () => {
-    const registryPda = FindWorldRegistryPda(worldProgram.programId);
-
-    const worldPda = FindWorldPda(new BN(1), worldProgram.programId);
-    await worldProgram.methods
-      .initializeNewWorld()
-      .accounts({
-        world: worldPda,
-        registry: registryPda,
-        payer: provider.wallet.publicKey,
-      })
-      .rpc();
+    const initializeNewWorld = await InitializeNewWorld({
+      payer: provider.wallet.publicKey,
+      connection: provider.connection,
+    });
+    await provider.sendAndConfirm(initializeNewWorld.transaction);
   });
 
   it("Add entity 1", async () => {
-    const worldPda = FindWorldPda(new BN(0), worldProgram.programId);
-    entity1 = FindEntityPda(new BN(0), new BN(0), null, worldProgram.programId);
-    await worldProgram.methods
-      .addEntity(null)
-      .accounts({
-        world: worldPda,
-        entity: entity1,
-        payer: provider.wallet.publicKey,
-      })
-      .rpc();
+    const addEntity = await AddEntity({
+      payer: provider.wallet.publicKey,
+      world: worldPda,
+      connection: provider.connection,
+    });
+    await provider.sendAndConfirm(addEntity.transaction);
+    entity1Pda = addEntity.entityPda; // Saved for later
   });
 
   it("Add entity 2", async () => {
-    const worldPda = FindWorldPda(new BN(0), worldProgram.programId);
-
-    entity2 = FindEntityPda(new BN(0), new BN(1), null, worldProgram.programId);
-    await worldProgram.methods
-      .addEntity(null)
-      .accounts({
-        world: worldPda,
-        entity: entity2,
-        payer: provider.wallet.publicKey,
-      })
-      .rpc();
+    const addEntity = await AddEntity({
+      payer: provider.wallet.publicKey,
+      world: worldPda,
+      connection: provider.connection,
+    });
+    await provider.sendAndConfirm(addEntity.transaction);
+    entity2Pda = addEntity.entityPda; // Saved for later
   });
 
   it("Add entity 3", async () => {
-    const worldPda = FindWorldPda(new BN(0), worldProgram.programId);
-
-    const entityPda = FindEntityPda(
-      new BN(0),
-      new BN(2),
-      null,
-      worldProgram.programId
-    );
-    await worldProgram.methods
-      .addEntity(null)
-      .accounts({
-        world: worldPda,
-        entity: entityPda,
-        payer: provider.wallet.publicKey,
-      })
-      .rpc();
+    const addEntity = await AddEntity({
+      payer: provider.wallet.publicKey,
+      world: worldPda,
+      connection: provider.connection,
+    });
+    await provider.sendAndConfirm(addEntity.transaction);
   });
 
   it("Add entity 4 with extra seeds", async () => {
-    const worldPda = FindWorldPda(new BN(0), worldProgram.programId);
-    const seed = "extra-seed";
-    const entity4 = FindEntityPda(
-      new BN(0),
-      new BN(3),
-      seed,
-      worldProgram.programId
-    );
-
-    await worldProgram.methods
-      .addEntity(seed)
-      .accounts({
-        world: worldPda,
-        entity: entity4,
-        payer: provider.wallet.publicKey,
-      })
-      .rpc();
+    const addEntity = await AddEntity({
+      payer: provider.wallet.publicKey,
+      world: worldPda,
+      seed: "extra-seed",
+      connection: provider.connection,
+    });
+    await provider.sendAndConfirm(addEntity.transaction);
   });
 
   it("Add entity 5", async () => {
-    const worldPda = FindWorldPda(new BN(0), worldProgram.programId);
-    entity5 = FindEntityPda(new BN(0), new BN(4), null, worldProgram.programId);
-
-    await worldProgram.methods
-      .addEntity(null)
-      .accounts({
-        world: worldPda,
-        entity: entity5,
-        payer: provider.wallet.publicKey,
-      })
-      .rpc();
+    const addEntity = await AddEntity({
+      payer: provider.wallet.publicKey,
+      world: worldPda,
+      connection: provider.connection,
+    });
+    await provider.sendAndConfirm(addEntity.transaction);
+    entity5Pda = addEntity.entityPda; // Saved for later
   });
 
   it("Initialize Original Component on Entity 1, trough the world instance", async () => {

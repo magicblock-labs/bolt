@@ -8,6 +8,7 @@ skip-lint = false
 world = "WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n"
 
 [programs.localnet]
+world = "WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n"
 bolt-component = "CmP2djJgABZ4cRokm4ndxuq6LerqpNHLBsaUv2XKEJua"
 bolt-system = "7X4EFsDJ5aYTcEjKzJ94rD8FRKgQeXC89fkpeTS4KaqP"
 position = "Fn1JzzEdyb55fsyduWS94mYHizGhJZuhvjX6DVvrmGbQ"
