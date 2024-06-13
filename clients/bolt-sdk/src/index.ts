@@ -1,30 +1,15 @@
 import { PublicKey } from "@solana/web3.js";
 import BN from "bn.js";
+import { PROGRAM_ID } from "generated";
 export * from "./generated/accounts";
 export * from "./generated/instructions";
 export * from "./transactions/transactions";
 export * from "./generated/delegation/accounts";
 export * from "./generated/delegation/delegate";
 
-/**
- * Program address
- *
- * @category constants
- * @category generated
- */
-export const PROGRAM_ADDRESS = "WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n";
-
 export const SYSVAR_INSTRUCTIONS_PUBKEY = new PublicKey(
   "Sysvar1nstructions1111111111111111111111111"
 );
-
-/**
- * Program public key
- *
- * @category constants
- * @category generated
- */
-export const PROGRAM_ID = new PublicKey(PROGRAM_ADDRESS);
 
 export function FindWorldRegistryPda(
   programId: PublicKey = new PublicKey(PROGRAM_ID)
