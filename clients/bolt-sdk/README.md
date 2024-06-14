@@ -12,7 +12,7 @@ npm install @magicblock-labs/bolt-sdk
 
 ## Contributing
 
-The community is encouraged to contribute to the Soar SDK.
+The community is encouraged to contribute to the BOLT SDK.
 
 Fixes and features are always welcome! Please feel free to submit a PR for review.
 
