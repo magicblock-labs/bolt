@@ -4,7 +4,7 @@ import { type PublicKey } from "@solana/web3.js";
 import { type Position } from "../target/types/position";
 import { type Velocity } from "../target/types/velocity";
 import { type BoltComponent } from "../target/types/bolt_component";
-import { SystemSimpleMovement } from "../target/types/system_simple_movement";
+import { type SystemSimpleMovement } from "../target/types/system_simple_movement";
 import { type SystemFly } from "../target/types/system_fly";
 import { type SystemApplyVelocity } from "../target/types/system_apply_velocity";
 import { type World } from "../target/types/world";
