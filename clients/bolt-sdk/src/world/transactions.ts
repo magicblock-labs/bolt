@@ -122,7 +122,6 @@ export async function InitializeComponent({
     authority: authority ?? PROGRAM_ID,
     instructionSysvarAccount: SYSVAR_INSTRUCTIONS_PUBKEY,
     anchorRemainingAccounts,
-    instructionSysvarAccount: SYSVAR_INSTRUCTIONS_PUBKEY,
   });
 
   return {
