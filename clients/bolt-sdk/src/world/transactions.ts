@@ -74,9 +74,10 @@ export async function AddEntity({
 }): Promise<{ transaction: Transaction; entityPda: PublicKey }> {
   const worldInstance = await World.fromAccountAddress(connection, world);
   const worldId = new BN(worldInstance.id);
-  const entityPda = seed
-    ? FindEntityPda({ worldId, seed })
-    : FindEntityPda({ worldId, entityId: new BN(worldInstance.entities) });
+  const entityPda =
+    seed !== undefined
+      ? FindEntityPda({ worldId, seed })
+      : FindEntityPda({ worldId, entityId: new BN(worldInstance.entities) });
   const createEntityIx = createAddEntityInstruction(
     {
       world,
@@ -126,7 +127,6 @@ export async function InitializeComponent({
     instructionSysvarAccount: SYSVAR_INSTRUCTIONS_PUBKEY,
     anchorRemainingAccounts,
   });
-
   return {
     transaction: new Transaction().add(initComponentIx),
     componentPda,
@@ -182,11 +182,11 @@ function createApplySystemInstruction({
 
   entities.forEach(function (entity) {
     entity.components.forEach(function (component) {
-      const componentPda = FindComponentPda(
-        component.id,
-        entity.entity,
-        component.seed ?? ""
-      );
+      const componentPda = FindComponentPda({
+        componentId: component.id,
+        entity: entity.entity,
+        seed: component.seed,
+      });
       instructionArgs[
         getBoltComponentProgramName(componentCount, componentCount)
       ] = component.id;

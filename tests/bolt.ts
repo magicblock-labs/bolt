@@ -13,6 +13,7 @@ import BN from "bn.js";
 import {
   AddEntity,
   createDelegateInstruction,
+  createUndelegateInstruction,
   createInitializeRegistryInstruction,
   DELEGATION_PROGRAM_ID,
   FindComponentPda,
@@ -21,7 +22,6 @@ import {
   InitializeNewWorld,
   SYSVAR_INSTRUCTIONS_PUBKEY,
 } from "../clients/bolt-sdk";
-import { createUndelegateInstruction } from "../clients/bolt-sdk/lib/delegation/undelegate";
 import { ApplySystem } from "../clients/bolt-sdk/src";
 
 enum Direction {
@@ -31,46 +31,38 @@ enum Direction {
   Down = "Down",
 }
 
-function serializeArgs(args: any = {}) {
-  const jsonString = JSON.stringify(args);
-  const encoder = new TextEncoder();
-  const binaryData = encoder.encode(jsonString);
-  return Buffer.from(
-    binaryData.buffer,
-    binaryData.byteOffset,
-    binaryData.byteLength
-  );
-}
-
 function padCenter(value: string, width: number) {
   const length = value.length;
+  if (width <= length) {
+    return value;
+  }
   const padding = (width - length) / 2;
   const align = length - padding;
   return value.padEnd(align, " ").padStart(width, " ");
 }
 
 function logPosition(title: string, { x, y, z }: { x: BN; y: BN; z: BN }) {
-  console.log(" +----------------------------+");
-  console.log(` | ${padCenter(title, 26)} |`);
-  console.log(" +---------------+------------+");
-  console.log(` | X Position    | ${String(x).padEnd(10, " ")} |`);
-  console.log(` | Y Position    | ${String(y).padEnd(10, " ")} |`);
-  console.log(` | Z Position    | ${String(z).padEnd(10, " ")} |`);
-  console.log(" +---------------+------------+");
+  console.log(" +----------------------------------+");
+  console.log(` | ${padCenter(title, 32)} |`);
+  console.log(" +-----------------+----------------+");
+  console.log(` | X Position      | ${String(x).padEnd(14, " ")} |`);
+  console.log(` | Y Position      | ${String(y).padEnd(14, " ")} |`);
+  console.log(` | Z Position      | ${String(z).padEnd(14, " ")} |`);
+  console.log(" +-----------------+----------------+");
 }
 
 function logVelocity(
   title: string,
   { x, y, z, lastApplied }: { x: BN; y: BN; z: BN; lastApplied: BN }
 ) {
-  console.log(" +----------------------------+");
-  console.log(` | ${padCenter(title, 26)} |`);
-  console.log(" +---------------+------------+");
-  console.log(` | X Velocity    | ${String(x).padEnd(10, " ")} |`);
-  console.log(` | Y Velocity    | ${String(y).padEnd(10, " ")} |`);
-  console.log(` | Z Velocity    | ${String(z).padEnd(10, " ")} |`);
-  console.log(` | Last Applied  | ${String(lastApplied).padEnd(10, " ")} |`);
-  console.log(" +---------------+------------+");
+  console.log(" +----------------------------------+");
+  console.log(` | ${padCenter(title, 32)} |`);
+  console.log(" +-----------------+----------------+");
+  console.log(` | X Velocity      | ${String(x).padEnd(14, " ")} |`);
+  console.log(` | Y Velocity      | ${String(y).padEnd(14, " ")} |`);
+  console.log(` | Z Velocity      | ${String(z).padEnd(14, " ")} |`);
+  console.log(` | Last Applied    | ${String(lastApplied).padEnd(14, " ")} |`);
+  console.log(" +-----------------+----------------+");
 }
 
 describe("bolt", () => {
@@ -105,7 +97,7 @@ describe("bolt", () => {
   let componentVelocityEntity1Pda: PublicKey;
 
   it("InitializeWorldsRegistry", async () => {
-    const registryPda = FindWorldRegistryPda(boltWorld.programId);
+    const registryPda = FindWorldRegistryPda({});
     const initializeRegistryIx = createInitializeRegistryInstruction({
       registry: registryPda,
       payer: provider.wallet.publicKey,
@@ -164,7 +156,7 @@ describe("bolt", () => {
     const addEntity = await AddEntity({
       payer: provider.wallet.publicKey,
       world: worldPda,
-      seed: "extra-seed", // TODO(vbrunet) - extra seed doesn't work for some reason?
+      seed: "extra-seed",
       connection: provider.connection,
     });
     await provider.sendAndConfirm(addEntity.transaction);
@@ -439,7 +431,7 @@ describe("bolt", () => {
         })
         .rpc();
     } catch (e) {
-      console.log("ERROR:", e);
+      console.log("Check invalid init without CPI: error:", e);
       invalid = true;
     }
     expect(invalid).to.equal(true);
@@ -462,7 +454,7 @@ describe("bolt", () => {
         })
         .rpc();
     } catch (e) {
-      console.log("ERROR2:", e);
+      console.log("Check invalid update without CPI: error:", e);
       invalid = true;
     }
     expect(invalid).to.equal(true);

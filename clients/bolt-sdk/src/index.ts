@@ -1,5 +1,5 @@
 import { PublicKey } from "@solana/web3.js";
-import BN from "bn.js";
+import type BN from "bn.js";
 import { PROGRAM_ID } from "./generated";
 export * from "./generated/accounts";
 export * from "./generated/instructions";
@@ -49,7 +49,8 @@ export function FindEntityPda({
     seeds.push(Buffer.from(new Uint8Array(8)));
     seeds.push(Buffer.from(seed));
   } else if (entityId !== undefined) {
-    seeds.push(Buffer.from(entityId.toArrayLike(Buffer, "be", 8)));
+    const entityIdBuffer = Buffer.from(entityId.toArrayLike(Buffer, "be", 8));
+    seeds.push(entityIdBuffer);
   } else {
     throw new Error("An entity must have either an Id or a Seed");
   }
