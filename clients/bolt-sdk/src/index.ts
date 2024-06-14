@@ -11,62 +11,64 @@ export const SYSVAR_INSTRUCTIONS_PUBKEY = new PublicKey(
   "Sysvar1nstructions1111111111111111111111111"
 );
 
-export function FindWorldRegistryPda(
-  programId: PublicKey = new PublicKey(PROGRAM_ID)
-) {
+export function FindWorldRegistryPda({ programId }: { programId?: PublicKey }) {
   return PublicKey.findProgramAddressSync(
     [Buffer.from("registry")],
-    programId
+    programId ?? PROGRAM_ID
   )[0];
 }
 
-export function FindWorldPda(
-  id: BN | string | number | Uint8Array,
-  programId: PublicKey = new PublicKey(PROGRAM_ID)
-) {
-  id = CastToBN(id);
-  const idBuffer = Buffer.from(id.toArrayLike(Buffer, "be", 8));
+export function FindWorldPda({
+  worldId,
+  programId,
+}: {
+  worldId: BN;
+  programId?: PublicKey;
+}) {
+  const idBuffer = Buffer.from(worldId.toArrayLike(Buffer, "be", 8));
   return PublicKey.findProgramAddressSync(
     [Buffer.from("world"), idBuffer],
-    programId
+    programId ?? PROGRAM_ID
   )[0];
 }
 
-export function FindEntityPda(
-  worldId: BN | string | number | Uint8Array,
-  entityId: BN | string | number | Uint8Array,
-  extraSeed?: string,
-  programId: PublicKey = new PublicKey(PROGRAM_ID)
-) {
-  worldId = CastToBN(worldId);
-  entityId = CastToBN(entityId);
+export function FindEntityPda({
+  worldId,
+  entityId,
+  seed,
+  programId,
+}: {
+  worldId: BN;
+  entityId?: BN;
+  seed?: string;
+  programId?: PublicKey;
+}) {
   const worldIdBuffer = Buffer.from(worldId.toArrayLike(Buffer, "be", 8));
   const seeds = [Buffer.from("entity"), worldIdBuffer];
-  if (extraSeed != null) {
+  if (seed !== undefined) {
     seeds.push(Buffer.from(new Uint8Array(8)));
-    seeds.push(Buffer.from(extraSeed));
-  } else {
+    seeds.push(Buffer.from(seed));
+  } else if (entityId !== undefined) {
     seeds.push(Buffer.from(entityId.toArrayLike(Buffer, "be", 8)));
+  } else {
+    throw new Error("An entity must have either an Id or a Seed");
   }
-  return PublicKey.findProgramAddressSync(seeds, programId)[0];
+  return PublicKey.findProgramAddressSync(seeds, programId ?? PROGRAM_ID)[0];
 }
 
-export function FindComponentPda(
-  componentProgramId: PublicKey,
-  entity: PublicKey,
-  componentId: string = ""
-) {
+export function FindComponentPda({
+  componentId,
+  entity,
+  seed,
+}: {
+  componentId: PublicKey;
+  entity: PublicKey;
+  seed?: string;
+}) {
   return PublicKey.findProgramAddressSync(
-    [Buffer.from(componentId), entity.toBytes()],
-    componentProgramId
+    [Buffer.from(seed ?? ""), entity.toBytes()],
+    componentId
   )[0];
-}
-
-function CastToBN(id: BN | string | number | Uint8Array) {
-  if (!(id instanceof BN)) {
-    id = new BN(id);
-  }
-  return id;
 }
 
 /**

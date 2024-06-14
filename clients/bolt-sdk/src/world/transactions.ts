@@ -35,10 +35,13 @@ export async function InitializeNewWorld({
 }: {
   payer: PublicKey;
   connection: Connection;
-}): Promise<{ transaction: Transaction; worldPda: PublicKey }> {
-  const registryPda = FindWorldRegistryPda();
+}): Promise<{ transaction: Transaction; worldPda: PublicKey; worldId: BN }> {
+  const registryPda = FindWorldRegistryPda({});
   const registry = await Registry.fromAccountAddress(connection, registryPda);
-  const worldPda = FindWorldPda(new BN(registry.worlds));
+  const worldId = new BN(registry.worlds);
+  const worldPda = FindWorldPda({
+    worldId,
+  });
   const initializeWorldIx = createInitializeNewWorldInstruction({
     world: worldPda,
     registry: registryPda,
@@ -47,6 +50,7 @@ export async function InitializeNewWorld({
   return {
     transaction: new Transaction().add(initializeWorldIx),
     worldPda,
+    worldId,
   };
 }
 
@@ -69,11 +73,10 @@ export async function AddEntity({
   connection: Connection;
 }): Promise<{ transaction: Transaction; entityPda: PublicKey }> {
   const worldInstance = await World.fromAccountAddress(connection, world);
-  const entityPda = FindEntityPda(
-    new BN(worldInstance.id),
-    new BN(worldInstance.entities),
-    seed
-  );
+  const worldId = new BN(worldInstance.id);
+  const entityPda = seed
+    ? FindEntityPda({ worldId, seed })
+    : FindEntityPda({ worldId, entityId: new BN(worldInstance.entities) });
   const createEntityIx = createAddEntityInstruction(
     {
       world,
@@ -113,7 +116,7 @@ export async function InitializeComponent({
   authority?: web3.PublicKey;
   anchorRemainingAccounts?: web3.AccountMeta[];
 }): Promise<{ transaction: Transaction; componentPda: PublicKey }> {
-  const componentPda = FindComponentPda(componentId, entity, seed);
+  const componentPda = FindComponentPda({ componentId, entity, seed });
   const initComponentIx = createInitializeComponentInstruction({
     payer,
     entity,
