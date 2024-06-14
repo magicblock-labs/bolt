@@ -24,6 +24,7 @@ import {
   SYSVAR_INSTRUCTIONS_PUBKEY,
 } from "../clients/bolt-sdk";
 import { createUndelegateInstruction } from "../clients/bolt-sdk/lib/delegation/undelegate";
+import { ApplySystem } from "../clients/bolt-sdk/src";
 
 enum Direction {
   Left = "Left",
@@ -60,7 +61,7 @@ describe("bolt", () => {
   ).programId;
   const systemFly = (anchor.workspace.SystemFly as Program<SystemFly>)
     .programId;
-  const applyVelocity = (
+  const systemApplyVelocity = (
     anchor.workspace.SystemApplyVelocity as Program<SystemApplyVelocity>
   ).programId;
 
@@ -71,7 +72,7 @@ describe("bolt", () => {
   let componentPositionEntity1Pda: PublicKey;
   let componentPositionEntity2Pda: PublicKey;
   let componentPositionEntity5Pda: PublicKey;
-  let componentVelocityEntity1: PublicKey;
+  let componentVelocityEntity1Pda: PublicKey;
 
   it("InitializeWorldsRegistry", async () => {
     const registryPda = FindWorldRegistryPda(worldProgram.programId);
@@ -217,35 +218,31 @@ describe("bolt", () => {
   });
 
   it("Simple Movement System and Up direction on Entity 1", async () => {
-    const args = {
-      direction: Direction.Up,
-    };
-    await worldProgram.methods
-      .apply(serializeArgs(args)) // Move Up
-      .accounts({
-        componentProgram: boltComponentPositionProgram.programId,
-        boltSystem: systemSimpleMovement,
-        boltComponent: componentPositionEntity1,
-        instructionSysvarAccount: SYSVAR_INSTRUCTIONS_PUBKEY,
-        authority: provider.wallet.publicKey,
-      })
-      .rpc();
+    const applySystem = await ApplySystem({
+      authority: provider.wallet.publicKey,
+      systemId: systemSimpleMovement,
+      entities: [
+        {
+          entity: entity1Pda,
+          components: [{ id: boltComponentPositionProgram.programId }],
+        },
+      ],
+      args: {
+        direction: Direction.Up,
+      },
+    });
+    await provider.sendAndConfirm(applySystem.transaction);
 
-    expect(
-      (
-        await boltComponentPositionProgram.account.position.fetch(
-          componentPositionEntity1
-        )
-      ).y.toNumber()
-    ).to.equal(1);
+    const position = await boltComponentPositionProgram.account.position.fetch(
+      componentPositionEntity1Pda
+    );
+    const x = position.x.toNumber();
+    const y = position.y.toNumber();
+    const z = position.z.toNumber();
+    expect(x).to.equal(0);
+    expect(y).to.equal(1);
+    expect(z).to.equal(0);
 
-    const componentData =
-      await boltComponentPositionProgram.account.position.fetch(
-        componentPositionEntity1
-      );
-    const x = componentData.x.toNumber();
-    const y = componentData.y.toNumber();
-    const z = componentData.z.toNumber();
     console.log("+-----------------------------+");
     console.log("| Movement System:   Entity 1 |");
     console.log("+----------------+------------+");
@@ -259,46 +256,35 @@ describe("bolt", () => {
     console.log("+----------------+------------+");
     console.log("|                             |");
     console.log("+-----------------------------+");
-    console.log("Component Position: ", componentPositionEntity1.toString());
+    console.log("Component Position: ", componentPositionEntity1Pda.toString());
   });
 
   it("Simple Movement System and Right direction on Entity 1", async () => {
-    const args = {
-      direction: Direction.Right,
-    };
-    await worldProgram.methods
-      .apply(serializeArgs(args)) // Move Right
-      .accounts({
-        componentProgram: boltComponentPositionProgram.programId,
-        boltSystem: systemSimpleMovement,
-        boltComponent: componentPositionEntity1,
-        instructionSysvarAccount: SYSVAR_INSTRUCTIONS_PUBKEY,
-        authority: provider.wallet.publicKey,
-      })
-      .rpc();
+    const applySystem = await ApplySystem({
+      authority: provider.wallet.publicKey,
+      systemId: systemSimpleMovement,
+      entities: [
+        {
+          entity: entity1Pda,
+          components: [{ id: boltComponentPositionProgram.programId }],
+        },
+      ],
+      args: {
+        direction: Direction.Right,
+      },
+    });
+    await provider.sendAndConfirm(applySystem.transaction);
 
-    expect(
-      (
-        await boltComponentPositionProgram.account.position.fetch(
-          componentPositionEntity1
-        )
-      ).y.toNumber()
-    ).to.equal(1);
-    expect(
-      (
-        await boltComponentPositionProgram.account.position.fetch(
-          componentPositionEntity1
-        )
-      ).y.toNumber()
-    ).to.equal(1);
+    const position = await boltComponentPositionProgram.account.position.fetch(
+      componentPositionEntity1Pda
+    );
+    const x = position.x.toNumber();
+    const y = position.y.toNumber();
+    const z = position.z.toNumber();
+    expect(x).to.equal(1);
+    expect(y).to.equal(1);
+    expect(z).to.equal(0);
 
-    const componentData =
-      await boltComponentPositionProgram.account.position.fetch(
-        componentPositionEntity1
-      );
-    const x = componentData.x.toNumber();
-    const y = componentData.y.toNumber();
-    const z = componentData.z.toNumber();
     console.log("+-----------------------------+");
     console.log("| Movement System:   Entity 1 |");
     console.log("+----------------+------------+");
@@ -315,32 +301,28 @@ describe("bolt", () => {
   });
 
   it("Fly System on Entity 1", async () => {
-    await worldProgram.methods
-      .apply(Buffer.alloc(0)) // Move Up
-      .accounts({
-        componentProgram: boltComponentPositionProgram.programId,
-        boltSystem: systemFly,
-        boltComponent: componentPositionEntity1,
-        instructionSysvarAccount: SYSVAR_INSTRUCTIONS_PUBKEY,
-        authority: provider.wallet.publicKey,
-      })
-      .rpc();
+    const applySystem = await ApplySystem({
+      authority: provider.wallet.publicKey,
+      systemId: systemFly,
+      entities: [
+        {
+          entity: entity1Pda,
+          components: [{ id: boltComponentPositionProgram.programId }],
+        },
+      ],
+    });
+    await provider.sendAndConfirm(applySystem.transaction);
 
-    expect(
-      (
-        await boltComponentPositionProgram.account.position.fetch(
-          componentPositionEntity1
-        )
-      ).z.toNumber()
-    ).to.equal(1);
+    const position = await boltComponentPositionProgram.account.position.fetch(
+      componentPositionEntity1Pda
+    );
+    const x = position.x.toNumber();
+    const y = position.y.toNumber();
+    const z = position.z.toNumber();
+    expect(x).to.equal(1);
+    expect(y).to.equal(1);
+    expect(z).to.equal(1);
 
-    const componentData =
-      await boltComponentPositionProgram.account.position.fetch(
-        componentPositionEntity1
-      );
-    const x = componentData.x.toNumber();
-    const y = componentData.y.toNumber();
-    const z = componentData.z.toNumber();
     console.log("+-----------------------------+");
     console.log("| Fly: Position Entity 1      |");
     console.log("+----------------+------------+");
@@ -356,30 +338,62 @@ describe("bolt", () => {
     console.log("+-----------------------------+");
   });
 
-  it("Apply Velocity on Entity 1", async () => {
-    await worldProgram.methods
-      .apply2(Buffer.alloc(0))
-      .accounts({
-        componentProgram1: boltComponentVelocityProgram.programId,
-        componentProgram2: boltComponentPositionProgram.programId,
-        boltSystem: applyVelocity,
-        boltComponent1: componentVelocityEntity1,
-        boltComponent2: componentPositionEntity1,
-        instructionSysvarAccount: SYSVAR_INSTRUCTIONS_PUBKEY,
-        authority: provider.wallet.publicKey,
-      })
-      .rpc();
+  it("Apply System Velocity on Entity 1", async () => {
+    const applySystem = await ApplySystem({
+      authority: provider.wallet.publicKey,
+      systemId: systemApplyVelocity,
+      entities: [
+        {
+          entity: entity1Pda,
+          components: [
+            { id: boltComponentVelocityProgram.programId },
+            { id: boltComponentPositionProgram.programId },
+          ],
+        },
+      ],
+    });
+    await provider.sendAndConfirm(applySystem.transaction);
 
-    const componentData =
-      await boltComponentVelocityProgram.account.velocity.fetch(
-        componentVelocityEntity1
-      );
-    let x = componentData.x.toNumber();
-    let y = componentData.y.toNumber();
-    let z = componentData.z.toNumber();
-    const tmp = componentData.lastApplied.toNumber();
+    const velocity = await boltComponentVelocityProgram.account.velocity.fetch(
+      componentVelocityEntity1Pda
+    );
+    const vx = velocity.x.toNumber();
+    const vy = velocity.y.toNumber();
+    const vz = velocity.z.toNumber();
+    const ts = velocity.lastApplied.toNumber();
+    expect(vx).to.equal(0);
+    expect(vy).to.equal(0);
+    expect(vz).to.equal(0);
+    expect(ts).to.equal(0);
+
     console.log("+-----------------------------+");
-    console.log("| Apply Velocity: Velocity Entity 1      |");
+    console.log("| Apply System Velocity: Velocity Entity 1      |");
+    console.log("+----------------+------------+");
+    console.log("| Coordinate    | Value      |");
+    console.log("+----------------+------------+");
+    console.log(`| X Position    | ${String(vx).padEnd(10, " ")} |`);
+    console.log("|               |            |");
+    console.log(`| Y Position    | ${String(vy).padEnd(10, " ")} |`);
+    console.log("|               |            |");
+    console.log(`| Z Position    | ${String(vz).padEnd(10, " ")} |`);
+    console.log("|               |            |");
+    console.log(`| Timestamp    | ${String(ts).padEnd(10, " ")} |`);
+    console.log("+----------------+------------+");
+    console.log("|                             |");
+    console.log("+-----------------------------+");
+
+    const position = await boltComponentPositionProgram.account.position.fetch(
+      componentPositionEntity1Pda
+    );
+    const x = position.x.toNumber();
+    const y = position.y.toNumber();
+    const z = position.z.toNumber();
+    expect(x).to.equal(1);
+    expect(y).to.equal(1);
+    expect(z).to.equal(1);
+
+    console.log("+-----------------------------+");
+    console.log("| Apply System Velocity: Position Entity 1      |");
     console.log("+----------------+------------+");
     console.log("| Coordinate    | Value      |");
     console.log("+----------------+------------+");
@@ -388,48 +402,25 @@ describe("bolt", () => {
     console.log(`| Y Position    | ${String(y).padEnd(10, " ")} |`);
     console.log("|               |            |");
     console.log(`| Z Position    | ${String(z).padEnd(10, " ")} |`);
-    console.log("|               |            |");
-    console.log(`| Timestamp    | ${String(tmp).padEnd(10, " ")} |`);
     console.log("+----------------+------------+");
     console.log("|                             |");
     console.log("+-----------------------------+");
-
-    const positionData =
-      await boltComponentPositionProgram.account.position.fetch(
-        componentPositionEntity1
-      );
-    x = positionData.x.toNumber();
-    y = positionData.y.toNumber();
-    z = positionData.z.toNumber();
-    console.log("+-----------------------------+");
-    console.log("| Apply Velocity: Position Entity 1      |");
-    console.log("+----------------+------------+");
-    console.log("| Coordinate    | Value      |");
-    console.log("+----------------+------------+");
-    console.log(`| X Position    | ${String(x).padEnd(10, " ")} |`);
-    console.log("|               |            |");
-    console.log(`| Y Position    | ${String(y).padEnd(10, " ")} |`);
-    console.log("|               |            |");
-    console.log(`| Z Position    | ${String(z).padEnd(10, " ")} |`);
-    console.log("+----------------+------------+");
-    console.log("|                             |");
-    console.log("+-----------------------------+");
-    expect(positionData.z.toNumber()).to.not.equal(300);
   });
 
-  it("Apply Velocity on Entity 1, with Clock external account", async () => {
-    await worldProgram.methods
-      .apply2(Buffer.alloc(0))
-      .accounts({
-        componentProgram1: boltComponentVelocityProgram.programId,
-        componentProgram2: boltComponentPositionProgram.programId,
-        boltSystem: applyVelocity,
-        boltComponent1: componentVelocityEntity1,
-        boltComponent2: componentPositionEntity1,
-        instructionSysvarAccount: SYSVAR_INSTRUCTIONS_PUBKEY,
-        authority: provider.wallet.publicKey,
-      })
-      .remainingAccounts([
+  it("Apply System Velocity on Entity 1, with Clock external account", async () => {
+    const applySystem = await ApplySystem({
+      authority: provider.wallet.publicKey,
+      systemId: systemApplyVelocity,
+      entities: [
+        {
+          entity: entity1Pda,
+          components: [
+            { id: boltComponentVelocityProgram.programId },
+            { id: boltComponentPositionProgram.programId },
+          ],
+        },
+      ],
+      extraAccounts: [
         {
           pubkey: new web3.PublicKey(
             "SysvarC1ock11111111111111111111111111111111"
@@ -437,71 +428,89 @@ describe("bolt", () => {
           isWritable: false,
           isSigner: false,
         },
-      ])
-      .rpc();
+      ],
+    });
+    await provider.sendAndConfirm(applySystem.transaction);
 
-    const positionData =
-      await boltComponentPositionProgram.account.position.fetch(
-        componentPositionEntity1
-      );
-    // Check if the position has changed to 300 (which means the account clock was used)
-    expect(positionData.z.toNumber()).to.equal(300);
+    const position = await boltComponentPositionProgram.account.position.fetch(
+      componentPositionEntity1Pda
+    );
+    const x = position.x.toNumber();
+    const y = position.y.toNumber();
+    const z = position.z.toNumber();
+    expect(x).to.equal(1);
+    expect(y).to.equal(1);
+    expect(z).to.equal(300);
+
+    console.log("+-----------------------------+");
+    console.log("| Apply System Velocity: Position Entity 1      |");
+    console.log("+----------------+------------+");
+    console.log("| Coordinate    | Value      |");
+    console.log("+----------------+------------+");
+    console.log(`| X Position    | ${String(x).padEnd(10, " ")} |`);
+    console.log("|               |            |");
+    console.log(`| Y Position    | ${String(y).padEnd(10, " ")} |`);
+    console.log("|               |            |");
+    console.log(`| Z Position    | ${String(z).padEnd(10, " ")} |`);
+    console.log("+----------------+------------+");
+    console.log("|                             |");
+    console.log("+-----------------------------+");
   });
 
   // Check illegal authority usage
   it("Check invalid component update", async () => {
-    const componentDataPrev =
+    const positionBefore =
       await boltComponentPositionProgram.account.position.fetch(
-        componentPositionEntity5
+        componentPositionEntity5Pda
       );
 
+    const applySystem = await ApplySystem({
+      authority: provider.wallet.publicKey,
+      systemId: systemFly,
+      entities: [
+        {
+          entity: entity5Pda,
+          components: [{ id: boltComponentPositionProgram.programId }],
+        },
+      ],
+    });
+
+    let failed = false;
     try {
-      await worldProgram.methods
-        .apply(Buffer.alloc(0)) // Move Up
-        .accounts({
-          componentProgram: boltComponentPositionProgram.programId,
-          boltSystem: systemFly,
-          boltComponent: componentPositionEntity5,
-          instructionSysvarAccount: SYSVAR_INSTRUCTIONS_PUBKEY,
-          authority: provider.wallet.publicKey,
-        })
-        .rpc();
-    } catch (e) {
-      expect(e.message).to.contain("Invalid authority");
+      await provider.sendAndConfirm(applySystem.transaction);
+    } catch (error) {
+      failed = true;
+      expect(error.message).to.contain("Invalid authority");
     }
+    expect(failed).to.equal(true);
 
-    const componentData =
+    const positionAfter =
       await boltComponentPositionProgram.account.position.fetch(
-        componentPositionEntity5
+        componentPositionEntity5Pda
       );
 
-    expect(
-      componentDataPrev.x.toNumber() === componentData.x.toNumber() &&
-        componentDataPrev.y.toNumber() === componentData.y.toNumber() &&
-        componentDataPrev.z.toNumber() === componentData.z.toNumber()
-    ).to.equal(true);
+    expect(positionBefore.x.toNumber()).to.equal(positionAfter.x.toNumber());
+    expect(positionBefore.y.toNumber()).to.equal(positionAfter.y.toNumber());
+    expect(positionBefore.z.toNumber()).to.equal(positionAfter.z.toNumber());
   });
 
   // Check illegal call, without CPI
   it("Check invalid init without CPI", async () => {
     let invalid = false;
-    const componentVelocityEntity5 = FindComponentPda(
-      boltComponentVelocityProgram.programId,
-      entity5
-    );
     try {
-      await boltComponentProgramOrigin.methods
+      await boltComponentPositionProgram.methods
         .initialize()
         .accounts({
           payer: provider.wallet.publicKey,
-          data: componentVelocityEntity5,
-          entity: entity5,
-          instructionSysvarAccount: SYSVAR_INSTRUCTIONS_PUBKEY,
-          systemProgram: anchor.web3.SystemProgram.programId,
+          data: componentPositionEntity5Pda,
+          entity: entity5Pda,
+          //instructionSysvarAccount: SYSVAR_INSTRUCTIONS_PUBKEY,
+          //systemProgram: anchor.web3.SystemProgram.programId,
           authority: provider.wallet.publicKey,
         })
         .rpc();
     } catch (e) {
+      console.log("ERROR:", e);
       invalid = true;
     }
     expect(invalid).to.equal(true);
@@ -512,18 +521,19 @@ describe("bolt", () => {
     let invalid = false;
     const componentVelocityEntity5 = FindComponentPda(
       boltComponentVelocityProgram.programId,
-      entity5
+      entity5Pda
     );
     try {
       await boltComponentProgramOrigin.methods
         .update(null)
         .accounts({
           boltComponent: componentVelocityEntity5,
-          instructionSysvarAccount: SYSVAR_INSTRUCTIONS_PUBKEY,
+          //instructionSysvarAccount: SYSVAR_INSTRUCTIONS_PUBKEY,
           authority: provider.wallet.publicKey,
         })
         .rpc();
     } catch (e) {
+      console.log("ERROR2:", e);
       invalid = true;
     }
     expect(invalid).to.equal(true);
@@ -532,15 +542,15 @@ describe("bolt", () => {
   // Check component delegation
   it("Check component delegation", async () => {
     const delegateIx = createDelegateInstruction({
-      entity: entity1,
-      account: componentPositionEntity1,
+      entity: entity1Pda,
+      account: componentPositionEntity1Pda,
       ownerProgram: boltComponentPositionProgram.programId,
       payer: provider.wallet.publicKey,
     });
     const tx = new anchor.web3.Transaction().add(delegateIx);
     await provider.sendAndConfirm(tx, [], { skipPreflight: true });
     const acc = await provider.connection.getAccountInfo(
-      componentPositionEntity1
+      componentPositionEntity1Pda
     );
     expect(acc.owner.toString()).to.equal(DELEGATION_PROGRAM_ID);
   });
@@ -549,14 +559,14 @@ describe("bolt", () => {
   it("Check component undelegation", async () => {
     const delegateIx = createUndelegateInstruction({
       payer: provider.wallet.publicKey,
-      delegatedAccount: componentPositionEntity1,
+      delegatedAccount: componentPositionEntity1Pda,
       ownerProgram: boltComponentPositionProgram.programId,
       reimbursement: provider.wallet.publicKey,
     });
     const tx = new anchor.web3.Transaction().add(delegateIx);
     await provider.sendAndConfirm(tx, [], { skipPreflight: true });
     const acc = await provider.connection.getAccountInfo(
-      componentPositionEntity1
+      componentPositionEntity1Pda
     );
     expect(acc.owner).to.deep.equal(boltComponentPositionProgram.programId);
   });
