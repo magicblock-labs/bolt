@@ -1,6 +1,6 @@
 import { PublicKey } from "@solana/web3.js";
 import BN from "bn.js";
-import { PROGRAM_ID } from "generated";
+import { PROGRAM_ID } from "./generated";
 export * from "./generated/accounts";
 export * from "./generated/instructions";
 export * from "./world/transactions";

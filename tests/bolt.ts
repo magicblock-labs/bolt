@@ -4,7 +4,7 @@ import { type PublicKey } from "@solana/web3.js";
 import { type Position } from "../target/types/position";
 import { type Velocity } from "../target/types/velocity";
 import { type BoltComponent } from "../target/types/bolt_component";
-import { type SystemSimpleMovement } from "../target/types/system_simple_movement";
+import { SystemSimpleMovement } from "../target/types/system_simple_movement";
 import { type SystemFly } from "../target/types/system_fly";
 import { type SystemApplyVelocity } from "../target/types/system_apply_velocity";
 import { type World } from "../target/types/world";
@@ -16,8 +16,6 @@ import {
   createInitializeRegistryInstruction,
   DELEGATION_PROGRAM_ID,
   FindComponentPda,
-  FindEntityPda,
-  FindWorldPda,
   FindWorldRegistryPda,
   InitializeComponent,
   InitializeNewWorld,
@@ -44,24 +42,56 @@ function serializeArgs(args: any = {}) {
   );
 }
 
+function padCenter(value: string, width: number) {
+  const length = value.length;
+  const padding = (width - length) / 2;
+  const align = length - padding;
+  return value.padEnd(align, " ").padStart(width, " ");
+}
+
+function logPosition(title: string, { x, y, z }: { x: BN; y: BN; z: BN }) {
+  console.log("+----------------------------+");
+  console.log(`| ${padCenter(title, 20)} |`);
+  console.log("+---------------+------------+");
+  console.log(`| X Position    | ${String(x).padEnd(10, " ")} |`);
+  console.log(`| Y Position    | ${String(y).padEnd(10, " ")} |`);
+  console.log(`| Z Position    | ${String(z).padEnd(10, " ")} |`);
+  console.log("+---------------+------------+");
+}
+
+function logVelocity(
+  title: string,
+  { x, y, z, lastApplied }: { x: BN; y: BN; z: BN; lastApplied: BN }
+) {
+  console.log("+----------------------------+");
+  console.log(`| ${padCenter(title, 20)} |`);
+  console.log("+---------------+------------+");
+  console.log(`| X Velocity    | ${String(x).padEnd(10, " ")} |`);
+  console.log(`| Y Velocity    | ${String(y).padEnd(10, " ")} |`);
+  console.log(`| Z Velocity    | ${String(z).padEnd(10, " ")} |`);
+  console.log(`| Last Applied  | ${String(lastApplied).padEnd(10, " ")} |`);
+  console.log("+---------------+------------+");
+}
+
 describe("bolt", () => {
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
 
-  const worldProgram = anchor.workspace.World as Program<World>;
-  const boltComponentPositionProgram = anchor.workspace
-    .Position as Program<Position>;
-  const boltComponentVelocityProgram = anchor.workspace
-    .Velocity as Program<Velocity>;
-  const boltComponentProgramOrigin = anchor.workspace
+  const boltWorld = anchor.workspace.World as Program<World>;
+  const boltComponentProgram = anchor.workspace
     .BoltComponent as Program<BoltComponent>;
 
-  const systemSimpleMovement = (
+  const exampleComponentPosition = anchor.workspace
+    .Position as Program<Position>;
+  const exampleComponentVelocity = anchor.workspace
+    .Velocity as Program<Velocity>;
+
+  const exampleSystemSimpleMovement = (
     anchor.workspace.SystemSimpleMovement as Program<SystemSimpleMovement>
   ).programId;
-  const systemFly = (anchor.workspace.SystemFly as Program<SystemFly>)
+  const exampleSystemFly = (anchor.workspace.SystemFly as Program<SystemFly>)
     .programId;
-  const systemApplyVelocity = (
+  const exampleSystemApplyVelocity = (
     anchor.workspace.SystemApplyVelocity as Program<SystemApplyVelocity>
   ).programId;
 
@@ -75,7 +105,7 @@ describe("bolt", () => {
   let componentVelocityEntity1Pda: PublicKey;
 
   it("InitializeWorldsRegistry", async () => {
-    const registryPda = FindWorldRegistryPda(worldProgram.programId);
+    const registryPda = FindWorldRegistryPda(boltWorld.programId);
     const initializeRegistryIx = createInitializeRegistryInstruction({
       registry: registryPda,
       payer: provider.wallet.publicKey,
@@ -134,7 +164,7 @@ describe("bolt", () => {
     const addEntity = await AddEntity({
       payer: provider.wallet.publicKey,
       world: worldPda,
-      seed: "extra-seed",
+      seed: "extra-seed", // TODO(vbrunet) - extra seed doesn't work for some reason?
       connection: provider.connection,
     });
     await provider.sendAndConfirm(addEntity.transaction);
@@ -154,8 +184,8 @@ describe("bolt", () => {
     const inititializeComponent = await InitializeComponent({
       payer: provider.wallet.publicKey,
       entity: entity1Pda,
-      seed: "origin-component",
-      componentId: boltComponentProgramOrigin.programId,
+      //seed: "origin-component",
+      componentId: boltComponentProgram.programId,
     });
     await provider.sendAndConfirm(inititializeComponent.transaction);
   });
@@ -164,8 +194,8 @@ describe("bolt", () => {
     const inititializeComponent = await InitializeComponent({
       payer: provider.wallet.publicKey,
       entity: entity2Pda,
-      seed: "origin-component",
-      componentId: boltComponentProgramOrigin.programId,
+      //seed: "origin-component",
+      componentId: boltComponentProgram.programId,
     });
     await provider.sendAndConfirm(inititializeComponent.transaction);
   });
@@ -174,7 +204,7 @@ describe("bolt", () => {
     const inititializeComponent = await InitializeComponent({
       payer: provider.wallet.publicKey,
       entity: entity1Pda,
-      componentId: boltComponentPositionProgram.programId,
+      componentId: exampleComponentPosition.programId,
     });
     await provider.sendAndConfirm(inititializeComponent.transaction);
     componentPositionEntity1Pda = inititializeComponent.componentPda; // Saved for later
@@ -184,7 +214,7 @@ describe("bolt", () => {
     const inititializeComponent = await InitializeComponent({
       payer: provider.wallet.publicKey,
       entity: entity1Pda,
-      componentId: boltComponentVelocityProgram.programId,
+      componentId: exampleComponentVelocity.programId,
     });
     await provider.sendAndConfirm(inititializeComponent.transaction);
   });
@@ -193,7 +223,7 @@ describe("bolt", () => {
     const inititializeComponent = await InitializeComponent({
       payer: provider.wallet.publicKey,
       entity: entity2Pda,
-      componentId: boltComponentPositionProgram.programId,
+      componentId: exampleComponentPosition.programId,
     });
     await provider.sendAndConfirm(inititializeComponent.transaction);
     componentPositionEntity2Pda = inititializeComponent.componentPda; // Saved for later
@@ -203,13 +233,13 @@ describe("bolt", () => {
     const inititializeComponent = await InitializeComponent({
       payer: provider.wallet.publicKey,
       entity: entity5Pda,
-      componentId: boltComponentPositionProgram.programId,
+      componentId: exampleComponentPosition.programId,
     });
     await provider.sendAndConfirm(inititializeComponent.transaction);
   });
 
   it("Check Position on Entity 1 is default", async () => {
-    const position = await boltComponentPositionProgram.account.position.fetch(
+    const position = await exampleComponentPosition.account.position.fetch(
       componentPositionEntity1Pda
     );
     expect(position.x.toNumber()).to.equal(0);
@@ -220,11 +250,11 @@ describe("bolt", () => {
   it("Simple Movement System and Up direction on Entity 1", async () => {
     const applySystem = await ApplySystem({
       authority: provider.wallet.publicKey,
-      systemId: systemSimpleMovement,
+      systemId: exampleSystemSimpleMovement,
       entities: [
         {
           entity: entity1Pda,
-          components: [{ id: boltComponentPositionProgram.programId }],
+          components: [{ id: exampleComponentPosition.programId }],
         },
       ],
       args: {
@@ -233,40 +263,23 @@ describe("bolt", () => {
     });
     await provider.sendAndConfirm(applySystem.transaction);
 
-    const position = await boltComponentPositionProgram.account.position.fetch(
+    const position = await exampleComponentPosition.account.position.fetch(
       componentPositionEntity1Pda
     );
-    const x = position.x.toNumber();
-    const y = position.y.toNumber();
-    const z = position.z.toNumber();
-    expect(x).to.equal(0);
-    expect(y).to.equal(1);
-    expect(z).to.equal(0);
-
-    console.log("+-----------------------------+");
-    console.log("| Movement System:   Entity 1 |");
-    console.log("+----------------+------------+");
-    console.log("| Coordinate    | Value      |");
-    console.log("+----------------+------------+");
-    console.log(`| X Position    | ${String(x).padEnd(10, " ")} |`);
-    console.log("|               |            |");
-    console.log(`| Y Position    | ${String(y).padEnd(10, " ")} |`);
-    console.log("|               |            |");
-    console.log(`| Z Position    | ${String(z).padEnd(10, " ")} |`);
-    console.log("+----------------+------------+");
-    console.log("|                             |");
-    console.log("+-----------------------------+");
-    console.log("Component Position: ", componentPositionEntity1Pda.toString());
+    logPosition("Movement System: Entity 1", position);
+    expect(position.x.toNumber()).to.equal(0);
+    expect(position.y.toNumber()).to.equal(1);
+    expect(position.z.toNumber()).to.equal(0);
   });
 
   it("Simple Movement System and Right direction on Entity 1", async () => {
     const applySystem = await ApplySystem({
       authority: provider.wallet.publicKey,
-      systemId: systemSimpleMovement,
+      systemId: exampleSystemSimpleMovement,
       entities: [
         {
           entity: entity1Pda,
-          components: [{ id: boltComponentPositionProgram.programId }],
+          components: [{ id: exampleComponentPosition.programId }],
         },
       ],
       args: {
@@ -275,148 +288,81 @@ describe("bolt", () => {
     });
     await provider.sendAndConfirm(applySystem.transaction);
 
-    const position = await boltComponentPositionProgram.account.position.fetch(
+    const position = await exampleComponentPosition.account.position.fetch(
       componentPositionEntity1Pda
     );
-    const x = position.x.toNumber();
-    const y = position.y.toNumber();
-    const z = position.z.toNumber();
-    expect(x).to.equal(1);
-    expect(y).to.equal(1);
-    expect(z).to.equal(0);
-
-    console.log("+-----------------------------+");
-    console.log("| Movement System:   Entity 1 |");
-    console.log("+----------------+------------+");
-    console.log("| Coordinate    | Value      |");
-    console.log("+----------------+------------+");
-    console.log(`| X Position    | ${String(x).padEnd(10, " ")} |`);
-    console.log("|               |            |");
-    console.log(`| Y Position    | ${String(y).padEnd(10, " ")} |`);
-    console.log("|               |            |");
-    console.log(`| Z Position    | ${String(z).padEnd(10, " ")} |`);
-    console.log("+----------------+------------+");
-    console.log("|                             |");
-    console.log("+-----------------------------+");
+    logPosition("Movement System: Entity 1", position);
+    expect(position.x.toNumber()).to.equal(1);
+    expect(position.y.toNumber()).to.equal(1);
+    expect(position.z.toNumber()).to.equal(0);
   });
 
   it("Fly System on Entity 1", async () => {
     const applySystem = await ApplySystem({
       authority: provider.wallet.publicKey,
-      systemId: systemFly,
+      systemId: exampleSystemFly,
       entities: [
         {
           entity: entity1Pda,
-          components: [{ id: boltComponentPositionProgram.programId }],
+          components: [{ id: exampleComponentPosition.programId }],
         },
       ],
     });
     await provider.sendAndConfirm(applySystem.transaction);
 
-    const position = await boltComponentPositionProgram.account.position.fetch(
+    const position = await exampleComponentPosition.account.position.fetch(
       componentPositionEntity1Pda
     );
-    const x = position.x.toNumber();
-    const y = position.y.toNumber();
-    const z = position.z.toNumber();
-    expect(x).to.equal(1);
-    expect(y).to.equal(1);
-    expect(z).to.equal(1);
-
-    console.log("+-----------------------------+");
-    console.log("| Fly: Position Entity 1      |");
-    console.log("+----------------+------------+");
-    console.log("| Coordinate    | Value      |");
-    console.log("+----------------+------------+");
-    console.log(`| X Position    | ${String(x).padEnd(10, " ")} |`);
-    console.log("|               |            |");
-    console.log(`| Y Position    | ${String(y).padEnd(10, " ")} |`);
-    console.log("|               |            |");
-    console.log(`| Z Position    | ${String(z).padEnd(10, " ")} |`);
-    console.log("+----------------+------------+");
-    console.log("|                             |");
-    console.log("+-----------------------------+");
+    logPosition("Fly System: Entity 1", position);
+    expect(position.x.toNumber()).to.equal(1);
+    expect(position.y.toNumber()).to.equal(1);
+    expect(position.z.toNumber()).to.equal(1);
   });
 
   it("Apply System Velocity on Entity 1", async () => {
     const applySystem = await ApplySystem({
       authority: provider.wallet.publicKey,
-      systemId: systemApplyVelocity,
+      systemId: exampleSystemApplyVelocity,
       entities: [
         {
           entity: entity1Pda,
           components: [
-            { id: boltComponentVelocityProgram.programId },
-            { id: boltComponentPositionProgram.programId },
+            { id: exampleComponentVelocity.programId },
+            { id: exampleComponentPosition.programId },
           ],
         },
       ],
     });
     await provider.sendAndConfirm(applySystem.transaction);
 
-    const velocity = await boltComponentVelocityProgram.account.velocity.fetch(
+    const velocity = await exampleComponentVelocity.account.velocity.fetch(
       componentVelocityEntity1Pda
     );
-    const vx = velocity.x.toNumber();
-    const vy = velocity.y.toNumber();
-    const vz = velocity.z.toNumber();
-    const ts = velocity.lastApplied.toNumber();
-    expect(vx).to.equal(0);
-    expect(vy).to.equal(0);
-    expect(vz).to.equal(0);
-    expect(ts).to.equal(0);
+    logVelocity("Apply System Velocity: Velocity Entity 1", velocity);
+    expect(velocity.x.toNumber()).to.equal(0);
+    expect(velocity.y.toNumber()).to.equal(0);
+    expect(velocity.z.toNumber()).to.equal(0);
+    expect(velocity.lastApplied.toNumber()).to.equal(0);
 
-    console.log("+-----------------------------+");
-    console.log("| Apply System Velocity: Velocity Entity 1      |");
-    console.log("+----------------+------------+");
-    console.log("| Coordinate    | Value      |");
-    console.log("+----------------+------------+");
-    console.log(`| X Position    | ${String(vx).padEnd(10, " ")} |`);
-    console.log("|               |            |");
-    console.log(`| Y Position    | ${String(vy).padEnd(10, " ")} |`);
-    console.log("|               |            |");
-    console.log(`| Z Position    | ${String(vz).padEnd(10, " ")} |`);
-    console.log("|               |            |");
-    console.log(`| Timestamp    | ${String(ts).padEnd(10, " ")} |`);
-    console.log("+----------------+------------+");
-    console.log("|                             |");
-    console.log("+-----------------------------+");
-
-    const position = await boltComponentPositionProgram.account.position.fetch(
+    const position = await exampleComponentPosition.account.position.fetch(
       componentPositionEntity1Pda
     );
-    const x = position.x.toNumber();
-    const y = position.y.toNumber();
-    const z = position.z.toNumber();
-    expect(x).to.equal(1);
-    expect(y).to.equal(1);
-    expect(z).to.equal(1);
-
-    console.log("+-----------------------------+");
-    console.log("| Apply System Velocity: Position Entity 1      |");
-    console.log("+----------------+------------+");
-    console.log("| Coordinate    | Value      |");
-    console.log("+----------------+------------+");
-    console.log(`| X Position    | ${String(x).padEnd(10, " ")} |`);
-    console.log("|               |            |");
-    console.log(`| Y Position    | ${String(y).padEnd(10, " ")} |`);
-    console.log("|               |            |");
-    console.log(`| Z Position    | ${String(z).padEnd(10, " ")} |`);
-    console.log("+----------------+------------+");
-    console.log("|                             |");
-    console.log("+-----------------------------+");
+    logPosition("Apply System Velocity: Position Entity 1", position);
+    expect(position.x.toNumber()).to.equal(1);
+    expect(position.y.toNumber()).to.equal(1);
+    expect(position.z.toNumber()).to.equal(1);
   });
 
   it("Apply System Velocity on Entity 1, with Clock external account", async () => {
     const applySystem = await ApplySystem({
       authority: provider.wallet.publicKey,
-      systemId: systemApplyVelocity,
+      systemId: exampleSystemApplyVelocity,
       entities: [
         {
           entity: entity1Pda,
           components: [
-            { id: boltComponentVelocityProgram.programId },
-            { id: boltComponentPositionProgram.programId },
+            { id: exampleComponentVelocity.programId },
+            { id: exampleComponentPosition.programId },
           ],
         },
       ],
@@ -432,45 +378,29 @@ describe("bolt", () => {
     });
     await provider.sendAndConfirm(applySystem.transaction);
 
-    const position = await boltComponentPositionProgram.account.position.fetch(
+    const position = await exampleComponentPosition.account.position.fetch(
       componentPositionEntity1Pda
     );
-    const x = position.x.toNumber();
-    const y = position.y.toNumber();
-    const z = position.z.toNumber();
-    expect(x).to.equal(1);
-    expect(y).to.equal(1);
-    expect(z).to.equal(300);
-
-    console.log("+-----------------------------+");
-    console.log("| Apply System Velocity: Position Entity 1      |");
-    console.log("+----------------+------------+");
-    console.log("| Coordinate    | Value      |");
-    console.log("+----------------+------------+");
-    console.log(`| X Position    | ${String(x).padEnd(10, " ")} |`);
-    console.log("|               |            |");
-    console.log(`| Y Position    | ${String(y).padEnd(10, " ")} |`);
-    console.log("|               |            |");
-    console.log(`| Z Position    | ${String(z).padEnd(10, " ")} |`);
-    console.log("+----------------+------------+");
-    console.log("|                             |");
-    console.log("+-----------------------------+");
+    logPosition("Apply System Velocity: Position Entity 1", position);
+    expect(position.x.toNumber()).to.equal(1);
+    expect(position.y.toNumber()).to.equal(1);
+    expect(position.z.toNumber()).to.equal(300);
   });
 
   // Check illegal authority usage
   it("Check invalid component update", async () => {
     const positionBefore =
-      await boltComponentPositionProgram.account.position.fetch(
+      await exampleComponentPosition.account.position.fetch(
         componentPositionEntity5Pda
       );
 
     const applySystem = await ApplySystem({
       authority: provider.wallet.publicKey,
-      systemId: systemFly,
+      systemId: exampleSystemFly,
       entities: [
         {
           entity: entity5Pda,
-          components: [{ id: boltComponentPositionProgram.programId }],
+          components: [{ id: exampleComponentPosition.programId }],
         },
       ],
     });
@@ -484,10 +414,9 @@ describe("bolt", () => {
     }
     expect(failed).to.equal(true);
 
-    const positionAfter =
-      await boltComponentPositionProgram.account.position.fetch(
-        componentPositionEntity5Pda
-      );
+    const positionAfter = await exampleComponentPosition.account.position.fetch(
+      componentPositionEntity5Pda
+    );
 
     expect(positionBefore.x.toNumber()).to.equal(positionAfter.x.toNumber());
     expect(positionBefore.y.toNumber()).to.equal(positionAfter.y.toNumber());
@@ -498,7 +427,7 @@ describe("bolt", () => {
   it("Check invalid init without CPI", async () => {
     let invalid = false;
     try {
-      await boltComponentPositionProgram.methods
+      await exampleComponentPosition.methods
         .initialize()
         .accounts({
           payer: provider.wallet.publicKey,
@@ -520,11 +449,11 @@ describe("bolt", () => {
   it("Check invalid update without CPI", async () => {
     let invalid = false;
     const componentVelocityEntity5 = FindComponentPda(
-      boltComponentVelocityProgram.programId,
+      exampleComponentVelocity.programId,
       entity5Pda
     );
     try {
-      await boltComponentProgramOrigin.methods
+      await boltComponentProgram.methods
         .update(null)
         .accounts({
           boltComponent: componentVelocityEntity5,
@@ -544,7 +473,7 @@ describe("bolt", () => {
     const delegateIx = createDelegateInstruction({
       entity: entity1Pda,
       account: componentPositionEntity1Pda,
-      ownerProgram: boltComponentPositionProgram.programId,
+      ownerProgram: exampleComponentPosition.programId,
       payer: provider.wallet.publicKey,
     });
     const tx = new anchor.web3.Transaction().add(delegateIx);
@@ -560,7 +489,7 @@ describe("bolt", () => {
     const delegateIx = createUndelegateInstruction({
       payer: provider.wallet.publicKey,
       delegatedAccount: componentPositionEntity1Pda,
-      ownerProgram: boltComponentPositionProgram.programId,
+      ownerProgram: exampleComponentPosition.programId,
       reimbursement: provider.wallet.publicKey,
     });
     const tx = new anchor.web3.Transaction().add(delegateIx);
@@ -568,6 +497,6 @@ describe("bolt", () => {
     const acc = await provider.connection.getAccountInfo(
       componentPositionEntity1Pda
     );
-    expect(acc.owner).to.deep.equal(boltComponentPositionProgram.programId);
+    expect(acc.owner).to.deep.equal(exampleComponentPosition.programId);
   });
 });

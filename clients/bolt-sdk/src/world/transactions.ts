@@ -19,7 +19,7 @@ import {
 import BN from "bn.js";
 import type web3 from "@solana/web3.js";
 import { type Connection, type PublicKey, Transaction } from "@solana/web3.js";
-import { PROGRAM_ID } from "generated";
+import { PROGRAM_ID } from "../generated";
 
 const MAX_COMPONENTS = 5;
 
@@ -35,11 +35,10 @@ export async function InitializeNewWorld({
 }: {
   payer: PublicKey;
   connection: Connection;
-}): Promise<{ transaction: Transaction; worldPda: PublicKey; worldId: BN }> {
+}): Promise<{ transaction: Transaction; worldPda: PublicKey }> {
   const registryPda = FindWorldRegistryPda();
   const registry = await Registry.fromAccountAddress(connection, registryPda);
-  const worldId = new BN(registry.worlds);
-  const worldPda = FindWorldPda(new BN(worldId));
+  const worldPda = FindWorldPda(new BN(registry.worlds));
   const initializeWorldIx = createInitializeNewWorldInstruction({
     world: worldPda,
     registry: registryPda,
@@ -48,7 +47,6 @@ export async function InitializeNewWorld({
   return {
     transaction: new Transaction().add(initializeWorldIx),
     worldPda,
-    worldId,
   };
 }
 
@@ -69,11 +67,12 @@ export async function AddEntity({
   world: PublicKey;
   seed?: string;
   connection: Connection;
-}): Promise<{ transaction: Transaction; entityPda: PublicKey; entityId: BN }> {
+}): Promise<{ transaction: Transaction; entityPda: PublicKey }> {
   const worldInstance = await World.fromAccountAddress(connection, world);
-  const entityId = new BN(worldInstance.entities);
-  const entityPda = FindEntityPda(new BN(worldInstance.id), entityId);
-
+  const entityPda = FindEntityPda(
+    new BN(worldInstance.id),
+    new BN(worldInstance.entities)
+  );
   const createEntityIx = createAddEntityInstruction(
     {
       world,
@@ -85,7 +84,6 @@ export async function AddEntity({
   return {
     transaction: new Transaction().add(createEntityIx),
     entityPda,
-    entityId,
   };
 }
 
