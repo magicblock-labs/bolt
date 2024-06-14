@@ -227,7 +227,7 @@ export async function ApplySystem({
   systemId,
   entities,
   extraAccounts,
-  args = {},
+  args,
 }: {
   authority: PublicKey;
   systemId: PublicKey;

@@ -50,27 +50,27 @@ function padCenter(value: string, width: number) {
 }
 
 function logPosition(title: string, { x, y, z }: { x: BN; y: BN; z: BN }) {
-  console.log("+----------------------------+");
-  console.log(`| ${padCenter(title, 20)} |`);
-  console.log("+---------------+------------+");
-  console.log(`| X Position    | ${String(x).padEnd(10, " ")} |`);
-  console.log(`| Y Position    | ${String(y).padEnd(10, " ")} |`);
-  console.log(`| Z Position    | ${String(z).padEnd(10, " ")} |`);
-  console.log("+---------------+------------+");
+  console.log(" +----------------------------+");
+  console.log(` | ${padCenter(title, 26)} |`);
+  console.log(" +---------------+------------+");
+  console.log(` | X Position    | ${String(x).padEnd(10, " ")} |`);
+  console.log(` | Y Position    | ${String(y).padEnd(10, " ")} |`);
+  console.log(` | Z Position    | ${String(z).padEnd(10, " ")} |`);
+  console.log(" +---------------+------------+");
 }
 
 function logVelocity(
   title: string,
   { x, y, z, lastApplied }: { x: BN; y: BN; z: BN; lastApplied: BN }
 ) {
-  console.log("+----------------------------+");
-  console.log(`| ${padCenter(title, 20)} |`);
-  console.log("+---------------+------------+");
-  console.log(`| X Velocity    | ${String(x).padEnd(10, " ")} |`);
-  console.log(`| Y Velocity    | ${String(y).padEnd(10, " ")} |`);
-  console.log(`| Z Velocity    | ${String(z).padEnd(10, " ")} |`);
-  console.log(`| Last Applied  | ${String(lastApplied).padEnd(10, " ")} |`);
-  console.log("+---------------+------------+");
+  console.log(" +----------------------------+");
+  console.log(` | ${padCenter(title, 26)} |`);
+  console.log(" +---------------+------------+");
+  console.log(` | X Velocity    | ${String(x).padEnd(10, " ")} |`);
+  console.log(` | Y Velocity    | ${String(y).padEnd(10, " ")} |`);
+  console.log(` | Z Velocity    | ${String(z).padEnd(10, " ")} |`);
+  console.log(` | Last Applied  | ${String(lastApplied).padEnd(10, " ")} |`);
+  console.log(" +---------------+------------+");
 }
 
 describe("bolt", () => {
@@ -184,7 +184,7 @@ describe("bolt", () => {
     const inititializeComponent = await InitializeComponent({
       payer: provider.wallet.publicKey,
       entity: entity1Pda,
-      //seed: "origin-component",
+      seed: "origin-component",
       componentId: boltComponentProgram.programId,
     });
     await provider.sendAndConfirm(inititializeComponent.transaction);
@@ -194,7 +194,7 @@ describe("bolt", () => {
     const inititializeComponent = await InitializeComponent({
       payer: provider.wallet.publicKey,
       entity: entity2Pda,
-      //seed: "origin-component",
+      seed: "origin-component",
       componentId: boltComponentProgram.programId,
     });
     await provider.sendAndConfirm(inititializeComponent.transaction);
