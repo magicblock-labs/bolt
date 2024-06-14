@@ -71,7 +71,8 @@ export async function AddEntity({
   const worldInstance = await World.fromAccountAddress(connection, world);
   const entityPda = FindEntityPda(
     new BN(worldInstance.id),
-    new BN(worldInstance.entities)
+    new BN(worldInstance.entities),
+    seed
   );
   const createEntityIx = createAddEntityInstruction(
     {
@@ -121,6 +122,7 @@ export async function InitializeComponent({
     authority: authority ?? PROGRAM_ID,
     instructionSysvarAccount: SYSVAR_INSTRUCTIONS_PUBKEY,
     anchorRemainingAccounts,
+    instructionSysvarAccount: SYSVAR_INSTRUCTIONS_PUBKEY,
   });
 
   return {
@@ -170,7 +172,7 @@ function createApplySystemInstruction({
   }
 
   const instructionArgs = {
-    authority,
+    authority: authority ?? PROGRAM_ID,
     boltSystem: systemId,
     instructionSysvarAccount: SYSVAR_INSTRUCTIONS_PUBKEY,
     anchorRemainingAccounts: extraAccounts,

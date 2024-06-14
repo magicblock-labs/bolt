@@ -41,13 +41,12 @@ export function FindEntityPda(
   worldId = CastToBN(worldId);
   entityId = CastToBN(entityId);
   const worldIdBuffer = Buffer.from(worldId.toArrayLike(Buffer, "be", 8));
-  const entityIdBuffer = Buffer.from(entityId.toArrayLike(Buffer, "be", 8));
   const seeds = [Buffer.from("entity"), worldIdBuffer];
   if (extraSeed != null) {
     seeds.push(Buffer.from(new Uint8Array(8)));
     seeds.push(Buffer.from(extraSeed));
   } else {
-    seeds.push(entityIdBuffer);
+    seeds.push(Buffer.from(entityId.toArrayLike(Buffer, "be", 8)));
   }
   return PublicKey.findProgramAddressSync(seeds, programId)[0];
 }
