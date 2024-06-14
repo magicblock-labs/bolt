@@ -29,7 +29,16 @@ shutdown_wait = 2000
 upgradeable = false
 
 [workspace]
-members = ["programs/bolt-component", "programs/bolt-system", "programs/world", "examples/component-position", "examples/component-velocity", "examples/system-apply-velocity", "examples/system-fly", "examples/system-simple-movement"]
+members = [
+    "programs/bolt-component",
+    "programs/bolt-system",
+    "programs/world",
+    "examples/component-position",
+    "examples/component-velocity",
+    "examples/system-apply-velocity",
+    "examples/system-fly",
+    "examples/system-simple-movement",
+]
 
 [[test.genesis]]
 address = "DELeGGvXpWV2fqJUhqcF5ZSYMS4JTLjteaAMARRSaeSh"
