@@ -37,8 +37,8 @@ function padCenter(value: string, width: number) {
     return value;
   }
   const padding = (width - length) / 2;
-  const align = length - padding;
-  return value.padEnd(align, " ").padStart(width, " ");
+  const align = width - padding;
+  return value.padStart(align, " ").padEnd(width, " ");
 }
 
 function logPosition(title: string, { x, y, z }: { x: BN; y: BN; z: BN }) {
@@ -173,61 +173,61 @@ describe("bolt", () => {
   });
 
   it("Initialize Original Component on Entity 1, trough the world instance", async () => {
-    const inititializeComponent = await InitializeComponent({
+    const initializeComponent = await InitializeComponent({
       payer: provider.wallet.publicKey,
       entity: entity1Pda,
       seed: "origin-component",
       componentId: boltComponentProgram.programId,
     });
-    await provider.sendAndConfirm(inititializeComponent.transaction);
+    await provider.sendAndConfirm(initializeComponent.transaction);
   });
 
   it("Initialize Original Component on Entity 2, trough the world instance", async () => {
-    const inititializeComponent = await InitializeComponent({
+    const initializeComponent = await InitializeComponent({
       payer: provider.wallet.publicKey,
       entity: entity2Pda,
       seed: "origin-component",
       componentId: boltComponentProgram.programId,
     });
-    await provider.sendAndConfirm(inititializeComponent.transaction);
+    await provider.sendAndConfirm(initializeComponent.transaction);
   });
 
   it("Initialize Position Component on Entity 1", async () => {
-    const inititializeComponent = await InitializeComponent({
+    const initializeComponent = await InitializeComponent({
       payer: provider.wallet.publicKey,
       entity: entity1Pda,
       componentId: exampleComponentPosition.programId,
     });
-    await provider.sendAndConfirm(inititializeComponent.transaction);
-    componentPositionEntity1Pda = inititializeComponent.componentPda; // Saved for later
+    await provider.sendAndConfirm(initializeComponent.transaction);
+    componentPositionEntity1Pda = initializeComponent.componentPda; // Saved for later
   });
 
   it("Initialize Velocity Component on Entity 1", async () => {
-    const inititializeComponent = await InitializeComponent({
+    const initializeComponent = await InitializeComponent({
       payer: provider.wallet.publicKey,
       entity: entity1Pda,
       componentId: exampleComponentVelocity.programId,
     });
-    await provider.sendAndConfirm(inititializeComponent.transaction);
+    await provider.sendAndConfirm(initializeComponent.transaction);
   });
 
   it("Initialize Position Component on Entity 2", async () => {
-    const inititializeComponent = await InitializeComponent({
+    const initializeComponent = await InitializeComponent({
       payer: provider.wallet.publicKey,
       entity: entity2Pda,
       componentId: exampleComponentPosition.programId,
     });
-    await provider.sendAndConfirm(inititializeComponent.transaction);
-    componentPositionEntity2Pda = inititializeComponent.componentPda; // Saved for later
+    await provider.sendAndConfirm(initializeComponent.transaction);
+    componentPositionEntity2Pda = initializeComponent.componentPda; // Saved for later
   });
 
   it("Initialize Position Component on Entity 5", async () => {
-    const inititializeComponent = await InitializeComponent({
+    const initializeComponent = await InitializeComponent({
       payer: provider.wallet.publicKey,
       entity: entity5Pda,
       componentId: exampleComponentPosition.programId,
     });
-    await provider.sendAndConfirm(inititializeComponent.transaction);
+    await provider.sendAndConfirm(initializeComponent.transaction);
   });
 
   it("Check Position on Entity 1 is default", async () => {
@@ -246,7 +246,7 @@ describe("bolt", () => {
       entities: [
         {
           entity: entity1Pda,
-          components: [{ id: exampleComponentPosition.programId }],
+          components: [{ componentId: exampleComponentPosition.programId }],
         },
       ],
       args: {
@@ -271,7 +271,7 @@ describe("bolt", () => {
       entities: [
         {
           entity: entity1Pda,
-          components: [{ id: exampleComponentPosition.programId }],
+          components: [{ componentId: exampleComponentPosition.programId }],
         },
       ],
       args: {
@@ -296,7 +296,7 @@ describe("bolt", () => {
       entities: [
         {
           entity: entity1Pda,
-          components: [{ id: exampleComponentPosition.programId }],
+          components: [{ componentId: exampleComponentPosition.programId }],
         },
       ],
     });
@@ -319,8 +319,8 @@ describe("bolt", () => {
         {
           entity: entity1Pda,
           components: [
-            { id: exampleComponentVelocity.programId },
-            { id: exampleComponentPosition.programId },
+            { componentId: exampleComponentVelocity.programId },
+            { componentId: exampleComponentPosition.programId },
           ],
         },
       ],
@@ -353,8 +353,8 @@ describe("bolt", () => {
         {
           entity: entity1Pda,
           components: [
-            { id: exampleComponentVelocity.programId },
-            { id: exampleComponentPosition.programId },
+            { componentId: exampleComponentVelocity.programId },
+            { componentId: exampleComponentPosition.programId },
           ],
         },
       ],
@@ -392,7 +392,7 @@ describe("bolt", () => {
       entities: [
         {
           entity: entity5Pda,
-          components: [{ id: exampleComponentPosition.programId }],
+          components: [{ componentId: exampleComponentPosition.programId }],
         },
       ],
     });

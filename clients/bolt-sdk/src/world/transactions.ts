@@ -213,7 +213,7 @@ interface ApplySystemEntity {
   components: ApplySystemComponent[];
 }
 interface ApplySystemComponent {
-  id: PublicKey;
+  componentId: PublicKey;
   seed?: string;
 }
 

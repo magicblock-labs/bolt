@@ -448,13 +448,13 @@ describe("{}", () => {{
   }});
 
   it("Add a component", async () => {{
-    const inititializeComponent = await InitializeComponent({{
+    const initializeComponent = await InitializeComponent({{
       payer: provider.wallet.publicKey,
       entity: entityPda,
       componentId: positionComponent.programId,
     }});
-    const txSign = await provider.sendAndConfirm(inititializeComponent.transaction);
-    componentPda = inititializeComponent.componentPda;
+    const txSign = await provider.sendAndConfirm(initializeComponent.transaction);
+    componentPda = initializeComponent.componentPda;
     console.log(`Initialized the grid component. Initialization signature: ${{txSign}}`);
   }});
 
@@ -471,7 +471,7 @@ describe("{}", () => {{
       systemId: systemMovement.programId,
       entities: [{{
         entity: entityPda,
-        components: [positionComponent.programId],
+        components: [{{ componentId: positionComponent.programId }}],
       }}]
     }});
     const txSign = await provider.sendAndConfirm(applySystem.transaction);
