@@ -464,8 +464,7 @@ describe("bolt", () => {
     expect(positionBefore.z.toNumber()).to.equal(positionAfter.z.toNumber());
   });
 
-  // Check illegal call, without CPI
-  it("Check invalid init without CPI", async () => {
+  it("Check invalid component init without CPI", async () => {
     let invalid = false;
     try {
       await exampleComponentPosition.methods
@@ -487,8 +486,7 @@ describe("bolt", () => {
     expect(invalid).to.equal(true);
   });
 
-  // Check illegal call, without CPI
-  it("Check invalid update without CPI", async () => {
+  it("Check invalid component update without CPI", async () => {
     let invalid = false;
     try {
       await boltComponentProgram.methods
@@ -508,7 +506,6 @@ describe("bolt", () => {
     expect(invalid).to.equal(true);
   });
 
-  // Check component delegation
   it("Check component delegation", async () => {
     const delegateIx = createDelegateInstruction({
       entity: entity1Pda,
@@ -524,7 +521,6 @@ describe("bolt", () => {
     expect(acc.owner.toString()).to.equal(DELEGATION_PROGRAM_ID);
   });
 
-  // Check component undelegation
   it("Check component undelegation", async () => {
     const delegateIx = createUndelegateInstruction({
       payer: provider.wallet.publicKey,

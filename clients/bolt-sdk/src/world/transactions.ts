@@ -142,7 +142,6 @@ function getApplyInstructionFunctionName(componentsCount: number) {
   if (componentsCount === 1) return "createApplyInstruction";
   return `createApply${componentsCount}Instruction`;
 }
-
 function getBoltComponentName(index: number, componentsCount: number) {
   if (componentsCount === 1) return "boltComponent";
   return `boltComponent${index + 1}`;
@@ -178,6 +177,7 @@ function createApplySystemInstruction({
     anchorRemainingAccounts: extraAccounts,
   };
 
+  let componentIndex = 0;
   entities.forEach(function (entity) {
     entity.components.forEach(function (component) {
       const componentPda = FindComponentPda({
@@ -186,10 +186,11 @@ function createApplySystemInstruction({
         seed: component.seed,
       });
       instructionArgs[
-        getBoltComponentProgramName(componentCount, componentCount)
+        getBoltComponentProgramName(componentIndex, componentCount)
       ] = component.componentId;
-      instructionArgs[getBoltComponentName(componentCount, componentCount)] =
+      instructionArgs[getBoltComponentName(componentIndex, componentCount)] =
         componentPda;
+      componentIndex++;
     });
   });
 
