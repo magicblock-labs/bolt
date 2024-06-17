@@ -447,7 +447,9 @@ describe("bolt", () => {
 
     let failed = false;
     try {
-      await provider.sendAndConfirm(applySystem.transaction);
+      await provider.sendAndConfirm(applySystem.transaction, [], {
+        skipPreflight: true, // Skip preflight to get error message from validator
+      });
     } catch (error) {
       failed = true;
       console.log("error.message", error.message);
