@@ -10,7 +10,7 @@ import {
   FindComponentPda,
   FindEntityPda,
   FindWorldPda,
-  FindWorldRegistryPda,
+  FindRegistryPda,
   Registry,
   SerializeArgs,
   SYSVAR_INSTRUCTIONS_PUBKEY,
@@ -36,10 +36,10 @@ export async function InitializeNewWorld({
   payer: PublicKey;
   connection: Connection;
 }): Promise<{ transaction: Transaction; worldPda: PublicKey; worldId: BN }> {
-  const registryPda = FindWorldRegistryPda();
+  const registryPda = FindRegistryPda({});
   const registry = await Registry.fromAccountAddress(connection, registryPda);
   const worldId = new BN(registry.worlds);
-  const worldPda = FindWorldPda(new BN(worldId));
+  const worldPda = FindWorldPda({ worldId });
   const initializeWorldIx = createInitializeNewWorldInstruction({
     world: worldPda,
     registry: registryPda,
@@ -62,28 +62,31 @@ export async function InitializeNewWorld({
 export async function AddEntity({
   payer,
   world,
+  seed,
   connection,
 }: {
   payer: PublicKey;
   world: PublicKey;
+  seed?: string;
   connection: Connection;
-}): Promise<{ transaction: Transaction; entityPda: PublicKey; entityId: BN }> {
+}): Promise<{ transaction: Transaction; entityPda: PublicKey }> {
   const worldInstance = await World.fromAccountAddress(connection, world);
-  const entityId = new BN(worldInstance.entities);
-  const entityPda = FindEntityPda(new BN(worldInstance.id), entityId);
-
-  const createEntityIx = createAddEntityInstruction(
+  const worldId = new BN(worldInstance.id);
+  const entityPda =
+    seed !== undefined
+      ? FindEntityPda({ worldId, seed })
+      : FindEntityPda({ worldId, entityId: new BN(worldInstance.entities) });
+  const addEntityIx = createAddEntityInstruction(
     {
       world,
       payer,
       entity: entityPda,
     },
-    { extraSeed: null }
+    { extraSeed: seed ?? null }
   );
   return {
-    transaction: new Transaction().add(createEntityIx),
+    transaction: new Transaction().add(addEntityIx),
     entityPda,
-    entityId,
   };
 }
 
@@ -112,60 +115,56 @@ export async function InitializeComponent({
   authority?: web3.PublicKey;
   anchorRemainingAccounts?: web3.AccountMeta[];
 }): Promise<{ transaction: Transaction; componentPda: PublicKey }> {
-  const componentPda = FindComponentPda(componentId, entity, seed);
-  const initComponentIx = createInitializeComponentInstruction({
+  const componentPda = FindComponentPda({ componentId, entity, seed });
+  const initializeComponentIx = createInitializeComponentInstruction({
     payer,
     entity,
     data: componentPda,
     componentProgram: componentId,
     authority: authority ?? PROGRAM_ID,
-    anchorRemainingAccounts,
     instructionSysvarAccount: SYSVAR_INSTRUCTIONS_PUBKEY,
+    anchorRemainingAccounts,
   });
-
   return {
-    transaction: new Transaction().add(initComponentIx),
+    transaction: new Transaction().add(initializeComponentIx),
     componentPda,
   };
 }
 
 interface ApplySystemInstruction {
-  entity: PublicKey;
-  components: PublicKey[];
-  system: PublicKey;
   authority: PublicKey;
-  seeds?: string[];
+  systemId: PublicKey;
+  entities: ApplySystemEntity[];
   extraAccounts?: web3.AccountMeta[];
   args?: object;
 }
-
-export function createApplySystemInstruction({
-  entity,
-  components,
-  system,
-  seeds,
+function getApplyInstructionFunctionName(componentsCount: number) {
+  if (componentsCount === 1) return "createApplyInstruction";
+  return `createApply${componentsCount}Instruction`;
+}
+function getBoltComponentName(index: number, componentsCount: number) {
+  if (componentsCount === 1) return "boltComponent";
+  return `boltComponent${index + 1}`;
+}
+function getBoltComponentProgramName(index: number, componentsCount: number) {
+  if (componentsCount === 1) return "componentProgram";
+  return `componentProgram${index + 1}`;
+}
+function createApplySystemInstruction({
   authority,
+  systemId,
+  entities,
   extraAccounts,
   args,
 }: ApplySystemInstruction): web3.TransactionInstruction {
-  const instructionFunctions = {
-    createApplyInstruction,
-    createApply2Instruction,
-    createApply3Instruction,
-    createApply4Instruction,
-    createApply5Instruction,
-  };
-  if (components.length === 0) throw new Error("No components provided");
-  if (seeds == null) seeds = new Array(components.length).fill("");
-  if (seeds.length !== components.length)
-    throw new Error("Seed length does not match components length");
-  const componentPdas: PublicKey[] = [];
-
-  for (let i = 0; i < components.length; i++) {
-    const componentPda = FindComponentPda(components[i], entity, seeds[i]);
-    componentPdas.push(componentPda);
+  let componentCount = 0;
+  entities.forEach(function (entity) {
+    componentCount += entity.components.length;
+  });
+  if (componentCount <= 0) {
+    throw new Error("No components provided");
   }
-  if (components.length < 1 || components.length > MAX_COMPONENTS) {
+  if (componentCount > MAX_COMPONENTS) {
     throw new Error(
       `Not implemented for component counts outside 1-${MAX_COMPONENTS}`
     );
@@ -173,77 +172,80 @@ export function createApplySystemInstruction({
 
   const instructionArgs = {
     authority: authority ?? PROGRAM_ID,
-    boltSystem: system,
+    boltSystem: systemId,
     instructionSysvarAccount: SYSVAR_INSTRUCTIONS_PUBKEY,
     anchorRemainingAccounts: extraAccounts,
   };
 
-  components.forEach((component, index) => {
-    instructionArgs[getBoltComponentProgramName(index, components.length)] =
-      component;
-    instructionArgs[getBoltComponentName(index, components.length)] =
-      componentPdas[index];
+  let componentIndex = 0;
+  entities.forEach(function (entity) {
+    entity.components.forEach(function (component) {
+      const componentPda = FindComponentPda({
+        componentId: component.componentId,
+        entity: entity.entity,
+        seed: component.seed,
+      });
+      instructionArgs[
+        getBoltComponentProgramName(componentIndex, componentCount)
+      ] = component.componentId;
+      instructionArgs[getBoltComponentName(componentIndex, componentCount)] =
+        componentPda;
+      componentIndex++;
+    });
   });
 
-  const functionName = getApplyInstructionFunctionName(components.length);
+  const instructionFunctions = {
+    createApplyInstruction,
+    createApply2Instruction,
+    createApply3Instruction,
+    createApply4Instruction,
+    createApply5Instruction,
+  };
+  const functionName = getApplyInstructionFunctionName(componentCount);
   return instructionFunctions[functionName](instructionArgs, {
     args: SerializeArgs(args),
   });
 }
 
+interface ApplySystemEntity {
+  entity: PublicKey;
+  components: ApplySystemComponent[];
+}
+interface ApplySystemComponent {
+  componentId: PublicKey;
+  seed?: string;
+}
+
 /**
- * Apply a system to an entity and its components
+ * Apply a system to a set of components
  * @param authority
- * @param system
- * @param entity
- * @param components
- * @param args
+ * @param systemId
+ * @param entities
  * @param extraAccounts
- * @param seeds
+ * @param args
  * @constructor
  */
 export async function ApplySystem({
   authority,
-  system,
-  entity,
-  components,
-  args = {},
+  systemId,
+  entities,
   extraAccounts,
-  seeds,
+  args,
 }: {
   authority: PublicKey;
-  system: PublicKey;
-  entity: PublicKey;
-  components: PublicKey[];
-  args?: object;
+  systemId: PublicKey;
+  entities: ApplySystemEntity[];
   extraAccounts?: web3.AccountMeta[];
-  seeds?: string[];
+  args?: object;
 }): Promise<{ transaction: Transaction }> {
   const applySystemIx = createApplySystemInstruction({
-    entity,
-    components,
-    system,
     authority,
-    seeds,
+    systemId,
+    entities,
     extraAccounts,
     args,
   });
   return {
     transaction: new Transaction().add(applySystemIx),
   };
-}
-
-function getApplyInstructionFunctionName(componentsLength: number) {
-  if (componentsLength === 1) return "createApplyInstruction";
-  return `createApply${componentsLength}Instruction`;
-}
-
-function getBoltComponentName(index: number, componentsLength: number) {
-  if (componentsLength === 1) return "boltComponent";
-  return `boltComponent${index + 1}`;
-}
-
-function getBoltComponentProgramName(index: number, componentsLength: number) {
-  if (componentsLength === 1) return "componentProgram";
-  return `componentProgram${index + 1}`;
 }
