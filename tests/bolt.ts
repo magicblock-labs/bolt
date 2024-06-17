@@ -91,12 +91,14 @@ describe("bolt", () => {
 
   let entity1Pda: PublicKey;
   let entity2Pda: PublicKey;
+  let entity4Pda: PublicKey;
   let entity5Pda: PublicKey;
 
   let componentPositionEntity1Pda: PublicKey;
   let componentVelocityEntity1Pda: PublicKey;
 
   let componentPositionEntity2Pda: PublicKey;
+  let componentPositionEntity4Pda: PublicKey;
   let componentPositionEntity5Pda: PublicKey;
 
   it("InitializeRegistry", async () => {
@@ -163,6 +165,7 @@ describe("bolt", () => {
       connection: provider.connection,
     });
     await provider.sendAndConfirm(addEntity.transaction);
+    entity4Pda = addEntity.entityPda;
   });
 
   it("Add entity 5", async () => {
@@ -224,6 +227,16 @@ describe("bolt", () => {
     });
     await provider.sendAndConfirm(initializeComponent.transaction);
     componentPositionEntity2Pda = initializeComponent.componentPda; // Saved for later
+  });
+
+  it("Initialize Position Component on Entity 4", async () => {
+    const initializeComponent = await InitializeComponent({
+      payer: provider.wallet.publicKey,
+      entity: entity4Pda,
+      componentId: exampleComponentPosition.programId,
+    });
+    await provider.sendAndConfirm(initializeComponent.transaction);
+    componentPositionEntity4Pda = initializeComponent.componentPda; // Saved for later
   });
 
   it("Initialize Position Component on Entity 5 (with authority)", async () => {
@@ -393,8 +406,29 @@ describe("bolt", () => {
     expect(position.z.toNumber()).to.equal(300);
   });
 
-  // Check illegal authority usage
-  it("Check invalid component update (Entity 5, wrong authority)", async () => {
+  it("Fly System on Entity 4", async () => {
+    const applySystem = await ApplySystem({
+      authority: provider.wallet.publicKey,
+      systemId: exampleSystemFly,
+      entities: [
+        {
+          entity: entity4Pda,
+          components: [{ componentId: exampleComponentPosition.programId }],
+        },
+      ],
+    });
+    await provider.sendAndConfirm(applySystem.transaction);
+
+    const position = await exampleComponentPosition.account.position.fetch(
+      componentPositionEntity4Pda
+    );
+    logPosition("Fly System: Entity 4", position);
+    expect(position.x.toNumber()).to.equal(1);
+    expect(position.y.toNumber()).to.equal(1);
+    expect(position.z.toNumber()).to.equal(1);
+  });
+
+  it("Fly System on Entity 5 (should fail with wrong authority)", async () => {
     const positionBefore =
       await exampleComponentPosition.account.position.fetch(
         componentPositionEntity5Pda
