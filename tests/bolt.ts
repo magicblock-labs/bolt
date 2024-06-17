@@ -88,13 +88,16 @@ describe("bolt", () => {
   ).programId;
 
   let worldPda: PublicKey;
+
   let entity1Pda: PublicKey;
   let entity2Pda: PublicKey;
   let entity5Pda: PublicKey;
+
   let componentPositionEntity1Pda: PublicKey;
+  let componentVelocityEntity1Pda: PublicKey;
+
   let componentPositionEntity2Pda: PublicKey;
   let componentPositionEntity5Pda: PublicKey;
-  let componentVelocityEntity1Pda: PublicKey;
 
   it("InitializeRegistry", async () => {
     const registryPda = FindRegistryPda({});
@@ -152,7 +155,7 @@ describe("bolt", () => {
     await provider.sendAndConfirm(addEntity.transaction);
   });
 
-  it("Add entity 4 with extra seeds", async () => {
+  it("Add entity 4 (with seed)", async () => {
     const addEntity = await AddEntity({
       payer: provider.wallet.publicKey,
       world: worldPda,
@@ -202,7 +205,7 @@ describe("bolt", () => {
     componentPositionEntity1Pda = initializeComponent.componentPda; // Saved for later
   });
 
-  it("Initialize Velocity Component on Entity 1", async () => {
+  it("Initialize Velocity Component on Entity 1 (with seed)", async () => {
     const initializeComponent = await InitializeComponent({
       payer: provider.wallet.publicKey,
       entity: entity1Pda,
@@ -210,6 +213,7 @@ describe("bolt", () => {
       seed: "component-velocity",
     });
     await provider.sendAndConfirm(initializeComponent.transaction);
+    componentVelocityEntity1Pda = initializeComponent.componentPda; // Saved for later
   });
 
   it("Initialize Position Component on Entity 2", async () => {
@@ -222,19 +226,22 @@ describe("bolt", () => {
     componentPositionEntity2Pda = initializeComponent.componentPda; // Saved for later
   });
 
-  it("Initialize Position Component on Entity 5", async () => {
+  it("Initialize Position Component on Entity 5 (with authority)", async () => {
     const initializeComponent = await InitializeComponent({
       payer: provider.wallet.publicKey,
       entity: entity5Pda,
       componentId: exampleComponentPosition.programId,
+      authority: provider.wallet.publicKey,
     });
     await provider.sendAndConfirm(initializeComponent.transaction);
+    componentPositionEntity5Pda = initializeComponent.componentPda; // Saved for later
   });
 
   it("Check Position on Entity 1 is default", async () => {
     const position = await exampleComponentPosition.account.position.fetch(
       componentPositionEntity1Pda
     );
+    logPosition("Default State: Entity 1", position);
     expect(position.x.toNumber()).to.equal(0);
     expect(position.y.toNumber()).to.equal(0);
     expect(position.z.toNumber()).to.equal(0);
@@ -334,7 +341,7 @@ describe("bolt", () => {
     const velocity = await exampleComponentVelocity.account.velocity.fetch(
       componentVelocityEntity1Pda
     );
-    logVelocity("Apply System Velocity: Velocity Entity 1", velocity);
+    logVelocity("Apply System Velocity: Entity 1", velocity);
     expect(velocity.x.toNumber()).to.equal(0);
     expect(velocity.y.toNumber()).to.equal(0);
     expect(velocity.z.toNumber()).to.equal(0);
@@ -343,7 +350,7 @@ describe("bolt", () => {
     const position = await exampleComponentPosition.account.position.fetch(
       componentPositionEntity1Pda
     );
-    logPosition("Apply System Velocity: Position Entity 1", position);
+    logPosition("Apply System Velocity: Entity 1", position);
     expect(position.x.toNumber()).to.equal(1);
     expect(position.y.toNumber()).to.equal(1);
     expect(position.z.toNumber()).to.equal(1);
@@ -387,7 +394,7 @@ describe("bolt", () => {
   });
 
   // Check illegal authority usage
-  it("Check invalid component update", async () => {
+  it("Check invalid component update (Entity 5, wrong authority)", async () => {
     const positionBefore =
       await exampleComponentPosition.account.position.fetch(
         componentPositionEntity5Pda
@@ -409,6 +416,7 @@ describe("bolt", () => {
       await provider.sendAndConfirm(applySystem.transaction);
     } catch (error) {
       failed = true;
+      console.log("error.message", error.message);
       expect(error.message).to.contain("Invalid authority");
     }
     expect(failed).to.equal(true);
@@ -437,8 +445,9 @@ describe("bolt", () => {
           authority: provider.wallet.publicKey,
         })
         .rpc();
-    } catch (e) {
-      console.log("Check invalid init without CPI: error:", e);
+    } catch (error) {
+      console.log("error.message", error.message);
+      // expect(error.message).to.contain("Invalid authority"); // TODO(vbrunet) - find correct error message
       invalid = true;
     }
     expect(invalid).to.equal(true);
@@ -460,8 +469,9 @@ describe("bolt", () => {
           authority: provider.wallet.publicKey,
         })
         .rpc();
-    } catch (e) {
-      console.log("Check invalid update without CPI: error:", e);
+    } catch (error) {
+      console.log("error.message", error.message);
+      // expect(error.message).to.contain("Invalid authority"); // TODO(vbrunet) - find correct error message
       invalid = true;
     }
     expect(invalid).to.equal(true);
