@@ -96,7 +96,7 @@ describe("bolt", () => {
   let componentPositionEntity5Pda: PublicKey;
   let componentVelocityEntity1Pda: PublicKey;
 
-  it("InitializeWorldsRegistry", async () => {
+  it("InitializeRegistry", async () => {
     const registryPda = FindRegistryPda({});
     const initializeRegistryIx = createInitializeRegistryInstruction({
       registry: registryPda,
@@ -207,6 +207,7 @@ describe("bolt", () => {
       payer: provider.wallet.publicKey,
       entity: entity1Pda,
       componentId: exampleComponentVelocity.programId,
+      seed: "component-velocity",
     });
     await provider.sendAndConfirm(initializeComponent.transaction);
   });
@@ -319,7 +320,10 @@ describe("bolt", () => {
         {
           entity: entity1Pda,
           components: [
-            { componentId: exampleComponentVelocity.programId },
+            {
+              componentId: exampleComponentVelocity.programId,
+              seed: "component-velocity",
+            },
             { componentId: exampleComponentPosition.programId },
           ],
         },
@@ -353,7 +357,10 @@ describe("bolt", () => {
         {
           entity: entity1Pda,
           components: [
-            { componentId: exampleComponentVelocity.programId },
+            {
+              componentId: exampleComponentVelocity.programId,
+              seed: "component-velocity",
+            },
             { componentId: exampleComponentPosition.programId },
           ],
         },
@@ -440,10 +447,10 @@ describe("bolt", () => {
   // Check illegal call, without CPI
   it("Check invalid update without CPI", async () => {
     let invalid = false;
-    const componentVelocityEntity5 = FindComponentPda(
-      exampleComponentVelocity.programId,
-      entity5Pda
-    );
+    const componentVelocityEntity5 = FindComponentPda({
+      componentId: exampleComponentVelocity.programId,
+      entity: entity5Pda,
+    });
     try {
       await boltComponentProgram.methods
         .update(null)
