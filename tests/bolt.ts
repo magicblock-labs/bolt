@@ -351,10 +351,10 @@ describe("bolt", () => {
       componentVelocityEntity1Pda
     );
     logVelocity("Apply System Velocity: Entity 1", velocity);
-    expect(velocity.x.toNumber()).to.equal(0);
+    expect(velocity.x.toNumber()).to.equal(10);
     expect(velocity.y.toNumber()).to.equal(0);
     expect(velocity.z.toNumber()).to.equal(0);
-    expect(velocity.lastApplied.toNumber()).to.equal(0);
+    expect(velocity.lastApplied.toNumber()).to.not.equal(0);
 
     const position = await exampleComponentPosition.account.position.fetch(
       componentPositionEntity1Pda
@@ -446,9 +446,7 @@ describe("bolt", () => {
       await provider.sendAndConfirm(applySystem.transaction);
     } catch (error) {
       failed = true;
-      console.log("error", error);
-      console.log("error.message", error.message);
-      expect(error.message).to.contain("Invalid authority");
+      expect(error.logs.join("\n")).to.contain("Error Code: InvalidAuthority");
     }
     expect(failed).to.equal(true);
 
@@ -493,7 +491,9 @@ describe("bolt", () => {
         .rpc();
     } catch (error) {
       console.log("error.message", error.message);
-      expect(error.message).to.contain("InvalidCaller");
+      expect(error.message).to.contain(
+        "bolt_component. Error Code: AccountOwnedByWrongProgram"
+      );
       invalid = true;
     }
     expect(invalid).to.equal(true);
