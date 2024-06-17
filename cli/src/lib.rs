@@ -174,7 +174,6 @@ fn init(
         fs::create_dir(&project_name)?;
     }
     std::env::set_current_dir(&project_name)?;
-    fs::create_dir_all("app")?;
 
     let mut cfg = Config::default();
     let jest = test_template == anchor_cli::rust_template::TestTemplate::Jest;
