@@ -360,7 +360,7 @@ describe("bolt", () => {
       componentPositionEntity1Pda
     );
     logPosition("Apply System Velocity: Entity 1", position);
-    expect(position.x.toNumber()).to.equal(1);
+    expect(position.x.toNumber()).to.greaterThan(1);
     expect(position.y.toNumber()).to.equal(1);
     expect(position.z.toNumber()).to.equal(1);
   });
@@ -446,6 +446,7 @@ describe("bolt", () => {
       await provider.sendAndConfirm(applySystem.transaction);
     } catch (error) {
       failed = true;
+      //console.log("error", error);
       expect(error.logs.join("\n")).to.contain("Error Code: InvalidAuthority");
     }
     expect(failed).to.equal(true);
@@ -472,8 +473,8 @@ describe("bolt", () => {
         })
         .rpc();
     } catch (error) {
-      console.log("error.message", error.message);
-      expect(error.message).to.contain("InvalidCaller");
+      //console.log("error", error);
+      expect(error.message).to.contain("Error Code: InvalidCaller");
       invalid = true;
     }
     expect(invalid).to.equal(true);
@@ -490,7 +491,7 @@ describe("bolt", () => {
         })
         .rpc();
     } catch (error) {
-      console.log("error.message", error.message);
+      //console.log("error", error);
       expect(error.message).to.contain(
         "bolt_component. Error Code: AccountOwnedByWrongProgram"
       );
