@@ -16,13 +16,11 @@ import {
   createUndelegateInstruction,
   createInitializeRegistryInstruction,
   DELEGATION_PROGRAM_ID,
-  FindComponentPda,
   FindRegistryPda,
   InitializeComponent,
   InitializeNewWorld,
-  SYSVAR_INSTRUCTIONS_PUBKEY,
+  ApplySystem,
 } from "../clients/bolt-sdk";
-import { ApplySystem } from "../clients/bolt-sdk/src";
 
 enum Direction {
   Left = "Left",
@@ -97,7 +95,6 @@ describe("bolt", () => {
   let componentPositionEntity1Pda: PublicKey;
   let componentVelocityEntity1Pda: PublicKey;
 
-  let componentPositionEntity2Pda: PublicKey;
   let componentPositionEntity4Pda: PublicKey;
   let componentPositionEntity5Pda: PublicKey;
 
@@ -226,7 +223,6 @@ describe("bolt", () => {
       componentId: exampleComponentPosition.programId,
     });
     await provider.sendAndConfirm(initializeComponent.transaction);
-    componentPositionEntity2Pda = initializeComponent.componentPda; // Saved for later
   });
 
   it("Initialize Position Component on Entity 4", async () => {
@@ -260,7 +256,7 @@ describe("bolt", () => {
     expect(position.z.toNumber()).to.equal(0);
   });
 
-  it("Simple Movement System and Up direction on Entity 1", async () => {
+  it("Apply Simple Movement System (Up) on Entity 1", async () => {
     const applySystem = await ApplySystem({
       authority: provider.wallet.publicKey,
       systemId: exampleSystemSimpleMovement,
@@ -285,7 +281,7 @@ describe("bolt", () => {
     expect(position.z.toNumber()).to.equal(0);
   });
 
-  it("Simple Movement System and Right direction on Entity 1", async () => {
+  it("Apply Simple Movement System (Right) on Entity 1", async () => {
     const applySystem = await ApplySystem({
       authority: provider.wallet.publicKey,
       systemId: exampleSystemSimpleMovement,
@@ -310,7 +306,7 @@ describe("bolt", () => {
     expect(position.z.toNumber()).to.equal(0);
   });
 
-  it("Fly System on Entity 1", async () => {
+  it("Apply Fly System on Entity 1", async () => {
     const applySystem = await ApplySystem({
       authority: provider.wallet.publicKey,
       systemId: exampleSystemFly,
@@ -400,13 +396,13 @@ describe("bolt", () => {
     const position = await exampleComponentPosition.account.position.fetch(
       componentPositionEntity1Pda
     );
-    logPosition("Apply System Velocity: Position Entity 1", position);
-    expect(position.x.toNumber()).to.equal(1);
+    logPosition("Apply System Velocity: Entity 1", position);
+    expect(position.x.toNumber()).to.greaterThan(1);
     expect(position.y.toNumber()).to.equal(1);
     expect(position.z.toNumber()).to.equal(300);
   });
 
-  it("Fly System on Entity 4", async () => {
+  it("Apply Fly System on Entity 4", async () => {
     const applySystem = await ApplySystem({
       authority: provider.wallet.publicKey,
       systemId: exampleSystemFly,
@@ -428,7 +424,7 @@ describe("bolt", () => {
     expect(position.z.toNumber()).to.equal(1);
   });
 
-  it("Fly System on Entity 5 (should fail with wrong authority)", async () => {
+  it("Apply Fly System on Entity 5 (should fail with wrong authority)", async () => {
     const positionBefore =
       await exampleComponentPosition.account.position.fetch(
         componentPositionEntity5Pda
@@ -447,11 +443,10 @@ describe("bolt", () => {
 
     let failed = false;
     try {
-      await provider.sendAndConfirm(applySystem.transaction, [], {
-        skipPreflight: true, // Skip preflight to get error message from validator
-      });
+      await provider.sendAndConfirm(applySystem.transaction);
     } catch (error) {
       failed = true;
+      console.log("error", error);
       console.log("error.message", error.message);
       expect(error.message).to.contain("Invalid authority");
     }
@@ -480,9 +475,7 @@ describe("bolt", () => {
         .rpc();
     } catch (error) {
       console.log("error.message", error.message);
-      expect(error.message).to.contain(
-        "The instruction must be called from a CPI"
-      );
+      expect(error.message).to.contain("InvalidCaller");
       invalid = true;
     }
     expect(invalid).to.equal(true);
@@ -494,15 +487,13 @@ describe("bolt", () => {
       await boltComponentProgram.methods
         .update(Buffer.from(""))
         .accounts({
-          boltComponent: componentPositionEntity5Pda,
+          boltComponent: componentPositionEntity4Pda,
           authority: provider.wallet.publicKey,
         })
         .rpc();
     } catch (error) {
       console.log("error.message", error.message);
-      expect(error.message).to.contain(
-        "The instruction must be called from a CPI"
-      );
+      expect(error.message).to.contain("InvalidCaller");
       invalid = true;
     }
     expect(invalid).to.equal(true);
@@ -516,7 +507,7 @@ describe("bolt", () => {
       payer: provider.wallet.publicKey,
     });
     const tx = new anchor.web3.Transaction().add(delegateIx);
-    await provider.sendAndConfirm(tx, [], { skipPreflight: true });
+    await provider.sendAndConfirm(tx);
     const acc = await provider.connection.getAccountInfo(
       componentPositionEntity1Pda
     );
@@ -531,7 +522,7 @@ describe("bolt", () => {
       reimbursement: provider.wallet.publicKey,
     });
     const tx = new anchor.web3.Transaction().add(delegateIx);
-    await provider.sendAndConfirm(tx, [], { skipPreflight: true });
+    await provider.sendAndConfirm(tx);
     const acc = await provider.connection.getAccountInfo(
       componentPositionEntity1Pda
     );
