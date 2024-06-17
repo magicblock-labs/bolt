@@ -17,7 +17,7 @@ import {
   createInitializeRegistryInstruction,
   DELEGATION_PROGRAM_ID,
   FindComponentPda,
-  FindWorldRegistryPda,
+  FindRegistryPda,
   InitializeComponent,
   InitializeNewWorld,
   SYSVAR_INSTRUCTIONS_PUBKEY,
@@ -97,7 +97,7 @@ describe("bolt", () => {
   let componentVelocityEntity1Pda: PublicKey;
 
   it("InitializeWorldsRegistry", async () => {
-    const registryPda = FindWorldRegistryPda({});
+    const registryPda = FindRegistryPda({});
     const initializeRegistryIx = createInitializeRegistryInstruction({
       registry: registryPda,
       payer: provider.wallet.publicKey,

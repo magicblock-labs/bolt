@@ -10,7 +10,7 @@ import {
   FindComponentPda,
   FindEntityPda,
   FindWorldPda,
-  FindWorldRegistryPda,
+  FindRegistryPda,
   Registry,
   SerializeArgs,
   SYSVAR_INSTRUCTIONS_PUBKEY,
@@ -36,12 +36,10 @@ export async function InitializeNewWorld({
   payer: PublicKey;
   connection: Connection;
 }): Promise<{ transaction: Transaction; worldPda: PublicKey; worldId: BN }> {
-  const registryPda = FindWorldRegistryPda({});
+  const registryPda = FindRegistryPda({});
   const registry = await Registry.fromAccountAddress(connection, registryPda);
   const worldId = new BN(registry.worlds);
-  const worldPda = FindWorldPda({
-    worldId,
-  });
+  const worldPda = FindWorldPda({ worldId });
   const initializeWorldIx = createInitializeNewWorldInstruction({
     world: worldPda,
     registry: registryPda,
@@ -78,7 +76,7 @@ export async function AddEntity({
     seed !== undefined
       ? FindEntityPda({ worldId, seed })
       : FindEntityPda({ worldId, entityId: new BN(worldInstance.entities) });
-  const createEntityIx = createAddEntityInstruction(
+  const addEntityIx = createAddEntityInstruction(
     {
       world,
       payer,
@@ -87,7 +85,7 @@ export async function AddEntity({
     { extraSeed: seed ?? null }
   );
   return {
-    transaction: new Transaction().add(createEntityIx),
+    transaction: new Transaction().add(addEntityIx),
     entityPda,
   };
 }
@@ -118,7 +116,7 @@ export async function InitializeComponent({
   anchorRemainingAccounts?: web3.AccountMeta[];
 }): Promise<{ transaction: Transaction; componentPda: PublicKey }> {
   const componentPda = FindComponentPda({ componentId, entity, seed });
-  const initComponentIx = createInitializeComponentInstruction({
+  const initializeComponentIx = createInitializeComponentInstruction({
     payer,
     entity,
     data: componentPda,
@@ -128,7 +126,7 @@ export async function InitializeComponent({
     anchorRemainingAccounts,
   });
   return {
-    transaction: new Transaction().add(initComponentIx),
+    transaction: new Transaction().add(initializeComponentIx),
     componentPda,
   };
 }
@@ -183,13 +181,13 @@ function createApplySystemInstruction({
   entities.forEach(function (entity) {
     entity.components.forEach(function (component) {
       const componentPda = FindComponentPda({
-        componentId: component.id,
+        componentId: component.componentId,
         entity: entity.entity,
         seed: component.seed,
       });
       instructionArgs[
         getBoltComponentProgramName(componentCount, componentCount)
-      ] = component.id;
+      ] = component.componentId;
       instructionArgs[getBoltComponentName(componentCount, componentCount)] =
         componentPda;
     });
