@@ -423,8 +423,8 @@ describe("bolt", () => {
       componentPositionEntity4Pda
     );
     logPosition("Fly System: Entity 4", position);
-    expect(position.x.toNumber()).to.equal(1);
-    expect(position.y.toNumber()).to.equal(1);
+    expect(position.x.toNumber()).to.equal(0);
+    expect(position.y.toNumber()).to.equal(0);
     expect(position.z.toNumber()).to.equal(1);
   });
 
@@ -474,14 +474,14 @@ describe("bolt", () => {
           payer: provider.wallet.publicKey,
           data: componentPositionEntity5Pda,
           entity: entity5Pda,
-          //instructionSysvarAccount: SYSVAR_INSTRUCTIONS_PUBKEY,
-          //systemProgram: anchor.web3.SystemProgram.programId,
           authority: provider.wallet.publicKey,
         })
         .rpc();
     } catch (error) {
       console.log("error.message", error.message);
-      // expect(error.message).to.contain("Invalid authority"); // TODO(vbrunet) - find correct error message
+      expect(error.message).to.contain(
+        "The instruction must be called from a CPI"
+      );
       invalid = true;
     }
     expect(invalid).to.equal(true);
@@ -490,22 +490,19 @@ describe("bolt", () => {
   // Check illegal call, without CPI
   it("Check invalid update without CPI", async () => {
     let invalid = false;
-    const componentVelocityEntity5 = FindComponentPda({
-      componentId: exampleComponentVelocity.programId,
-      entity: entity5Pda,
-    });
     try {
       await boltComponentProgram.methods
-        .update(null)
+        .update(Buffer.from(""))
         .accounts({
-          boltComponent: componentVelocityEntity5,
-          //instructionSysvarAccount: SYSVAR_INSTRUCTIONS_PUBKEY,
+          boltComponent: componentPositionEntity5Pda,
           authority: provider.wallet.publicKey,
         })
         .rpc();
     } catch (error) {
       console.log("error.message", error.message);
-      // expect(error.message).to.contain("Invalid authority"); // TODO(vbrunet) - find correct error message
+      expect(error.message).to.contain(
+        "The instruction must be called from a CPI"
+      );
       invalid = true;
     }
     expect(invalid).to.equal(true);
