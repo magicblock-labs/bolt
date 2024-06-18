@@ -98,10 +98,10 @@ declare_id!("{}");
 #[system]
 pub mod {} {{
 
-    pub fn execute(ctx: Context<Components>, _args_p: Vec<u8>) -> Result<Components> {{
+    pub fn execute(ctx: Context<Components>, args: Args) -> Result<Components> {{
         let position = &mut ctx.accounts.position;
-        position.x += 1;
-        position.y += 1;
+        position.x += args.x;
+        position.y += args.y;
         Ok(ctx.accounts)
     }}
 
@@ -110,6 +110,11 @@ pub mod {} {{
         pub position: Position,
     }}
 
+    #[arguments]
+    struct Args {{
+        pub x: i64,
+        pub y: i64,
+    }}
 }}
 "#,
             anchor_cli::rust_template::get_or_create_program_id(name),
@@ -473,6 +478,9 @@ describe("{}", () => {{
         entity: entityPda,
         components: [{{ componentId: positionComponent.programId }}],
       }}]
+    }}, {{
+        x: 1,
+        y: 1,
     }});
     const txSign = await provider.sendAndConfirm(applySystem.transaction);
     console.log(`Applied a system. Signature: ${{txSign}}`);
