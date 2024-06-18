@@ -34,18 +34,17 @@ export function FindWorldPda({
 }
 
 export function FindEntityPda({
-  worldId,
-  entityId,
+  world,
   seed,
+  entityId,
   programId,
 }: {
-  worldId: BN;
-  entityId?: BN;
+  world: PublicKey;
   seed?: string;
+  entityId?: BN;
   programId?: PublicKey;
 }) {
-  const worldIdBuffer = Buffer.from(worldId.toArrayLike(Buffer, "be", 8));
-  const seeds = [Buffer.from("entity"), worldIdBuffer];
+  const seeds = [Buffer.from("entity"), world.toBytes()];
   if (seed !== undefined) {
     seeds.push(Buffer.from(new Uint8Array(8)));
     seeds.push(Buffer.from(seed));

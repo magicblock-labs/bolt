@@ -70,19 +70,20 @@ export async function AddEntity({
   seed?: string;
   connection: Connection;
 }): Promise<{ transaction: Transaction; entityPda: PublicKey }> {
-  const worldInstance = await World.fromAccountAddress(connection, world);
-  const worldId = new BN(worldInstance.id);
-  const entityPda =
-    seed !== undefined
-      ? FindEntityPda({ worldId, seed })
-      : FindEntityPda({ worldId, entityId: new BN(worldInstance.entities) });
+  let entityPda: PublicKey;
+  if (seed !== undefined) {
+    entityPda = FindEntityPda({ world, seed });
+  } else {
+    const worldData = await World.fromAccountAddress(connection, world);
+    entityPda = FindEntityPda({ world, entityId: new BN(worldData.entities) });
+  }
   const addEntityIx = createAddEntityInstruction(
     {
       world,
       payer,
       entity: entityPda,
     },
-    { extraSeed: seed ?? null }
+    { seed: seed ?? null }
   );
   return {
     transaction: new Transaction().add(addEntityIx),
