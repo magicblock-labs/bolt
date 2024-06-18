@@ -477,10 +477,11 @@ describe("{}", () => {{
       entities: [{{
         entity: entityPda,
         components: [{{ componentId: positionComponent.programId }}],
-      }}]
-    }}, {{
+      }}],
+      args: {{
         x: 1,
         y: 1,
+      }}
     }});
     const txSign = await provider.sendAndConfirm(applySystem.transaction);
     console.log(`Applied a system. Signature: ${{txSign}}`);
@@ -491,7 +492,6 @@ describe("{}", () => {{
     );
     expect(positionAfter.x.toNumber()).to.gt(0);
   }});
-
 }});
 "#,
         name.to_upper_camel_case(),
