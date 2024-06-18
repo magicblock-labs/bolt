@@ -35,7 +35,7 @@ export async function InitializeNewWorld({
 }: {
   payer: PublicKey;
   connection: Connection;
-}): Promise<{ transaction: Transaction; worldPda: PublicKey; worldId: BN }> {
+}): Promise<{ transaction: Transaction; worldPda: PublicKey }> {
   const registryPda = FindRegistryPda({});
   const registry = await Registry.fromAccountAddress(connection, registryPda);
   const worldId = new BN(registry.worlds);
@@ -48,7 +48,6 @@ export async function InitializeNewWorld({
   return {
     transaction: new Transaction().add(initializeWorldIx),
     worldPda,
-    worldId,
   };
 }
 
@@ -75,7 +74,8 @@ export async function AddEntity({
     entityPda = FindEntityPda({ world, seed });
   } else {
     const worldData = await World.fromAccountAddress(connection, world);
-    entityPda = FindEntityPda({ world, entityId: new BN(worldData.entities) });
+    const entityId = new BN(worldData.entities);
+    entityPda = FindEntityPda({ world, entityId });
   }
   const addEntityIx = createAddEntityInstruction(
     {

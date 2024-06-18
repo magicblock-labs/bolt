@@ -49,7 +49,7 @@ export function FindEntityPda({
     seeds.push(Buffer.from(new Uint8Array(8)));
     seeds.push(Buffer.from(seed));
   } else if (entityId !== undefined) {
-    const entityIdBuffer = Buffer.from(entityId.toArrayLike(Buffer, "be", 8));
+    const entityIdBuffer = entityId.toArrayLike(Buffer, "be", 8);
     seeds.push(entityIdBuffer);
   } else {
     throw new Error("An entity must have either an Id or a Seed");
