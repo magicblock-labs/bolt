@@ -6,7 +6,11 @@ export * from "./generated/instructions";
 export * from "./world/transactions";
 export * from "./delegation/accounts";
 export * from "./delegation/delegate";
-export * from "./delegation/undelegate";
+export {
+  createCommitInstruction,
+  createUndelegateInstruction,
+  DELEGATION_PROGRAM_ID,
+} from "@magicblock-labs/delegation-program";
 
 export const SYSVAR_INSTRUCTIONS_PUBKEY = new PublicKey(
   "Sysvar1nstructions1111111111111111111111111"
