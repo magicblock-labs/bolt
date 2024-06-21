@@ -51,13 +51,10 @@ cd new-project
 bolt test
 ```
 
-## 📘 Bolt book
+## 📘 Bolt docs
 
-Read the Bolt book: [book.boltengine.gg](https://book.boltengine.gg/)
+Read the Bolt [docs]([https://book.boltengine.gg/](https://docs.magicblock.gg/BOLT/Introduction/introduction))
 
-## 📜 Bolt Whitepaper
-
-Read the Bolt whitepaper for a detailed overview on the architecture and the scalability solution: [Ephemeral Rollups are All you Need](https://arxiv.org/abs/2311.02650)
 
 ## 🚧 Under construction
 
