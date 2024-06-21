@@ -6,7 +6,7 @@ on:
   pull_request:
 
 env:
-  solana_version: v1.18.9
+  solana_version: v1.18.15
 
 jobs:
   install:
