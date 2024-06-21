@@ -157,7 +157,7 @@ jobs:
       - name: Generate lib
         run: |
           cd clients/bolt-sdk
-          yarn build
+          yarn install && yarn build
           cd ../..
 
       - name: run tests
