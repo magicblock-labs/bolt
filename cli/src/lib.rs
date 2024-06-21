@@ -69,6 +69,7 @@ pub fn entry(opts: Opts) -> Result<()> {
                 name,
                 javascript,
                 solidity,
+                no_install,
                 no_git,
                 template,
                 test_template,
@@ -78,6 +79,7 @@ pub fn entry(opts: Opts) -> Result<()> {
                 name,
                 javascript,
                 solidity,
+                no_install,
                 no_git,
                 template,
                 test_template,
@@ -137,6 +139,7 @@ fn init(
     name: String,
     javascript: bool,
     solidity: bool,
+    no_install: bool,
     no_git: bool,
     template: anchor_cli::rust_template::ProgramTemplate,
     test_template: anchor_cli::rust_template::TestTemplate,
@@ -386,10 +389,12 @@ fn init(
         }
     }
 
-    let yarn_result = install_node_modules("yarn")?;
-    if !yarn_result.status.success() {
-        println!("Failed yarn install will attempt to npm install");
-        install_node_modules("npm")?;
+    if !no_install {
+        let yarn_result = install_node_modules("yarn")?;
+        if !yarn_result.status.success() {
+            println!("Failed yarn install will attempt to npm install");
+            install_node_modules("npm")?;
+        }
     }
 
     if !no_git {

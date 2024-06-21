@@ -10,4 +10,4 @@ name = "bolt_types"
 
 [dependencies]
 bolt-lang = { path = "../../crates/bolt-lang" }
-anchor-lang = { version = "0.30.0" }
+anchor-lang = { version = "0.30.1" }
