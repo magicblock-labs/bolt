@@ -53,7 +53,7 @@ bolt test
 
 ## 📘 Bolt docs
 
-Read the Bolt [docs]([https://book.boltengine.gg/](https://docs.magicblock.gg/BOLT/Introduction/introduction))
+Read the Bolt [docs](https://docs.magicblock.gg/BOLT/Introduction/introduction)
 
 
 ## 🚧 Under construction
