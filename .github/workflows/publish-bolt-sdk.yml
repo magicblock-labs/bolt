@@ -166,6 +166,12 @@ jobs:
           cargo install --path cli --force --locked
           bolt build
 
+      - name: Generate lib
+        run: |
+          cd clients/bolt-sdk
+          yarn install && yarn build
+          cd ../..
+
       - name: run tests
         run: |
           export PATH="/home/runner/.local/share/solana/install/active_release/bin:$PATH"
