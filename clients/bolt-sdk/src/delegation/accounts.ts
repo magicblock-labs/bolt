@@ -1,12 +1,12 @@
 import { PublicKey } from "@solana/web3.js";
-
-const SEED_BUFFER_PDA = "buffer";
-const SEED_DELEGATION_PDA = "delegation";
-const DELEGATED_ACCOUNT_SEEDS = "account-seeds";
-const SEED_COMMIT_STATE_RECORD_PDA = "commit-state-record";
-const SEED_STATE_DIFF_PDA = "state-diff";
-export const DELEGATION_PROGRAM_ID =
-  "DELeGGvXpWV2fqJUhqcF5ZSYMS4JTLjteaAMARRSaeSh";
+import {
+  DELEGATED_ACCOUNT_SEEDS,
+  DELEGATION_PROGRAM_ID,
+  SEED_BUFFER_PDA,
+  SEED_COMMIT_STATE_RECORD_PDA,
+  SEED_DELEGATION_PDA,
+  SEED_STATE_DIFF_PDA,
+} from "@magicblock-labs/delegation-program";
 
 export function getDelegationAccounts(
   accountToDelegate: PublicKey,

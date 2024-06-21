@@ -7,9 +7,8 @@ import { type BoltComponent } from "../target/types/bolt_component";
 import { type SystemSimpleMovement } from "../target/types/system_simple_movement";
 import { type SystemFly } from "../target/types/system_fly";
 import { type SystemApplyVelocity } from "../target/types/system_apply_velocity";
-import { type World } from "../target/types/world";
 import { expect } from "chai";
-import BN from "bn.js";
+import type BN from "bn.js";
 import {
   AddEntity,
   createDelegateInstruction,
@@ -67,7 +66,6 @@ describe("bolt", () => {
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
 
-  const boltWorld = anchor.workspace.World as Program<World>;
   const boltComponentProgram = anchor.workspace
     .BoltComponent as Program<BoltComponent>;
 
@@ -446,7 +444,7 @@ describe("bolt", () => {
       await provider.sendAndConfirm(applySystem.transaction);
     } catch (error) {
       failed = true;
-      //console.log("error", error);
+      // console.log("error", error);
       expect(error.logs.join("\n")).to.contain("Error Code: InvalidAuthority");
     }
     expect(failed).to.equal(true);
@@ -473,7 +471,7 @@ describe("bolt", () => {
         })
         .rpc();
     } catch (error) {
-      //console.log("error", error);
+      // console.log("error", error);
       expect(error.message).to.contain("Error Code: InvalidCaller");
       invalid = true;
     }
@@ -491,7 +489,7 @@ describe("bolt", () => {
         })
         .rpc();
     } catch (error) {
-      //console.log("error", error);
+      // console.log("error", error);
       expect(error.message).to.contain(
         "bolt_component. Error Code: AccountOwnedByWrongProgram"
       );

@@ -1,6 +1,7 @@
 import * as beet from "@metaplex-foundation/beet";
 import * as web3 from "@solana/web3.js";
-import { DELEGATION_PROGRAM_ID, getDelegationAccounts } from "./accounts";
+import { getDelegationAccounts } from "./accounts";
+import { DELEGATION_PROGRAM_ID } from "@magicblock-labs/delegation-program";
 
 export interface DelegateInstructionArgs {
   validUntil: beet.bignum;
