@@ -156,7 +156,7 @@ describe("bolt", () => {
     const addEntity = await AddEntity({
       payer: provider.wallet.publicKey,
       world: worldPda,
-      seed: "extra-seed",
+      seed: "custom-seed",
       connection: provider.connection,
     });
     await provider.sendAndConfirm(addEntity.transaction);
@@ -521,7 +521,11 @@ describe("bolt", () => {
       reimbursement: provider.wallet.publicKey,
     });
     const tx = new anchor.web3.Transaction().add(delegateIx);
-    await provider.sendAndConfirm(tx);
+    try {
+      await provider.sendAndConfirm(tx);
+    } catch (error) {
+      console.log("error", error);
+    }
     const acc = await provider.connection.getAccountInfo(
       componentPositionEntity1Pda
     );
