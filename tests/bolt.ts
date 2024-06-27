@@ -19,6 +19,7 @@ import {
   InitializeComponent,
   InitializeNewWorld,
   ApplySystem,
+  createAllowUndelegationInstruction,
 } from "../clients/bolt-sdk";
 
 enum Direction {
@@ -514,13 +515,19 @@ describe("bolt", () => {
   });
 
   it("Check component undelegation", async () => {
+    const allowUndelegateIx = createAllowUndelegationInstruction({
+      delegatedAccount: componentPositionEntity1Pda,
+      ownerProgram: exampleComponentPosition.programId,
+    });
     const delegateIx = createUndelegateInstruction({
       payer: provider.wallet.publicKey,
       delegatedAccount: componentPositionEntity1Pda,
       ownerProgram: exampleComponentPosition.programId,
       reimbursement: provider.wallet.publicKey,
     });
-    const tx = new anchor.web3.Transaction().add(delegateIx);
+    const tx = new anchor.web3.Transaction()
+      .add(allowUndelegateIx)
+      .add(delegateIx);
     await provider.sendAndConfirm(tx);
     const acc = await provider.connection.getAccountInfo(
       componentPositionEntity1Pda

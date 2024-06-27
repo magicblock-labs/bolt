@@ -20,7 +20,7 @@ pub use world;
 pub use world::program::World;
 pub use world::Entity;
 
-pub use delegation_program_sdk::{delegate_account, undelegate_account};
+pub use delegation_program_sdk::{allow_undelegation, delegate_account, undelegate_account};
 
 pub use serde;
 

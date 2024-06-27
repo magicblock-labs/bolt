@@ -1587,12 +1587,24 @@ checksum = "e8566979429cf69b49a5c740c60791108e86440e8be149bbea4fe54d2c32d6e2"
 
 [[package]]
 name = "delegation-program-sdk"
-version = "0.0.2"
+version = "0.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c8d4c66a4e72ca5581f8f14cc69bcded51da1d1c8e548e2b394bc00bb76b0b7d"
+checksum = "f8c618cde8084c987bdf7434d06253b5c79d032aa487fc996965d5dc59e3dbd6"
 dependencies = [
  "borsh 0.10.3",
+ "delegation-sdk-attribute-delegate",
  "solana-program",
+]
+
+[[package]]
+name = "delegation-sdk-attribute-delegate"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c95b9e42aee58a38bcd7f3f0014a832e66ea31157f4f8102ae85a4a37aa4eeb5"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 1.0.109",
 ]
 
 [[package]]
