@@ -1,6 +1,6 @@
 {
   "name": "@magicblock-labs/bolt-sdk",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "Bolt typescript SDK",
   "author": "dev@magicblock.gg",
   "license": "MIT",
