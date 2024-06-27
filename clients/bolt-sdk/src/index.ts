@@ -4,8 +4,8 @@ import { PROGRAM_ID } from "./generated";
 export * from "./generated/accounts";
 export * from "./generated/instructions";
 export * from "./world/transactions";
-export * from "./delegation/accounts";
 export * from "./delegation/delegate";
+export * from "./delegation/allow_undelegation";
 export {
   createCommitInstruction,
   createUndelegateInstruction,
