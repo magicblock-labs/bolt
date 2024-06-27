@@ -1,9 +1,12 @@
 
+## [0.1.8] - 2024-06-27
+ - Add allow undelegation ix (#68)
+
 ## [0.1.7] - 2024-06-21
 
 ### ✨️ Features
  - Add manual commit to the typescript sdk (#59)
-- Upgrade to Anchor 0.30.1 (#62)
+ - Upgrade to Anchor 0.30.1 (#62)
 
 ### 👷 CI/CD
 
