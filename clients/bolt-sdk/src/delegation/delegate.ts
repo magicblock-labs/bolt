@@ -1,6 +1,9 @@
 import * as beet from "@metaplex-foundation/beet";
 import * as web3 from "@solana/web3.js";
-import { DELEGATION_PROGRAM_ID, getDelegationAccounts } from "./accounts";
+import {
+  DelegateAccounts,
+  DELEGATION_PROGRAM_ID,
+} from "@magicblock-labs/delegation-program";
 
 export interface DelegateInstructionArgs {
   validUntil: beet.bignum;
@@ -32,7 +35,7 @@ export interface DelegateInstructionAccounts {
   ownerProgram: web3.PublicKey;
   buffer?: web3.PublicKey;
   delegationRecord?: web3.PublicKey;
-  delegateAccountSeeds?: web3.PublicKey;
+  delegationMetadata?: web3.PublicKey;
   delegationProgram?: web3.PublicKey;
   systemProgram?: web3.PublicKey;
 }
@@ -57,8 +60,10 @@ export function createDelegateInstruction(
     commitFrequencyMs,
   });
 
-  const { delegationPda, delegatedAccountSeedsPda, bufferPda } =
-    getDelegationAccounts(accounts.account, accounts.ownerProgram);
+  const { delegationPda, delegationMetadata, bufferPda } = DelegateAccounts(
+    accounts.account,
+    accounts.ownerProgram
+  );
 
   const keys: web3.AccountMeta[] = [
     {
@@ -92,7 +97,7 @@ export function createDelegateInstruction(
       isSigner: false,
     },
     {
-      pubkey: accounts.delegateAccountSeeds ?? delegatedAccountSeedsPda,
+      pubkey: accounts.delegationMetadata ?? delegationMetadata,
       isWritable: true,
       isSigner: false,
     },

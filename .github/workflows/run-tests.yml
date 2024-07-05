@@ -6,7 +6,7 @@ on:
   pull_request:
 
 env:
-  solana_version: v1.18.9
+  solana_version: v1.18.15
 
 jobs:
   install:
@@ -157,7 +157,7 @@ jobs:
       - name: Generate lib
         run: |
           cd clients/bolt-sdk
-          yarn build
+          yarn install && yarn build
           cd ../..
 
       - name: run tests

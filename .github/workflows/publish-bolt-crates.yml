@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 env:
-  solana_version: v1.18.8
+  solana_version: v1.18.15
 
 jobs:
   install:
@@ -165,6 +165,12 @@ jobs:
           export PATH="/home/runner/.local/share/solana/install/active_release/bin:$PATH"
           cargo install --path cli --force --locked
           bolt build
+
+      - name: Generate lib
+        run: |
+          cd clients/bolt-sdk
+          yarn install && yarn build
+          cd ../..
 
       - name: run tests
         run: |

@@ -34,6 +34,7 @@ pub fn delegate(args: TokenStream, input: TokenStream) -> TokenStream {
 fn modify_component_module(mut module: ItemMod, component_type: &Type) -> ItemMod {
     let (delegate_fn, delegate_struct) = generate_delegate(component_type);
     let (undelegate_fn, undelegate_struct) = generate_undelegate();
+    let (allow_undelegate_fn, allow_undelegate_struct) = generate_allow_undelegate();
     module.content = module.content.map(|(brace, mut items)| {
         items.extend(
             vec![
@@ -41,6 +42,8 @@ fn modify_component_module(mut module: ItemMod, component_type: &Type) -> ItemMo
                 delegate_struct,
                 undelegate_fn,
                 undelegate_struct,
+                allow_undelegate_fn,
+                allow_undelegate_struct,
             ]
             .into_iter()
             .map(|item| syn::parse2(item).unwrap())
@@ -49,6 +52,47 @@ fn modify_component_module(mut module: ItemMod, component_type: &Type) -> ItemMo
         (brace, items)
     });
     module
+}
+
+/// Generates the allow_undelegate function and struct.
+fn generate_allow_undelegate() -> (TokenStream2, TokenStream2) {
+    (
+        quote! {
+            #[automatically_derived]
+            pub fn allow_undelegation(ctx: Context<AllowUndelegation>) -> Result<()> {
+                ::bolt_lang::allow_undelegation(
+                    &ctx.accounts.base_account,
+                    &ctx.accounts.delegation_record,
+                    &ctx.accounts.delegation_metadata,
+                    &ctx.accounts.buffer,
+                    &ctx.accounts.delegation_program,
+                    &id(),
+                )?;
+                Ok(())
+            }
+        },
+        quote! {
+            #[automatically_derived]
+            #[derive(Accounts)]
+            pub struct AllowUndelegation<'info> {
+                #[account()]
+                /// CHECK: The delegated component
+                pub base_account: AccountInfo<'info>,
+                #[account()]
+                /// CHECK: delegation record
+                pub delegation_record: AccountInfo<'info>,
+                #[account(mut)]
+                /// CHECK: delegation metadata
+                pub delegation_metadata: AccountInfo<'info>,
+                #[account()]
+                /// CHECK: singer buffer to enforce CPI
+                pub buffer: AccountInfo<'info>,
+                #[account()]
+                /// CHECK:`
+                pub delegation_program: AccountInfo<'info>,
+            }
+        },
+    )
 }
 
 /// Generates the undelegate function and struct.
@@ -63,7 +107,7 @@ fn generate_undelegate() -> (TokenStream2, TokenStream2) {
                     &ctx.accounts.payer,
                     &ctx.accounts.system_program,
                 ];
-                undelegate_account(
+                ::bolt_lang::undelegate_account(
                     delegated_account,
                     &id(),
                     buffer,
@@ -77,7 +121,7 @@ fn generate_undelegate() -> (TokenStream2, TokenStream2) {
         quote! {
             #[automatically_derived]
             #[derive(Accounts)]
-                pub struct InitializeAfterUndelegation<'info> {
+            pub struct InitializeAfterUndelegation<'info> {
                 /// CHECK:`
                 #[account(mut)]
                 pub base_account: AccountInfo<'info>,
@@ -115,7 +159,7 @@ fn generate_delegate(component_type: &Type) -> (TokenStream2, TokenStream2) {
 
                 let pda_seeds: &[&[u8]] = &[<#component_type>::seed(), &entity.key.to_bytes()];
 
-                delegate_account(
+                ::bolt_lang::delegate_account(
                     payer,
                     account,
                     owner_program,
