@@ -35,7 +35,7 @@ export async function InitializeNewWorld({
 }: {
   payer: PublicKey;
   connection: Connection;
-}): Promise<{ transaction: Transaction; worldPda: PublicKey; worldId: BN }> {
+}): Promise<{ transaction: Transaction; worldPda: PublicKey }> {
   const registryPda = FindRegistryPda({});
   const registry = await Registry.fromAccountAddress(connection, registryPda);
   const worldId = new BN(registry.worlds);
@@ -48,7 +48,6 @@ export async function InitializeNewWorld({
   return {
     transaction: new Transaction().add(initializeWorldIx),
     worldPda,
-    worldId,
   };
 }
 
@@ -70,19 +69,21 @@ export async function AddEntity({
   seed?: string;
   connection: Connection;
 }): Promise<{ transaction: Transaction; entityPda: PublicKey }> {
-  const worldInstance = await World.fromAccountAddress(connection, world);
-  const worldId = new BN(worldInstance.id);
-  const entityPda =
-    seed !== undefined
-      ? FindEntityPda({ worldId, seed })
-      : FindEntityPda({ worldId, entityId: new BN(worldInstance.entities) });
+  let entityPda: PublicKey;
+  if (seed !== undefined) {
+    entityPda = FindEntityPda({ world, seed });
+  } else {
+    const worldData = await World.fromAccountAddress(connection, world);
+    const entityId = new BN(worldData.entities);
+    entityPda = FindEntityPda({ world, entityId });
+  }
   const addEntityIx = createAddEntityInstruction(
     {
       world,
       payer,
       entity: entityPda,
     },
-    { extraSeed: seed ?? null }
+    { seed: seed ?? null }
   );
   return {
     transaction: new Transaction().add(addEntityIx),

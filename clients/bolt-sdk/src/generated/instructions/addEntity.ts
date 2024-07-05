@@ -14,8 +14,9 @@ import * as web3 from "@solana/web3.js";
  * @category generated
  */
 export interface AddEntityInstructionArgs {
-  extraSeed: beet.COption<string>;
+  seed: beet.COption<string>;
 }
+
 /**
  * @category Instructions
  * @category AddEntity
@@ -28,10 +29,11 @@ export const addEntityStruct = new beet.FixableBeetArgsStruct<
 >(
   [
     ["instructionDiscriminator", beet.uniformFixedSizeArray(beet.u8, 8)],
-    ["extraSeed", beet.coption(beet.utf8String)],
+    ["seed", beet.coption(beet.utf8String)],
   ],
   "AddEntityInstructionArgs"
 );
+
 /**
  * Accounts required by the _addEntity_ instruction
  *
