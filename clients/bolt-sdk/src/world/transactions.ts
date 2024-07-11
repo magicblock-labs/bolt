@@ -18,7 +18,12 @@ import {
 } from "../index";
 import BN from "bn.js";
 import type web3 from "@solana/web3.js";
-import { type Connection, type PublicKey, Transaction } from "@solana/web3.js";
+import {
+  type Connection,
+  type PublicKey,
+  Transaction,
+  TransactionInstruction,
+} from "@solana/web3.js";
 import { PROGRAM_ID } from "../generated";
 
 const MAX_COMPONENTS = 5;
@@ -35,7 +40,12 @@ export async function InitializeNewWorld({
 }: {
   payer: PublicKey;
   connection: Connection;
-}): Promise<{ transaction: Transaction; worldPda: PublicKey; worldId: BN }> {
+}): Promise<{
+  instruction: TransactionInstruction;
+  transaction: Transaction;
+  worldPda: PublicKey;
+  worldId: BN;
+}> {
   const registryPda = FindRegistryPda({});
   const registry = await Registry.fromAccountAddress(connection, registryPda);
   const worldId = new BN(registry.worlds);
@@ -46,6 +56,7 @@ export async function InitializeNewWorld({
     payer,
   });
   return {
+    instruction: initializeWorldIx,
     transaction: new Transaction().add(initializeWorldIx),
     worldPda,
     worldId,
@@ -69,7 +80,11 @@ export async function AddEntity({
   world: PublicKey;
   seed?: string;
   connection: Connection;
-}): Promise<{ transaction: Transaction; entityPda: PublicKey }> {
+}): Promise<{
+  instruction: TransactionInstruction;
+  transaction: Transaction;
+  entityPda: PublicKey;
+}> {
   const worldInstance = await World.fromAccountAddress(connection, world);
   const worldId = new BN(worldInstance.id);
   const entityPda =
@@ -85,6 +100,7 @@ export async function AddEntity({
     { extraSeed: seed ?? null }
   );
   return {
+    instruction: addEntityIx,
     transaction: new Transaction().add(addEntityIx),
     entityPda,
   };
@@ -114,7 +130,11 @@ export async function InitializeComponent({
   seed?: string;
   authority?: web3.PublicKey;
   anchorRemainingAccounts?: web3.AccountMeta[];
-}): Promise<{ transaction: Transaction; componentPda: PublicKey }> {
+}): Promise<{
+  instruction: TransactionInstruction;
+  transaction: Transaction;
+  componentPda: PublicKey;
+}> {
   const componentPda = FindComponentPda({ componentId, entity, seed });
   const initializeComponentIx = createInitializeComponentInstruction({
     payer,
@@ -126,6 +146,7 @@ export async function InitializeComponent({
     anchorRemainingAccounts,
   });
   return {
+    instruction: initializeComponentIx,
     transaction: new Transaction().add(initializeComponentIx),
     componentPda,
   };
@@ -237,7 +258,7 @@ export async function ApplySystem({
   entities: ApplySystemEntity[];
   extraAccounts?: web3.AccountMeta[];
   args?: object;
-}): Promise<{ transaction: Transaction }> {
+}): Promise<{ instruction: TransactionInstruction; transaction: Transaction }> {
   const applySystemIx = createApplySystemInstruction({
     authority,
     systemId,
@@ -246,6 +267,7 @@ export async function ApplySystem({
     args,
   });
   return {
+    instruction: applySystemIx,
     transaction: new Transaction().add(applySystemIx),
   };
 }
