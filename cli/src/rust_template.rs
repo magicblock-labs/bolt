@@ -7,6 +7,7 @@ use anchor_lang_idl::types::{
 };
 use anyhow::Result;
 use heck::{ToSnakeCase, ToUpperCamelCase};
+use std::fs;
 use std::path::{Path, PathBuf};
 
 pub const ANCHOR_VERSION: &str = anchor_cli::VERSION;
@@ -62,27 +63,20 @@ pub fn create_program(name: &str, template: ProgramTemplate) -> Result<()> {
 
 /// Create a component which holds position data.
 fn create_component_template_simple(name: &str, program_path: &Path) -> Files {
-    vec![(
-        program_path.join("src").join("lib.rs"),
-        format!(
-            r#"use bolt_lang::*;
+    // Define the path to the template file in the "templates" folder
+    let template_path = Path::new("templates").join("component_template.txt");
 
-declare_id!("{}");
+    // Read the template content from the text file
+    let mut template =
+        fs::read_to_string(&template_path).expect("Failed to read component template file");
 
-#[component]
-#[derive(Default)]
-pub struct {} {{
-    pub x: i64,
-    pub y: i64,
-    pub z: i64,
-    #[max_len(20)]
-    pub description: String,
-}}
-"#,
-            anchor_cli::rust_template::get_or_create_program_id(name),
-            name.to_upper_camel_case(),
-        ),
-    )]
+    let program_id = anchor_cli::rust_template::get_or_create_program_id(name).to_string();
+
+    // Replace placeholders with actual values
+    template = template.replace("{{PROGRAM_ID}}", &program_id);
+    template = template.replace("{{STRUCT_NAME}}", &name.to_upper_camel_case());
+    // Return the modified string as part of the function
+    vec![(program_path.join("src").join("lib.rs"), template)]
 }
 
 /// Create a system which operates on a Position component.
