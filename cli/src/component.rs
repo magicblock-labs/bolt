@@ -1,6 +1,7 @@
 use crate::{
     discover_cluster_url,
-    rust_template::{component_type, component_type_import, create_component},
+    rust_template::create_component,
+    templates::component::{component_type, component_type_import},
     workspace::with_workspace,
 };
 use anchor_cli::config::{ConfigOverride, ProgramDeployment};

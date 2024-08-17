@@ -1,6 +1,7 @@
 mod component;
 mod rust_template;
 mod system;
+mod templates;
 mod workspace;
 
 use crate::component::new_component;
@@ -280,10 +281,10 @@ fn init(
     fs::write("Anchor.toml", toml)?;
 
     // Initialize .gitignore file
-    fs::write(".gitignore", rust_template::git_ignore())?;
+    fs::write(".gitignore", templates::workspace::git_ignore())?;
 
     // Initialize .prettierignore file
-    fs::write(".prettierignore", rust_template::prettier_ignore())?;
+    fs::write(".prettierignore", templates::workspace::prettier_ignore())?;
 
     // Remove the default programs if `--force` is passed
     if force {
@@ -354,21 +355,21 @@ fn init(
     if javascript {
         // Build javascript config
         let mut package_json = File::create("package.json")?;
-        package_json.write_all(rust_template::package_json(jest).as_bytes())?;
+        package_json.write_all(templates::workspace::package_json(jest).as_bytes())?;
 
         if jest {
             let mut test = File::create(format!("tests/{}.test.js", &project_name))?;
             if solidity {
                 test.write_all(anchor_cli::solidity_template::jest(&project_name).as_bytes())?;
             } else {
-                test.write_all(rust_template::jest(&project_name).as_bytes())?;
+                test.write_all(templates::workspace::jest(&project_name).as_bytes())?;
             }
         } else {
             let mut test = File::create(format!("tests/{}.js", &project_name))?;
             if solidity {
                 test.write_all(anchor_cli::solidity_template::mocha(&project_name).as_bytes())?;
             } else {
-                test.write_all(rust_template::mocha(&project_name).as_bytes())?;
+                test.write_all(templates::workspace::mocha(&project_name).as_bytes())?;
             }
         }
 
@@ -381,7 +382,7 @@ fn init(
         ts_config.write_all(anchor_cli::rust_template::ts_config(jest).as_bytes())?;
 
         let mut ts_package_json = File::create("package.json")?;
-        ts_package_json.write_all(rust_template::ts_package_json(jest).as_bytes())?;
+        ts_package_json.write_all(templates::workspace::ts_package_json(jest).as_bytes())?;
 
         let mut deploy = File::create("migrations/deploy.ts")?;
         deploy.write_all(anchor_cli::rust_template::ts_deploy_script().as_bytes())?;
@@ -390,7 +391,7 @@ fn init(
         if solidity {
             mocha.write_all(anchor_cli::solidity_template::ts_mocha(&project_name).as_bytes())?;
         } else {
-            mocha.write_all(rust_template::ts_mocha(&project_name).as_bytes())?;
+            mocha.write_all(templates::workspace::ts_mocha(&project_name).as_bytes())?;
         }
     }
 
@@ -545,7 +546,7 @@ fn build_dynamic_types(
         .join("Cargo.toml");
     if !cargo_path.exists() {
         let mut file = File::create(cargo_path)?;
-        file.write_all(rust_template::types_cargo_toml().as_bytes())?;
+        file.write_all(templates::workspace::types_cargo_toml().as_bytes())?;
     }
     std::env::set_current_dir(cur_dir)?;
     Ok(())
