@@ -3,7 +3,9 @@ on:
   push:
     branches:
       - main
-  pull_request:
+  pull_request_target:
+    branches:
+      - main
 
 env:
   solana_version: v1.18.15
