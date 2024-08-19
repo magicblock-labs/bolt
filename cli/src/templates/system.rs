@@ -1,6 +1,6 @@
-use std::path::Path;
 use anchor_cli::Files;
-use heck::ToSnakeCase; // Import the trait
+use heck::ToSnakeCase;
+use std::path::Path;
 
 /// Create a system which operates on a Position component.
 pub fn create_system_template_simple(name: &str, program_path: &Path) -> Files {

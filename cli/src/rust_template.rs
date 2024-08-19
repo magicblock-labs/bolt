@@ -1,14 +1,14 @@
-use crate::templates::program::{create_program_template_multiple, create_program_template_single};
-use crate::templates::workspace::{
-    cargo_toml, cargo_toml_with_serde, workspace_manifest, xargo_toml,
-};
 use anchor_cli::rust_template::ProgramTemplate;
 use anchor_cli::{create_files, Files};
 use anchor_lang_idl::types::{IdlArrayLen, IdlGenericArg, IdlType};
 use anyhow::Result;
 use std::path::{Path, PathBuf};
-use crate::templates::{
-    component::create_component_template_simple, system::create_system_template_simple,
+
+use crate::templates::component::create_component_template_simple;
+use crate::templates::program::{create_program_template_multiple, create_program_template_single};
+use crate::templates::system::create_system_template_simple;
+use crate::templates::workspace::{
+    cargo_toml, cargo_toml_with_serde, workspace_manifest, xargo_toml,
 };
 
 /// Create a component from the given name.
