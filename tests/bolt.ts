@@ -21,6 +21,7 @@ import {
   ApplySystem,
   createAllowUndelegationInstruction,
 } from "../clients/bolt-sdk";
+import { DelegateComponent } from "../clients/bolt-sdk/src";
 
 enum Direction {
   Left = "Left",
@@ -500,16 +501,20 @@ describe("bolt", () => {
   });
 
   it("Check component delegation", async () => {
-    const delegateIx = createDelegateInstruction({
-      entity: entity1Pda,
-      account: componentPositionEntity1Pda,
-      ownerProgram: exampleComponentPosition.programId,
+    const delegateComponent = await DelegateComponent({
       payer: provider.wallet.publicKey,
+      entity: entity1Pda,
+      componentId: exampleComponentPosition.programId,
     });
-    const tx = new anchor.web3.Transaction().add(delegateIx);
-    await provider.sendAndConfirm(tx);
+
+    const txSign = await provider.sendAndConfirm(
+      delegateComponent.transaction,
+      [],
+      { skipPreflight: true, commitment: "finalized" }
+    );
+    console.log(`Delegation signature: ${txSign}`);
     const acc = await provider.connection.getAccountInfo(
-      componentPositionEntity1Pda
+      delegateComponent.componentPda
     );
     expect(acc.owner.toString()).to.equal(DELEGATION_PROGRAM_ID);
   });

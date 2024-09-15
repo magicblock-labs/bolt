@@ -4,6 +4,12 @@ import {
   DelegateAccounts,
   DELEGATION_PROGRAM_ID,
 } from "@magicblock-labs/delegation-program";
+import { FindComponentPda } from "../index";
+import {
+  type PublicKey,
+  Transaction,
+  type TransactionInstruction,
+} from "@solana/web3.js";
 
 export interface DelegateInstructionArgs {
   validUntil: beet.bignum;
@@ -119,4 +125,62 @@ export function createDelegateInstruction(
     keys,
     data,
   });
+}
+
+/**
+ * Create the transaction to Delegate a component
+ * @param payer
+ * @param entityPda
+ * @param componentId
+ * @param seeds
+ * @param buffer
+ * @param delegationRecord
+ * @param delegationMetadata
+ * @param delegationProgram
+ * @param systemProgram
+ * @constructor
+ */
+export async function DelegateComponent({
+  payer,
+  entity,
+  componentId,
+  seed = "",
+  buffer,
+  delegationRecord,
+  delegationMetadata,
+  delegationProgram,
+  systemProgram,
+}: {
+  payer: PublicKey;
+  entity: PublicKey;
+  componentId: PublicKey;
+  seed?: string;
+  buffer?: web3.PublicKey;
+  delegationRecord?: web3.PublicKey;
+  delegationMetadata?: web3.PublicKey;
+  delegationProgram?: web3.PublicKey;
+  systemProgram?: web3.PublicKey;
+}): Promise<{
+  instruction: TransactionInstruction;
+  transaction: Transaction;
+  componentPda: PublicKey;
+}> {
+  const componentPda = FindComponentPda({ componentId, entity, seed });
+  const delegateComponentIx = createDelegateInstruction({
+    payer,
+    entity,
+    account: componentPda,
+    ownerProgram: componentId,
+    buffer,
+    delegationRecord,
+    delegationMetadata,
+    delegationProgram,
+    systemProgram,
+  });
+
+  return {
+    instruction: delegateComponentIx,
+    transaction: new Transaction().add(delegateComponentIx),
+    componentPda,
+  };
 }
