@@ -1,18 +1,24 @@
+mod component;
 mod rust_template;
+mod system;
+mod templates;
+mod workspace;
 
+use crate::component::new_component;
 use crate::rust_template::{create_component, create_system};
+use crate::system::new_system;
 use anchor_cli::config;
 use anchor_cli::config::{
     BootstrapMode, Config, ConfigOverride, GenesisEntry, ProgramArch, ProgramDeployment,
     TestValidator, Validator, WithPath,
 };
 use anchor_client::Cluster;
-use anchor_lang_idl::types::Idl;
 use anyhow::{anyhow, Result};
 use clap::{Parser, Subcommand};
+use component::{append_component_to_lib_rs, extract_component_id, generate_component_type_file};
 use heck::{ToKebabCase, ToSnakeCase};
 use std::collections::BTreeMap;
-use std::fs::{self, create_dir_all, File, OpenOptions};
+use std::fs::{self, create_dir_all, File};
 use std::io::Write;
 use std::io::{self, BufRead};
 use std::path::{Path, PathBuf};
@@ -23,7 +29,7 @@ pub const ANCHOR_VERSION: &str = anchor_cli::VERSION;
 
 pub const WORLD_PROGRAM: &str = "WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n";
 
-#[derive(Debug, Subcommand)]
+#[derive(Subcommand)]
 pub enum BoltCommand {
     #[clap(about = "Create a new component")]
     Component(ComponentCommand),
@@ -50,7 +56,7 @@ pub struct SystemCommand {
     pub name: String,
 }
 
-#[derive(Debug, Parser)]
+#[derive(Parser)]
 #[clap(version = VERSION)]
 pub struct Opts {
     /// Rebuild the auto-generated types
@@ -275,10 +281,10 @@ fn init(
     fs::write("Anchor.toml", toml)?;
 
     // Initialize .gitignore file
-    fs::write(".gitignore", rust_template::git_ignore())?;
+    fs::write(".gitignore", templates::workspace::git_ignore())?;
 
     // Initialize .prettierignore file
-    fs::write(".prettierignore", rust_template::prettier_ignore())?;
+    fs::write(".prettierignore", templates::workspace::prettier_ignore())?;
 
     // Remove the default programs if `--force` is passed
     if force {
@@ -349,21 +355,21 @@ fn init(
     if javascript {
         // Build javascript config
         let mut package_json = File::create("package.json")?;
-        package_json.write_all(rust_template::package_json(jest).as_bytes())?;
+        package_json.write_all(templates::workspace::package_json(jest).as_bytes())?;
 
         if jest {
             let mut test = File::create(format!("tests/{}.test.js", &project_name))?;
             if solidity {
                 test.write_all(anchor_cli::solidity_template::jest(&project_name).as_bytes())?;
             } else {
-                test.write_all(rust_template::jest(&project_name).as_bytes())?;
+                test.write_all(templates::workspace::jest(&project_name).as_bytes())?;
             }
         } else {
             let mut test = File::create(format!("tests/{}.js", &project_name))?;
             if solidity {
                 test.write_all(anchor_cli::solidity_template::mocha(&project_name).as_bytes())?;
             } else {
-                test.write_all(rust_template::mocha(&project_name).as_bytes())?;
+                test.write_all(templates::workspace::mocha(&project_name).as_bytes())?;
             }
         }
 
@@ -376,7 +382,7 @@ fn init(
         ts_config.write_all(anchor_cli::rust_template::ts_config(jest).as_bytes())?;
 
         let mut ts_package_json = File::create("package.json")?;
-        ts_package_json.write_all(rust_template::ts_package_json(jest).as_bytes())?;
+        ts_package_json.write_all(templates::workspace::ts_package_json(jest).as_bytes())?;
 
         let mut deploy = File::create("migrations/deploy.ts")?;
         deploy.write_all(anchor_cli::rust_template::ts_deploy_script().as_bytes())?;
@@ -385,7 +391,7 @@ fn init(
         if solidity {
             mocha.write_all(anchor_cli::solidity_template::ts_mocha(&project_name).as_bytes())?;
         } else {
-            mocha.write_all(rust_template::ts_mocha(&project_name).as_bytes())?;
+            mocha.write_all(templates::workspace::ts_mocha(&project_name).as_bytes())?;
         }
     }
 
@@ -488,134 +494,6 @@ fn install_node_modules(cmd: &str) -> Result<std::process::Output> {
         .map_err(|e| anyhow::format_err!("{} install failed: {}", cmd, e.to_string()))
 }
 
-// Create a new component from the template
-fn new_component(cfg_override: &ConfigOverride, name: String) -> Result<()> {
-    with_workspace(cfg_override, |cfg| {
-        match cfg.path().parent() {
-            None => {
-                println!("Unable to make new component");
-            }
-            Some(parent) => {
-                std::env::set_current_dir(parent)?;
-
-                let cluster = cfg.provider.cluster.clone();
-                let programs = cfg.programs.entry(cluster).or_default();
-                if programs.contains_key(&name) {
-                    return Err(anyhow!("Program already exists"));
-                }
-
-                programs.insert(
-                    name.clone(),
-                    ProgramDeployment {
-                        address: {
-                            create_component(&name)?;
-                            anchor_cli::rust_template::get_or_create_program_id(&name)
-                        },
-                        path: None,
-                        idl: None,
-                    },
-                );
-
-                let toml = cfg.to_string();
-                fs::write("Anchor.toml", toml)?;
-
-                println!("Created new component: {}", name);
-            }
-        };
-        Ok(())
-    })
-}
-
-// Create a new system from the template
-fn new_system(cfg_override: &ConfigOverride, name: String) -> Result<()> {
-    with_workspace(cfg_override, |cfg| {
-        match cfg.path().parent() {
-            None => {
-                println!("Unable to make new system");
-            }
-            Some(parent) => {
-                std::env::set_current_dir(parent)?;
-
-                let cluster = cfg.provider.cluster.clone();
-                let programs = cfg.programs.entry(cluster).or_default();
-                if programs.contains_key(&name) {
-                    return Err(anyhow!("Program already exists"));
-                }
-
-                programs.insert(
-                    name.clone(),
-                    anchor_cli::config::ProgramDeployment {
-                        address: {
-                            rust_template::create_system(&name)?;
-                            anchor_cli::rust_template::get_or_create_program_id(&name)
-                        },
-                        path: None,
-                        idl: None,
-                    },
-                );
-
-                let toml = cfg.to_string();
-                fs::write("Anchor.toml", toml)?;
-
-                println!("Created new system: {}", name);
-            }
-        };
-        Ok(())
-    })
-}
-
-// with_workspace ensures the current working directory is always the top level
-// workspace directory, i.e., where the `Anchor.toml` file is located, before
-// and after the closure invocation.
-//
-// The closure passed into this function must never change the working directory
-// to be outside the workspace. Doing so will have undefined behavior.
-fn with_workspace<R>(
-    cfg_override: &ConfigOverride,
-    f: impl FnOnce(&mut WithPath<Config>) -> R,
-) -> R {
-    set_workspace_dir_or_exit();
-
-    let mut cfg = Config::discover(cfg_override)
-        .expect("Previously set the workspace dir")
-        .expect("Anchor.toml must always exist");
-
-    let r = f(&mut cfg);
-
-    set_workspace_dir_or_exit();
-
-    r
-}
-
-fn set_workspace_dir_or_exit() {
-    let d = match Config::discover(&ConfigOverride::default()) {
-        Err(err) => {
-            println!("Workspace configuration error: {err}");
-            std::process::exit(1);
-        }
-        Ok(d) => d,
-    };
-    match d {
-        None => {
-            println!("Not in anchor workspace.");
-            std::process::exit(1);
-        }
-        Some(cfg) => {
-            match cfg.path().parent() {
-                None => {
-                    println!("Unable to make new program");
-                }
-                Some(parent) => {
-                    if std::env::set_current_dir(parent).is_err() {
-                        println!("Not in anchor workspace.");
-                        std::process::exit(1);
-                    }
-                }
-            };
-        }
-    }
-}
-
 fn discover_cluster_url(cfg_override: &ConfigOverride) -> Result<String> {
     let url = match Config::discover(cfg_override)? {
         Some(cfg) => cluster_url(&cfg, &cfg.test_validator),
@@ -668,7 +546,7 @@ fn build_dynamic_types(
         .join("Cargo.toml");
     if !cargo_path.exists() {
         let mut file = File::create(cargo_path)?;
-        file.write_all(rust_template::types_cargo_toml().as_bytes())?;
+        file.write_all(templates::workspace::types_cargo_toml().as_bytes())?;
     }
     std::env::set_current_dir(cur_dir)?;
     Ok(())
@@ -718,65 +596,5 @@ fn add_types_crate_dependency(program_name: &str, types_path: &str) -> Result<()
                 e.to_string()
             )
         })?;
-    Ok(())
-}
-
-fn extract_component_id(line: &str) -> Option<&str> {
-    let component_id_marker = "#[component_id(";
-    line.find(component_id_marker).map(|start| {
-        let start = start + component_id_marker.len();
-        let end = line[start..].find(')').unwrap() + start;
-        line[start..end].trim_matches('"')
-    })
-}
-
-fn fetch_idl_for_component(component_id: &str, url: &str) -> Result<String> {
-    let output = std::process::Command::new("bolt")
-        .arg("idl")
-        .arg("fetch")
-        .arg(component_id)
-        .arg("--provider.cluster")
-        .arg(url)
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped())
-        .output()?;
-
-    if output.status.success() {
-        let idl_string = String::from_utf8(output.stdout)
-            .map_err(|e| anyhow!("Failed to decode IDL output as UTF-8: {}", e))?
-            .to_string();
-        Ok(idl_string)
-    } else {
-        let error_message = String::from_utf8(output.stderr)
-            .unwrap_or(format!(
-                "Error trying to dynamically generate the type \
-            for component {}, unable to fetch the idl. \nEnsure that the idl is available. Specify \
-            the appropriate cluster using the --provider.cluster option",
-                component_id
-            ))
-            .to_string();
-        Err(anyhow!("Command failed with error: {}", error_message))
-    }
-}
-
-fn generate_component_type_file(
-    file_path: &Path,
-    cfg_override: &ConfigOverride,
-    component_id: &str,
-) -> Result<()> {
-    let url = discover_cluster_url(cfg_override)?;
-    let idl_string = fetch_idl_for_component(component_id, &url)?;
-    let idl: Idl = serde_json::from_str(&idl_string)?;
-    let mut file = File::create(file_path)?;
-    file.write_all(rust_template::component_type(&idl, component_id)?.as_bytes())?;
-    Ok(())
-}
-
-fn append_component_to_lib_rs(lib_rs_path: &Path, component_id: &str) -> Result<()> {
-    let mut file = OpenOptions::new()
-        .create(true)
-        .append(true)
-        .open(lib_rs_path)?;
-    file.write_all(rust_template::component_type_import(component_id).as_bytes())?;
     Ok(())
 }
