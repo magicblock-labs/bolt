@@ -6,11 +6,7 @@ export * from "./generated/instructions";
 export * from "./world/transactions";
 export * from "./delegation/delegate";
 export * from "./delegation/allow_undelegation";
-export {
-  createCommitInstruction,
-  createUndelegateInstruction,
-  DELEGATION_PROGRAM_ID,
-} from "@magicblock-labs/delegation-program";
+export { DELEGATION_PROGRAM_ID } from "@magicblock-labs/ephemeral-rollups-sdk";
 
 export const SYSVAR_INSTRUCTIONS_PUBKEY = new PublicKey(
   "Sysvar1nstructions1111111111111111111111111"

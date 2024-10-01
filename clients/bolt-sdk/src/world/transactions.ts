@@ -22,7 +22,7 @@ import {
   type Connection,
   type PublicKey,
   Transaction,
-  TransactionInstruction,
+  type TransactionInstruction,
 } from "@solana/web3.js";
 import { PROGRAM_ID } from "../generated";
 

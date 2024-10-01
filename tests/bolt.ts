@@ -510,33 +510,12 @@ describe("bolt", () => {
     const txSign = await provider.sendAndConfirm(
       delegateComponent.transaction,
       [],
-      { skipPreflight: true, commitment: "finalized" }
+      { skipPreflight: true, commitment: "confirmed" }
     );
     console.log(`Delegation signature: ${txSign}`);
     const acc = await provider.connection.getAccountInfo(
       delegateComponent.componentPda
     );
     expect(acc.owner.toString()).to.equal(DELEGATION_PROGRAM_ID);
-  });
-
-  it("Check component undelegation", async () => {
-    const allowUndelegateIx = createAllowUndelegationInstruction({
-      delegatedAccount: componentPositionEntity1Pda,
-      ownerProgram: exampleComponentPosition.programId,
-    });
-    const delegateIx = createUndelegateInstruction({
-      payer: provider.wallet.publicKey,
-      delegatedAccount: componentPositionEntity1Pda,
-      ownerProgram: exampleComponentPosition.programId,
-      reimbursement: provider.wallet.publicKey,
-    });
-    const tx = new anchor.web3.Transaction()
-      .add(allowUndelegateIx)
-      .add(delegateIx);
-    await provider.sendAndConfirm(tx);
-    const acc = await provider.connection.getAccountInfo(
-      componentPositionEntity1Pda
-    );
-    expect(acc.owner).to.deep.equal(exampleComponentPosition.programId);
   });
 });

@@ -27,7 +27,7 @@ world = { workspace = true }
 bolt-system = { workspace = true }
 
 # Delegation
-delegation-program-sdk = { workspace = true }
+ephemeral-rollups-sdk = { workspace = true , features = ["anchor"]}
 
 # Other dependencies
 serde = { workspace = true }

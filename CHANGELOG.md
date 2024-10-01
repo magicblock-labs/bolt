@@ -1,12 +1,28 @@
 
 ## [0.1.8] - 2024-06-27
+
+### ✨️ Features
  - Add allow undelegation ix (#68)
 
 ## [0.1.7] - 2024-06-21
 
 ### ✨️ Features
  - Add manual commit to the typescript sdk (#59)
+# :sparkles: Add manual commit to the typescript sdk
+| Status  | Type  | ⚠️ Core Change | Issue |
+| :---: | :---: | :---: | :--: |
+| Ready | Feature | No | - |
+
+## Description
+Add Ephemeral Rollups manual commit instruction to the typescript sdk
  - Upgrade to Anchor 0.30.1 (#62)
+# Upgrade to Anchor 0.30.1
+| Status  | Type  | ⚠️ Core Change | Issue |
+| :---: | :---: | :---: | :--: |
+| Ready | Feature | No | - |
+
+## Description
+Upgrade Anchor dependency to 0.30.1
 
 ### 👷 CI/CD
 

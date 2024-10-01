@@ -823,7 +823,7 @@ checksum = "8d696c370c750c948ada61c69a0ee2cbbb9c50b1019ddb86d9317157a99c2cae"
 
 [[package]]
 name = "bolt-attribute-bolt-arguments"
-version = "0.1.8"
+version = "0.1.9"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -832,7 +832,7 @@ dependencies = [
 
 [[package]]
 name = "bolt-attribute-bolt-component"
-version = "0.1.8"
+version = "0.1.9"
 dependencies = [
  "bolt-utils",
  "proc-macro2",
@@ -842,7 +842,7 @@ dependencies = [
 
 [[package]]
 name = "bolt-attribute-bolt-component-deserialize"
-version = "0.1.8"
+version = "0.1.9"
 dependencies = [
  "bolt-utils",
  "proc-macro2",
@@ -852,7 +852,7 @@ dependencies = [
 
 [[package]]
 name = "bolt-attribute-bolt-component-id"
-version = "0.1.8"
+version = "0.1.9"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -861,7 +861,7 @@ dependencies = [
 
 [[package]]
 name = "bolt-attribute-bolt-delegate"
-version = "0.1.8"
+version = "0.1.9"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -870,7 +870,7 @@ dependencies = [
 
 [[package]]
 name = "bolt-attribute-bolt-extra-accounts"
-version = "0.1.8"
+version = "0.1.9"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -879,7 +879,7 @@ dependencies = [
 
 [[package]]
 name = "bolt-attribute-bolt-program"
-version = "0.1.8"
+version = "0.1.9"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -888,7 +888,7 @@ dependencies = [
 
 [[package]]
 name = "bolt-attribute-bolt-system"
-version = "0.1.8"
+version = "0.1.9"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -897,7 +897,7 @@ dependencies = [
 
 [[package]]
 name = "bolt-attribute-bolt-system-input"
-version = "0.1.8"
+version = "0.1.9"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -906,7 +906,7 @@ dependencies = [
 
 [[package]]
 name = "bolt-cli"
-version = "0.1.8"
+version = "0.1.9"
 dependencies = [
  "anchor-cli",
  "anchor-client",
@@ -921,7 +921,7 @@ dependencies = [
 
 [[package]]
 name = "bolt-component"
-version = "0.1.8"
+version = "0.1.9"
 dependencies = [
  "anchor-lang",
  "bolt-system",
@@ -933,7 +933,7 @@ version = "0.0.1"
 
 [[package]]
 name = "bolt-helpers-system-template"
-version = "0.1.8"
+version = "0.1.9"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -942,7 +942,7 @@ dependencies = [
 
 [[package]]
 name = "bolt-helpers-world-apply"
-version = "0.1.8"
+version = "0.1.9"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -951,7 +951,7 @@ dependencies = [
 
 [[package]]
 name = "bolt-lang"
-version = "0.1.8"
+version = "0.1.9"
 dependencies = [
  "ahash 0.8.11",
  "anchor-lang",
@@ -965,7 +965,7 @@ dependencies = [
  "bolt-attribute-bolt-system",
  "bolt-attribute-bolt-system-input",
  "bolt-system",
- "delegation-program-sdk",
+ "ephemeral-rollups-sdk",
  "serde",
  "serde_json",
  "world",
@@ -973,7 +973,7 @@ dependencies = [
 
 [[package]]
 name = "bolt-system"
-version = "0.1.8"
+version = "0.1.9"
 dependencies = [
  "anchor-lang",
  "bolt-helpers-system-template",
@@ -989,7 +989,7 @@ dependencies = [
 
 [[package]]
 name = "bolt-utils"
-version = "0.1.8"
+version = "0.1.9"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1586,28 +1586,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e8566979429cf69b49a5c740c60791108e86440e8be149bbea4fe54d2c32d6e2"
 
 [[package]]
-name = "delegation-program-sdk"
-version = "0.1.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f8c618cde8084c987bdf7434d06253b5c79d032aa487fc996965d5dc59e3dbd6"
-dependencies = [
- "borsh 0.10.3",
- "delegation-sdk-attribute-delegate",
- "solana-program",
-]
-
-[[package]]
-name = "delegation-sdk-attribute-delegate"
-version = "0.1.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c95b9e42aee58a38bcd7f3f0014a832e66ea31157f4f8102ae85a4a37aa4eeb5"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 1.0.109",
-]
-
-[[package]]
 name = "der"
 version = "0.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1865,6 +1843,42 @@ dependencies = [
  "log",
  "regex",
  "termcolor",
+]
+
+[[package]]
+name = "ephemeral-rollups-sdk"
+version = "0.0.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "78d083d793a467350cb76312a1281e9bc6a0083823102dee8f99e1117b668fb6"
+dependencies = [
+ "anchor-lang",
+ "borsh 0.10.3",
+ "ephemeral-rollups-sdk-attribute-commit",
+ "ephemeral-rollups-sdk-attribute-delegate",
+ "paste",
+ "solana-program",
+]
+
+[[package]]
+name = "ephemeral-rollups-sdk-attribute-commit"
+version = "0.0.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "82c0c885becc3dba2ffacd1d121b1f54bdb061a62549f4fe1f2982d4535b0a66"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 1.0.109",
+]
+
+[[package]]
+name = "ephemeral-rollups-sdk-attribute-delegate"
+version = "0.0.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "52e08894bd8218c86414fa637dad53c8cccddfab0f5ee81f3d70b79745e084cb"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 1.0.109",
 ]
 
 [[package]]
@@ -3159,7 +3173,7 @@ dependencies = [
 
 [[package]]
 name = "position"
-version = "0.1.8"
+version = "0.1.9"
 dependencies = [
  "anchor-lang",
  "bolt-lang",
@@ -5279,7 +5293,7 @@ dependencies = [
 
 [[package]]
 name = "system-apply-velocity"
-version = "0.1.8"
+version = "0.1.9"
 dependencies = [
  "anchor-lang",
  "anchor-spl",
@@ -5311,7 +5325,7 @@ dependencies = [
 
 [[package]]
 name = "system-fly"
-version = "0.1.8"
+version = "0.1.9"
 dependencies = [
  "anchor-lang",
  "bolt-lang",
@@ -5320,7 +5334,7 @@ dependencies = [
 
 [[package]]
 name = "system-simple-movement"
-version = "0.1.8"
+version = "0.1.9"
 dependencies = [
  "anchor-lang",
  "bolt-lang",
@@ -5841,7 +5855,7 @@ checksum = "f1bddf1187be692e79c5ffeab891132dfb0f236ed36a43c7ed39f1165ee20191"
 
 [[package]]
 name = "velocity"
-version = "0.1.8"
+version = "0.1.9"
 dependencies = [
  "anchor-lang",
  "bolt-lang",
@@ -6190,7 +6204,7 @@ dependencies = [
 
 [[package]]
 name = "world"
-version = "0.1.8"
+version = "0.1.9"
 dependencies = [
  "anchor-lang",
  "bolt-component",
