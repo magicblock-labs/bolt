@@ -36,6 +36,45 @@ pub mod world {
     }
 
     #[allow(unused_variables)]
+    pub fn add_authority(ctx: Context<AddAuthority>, world_id: u64) -> Result<()> {
+        if ctx.accounts.world.authorities.len() == 3 {
+            return Err(WorldError::TooManyAuthorities.into());
+        }
+        if ctx.accounts.world.authorities.is_empty()
+            || ctx
+                .accounts
+                .world
+                .authorities
+                .contains(ctx.accounts.authority.key)
+        {
+            ctx.accounts
+                .world
+                .authorities
+                .push(*ctx.accounts.new_authority.key);
+        }
+        Ok(())
+    }
+
+    #[allow(unused_variables)]
+    pub fn remove_authority(ctx: Context<RemoveAuthority>, world_id: u64) -> Result<()> {
+        if !ctx.accounts.world.authorities.contains(ctx.accounts.authority.key) {
+            return Err(WorldError::InvalidAuthority.into());
+        }
+        if let Some(index) = ctx
+            .accounts
+            .world
+            .authorities
+            .iter()
+            .position(|&x| x == *ctx.accounts.authority_to_delete.key)
+        {
+            ctx.accounts.world.authorities.remove(index);
+            Ok(())
+        } else {
+            Err(WorldError::AuthorityNotFound.into())
+        }
+    }
+
+    #[allow(unused_variables)]
     pub fn add_entity(ctx: Context<AddEntity>, extra_seed: Option<String>) -> Result<()> {
         require!(
             ctx.accounts.world.key() == ctx.accounts.world.pda().0,
@@ -132,6 +171,30 @@ pub struct InitializeNewWorld<'info> {
 }
 
 #[derive(Accounts)]
+#[instruction(world_id: u64)]
+pub struct AddAuthority<'info> {
+    #[account(mut)]
+    pub authority: Signer<'info>,
+    #[account()]
+    /// CHECK: new authority check
+    pub new_authority: AccountInfo<'info>,
+    #[account(mut, seeds = [World::seed(), &world_id.to_be_bytes()], bump)]
+    pub world: Account<'info, World>,
+}
+
+#[derive(Accounts)]
+#[instruction(world_id: u64)]
+pub struct RemoveAuthority<'info> {
+    #[account(mut)]
+    pub authority: Signer<'info>,
+    #[account()]
+    /// CHECK: new authority check
+    pub authority_to_delete: AccountInfo<'info>,
+    #[account(mut, seeds = [World::seed(), &world_id.to_be_bytes()], bump)]
+    pub world: Account<'info, World>,
+}
+
+#[derive(Accounts)]
 #[instruction(extra_seed: Option<String>)]
 pub struct AddEntity<'info> {
     #[account(mut)]
@@ -209,10 +272,12 @@ impl Registry {
 }
 
 #[account]
-#[derive(InitSpace, Default, Copy)]
+#[derive(InitSpace, Default)]
 pub struct World {
     pub id: u64,
     pub entities: u64,
+    #[max_len(3)]
+    pub authorities: Vec<Pubkey>,
 }
 
 impl World {

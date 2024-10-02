@@ -1,27 +1,26 @@
 import * as anchor from "@coral-xyz/anchor";
 import { type Program, web3 } from "@coral-xyz/anchor";
-import { type PublicKey } from "@solana/web3.js";
+import { Keypair, type PublicKey } from "@solana/web3.js";
 import { type Position } from "../target/types/position";
 import { type Velocity } from "../target/types/velocity";
 import { type BoltComponent } from "../target/types/bolt_component";
 import { type SystemSimpleMovement } from "../target/types/system_simple_movement";
+import { type World } from "../target/types/world";
 import { type SystemFly } from "../target/types/system_fly";
 import { type SystemApplyVelocity } from "../target/types/system_apply_velocity";
 import { expect } from "chai";
 import type BN from "bn.js";
 import {
   AddEntity,
-  createDelegateInstruction,
-  createUndelegateInstruction,
   createInitializeRegistryInstruction,
   DELEGATION_PROGRAM_ID,
   FindRegistryPda,
   InitializeComponent,
   InitializeNewWorld,
   ApplySystem,
-  createAllowUndelegationInstruction,
+  DelegateComponent,
+  AddAuthority, RemoveAuthority
 } from "../clients/bolt-sdk";
-import { DelegateComponent } from "../clients/bolt-sdk/src";
 
 enum Direction {
   Left = "Left",
@@ -68,6 +67,8 @@ describe("bolt", () => {
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
 
+  const worldProgram = anchor.workspace.World as Program<World>;
+
   const boltComponentProgram = anchor.workspace
     .BoltComponent as Program<BoltComponent>;
 
@@ -98,7 +99,9 @@ describe("bolt", () => {
   let componentPositionEntity4Pda: PublicKey;
   let componentPositionEntity5Pda: PublicKey;
 
-  it("InitializeRegistry", async () => {
+  const secondAuthority = Keypair.generate().publicKey;
+
+  it.only("InitializeRegistry", async () => {
     const registryPda = FindRegistryPda({});
     const initializeRegistryIx = createInitializeRegistryInstruction({
       registry: registryPda,
@@ -108,13 +111,57 @@ describe("bolt", () => {
     await provider.sendAndConfirm(tx);
   });
 
-  it("InitializeNewWorld", async () => {
+  it.only("InitializeNewWorld", async () => {
     const initializeNewWorld = await InitializeNewWorld({
       payer: provider.wallet.publicKey,
       connection: provider.connection,
     });
     await provider.sendAndConfirm(initializeNewWorld.transaction);
     worldPda = initializeNewWorld.worldPda; // Saved for later
+  });
+
+  it.only("Add authority", async () => {
+    const addAuthority = await AddAuthority({
+      authority: provider.wallet.publicKey,
+      newAuthority: provider.wallet.publicKey,
+      world: worldPda,
+      connection: provider.connection,
+    });
+    await provider.sendAndConfirm(addAuthority.transaction, [], {
+      skipPreflight: true,
+    });
+    const worldAccount = await worldProgram.account.world.fetch(worldPda);
+    expect(
+      worldAccount.authorities.some((auth) =>
+        auth.equals(provider.wallet.publicKey)
+      )
+    );
+  });
+
+  it.only("Add a second authority", async () => {
+    const addAuthority = await AddAuthority({
+      authority: provider.wallet.publicKey,
+      newAuthority: secondAuthority,
+      world: worldPda,
+      connection: provider.connection,
+    });
+    const signature = await provider.sendAndConfirm(addAuthority.transaction);
+    console.log(`Add Authority signature: ${signature}`);
+    const worldAccount = await worldProgram.account.world.fetch(worldPda);
+    expect(worldAccount.authorities.some((auth) => auth.equals(secondAuthority)));
+  });
+
+  it.only("Remove an authority", async () => {
+    const addAuthority = await RemoveAuthority({
+      authority: provider.wallet.publicKey,
+      authorityToDelete: secondAuthority,
+      world: worldPda,
+      connection: provider.connection,
+    });
+    const signature = await provider.sendAndConfirm(addAuthority.transaction);
+    console.log(`Add Authority signature: ${signature}`);
+    const worldAccount = await worldProgram.account.world.fetch(worldPda);
+    expect(!worldAccount.authorities.some((auth) => auth.equals(secondAuthority)));
   });
 
   it("InitializeNewWorld 2", async () => {

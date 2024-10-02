@@ -24,7 +24,9 @@ import {
   Transaction,
   type TransactionInstruction,
 } from "@solana/web3.js";
-import { PROGRAM_ID } from "../generated";
+import type WorldProgram from "../generated";
+import { PROGRAM_ID, worldIdl } from "../generated";
+import { type Idl, Program } from "@coral-xyz/anchor";
 
 const MAX_COMPONENTS = 5;
 
@@ -60,6 +62,88 @@ export async function InitializeNewWorld({
     transaction: new Transaction().add(initializeWorldIx),
     worldPda,
     worldId,
+  };
+}
+
+/**
+ * Create the transaction to Add a new authority
+ * @param authority
+ * @param newAuthority
+ * @param world
+ * @param connection
+ * @constructor
+ */
+export async function AddAuthority({
+  authority,
+  newAuthority,
+  world,
+  connection,
+}: {
+  authority: PublicKey;
+  newAuthority: PublicKey;
+  world: PublicKey;
+  connection: Connection;
+}): Promise<{
+  instruction: TransactionInstruction;
+  transaction: Transaction;
+}> {
+  const program = new Program(
+    worldIdl as Idl
+  ) as unknown as Program<WorldProgram>;
+  const worldInstance = await World.fromAccountAddress(connection, world);
+  const worldId = new BN(worldInstance.id);
+  const addAuthorityIx = await program.methods
+    .addAuthority(worldId)
+    .accounts({
+      authority,
+      newAuthority,
+      world,
+    })
+    .instruction();
+  return {
+    instruction: addAuthorityIx,
+    transaction: new Transaction().add(addAuthorityIx),
+  };
+}
+
+/**
+ * Create the transaction to Remove an authority
+ * @param authority
+ * @param authorityToDelete
+ * @param world
+ * @param connection
+ * @constructor
+ */
+export async function RemoveAuthority({
+  authority,
+  authorityToDelete,
+  world,
+  connection,
+}: {
+  authority: PublicKey;
+  authorityToDelete: PublicKey;
+  world: PublicKey;
+  connection: Connection;
+}): Promise<{
+  instruction: TransactionInstruction;
+  transaction: Transaction;
+}> {
+  const program = new Program(
+    worldIdl as Idl
+  ) as unknown as Program<WorldProgram>;
+  const worldInstance = await World.fromAccountAddress(connection, world);
+  const worldId = new BN(worldInstance.id);
+  const removeAuthorityIx = await program.methods
+    .removeAuthority(worldId)
+    .accounts({
+      authority,
+      authorityToDelete,
+      world,
+    })
+    .instruction();
+  return {
+    instruction: removeAuthorityIx,
+    transaction: new Transaction().add(removeAuthorityIx),
   };
 }
 
