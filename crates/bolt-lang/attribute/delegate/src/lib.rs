@@ -62,7 +62,7 @@ fn generate_undelegate() -> (TokenStream2, TokenStream2) {
             pub fn undelegate(ctx: Context<Undelegate>) -> Result<()> {
                 ::bolt_lang::commit_and_undelegate_accounts(
                     &ctx.accounts.payer,
-                    vec![&ctx.accounts.base_account.to_account_info()],
+                    vec![&ctx.accounts.delegated_account.to_account_info()],
                     &ctx.accounts.magic_context,
                     &ctx.accounts.magic_program,
                 )?;
@@ -75,9 +75,9 @@ fn generate_undelegate() -> (TokenStream2, TokenStream2) {
             pub struct Undelegate<'info> {
                 #[account(mut)]
                 pub payer: Signer<'info>,
-                #[account()]
+                #[account(mut)]
                 /// CHECK: The delegated component
-                pub base_account: AccountInfo<'info>,
+                pub delegated_account: AccountInfo<'info>,
                 #[account(mut, address = ::bolt_lang::MAGIC_CONTEXT_ID)]
                 /// CHECK:`
                 pub magic_context: AccountInfo<'info>,
@@ -96,7 +96,7 @@ fn generate_reinit_after_undelegate() -> (TokenStream2, TokenStream2) {
             #[automatically_derived]
             pub fn process_undelegation(ctx: Context<InitializeAfterUndelegation>, account_seeds: Vec<Vec<u8>>) -> Result<()> {
                 let [delegated_account, buffer, payer, system_program] = [
-                    &ctx.accounts.base_account,
+                    &ctx.accounts.delegated_account,
                     &ctx.accounts.buffer,
                     &ctx.accounts.payer,
                     &ctx.accounts.system_program,
@@ -118,7 +118,7 @@ fn generate_reinit_after_undelegate() -> (TokenStream2, TokenStream2) {
             pub struct InitializeAfterUndelegation<'info> {
                 /// CHECK:`
                 #[account(mut)]
-                pub base_account: AccountInfo<'info>,
+                pub delegated_account: AccountInfo<'info>,
                 /// CHECK:`
                 #[account()]
                 pub buffer: AccountInfo<'info>,
