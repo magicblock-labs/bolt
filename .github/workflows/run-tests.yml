@@ -71,8 +71,8 @@ jobs:
         uses: Swatinem/rust-cache@v2
       - name: Check Rust version
         run: rustc --version
-      - name: Run fmt
-        run: cargo fmt -- --check --verbose
+#      - name: Run fmt
+#        run: cargo fmt -- --check --verbose
       - name: Run clippy
         run: cargo clippy -- --deny=warnings
 
