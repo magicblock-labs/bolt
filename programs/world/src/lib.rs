@@ -57,7 +57,12 @@ pub mod world {
 
     #[allow(unused_variables)]
     pub fn remove_authority(ctx: Context<RemoveAuthority>, world_id: u64) -> Result<()> {
-        if !ctx.accounts.world.authorities.contains(ctx.accounts.authority.key) {
+        if !ctx
+            .accounts
+            .world
+            .authorities
+            .contains(ctx.accounts.authority.key)
+        {
             return Err(WorldError::InvalidAuthority.into());
         }
         if let Some(index) = ctx
