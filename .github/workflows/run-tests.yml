@@ -8,7 +8,7 @@ on:
       - main
 
 env:
-  solana_version: v1.18.15
+  solana_version: v1.18.24
 
 jobs:
   install:
@@ -26,7 +26,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 21
 
       - name: install essentials
         run: |
@@ -49,13 +49,14 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: ./rust-toolchain.toml
+
       - name: Cache rust
         uses: Swatinem/rust-cache@v2
 
       - name: install solana
         if: steps.cache-solana.outputs.cache-hit != 'true'
         run: |
-          sh -c "$(curl -sSfL https://release.solana.com/${{ env.solana_version }}/install)"
+          sh -c "$(curl -sSfL https://release.anza.xyz/${{ env.solana_version }}/install)"
           export PATH="$HOME/.local/share/solana/install/active_release/bin:$PATH"
           solana --version
 
@@ -99,7 +100,7 @@ jobs:
       - name: install rust
         uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: stable
+          toolchain: ./rust-toolchain.toml
 
       - name: Cache rust
         uses: Swatinem/rust-cache@v2
@@ -109,7 +110,7 @@ jobs:
       - name: Use Node ${{ matrix.node }}
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 21
 
       - name: Cache node dependencies
         uses: actions/cache@v3
