@@ -3,7 +3,7 @@ import * as web3 from "@solana/web3.js";
 import {
   DelegateAccounts,
   DELEGATION_PROGRAM_ID,
-} from "@magicblock-labs/delegation-program";
+} from "@magicblock-labs/ephemeral-rollups-sdk";
 import { FindComponentPda } from "../index";
 import {
   type PublicKey,

@@ -1,6 +1,6 @@
 {
   "name": "@magicblock-labs/bolt-cli",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "Bolt CLI tool",
   "homepage": "https://github.com/magicblock-labs/bolt#readme",
   "bugs": {
@@ -29,13 +29,13 @@
     "typescript": "^4.9.4"
   },
   "optionalDependencies": {
-    "@magicblock-labs/bolt-cli-darwin-x64": "0.1.8",
-    "@magicblock-labs/bolt-cli-darwin-arm64": "0.1.8",
-    "@magicblock-labs/bolt-cli-linux-x86": "0.1.8",
-    "@magicblock-labs/bolt-cli-linux-x64": "0.1.8",
-    "@magicblock-labs/bolt-cli-linux-arm64": "0.1.8",
-    "@magicblock-labs/bolt-cli-windows-x86": "0.1.8",
-    "@magicblock-labs/bolt-cli-windows-x64": "0.1.8"
+    "@magicblock-labs/bolt-cli-darwin-x64": "0.1.9",
+    "@magicblock-labs/bolt-cli-darwin-arm64": "0.1.9",
+    "@magicblock-labs/bolt-cli-linux-x86": "0.1.9",
+    "@magicblock-labs/bolt-cli-linux-x64": "0.1.9",
+    "@magicblock-labs/bolt-cli-linux-arm64": "0.1.9",
+    "@magicblock-labs/bolt-cli-windows-x86": "0.1.9",
+    "@magicblock-labs/bolt-cli-windows-x64": "0.1.9"
   },
   "publishConfig": {
     "access": "public"

@@ -84,10 +84,10 @@
     wrap-ansi "^8.1.0"
     wrap-ansi-cjs "npm:wrap-ansi@^7.0.0"
 
-"@magicblock-labs/delegation-program@0.1.2":
-  version "0.1.2"
-  resolved "https://registry.yarnpkg.com/@magicblock-labs/delegation-program/-/delegation-program-0.1.2.tgz#7b298398259d80a368eb9e91cb911e5a6e542391"
-  integrity sha512-9EGtcBWGAXGCOjTJVyzxydMpM8GGk8QjzQlgpV0q96BAbmpEO9C6b/N3lvMRTR1FfDuBn43a3Pa5YEiHyUu8Eg==
+"@magicblock-labs/ephemeral-rollups-sdk@0.0.6":
+  version "0.0.6"
+  resolved "https://registry.yarnpkg.com/@magicblock-labs/ephemeral-rollups-sdk/-/ephemeral-rollups-sdk-0.0.6.tgz#47a667d9fd7df76752660a6d82688e54174241ab"
+  integrity sha512-moep9ja4fmDXPa0OcjJBvvOTUNrds8rwTzxmbGd5Myu/6AsykcCpTuUZjleQCRotu/yODLVkpheMDr1S0/mtpA==
   dependencies:
     "@metaplex-foundation/beet" "^0.7.2"
     "@solana/web3.js" "^1.92.3"
