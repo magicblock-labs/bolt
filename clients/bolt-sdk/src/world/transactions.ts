@@ -148,6 +148,78 @@ export async function RemoveAuthority({
 }
 
 /**
+ * Create the transaction to Approve a system
+ * @param authority
+ * @param systemToApprove
+ * @param world
+ * @constructor
+ */
+export async function ApproveSystem({
+  authority,
+  systemToApprove,
+  world,
+}: {
+  authority: PublicKey;
+  systemToApprove: PublicKey;
+  world: PublicKey;
+}): Promise<{
+  instruction: TransactionInstruction;
+  transaction: Transaction;
+}> {
+  const program = new Program(
+    worldIdl as Idl
+  ) as unknown as Program<WorldProgram>;
+  const approveSystemIx = await program.methods
+    .approveSystem()
+    .accounts({
+      authority,
+      system: systemToApprove,
+      world,
+    })
+    .instruction();
+  return {
+    instruction: approveSystemIx,
+    transaction: new Transaction().add(approveSystemIx),
+  };
+}
+
+/**
+ * Create the transaction to Remove a system
+ * @param authority
+ * @param systemToRemove
+ * @param world
+ * @constructor
+ */
+export async function RemoveSystem({
+  authority,
+  systemToRemove,
+  world,
+}: {
+  authority: PublicKey;
+  systemToRemove: PublicKey;
+  world: PublicKey;
+}): Promise<{
+  instruction: TransactionInstruction;
+  transaction: Transaction;
+}> {
+  const program = new Program(
+    worldIdl as Idl
+  ) as unknown as Program<WorldProgram>;
+  const removeSystemIx = await program.methods
+    .removeSystem()
+    .accounts({
+      authority,
+      system: systemToRemove,
+      world,
+    })
+    .instruction();
+  return {
+    instruction: removeSystemIx,
+    transaction: new Transaction().add(removeSystemIx),
+  };
+}
+
+/**
  * Create the transaction to Add a new entity
  * @param payer
  * @param worldPda
@@ -262,6 +334,9 @@ function createApplySystemInstruction({
   extraAccounts,
   args,
 }: ApplySystemInstruction): web3.TransactionInstruction {
+  const program = new Program(
+    worldIdl as Idl
+  ) as unknown as Program<WorldProgram>;
   let componentCount = 0;
   entities.forEach(function (entity) {
     componentCount += entity.components.length;

@@ -29,6 +29,10 @@ export interface World {
         {
           name: "world";
           writable: true;
+        },
+        {
+          name: "systemProgram";
+          address: "11111111111111111111111111111111";
         }
       ];
       args: [
@@ -90,6 +94,9 @@ export interface World {
         {
           name: "instructionSysvarAccount";
           address: "Sysvar1nstructions1111111111111111111111111";
+        },
+        {
+          name: "world";
         }
       ];
       args: [
@@ -127,6 +134,9 @@ export interface World {
         {
           name: "instructionSysvarAccount";
           address: "Sysvar1nstructions1111111111111111111111111";
+        },
+        {
+          name: "world";
         }
       ];
       args: [
@@ -171,6 +181,9 @@ export interface World {
         {
           name: "instructionSysvarAccount";
           address: "Sysvar1nstructions1111111111111111111111111";
+        },
+        {
+          name: "world";
         }
       ];
       args: [
@@ -222,6 +235,9 @@ export interface World {
         {
           name: "instructionSysvarAccount";
           address: "Sysvar1nstructions1111111111111111111111111";
+        },
+        {
+          name: "world";
         }
       ];
       args: [
@@ -280,6 +296,9 @@ export interface World {
         {
           name: "instructionSysvarAccount";
           address: "Sysvar1nstructions1111111111111111111111111";
+        },
+        {
+          name: "world";
         }
       ];
       args: [
@@ -288,6 +307,29 @@ export interface World {
           type: "bytes";
         }
       ];
+    },
+    {
+      name: "approveSystem";
+      discriminator: [114, 165, 105, 68, 52, 67, 207, 121];
+      accounts: [
+        {
+          name: "authority";
+          writable: true;
+          signer: true;
+        },
+        {
+          name: "world";
+          writable: true;
+        },
+        {
+          name: "system";
+        },
+        {
+          name: "systemProgram";
+          address: "11111111111111111111111111111111";
+        }
+      ];
+      args: [];
     },
     {
       name: "initializeComponent";
@@ -381,6 +423,10 @@ export interface World {
         {
           name: "world";
           writable: true;
+        },
+        {
+          name: "systemProgram";
+          address: "11111111111111111111111111111111";
         }
       ];
       args: [
@@ -389,6 +435,29 @@ export interface World {
           type: "u64";
         }
       ];
+    },
+    {
+      name: "removeSystem";
+      discriminator: [218, 80, 71, 80, 161, 130, 149, 120];
+      accounts: [
+        {
+          name: "authority";
+          writable: true;
+          signer: true;
+        },
+        {
+          name: "world";
+          writable: true;
+        },
+        {
+          name: "system";
+        },
+        {
+          name: "systemProgram";
+          address: "11111111111111111111111111111111";
+        }
+      ];
+      args: [];
     }
   ];
   accounts: [
@@ -470,6 +539,14 @@ export interface World {
             type: {
               vec: "pubkey";
             };
+          },
+          {
+            name: "permissionless";
+            type: "bool";
+          },
+          {
+            name: "systems";
+            type: "bytes";
           }
         ];
       };

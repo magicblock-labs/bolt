@@ -19,7 +19,10 @@ import {
   InitializeNewWorld,
   ApplySystem,
   DelegateComponent,
-  AddAuthority, RemoveAuthority
+  AddAuthority,
+  RemoveAuthority,
+  ApproveSystem,
+  RemoveSystem,
 } from "../clients/bolt-sdk";
 
 enum Direction {
@@ -101,7 +104,7 @@ describe("bolt", () => {
 
   const secondAuthority = Keypair.generate().publicKey;
 
-  it.only("InitializeRegistry", async () => {
+  it("InitializeRegistry", async () => {
     const registryPda = FindRegistryPda({});
     const initializeRegistryIx = createInitializeRegistryInstruction({
       registry: registryPda,
@@ -111,7 +114,7 @@ describe("bolt", () => {
     await provider.sendAndConfirm(tx);
   });
 
-  it.only("InitializeNewWorld", async () => {
+  it("InitializeNewWorld", async () => {
     const initializeNewWorld = await InitializeNewWorld({
       payer: provider.wallet.publicKey,
       connection: provider.connection,
@@ -120,7 +123,7 @@ describe("bolt", () => {
     worldPda = initializeNewWorld.worldPda; // Saved for later
   });
 
-  it.only("Add authority", async () => {
+  it("Add authority", async () => {
     const addAuthority = await AddAuthority({
       authority: provider.wallet.publicKey,
       newAuthority: provider.wallet.publicKey,
@@ -138,7 +141,7 @@ describe("bolt", () => {
     );
   });
 
-  it.only("Add a second authority", async () => {
+  it("Add a second authority", async () => {
     const addAuthority = await AddAuthority({
       authority: provider.wallet.publicKey,
       newAuthority: secondAuthority,
@@ -148,10 +151,12 @@ describe("bolt", () => {
     const signature = await provider.sendAndConfirm(addAuthority.transaction);
     console.log(`Add Authority signature: ${signature}`);
     const worldAccount = await worldProgram.account.world.fetch(worldPda);
-    expect(worldAccount.authorities.some((auth) => auth.equals(secondAuthority)));
+    expect(
+      worldAccount.authorities.some((auth) => auth.equals(secondAuthority))
+    );
   });
 
-  it.only("Remove an authority", async () => {
+  it("Remove an authority", async () => {
     const addAuthority = await RemoveAuthority({
       authority: provider.wallet.publicKey,
       authorityToDelete: secondAuthority,
@@ -161,7 +166,9 @@ describe("bolt", () => {
     const signature = await provider.sendAndConfirm(addAuthority.transaction);
     console.log(`Add Authority signature: ${signature}`);
     const worldAccount = await worldProgram.account.world.fetch(worldPda);
-    expect(!worldAccount.authorities.some((auth) => auth.equals(secondAuthority)));
+    expect(
+      !worldAccount.authorities.some((auth) => auth.equals(secondAuthority))
+    );
   });
 
   it("InitializeNewWorld 2", async () => {
@@ -505,6 +512,66 @@ describe("bolt", () => {
     expect(positionBefore.x.toNumber()).to.equal(positionAfter.x.toNumber());
     expect(positionBefore.y.toNumber()).to.equal(positionAfter.y.toNumber());
     expect(positionBefore.z.toNumber()).to.equal(positionAfter.z.toNumber());
+  });
+
+  it("Whitelist System", async () => {
+    const approveSystem = await ApproveSystem({
+      authority: provider.wallet.publicKey,
+      systemToApprove: exampleSystemFly,
+      world: worldPda,
+    });
+
+    const signature = await provider.sendAndConfirm(
+      approveSystem.transaction,
+      [],
+      { skipPreflight: true }
+    );
+    console.log(`Whitelist 2 system approval signature: ${signature}`);
+
+    // Get World and check permissionless and systems
+    const worldAccount = await worldProgram.account.world.fetch(worldPda);
+    expect(worldAccount.permissionless).to.equal(false);
+    expect(worldAccount.systems.length).to.be.greaterThan(0);
+  });
+
+  it("Whitelist System 2", async () => {
+    const approveSystem = await ApproveSystem({
+      authority: provider.wallet.publicKey,
+      systemToApprove: exampleSystemApplyVelocity,
+      world: worldPda,
+    });
+
+    const signature = await provider.sendAndConfirm(
+      approveSystem.transaction,
+      [],
+      { skipPreflight: true }
+    );
+    console.log(`Whitelist 2 system approval signature: ${signature}`);
+
+    // Get World and check permissionless and systems
+    const worldAccount = await worldProgram.account.world.fetch(worldPda);
+    expect(worldAccount.permissionless).to.equal(false);
+    expect(worldAccount.systems.length).to.be.greaterThan(0);
+  });
+
+  it("Remove System 2", async () => {
+    const approveSystem = await RemoveSystem({
+      authority: provider.wallet.publicKey,
+      systemToRemove: exampleSystemApplyVelocity,
+      world: worldPda,
+    });
+
+    const signature = await provider.sendAndConfirm(
+      approveSystem.transaction,
+      [],
+      { skipPreflight: true }
+    );
+    console.log(`Whitelist 2 system approval signature: ${signature}`);
+
+    // Get World and check permissionless and systems
+    const worldAccount = await worldProgram.account.world.fetch(worldPda);
+    expect(worldAccount.permissionless).to.equal(false);
+    expect(worldAccount.systems.length).to.be.greaterThan(0);
   });
 
   it("Check invalid component init without CPI", async () => {

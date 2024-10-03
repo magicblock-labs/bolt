@@ -1,5 +1,6 @@
 use anchor_lang::prelude::*;
 use bolt_helpers_world_apply::apply_system;
+use std::collections::BTreeSet;
 use tuple_conv::RepeatedTuple;
 
 #[cfg(not(feature = "no-entrypoint"))]
@@ -51,6 +52,31 @@ pub mod world {
                 .world
                 .authorities
                 .push(*ctx.accounts.new_authority.key);
+
+            let new_space = World::space_for_authorities(
+                ctx.accounts.world.authorities.len(),
+                ctx.accounts.world.systems.len(),
+            );
+
+            // Transfer to make it rent exempt
+            let rent = Rent::get()?;
+            let new_minimum_balance = rent.minimum_balance(new_space);
+            let lamports_diff = new_minimum_balance.saturating_sub(ctx.accounts.world.to_account_info().lamports());
+            if lamports_diff > 0 {
+                anchor_lang::solana_program::program::invoke(
+                    &anchor_lang::solana_program::system_instruction::transfer(
+                        ctx.accounts.authority.key,
+                        ctx.accounts.world.to_account_info().key,
+                        lamports_diff
+                    ),
+                    &[
+                        ctx.accounts.authority.to_account_info(),
+                        ctx.accounts.world.to_account_info(),
+                        ctx.accounts.system_program.to_account_info(),
+                    ],
+                )?;
+            }
+            ctx.accounts.world.to_account_info().realloc(new_space, false)?;
         }
         Ok(())
     }
@@ -73,10 +99,109 @@ pub mod world {
             .position(|&x| x == *ctx.accounts.authority_to_delete.key)
         {
             ctx.accounts.world.authorities.remove(index);
+
+            let new_space = World::space_for_authorities(
+                ctx.accounts.world.authorities.len(),
+                ctx.accounts.world.systems.len(),
+            );
+
+            // Remove the extra rent
+            let rent = Rent::get()?;
+            let new_minimum_balance = rent.minimum_balance(new_space);
+            let lamports_diff = new_minimum_balance.saturating_sub(ctx.accounts.world.to_account_info().lamports());
+            **ctx.accounts.world.to_account_info().try_borrow_mut_lamports()? += lamports_diff;
+            **ctx.accounts.authority.to_account_info().try_borrow_mut_lamports()? -= lamports_diff;
+            ctx.accounts.world.to_account_info().realloc(new_space, false)?;
             Ok(())
         } else {
             Err(WorldError::AuthorityNotFound.into())
         }
+    }
+
+    pub fn approve_system(ctx: Context<ApproveSystem>) -> Result<()> {
+        if !ctx.accounts.authority.is_signer {
+            return Err(WorldError::InvalidAuthority.into());
+        }
+        if !ctx
+            .accounts
+            .world
+            .authorities
+            .contains(ctx.accounts.authority.key)
+        {
+            return Err(WorldError::InvalidAuthority.into());
+        }
+        if ctx.accounts.world.permissionless {
+            ctx.accounts.world.permissionless = false;
+        }
+
+        let mut world_systems = WorldSystems::try_from_slice(ctx.accounts.world.systems.as_ref()).unwrap_or_default();
+        world_systems.approved_systems.insert(ctx.accounts.system.key());
+
+        let encoded_world_systems = world_systems.try_to_vec()?;
+        ctx.accounts.world.systems = encoded_world_systems.clone();
+
+        let new_space = World::space_for_authorities(
+            ctx.accounts.world.authorities.len(),
+            encoded_world_systems.len(),
+        );
+
+        // Transfer to make it rent exempt
+        let rent = Rent::get()?;
+        let new_minimum_balance = rent.minimum_balance(new_space);
+        let lamports_diff = new_minimum_balance.saturating_sub(ctx.accounts.world.to_account_info().lamports());
+        if lamports_diff > 0 {
+            anchor_lang::solana_program::program::invoke(
+                &anchor_lang::solana_program::system_instruction::transfer(
+                    ctx.accounts.authority.key,
+                    ctx.accounts.world.to_account_info().key,
+                    lamports_diff
+                ),
+                &[
+                    ctx.accounts.authority.to_account_info(),
+                    ctx.accounts.world.to_account_info(),
+                    ctx.accounts.system_program.to_account_info(),
+                ],
+            )?;
+        }
+        ctx.accounts.world.to_account_info().realloc(new_space, false)?;
+        msg!("Approved system: {:?}", world_systems);
+        Ok(())
+    }
+
+
+    pub fn remove_system(ctx: Context<RemoveSystem>) -> Result<()> {
+        if !ctx.accounts.authority.is_signer {
+            return Err(WorldError::InvalidAuthority.into());
+        }
+        if !ctx
+            .accounts
+            .world
+            .authorities
+            .contains(ctx.accounts.authority.key)
+        {
+            return Err(WorldError::InvalidAuthority.into());
+        }
+
+        let mut world_systems = WorldSystems::try_from_slice(ctx.accounts.world.systems.as_ref()).unwrap_or_default();
+        world_systems.approved_systems.remove(&ctx.accounts.system.key());
+
+        let encoded_world_systems = world_systems.try_to_vec()?;
+        ctx.accounts.world.systems = encoded_world_systems.clone();
+
+        let new_space = World::space_for_authorities(
+            ctx.accounts.world.authorities.len(),
+            encoded_world_systems.len(),
+        );
+
+        // Remove the extra rent
+        let rent = Rent::get()?;
+        let new_minimum_balance = rent.minimum_balance(new_space);
+        let lamports_diff = new_minimum_balance.saturating_sub(ctx.accounts.world.to_account_info().lamports());
+        **ctx.accounts.world.to_account_info().try_borrow_mut_lamports()? += lamports_diff;
+        **ctx.accounts.authority.to_account_info().try_borrow_mut_lamports()? -= lamports_diff;
+        ctx.accounts.world.to_account_info().realloc(new_space, false)?;
+        msg!("Approved system: {:?}", world_systems);
+        Ok(())
     }
 
     #[allow(unused_variables)]
@@ -139,6 +264,8 @@ pub mod world {
         #[account(address = anchor_lang::solana_program::sysvar::instructions::id())]
         /// CHECK: instruction sysvar check
         pub instruction_sysvar_account: UncheckedAccount<'info>,
+        #[account()]
+        pub world: Account<'info, World>,
     }
 
     impl<'info> ApplySystem<'info> {
@@ -185,6 +312,7 @@ pub struct AddAuthority<'info> {
     pub new_authority: AccountInfo<'info>,
     #[account(mut, seeds = [World::seed(), &world_id.to_be_bytes()], bump)]
     pub world: Account<'info, World>,
+    pub system_program: Program<'info, System>,
 }
 
 #[derive(Accounts)]
@@ -197,6 +325,29 @@ pub struct RemoveAuthority<'info> {
     pub authority_to_delete: AccountInfo<'info>,
     #[account(mut, seeds = [World::seed(), &world_id.to_be_bytes()], bump)]
     pub world: Account<'info, World>,
+    pub system_program: Program<'info, System>,
+}
+
+#[derive(Accounts)]
+pub struct ApproveSystem<'info> {
+    #[account(mut)]
+    pub authority: Signer<'info>,
+    #[account(mut)]
+    pub world: Account<'info, World>,
+    /// CHECK: Used for the pda derivation
+    pub system: AccountInfo<'info>,
+    pub system_program: Program<'info, System>,
+}
+
+#[derive(Accounts)]
+pub struct RemoveSystem<'info> {
+    #[account(mut)]
+    pub authority: Signer<'info>,
+    #[account(mut)]
+    pub world: Account<'info, World>,
+    /// CHECK: Used for the pda derivation
+    pub system: AccountInfo<'info>,
+    pub system_program: Program<'info, System>,
 }
 
 #[derive(Accounts)]
@@ -277,12 +428,41 @@ impl Registry {
 }
 
 #[account]
-#[derive(InitSpace, Default)]
+#[derive(Debug)]
 pub struct World {
     pub id: u64,
     pub entities: u64,
-    #[max_len(3)]
     pub authorities: Vec<Pubkey>,
+    pub permissionless: bool,
+    pub systems: Vec<u8>,
+}
+
+impl Default for World {
+    fn default() -> Self {
+        Self {
+            id: 0,
+            entities: 0,
+            authorities: Vec::new(),
+            permissionless: true,
+            systems: Vec::new(),
+        }
+    }
+}
+
+impl World {
+    fn space_for_authorities(auths: usize, systems_space: usize) -> usize {
+        16 + 8 + 32 * auths + 1 + 8 + systems_space
+    }
+}
+
+#[derive(
+    anchor_lang::prelude::borsh::BorshSerialize,
+    anchor_lang::prelude::borsh::BorshDeserialize,
+    Default,
+    Debug
+)]
+pub struct WorldSystems {
+    pub approved_systems: BTreeSet<Pubkey>,
 }
 
 impl World {
@@ -291,7 +471,7 @@ impl World {
     }
 
     pub fn size() -> usize {
-        8 + World::INIT_SPACE
+        16 + 8 + 1 + 8
     }
 
     pub fn pda(&self) -> (Pubkey, u8) {
@@ -308,6 +488,20 @@ pub struct Entity {
 impl Entity {
     pub fn seed() -> &'static [u8] {
         b"entity"
+    }
+}
+
+#[account]
+#[derive(InitSpace, Default)]
+pub struct SystemWhitelist {}
+
+impl SystemWhitelist {
+    pub fn seed() -> &'static [u8] {
+        b"whitelist"
+    }
+
+    pub fn size() -> usize {
+        8 + Registry::INIT_SPACE
     }
 }
 
