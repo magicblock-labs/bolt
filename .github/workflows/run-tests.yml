@@ -77,6 +77,8 @@ jobs:
       - name: Create keypair
         run: |
           export PATH="$HOME/.local/share/solana/install/active_release/bin:$PATH"
+          echo $PATH
+          ls -la $HOME/.local/share/solana/install/active_release/bin
           solana --version
           solana-keygen new --silent --no-bip39-passphrase
           solana airdrop 100
