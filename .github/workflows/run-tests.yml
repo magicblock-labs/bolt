@@ -75,7 +75,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Setup Environment
         run: |
-          export PATH="/home/runner/.local/share/solana/install/active_release/bin:$PATH"
+          export PATH="$HOME/.local/share/solana/install/active_release/bin:$PATH"
           solana --version
           solana-keygen new --silent --no-bip39-passphrase
 
