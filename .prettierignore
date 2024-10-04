@@ -1,10 +1,10 @@
-# Ignore all files in the generated types directory
-clients/bolt-sdk/src/generated/types/world.ts
-
-# You can add more patterns here
+.anchor
+.bolt
+.DS_Store
+target
 node_modules
 dist
-
-clients/bolt-sdk/idl/world.ts
-.anchor
+build
+test-ledger
 target
+clients/bolt-sdk/lib

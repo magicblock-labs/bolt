@@ -19,10 +19,10 @@ const createErrorFromNameLookup = new Map<string, () => ErrorWithCode>();
  */
 export class InvalidAuthorityError extends Error {
   readonly code: number = 0x1770;
-  readonly name: string = 'InvalidAuthority';
+  readonly name: string = "InvalidAuthority";
   constructor() {
-    super('Invalid authority for instruction');
-    if (typeof Error.captureStackTrace === 'function') {
+    super("Invalid authority for instruction");
+    if (typeof Error.captureStackTrace === "function") {
       Error.captureStackTrace(this, InvalidAuthorityError);
     }
   }
@@ -30,8 +30,8 @@ export class InvalidAuthorityError extends Error {
 
 createErrorFromCodeLookup.set(0x1770, () => new InvalidAuthorityError());
 createErrorFromNameLookup.set(
-  'InvalidAuthority',
-  () => new InvalidAuthorityError(),
+  "InvalidAuthority",
+  () => new InvalidAuthorityError()
 );
 
 /**

@@ -1,15 +1,15 @@
-import * as anchor from '@coral-xyz/anchor';
-import { type Program, web3 } from '@coral-xyz/anchor';
-import { Keypair, type PublicKey } from '@solana/web3.js';
-import { type Position } from '../target/types/position';
-import { type Velocity } from '../target/types/velocity';
-import { type BoltComponent } from '../target/types/bolt_component';
-import { type SystemSimpleMovement } from '../target/types/system_simple_movement';
-import { type World } from '../target/types/world';
-import { type SystemFly } from '../target/types/system_fly';
-import { type SystemApplyVelocity } from '../target/types/system_apply_velocity';
-import { expect } from 'chai';
-import type BN from 'bn.js';
+import * as anchor from "@coral-xyz/anchor";
+import { type Program, web3 } from "@coral-xyz/anchor";
+import { Keypair, type PublicKey } from "@solana/web3.js";
+import { type Position } from "../target/types/position";
+import { type Velocity } from "../target/types/velocity";
+import { type BoltComponent } from "../target/types/bolt_component";
+import { type SystemSimpleMovement } from "../target/types/system_simple_movement";
+import { type World } from "../target/types/world";
+import { type SystemFly } from "../target/types/system_fly";
+import { type SystemApplyVelocity } from "../target/types/system_apply_velocity";
+import { expect } from "chai";
+import type BN from "bn.js";
 import {
   AddEntity,
   createInitializeRegistryInstruction,
@@ -23,13 +23,13 @@ import {
   RemoveAuthority,
   ApproveSystem,
   RemoveSystem,
-} from '../clients/bolt-sdk';
+} from "../clients/bolt-sdk";
 
 enum Direction {
-  Left = 'Left',
-  Right = 'Right',
-  Up = 'Up',
-  Down = 'Down',
+  Left = "Left",
+  Right = "Right",
+  Up = "Up",
+  Down = "Down",
 }
 
 function padCenter(value: string, width: number) {
@@ -39,34 +39,34 @@ function padCenter(value: string, width: number) {
   }
   const padding = (width - length) / 2;
   const align = width - padding;
-  return value.padStart(align, ' ').padEnd(width, ' ');
+  return value.padStart(align, " ").padEnd(width, " ");
 }
 
 function logPosition(title: string, { x, y, z }: { x: BN; y: BN; z: BN }) {
-  console.log(' +----------------------------------+');
+  console.log(" +----------------------------------+");
   console.log(` | ${padCenter(title, 32)} |`);
-  console.log(' +-----------------+----------------+');
-  console.log(` | X Position      | ${String(x).padEnd(14, ' ')} |`);
-  console.log(` | Y Position      | ${String(y).padEnd(14, ' ')} |`);
-  console.log(` | Z Position      | ${String(z).padEnd(14, ' ')} |`);
-  console.log(' +-----------------+----------------+');
+  console.log(" +-----------------+----------------+");
+  console.log(` | X Position      | ${String(x).padEnd(14, " ")} |`);
+  console.log(` | Y Position      | ${String(y).padEnd(14, " ")} |`);
+  console.log(` | Z Position      | ${String(z).padEnd(14, " ")} |`);
+  console.log(" +-----------------+----------------+");
 }
 
 function logVelocity(
   title: string,
-  { x, y, z, lastApplied }: { x: BN; y: BN; z: BN; lastApplied: BN },
+  { x, y, z, lastApplied }: { x: BN; y: BN; z: BN; lastApplied: BN }
 ) {
-  console.log(' +----------------------------------+');
+  console.log(" +----------------------------------+");
   console.log(` | ${padCenter(title, 32)} |`);
-  console.log(' +-----------------+----------------+');
-  console.log(` | X Velocity      | ${String(x).padEnd(14, ' ')} |`);
-  console.log(` | Y Velocity      | ${String(y).padEnd(14, ' ')} |`);
-  console.log(` | Z Velocity      | ${String(z).padEnd(14, ' ')} |`);
-  console.log(` | Last Applied    | ${String(lastApplied).padEnd(14, ' ')} |`);
-  console.log(' +-----------------+----------------+');
+  console.log(" +-----------------+----------------+");
+  console.log(` | X Velocity      | ${String(x).padEnd(14, " ")} |`);
+  console.log(` | Y Velocity      | ${String(y).padEnd(14, " ")} |`);
+  console.log(` | Z Velocity      | ${String(z).padEnd(14, " ")} |`);
+  console.log(` | Last Applied    | ${String(lastApplied).padEnd(14, " ")} |`);
+  console.log(" +-----------------+----------------+");
 }
 
-describe('bolt', () => {
+describe("bolt", () => {
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
 
@@ -104,7 +104,7 @@ describe('bolt', () => {
 
   const secondAuthority = Keypair.generate().publicKey;
 
-  it.only('InitializeRegistry', async () => {
+  it.only("InitializeRegistry", async () => {
     const registryPda = FindRegistryPda({});
     const initializeRegistryIx = createInitializeRegistryInstruction({
       registry: registryPda,
@@ -114,19 +114,19 @@ describe('bolt', () => {
     await provider.sendAndConfirm(tx);
   });
 
-  it.only('InitializeNewWorld', async () => {
+  it.only("InitializeNewWorld", async () => {
     const initializeNewWorld = await InitializeNewWorld({
       payer: provider.wallet.publicKey,
       connection: provider.connection,
     });
     const signature = await provider.sendAndConfirm(
-      initializeNewWorld.transaction,
+      initializeNewWorld.transaction
     );
-    console.log('InitializeNewWorld signature: ', signature);
+    console.log("InitializeNewWorld signature: ", signature);
     worldPda = initializeNewWorld.worldPda; // Saved for later
   });
 
-  it('Add authority', async () => {
+  it("Add authority", async () => {
     const addAuthority = await AddAuthority({
       authority: provider.wallet.publicKey,
       newAuthority: provider.wallet.publicKey,
@@ -139,12 +139,12 @@ describe('bolt', () => {
     const worldAccount = await worldProgram.account.world.fetch(worldPda);
     expect(
       worldAccount.authorities.some((auth) =>
-        auth.equals(provider.wallet.publicKey),
-      ),
+        auth.equals(provider.wallet.publicKey)
+      )
     );
   });
 
-  it('Add a second authority', async () => {
+  it("Add a second authority", async () => {
     const addAuthority = await AddAuthority({
       authority: provider.wallet.publicKey,
       newAuthority: secondAuthority,
@@ -155,11 +155,11 @@ describe('bolt', () => {
     console.log(`Add Authority signature: ${signature}`);
     const worldAccount = await worldProgram.account.world.fetch(worldPda);
     expect(
-      worldAccount.authorities.some((auth) => auth.equals(secondAuthority)),
+      worldAccount.authorities.some((auth) => auth.equals(secondAuthority))
     );
   });
 
-  it('Remove an authority', async () => {
+  it("Remove an authority", async () => {
     const addAuthority = await RemoveAuthority({
       authority: provider.wallet.publicKey,
       authorityToDelete: secondAuthority,
@@ -170,11 +170,11 @@ describe('bolt', () => {
     console.log(`Add Authority signature: ${signature}`);
     const worldAccount = await worldProgram.account.world.fetch(worldPda);
     expect(
-      !worldAccount.authorities.some((auth) => auth.equals(secondAuthority)),
+      !worldAccount.authorities.some((auth) => auth.equals(secondAuthority))
     );
   });
 
-  it('InitializeNewWorld 2', async () => {
+  it("InitializeNewWorld 2", async () => {
     const initializeNewWorld = await InitializeNewWorld({
       payer: provider.wallet.publicKey,
       connection: provider.connection,
@@ -182,7 +182,7 @@ describe('bolt', () => {
     await provider.sendAndConfirm(initializeNewWorld.transaction);
   });
 
-  it('Add entity 1', async () => {
+  it("Add entity 1", async () => {
     const addEntity = await AddEntity({
       payer: provider.wallet.publicKey,
       world: worldPda,
@@ -192,7 +192,7 @@ describe('bolt', () => {
     entity1Pda = addEntity.entityPda; // Saved for later
   });
 
-  it('Add entity 2', async () => {
+  it("Add entity 2", async () => {
     const addEntity = await AddEntity({
       payer: provider.wallet.publicKey,
       world: worldPda,
@@ -202,7 +202,7 @@ describe('bolt', () => {
     entity2Pda = addEntity.entityPda; // Saved for later
   });
 
-  it('Add entity 3', async () => {
+  it("Add entity 3", async () => {
     const addEntity = await AddEntity({
       payer: provider.wallet.publicKey,
       world: worldPda,
@@ -211,18 +211,18 @@ describe('bolt', () => {
     await provider.sendAndConfirm(addEntity.transaction);
   });
 
-  it('Add entity 4 (with seed)', async () => {
+  it("Add entity 4 (with seed)", async () => {
     const addEntity = await AddEntity({
       payer: provider.wallet.publicKey,
       world: worldPda,
-      seed: 'extra-seed',
+      seed: "extra-seed",
       connection: provider.connection,
     });
     await provider.sendAndConfirm(addEntity.transaction);
     entity4Pda = addEntity.entityPda;
   });
 
-  it('Add entity 5', async () => {
+  it("Add entity 5", async () => {
     const addEntity = await AddEntity({
       payer: provider.wallet.publicKey,
       world: worldPda,
@@ -232,27 +232,27 @@ describe('bolt', () => {
     entity5Pda = addEntity.entityPda; // Saved for later
   });
 
-  it('Initialize Original Component on Entity 1, trough the world instance', async () => {
+  it("Initialize Original Component on Entity 1, trough the world instance", async () => {
     const initializeComponent = await InitializeComponent({
       payer: provider.wallet.publicKey,
       entity: entity1Pda,
-      seed: 'origin-component',
+      seed: "origin-component",
       componentId: boltComponentProgram.programId,
     });
     await provider.sendAndConfirm(initializeComponent.transaction);
   });
 
-  it('Initialize Original Component on Entity 2, trough the world instance', async () => {
+  it("Initialize Original Component on Entity 2, trough the world instance", async () => {
     const initializeComponent = await InitializeComponent({
       payer: provider.wallet.publicKey,
       entity: entity2Pda,
-      seed: 'origin-component',
+      seed: "origin-component",
       componentId: boltComponentProgram.programId,
     });
     await provider.sendAndConfirm(initializeComponent.transaction);
   });
 
-  it('Initialize Position Component on Entity 1', async () => {
+  it("Initialize Position Component on Entity 1", async () => {
     const initializeComponent = await InitializeComponent({
       payer: provider.wallet.publicKey,
       entity: entity1Pda,
@@ -262,18 +262,18 @@ describe('bolt', () => {
     componentPositionEntity1Pda = initializeComponent.componentPda; // Saved for later
   });
 
-  it('Initialize Velocity Component on Entity 1 (with seed)', async () => {
+  it("Initialize Velocity Component on Entity 1 (with seed)", async () => {
     const initializeComponent = await InitializeComponent({
       payer: provider.wallet.publicKey,
       entity: entity1Pda,
       componentId: exampleComponentVelocity.programId,
-      seed: 'component-velocity',
+      seed: "component-velocity",
     });
     await provider.sendAndConfirm(initializeComponent.transaction);
     componentVelocityEntity1Pda = initializeComponent.componentPda; // Saved for later
   });
 
-  it('Initialize Position Component on Entity 2', async () => {
+  it("Initialize Position Component on Entity 2", async () => {
     const initializeComponent = await InitializeComponent({
       payer: provider.wallet.publicKey,
       entity: entity2Pda,
@@ -282,7 +282,7 @@ describe('bolt', () => {
     await provider.sendAndConfirm(initializeComponent.transaction);
   });
 
-  it('Initialize Position Component on Entity 4', async () => {
+  it("Initialize Position Component on Entity 4", async () => {
     const initializeComponent = await InitializeComponent({
       payer: provider.wallet.publicKey,
       entity: entity4Pda,
@@ -292,7 +292,7 @@ describe('bolt', () => {
     componentPositionEntity4Pda = initializeComponent.componentPda; // Saved for later
   });
 
-  it('Initialize Position Component on Entity 5 (with authority)', async () => {
+  it("Initialize Position Component on Entity 5 (with authority)", async () => {
     const initializeComponent = await InitializeComponent({
       payer: provider.wallet.publicKey,
       entity: entity5Pda,
@@ -303,17 +303,17 @@ describe('bolt', () => {
     componentPositionEntity5Pda = initializeComponent.componentPda; // Saved for later
   });
 
-  it('Check Position on Entity 1 is default', async () => {
+  it("Check Position on Entity 1 is default", async () => {
     const position = await exampleComponentPosition.account.position.fetch(
-      componentPositionEntity1Pda,
+      componentPositionEntity1Pda
     );
-    logPosition('Default State: Entity 1', position);
+    logPosition("Default State: Entity 1", position);
     expect(position.x.toNumber()).to.equal(0);
     expect(position.y.toNumber()).to.equal(0);
     expect(position.z.toNumber()).to.equal(0);
   });
 
-  it('Apply Simple Movement System (Up) on Entity 1', async () => {
+  it("Apply Simple Movement System (Up) on Entity 1", async () => {
     const applySystem = await ApplySystem({
       authority: provider.wallet.publicKey,
       systemId: exampleSystemSimpleMovement,
@@ -331,20 +331,20 @@ describe('bolt', () => {
     const signature = await provider.sendAndConfirm(
       applySystem.transaction,
       [],
-      { skipPreflight: true },
+      { skipPreflight: true }
     );
     console.log(`Signature: ${signature}`);
 
     const position = await exampleComponentPosition.account.position.fetch(
-      componentPositionEntity1Pda,
+      componentPositionEntity1Pda
     );
-    logPosition('Movement System: Entity 1', position);
+    logPosition("Movement System: Entity 1", position);
     expect(position.x.toNumber()).to.equal(0);
     expect(position.y.toNumber()).to.equal(1);
     expect(position.z.toNumber()).to.equal(0);
   });
 
-  it('Apply Simple Movement System (Right) on Entity 1', async () => {
+  it("Apply Simple Movement System (Right) on Entity 1", async () => {
     const applySystem = await ApplySystem({
       authority: provider.wallet.publicKey,
       systemId: exampleSystemSimpleMovement,
@@ -362,15 +362,15 @@ describe('bolt', () => {
     await provider.sendAndConfirm(applySystem.transaction);
 
     const position = await exampleComponentPosition.account.position.fetch(
-      componentPositionEntity1Pda,
+      componentPositionEntity1Pda
     );
-    logPosition('Movement System: Entity 1', position);
+    logPosition("Movement System: Entity 1", position);
     expect(position.x.toNumber()).to.equal(1);
     expect(position.y.toNumber()).to.equal(1);
     expect(position.z.toNumber()).to.equal(0);
   });
 
-  it('Apply Fly System on Entity 1', async () => {
+  it("Apply Fly System on Entity 1", async () => {
     const applySystem = await ApplySystem({
       authority: provider.wallet.publicKey,
       systemId: exampleSystemFly,
@@ -385,15 +385,15 @@ describe('bolt', () => {
     await provider.sendAndConfirm(applySystem.transaction);
 
     const position = await exampleComponentPosition.account.position.fetch(
-      componentPositionEntity1Pda,
+      componentPositionEntity1Pda
     );
-    logPosition('Fly System: Entity 1', position);
+    logPosition("Fly System: Entity 1", position);
     expect(position.x.toNumber()).to.equal(1);
     expect(position.y.toNumber()).to.equal(1);
     expect(position.z.toNumber()).to.equal(1);
   });
 
-  it('Apply System Velocity on Entity 1', async () => {
+  it("Apply System Velocity on Entity 1", async () => {
     const applySystem = await ApplySystem({
       authority: provider.wallet.publicKey,
       systemId: exampleSystemApplyVelocity,
@@ -404,7 +404,7 @@ describe('bolt', () => {
           components: [
             {
               componentId: exampleComponentVelocity.programId,
-              seed: 'component-velocity',
+              seed: "component-velocity",
             },
             { componentId: exampleComponentPosition.programId },
           ],
@@ -414,24 +414,24 @@ describe('bolt', () => {
     await provider.sendAndConfirm(applySystem.transaction);
 
     const velocity = await exampleComponentVelocity.account.velocity.fetch(
-      componentVelocityEntity1Pda,
+      componentVelocityEntity1Pda
     );
-    logVelocity('Apply System Velocity: Entity 1', velocity);
+    logVelocity("Apply System Velocity: Entity 1", velocity);
     expect(velocity.x.toNumber()).to.equal(10);
     expect(velocity.y.toNumber()).to.equal(0);
     expect(velocity.z.toNumber()).to.equal(0);
     expect(velocity.lastApplied.toNumber()).to.not.equal(0);
 
     const position = await exampleComponentPosition.account.position.fetch(
-      componentPositionEntity1Pda,
+      componentPositionEntity1Pda
     );
-    logPosition('Apply System Velocity: Entity 1', position);
+    logPosition("Apply System Velocity: Entity 1", position);
     expect(position.x.toNumber()).to.greaterThan(1);
     expect(position.y.toNumber()).to.equal(1);
     expect(position.z.toNumber()).to.equal(1);
   });
 
-  it('Apply System Velocity on Entity 1, with Clock external account', async () => {
+  it("Apply System Velocity on Entity 1, with Clock external account", async () => {
     const applySystem = await ApplySystem({
       authority: provider.wallet.publicKey,
       systemId: exampleSystemApplyVelocity,
@@ -442,7 +442,7 @@ describe('bolt', () => {
           components: [
             {
               componentId: exampleComponentVelocity.programId,
-              seed: 'component-velocity',
+              seed: "component-velocity",
             },
             { componentId: exampleComponentPosition.programId },
           ],
@@ -451,7 +451,7 @@ describe('bolt', () => {
       extraAccounts: [
         {
           pubkey: new web3.PublicKey(
-            'SysvarC1ock11111111111111111111111111111111',
+            "SysvarC1ock11111111111111111111111111111111"
           ),
           isWritable: false,
           isSigner: false,
@@ -461,15 +461,15 @@ describe('bolt', () => {
     await provider.sendAndConfirm(applySystem.transaction);
 
     const position = await exampleComponentPosition.account.position.fetch(
-      componentPositionEntity1Pda,
+      componentPositionEntity1Pda
     );
-    logPosition('Apply System Velocity: Entity 1', position);
+    logPosition("Apply System Velocity: Entity 1", position);
     expect(position.x.toNumber()).to.greaterThan(1);
     expect(position.y.toNumber()).to.equal(1);
     expect(position.z.toNumber()).to.equal(300);
   });
 
-  it('Apply Fly System on Entity 4', async () => {
+  it("Apply Fly System on Entity 4", async () => {
     const applySystem = await ApplySystem({
       authority: provider.wallet.publicKey,
       systemId: exampleSystemFly,
@@ -484,18 +484,18 @@ describe('bolt', () => {
     await provider.sendAndConfirm(applySystem.transaction);
 
     const position = await exampleComponentPosition.account.position.fetch(
-      componentPositionEntity4Pda,
+      componentPositionEntity4Pda
     );
-    logPosition('Fly System: Entity 4', position);
+    logPosition("Fly System: Entity 4", position);
     expect(position.x.toNumber()).to.equal(0);
     expect(position.y.toNumber()).to.equal(0);
     expect(position.z.toNumber()).to.equal(1);
   });
 
-  it('Apply Fly System on Entity 5 (should fail with wrong authority)', async () => {
+  it("Apply Fly System on Entity 5 (should fail with wrong authority)", async () => {
     const positionBefore =
       await exampleComponentPosition.account.position.fetch(
-        componentPositionEntity5Pda,
+        componentPositionEntity5Pda
       );
 
     const applySystem = await ApplySystem({
@@ -516,12 +516,12 @@ describe('bolt', () => {
     } catch (error) {
       failed = true;
       // console.log("error", error);
-      expect(error.logs.join('\n')).to.contain('Error Code: InvalidAuthority');
+      expect(error.logs.join("\n")).to.contain("Error Code: InvalidAuthority");
     }
     expect(failed).to.equal(true);
 
     const positionAfter = await exampleComponentPosition.account.position.fetch(
-      componentPositionEntity5Pda,
+      componentPositionEntity5Pda
     );
 
     expect(positionBefore.x.toNumber()).to.equal(positionAfter.x.toNumber());
@@ -529,7 +529,7 @@ describe('bolt', () => {
     expect(positionBefore.z.toNumber()).to.equal(positionAfter.z.toNumber());
   });
 
-  it('Whitelist System', async () => {
+  it("Whitelist System", async () => {
     const approveSystem = await ApproveSystem({
       authority: provider.wallet.publicKey,
       systemToApprove: exampleSystemFly,
@@ -539,7 +539,7 @@ describe('bolt', () => {
     const signature = await provider.sendAndConfirm(
       approveSystem.transaction,
       [],
-      { skipPreflight: true },
+      { skipPreflight: true }
     );
     console.log(`Whitelist 2 system approval signature: ${signature}`);
 
@@ -549,7 +549,7 @@ describe('bolt', () => {
     expect(worldAccount.systems.length).to.be.greaterThan(0);
   });
 
-  it('Whitelist System 2', async () => {
+  it("Whitelist System 2", async () => {
     const approveSystem = await ApproveSystem({
       authority: provider.wallet.publicKey,
       systemToApprove: exampleSystemApplyVelocity,
@@ -559,7 +559,7 @@ describe('bolt', () => {
     const signature = await provider.sendAndConfirm(
       approveSystem.transaction,
       [],
-      { skipPreflight: true },
+      { skipPreflight: true }
     );
     console.log(`Whitelist 2 system approval signature: ${signature}`);
 
@@ -569,7 +569,7 @@ describe('bolt', () => {
     expect(worldAccount.systems.length).to.be.greaterThan(0);
   });
 
-  it('Apply Fly System on Entity 1', async () => {
+  it("Apply Fly System on Entity 1", async () => {
     const applySystem = await ApplySystem({
       authority: provider.wallet.publicKey,
       systemId: exampleSystemFly,
@@ -584,7 +584,7 @@ describe('bolt', () => {
     await provider.sendAndConfirm(applySystem.transaction);
   });
 
-  it('Remove System 1', async () => {
+  it("Remove System 1", async () => {
     const approveSystem = await RemoveSystem({
       authority: provider.wallet.publicKey,
       systemToRemove: exampleSystemFly,
@@ -594,7 +594,7 @@ describe('bolt', () => {
     const signature = await provider.sendAndConfirm(
       approveSystem.transaction,
       [],
-      { skipPreflight: true },
+      { skipPreflight: true }
     );
     console.log(`Whitelist 2 system approval signature: ${signature}`);
 
@@ -604,7 +604,7 @@ describe('bolt', () => {
     expect(worldAccount.systems.length).to.be.greaterThan(0);
   });
 
-  it('Apply Invalid Fly System on Entity 1', async () => {
+  it("Apply Invalid Fly System on Entity 1", async () => {
     const applySystem = await ApplySystem({
       authority: provider.wallet.publicKey,
       systemId: exampleSystemFly,
@@ -620,13 +620,13 @@ describe('bolt', () => {
     try {
       await provider.sendAndConfirm(applySystem.transaction);
     } catch (error) {
-      expect(error.logs.join(' ')).to.contain('Error Code: SystemNotApproved');
+      expect(error.logs.join(" ")).to.contain("Error Code: SystemNotApproved");
       invalid = true;
     }
     expect(invalid).to.equal(true);
   });
 
-  it('Check invalid component init without CPI', async () => {
+  it("Check invalid component init without CPI", async () => {
     let invalid = false;
     try {
       await exampleComponentPosition.methods
@@ -640,17 +640,17 @@ describe('bolt', () => {
         .rpc();
     } catch (error) {
       // console.log("error", error);
-      expect(error.message).to.contain('Error Code: InvalidCaller');
+      expect(error.message).to.contain("Error Code: InvalidCaller");
       invalid = true;
     }
     expect(invalid).to.equal(true);
   });
 
-  it('Check invalid component update without CPI', async () => {
+  it("Check invalid component update without CPI", async () => {
     let invalid = false;
     try {
       await boltComponentProgram.methods
-        .update(Buffer.from(''))
+        .update(Buffer.from(""))
         .accounts({
           boltComponent: componentPositionEntity4Pda,
           authority: provider.wallet.publicKey,
@@ -659,14 +659,14 @@ describe('bolt', () => {
     } catch (error) {
       // console.log("error", error);
       expect(error.message).to.contain(
-        'bolt_component. Error Code: AccountOwnedByWrongProgram',
+        "bolt_component. Error Code: AccountOwnedByWrongProgram"
       );
       invalid = true;
     }
     expect(invalid).to.equal(true);
   });
 
-  it('Check component delegation', async () => {
+  it("Check component delegation", async () => {
     const delegateComponent = await DelegateComponent({
       payer: provider.wallet.publicKey,
       entity: entity1Pda,
@@ -676,12 +676,12 @@ describe('bolt', () => {
     const txSign = await provider.sendAndConfirm(
       delegateComponent.transaction,
       [],
-      { skipPreflight: true, commitment: 'confirmed' },
+      { skipPreflight: true, commitment: "confirmed" }
     );
     console.log(`Delegation signature: ${txSign}`);
     const acc = await provider.connection.getAccountInfo(
-      delegateComponent.componentPda,
+      delegateComponent.componentPda
     );
-    expect(acc.owner.toString()).to.equal(DELEGATION_PROGRAM_ID);
+    expect(acc?.owner.toString()).to.equal(DELEGATION_PROGRAM_ID);
   });
 });

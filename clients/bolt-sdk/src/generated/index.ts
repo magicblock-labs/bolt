@@ -5,12 +5,12 @@
  * See: https://github.com/metaplex-foundation/solita
  */
 
-import { PublicKey } from '@solana/web3.js';
-import { type World as WorldProgram } from './types/world';
-import idl from './idl/world.json';
-export * from './accounts';
-export * from './errors';
-export * from './instructions';
+import { PublicKey } from "@solana/web3.js";
+import { type World as WorldProgram } from "./types/world";
+import idl from "./idl/world.json";
+export * from "./accounts";
+export * from "./errors";
+export * from "./instructions";
 
 /**
  * Program address
@@ -18,7 +18,7 @@ export * from './instructions';
  * @category constants
  * @category generated
  */
-export const PROGRAM_ADDRESS = 'WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n';
+export const PROGRAM_ADDRESS = "WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n";
 
 /**
  * Program public key

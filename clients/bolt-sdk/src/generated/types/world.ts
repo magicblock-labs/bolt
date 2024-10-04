@@ -5,556 +5,556 @@
  * IDL can be found at `target/idl/world.json`.
  */
 export interface World {
-  address: 'WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n';
+  address: "WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n";
   metadata: {
-    name: 'world';
-    version: '0.1.9';
-    spec: '0.1.0';
-    description: 'Bolt World program';
-    repository: 'https://github.com/magicblock-labs/bolt';
+    name: "world";
+    version: "0.1.9";
+    spec: "0.1.0";
+    description: "Bolt World program";
+    repository: "https://github.com/magicblock-labs/bolt";
   };
   instructions: [
     {
-      name: 'addAuthority';
+      name: "addAuthority";
       discriminator: [229, 9, 106, 73, 91, 213, 109, 183];
       accounts: [
         {
-          name: 'authority';
+          name: "authority";
           writable: true;
           signer: true;
         },
         {
-          name: 'newAuthority';
+          name: "newAuthority";
         },
         {
-          name: 'world';
+          name: "world";
           writable: true;
         },
         {
-          name: 'systemProgram';
-          address: '11111111111111111111111111111111';
-        },
+          name: "systemProgram";
+          address: "11111111111111111111111111111111";
+        }
       ];
       args: [
         {
-          name: 'worldId';
-          type: 'u64';
-        },
+          name: "worldId";
+          type: "u64";
+        }
       ];
     },
     {
-      name: 'addEntity';
+      name: "addEntity";
       discriminator: [163, 241, 57, 35, 244, 244, 48, 57];
       accounts: [
         {
-          name: 'payer';
+          name: "payer";
           writable: true;
           signer: true;
         },
         {
-          name: 'entity';
+          name: "entity";
           writable: true;
         },
         {
-          name: 'world';
+          name: "world";
           writable: true;
         },
         {
-          name: 'systemProgram';
-          address: '11111111111111111111111111111111';
-        },
+          name: "systemProgram";
+          address: "11111111111111111111111111111111";
+        }
       ];
       args: [
         {
-          name: 'extraSeed';
+          name: "extraSeed";
           type: {
-            option: 'string';
+            option: "string";
           };
-        },
+        }
       ];
     },
     {
-      name: 'apply';
+      name: "apply";
       discriminator: [248, 243, 145, 24, 105, 50, 162, 225];
       accounts: [
         {
-          name: 'componentProgram';
+          name: "componentProgram";
         },
         {
-          name: 'boltSystem';
+          name: "boltSystem";
         },
         {
-          name: 'boltComponent';
+          name: "boltComponent";
           writable: true;
         },
         {
-          name: 'authority';
+          name: "authority";
           signer: true;
         },
         {
-          name: 'instructionSysvarAccount';
-          address: 'Sysvar1nstructions1111111111111111111111111';
+          name: "instructionSysvarAccount";
+          address: "Sysvar1nstructions1111111111111111111111111";
         },
         {
-          name: 'world';
-        },
+          name: "world";
+        }
       ];
       args: [
         {
-          name: 'args';
-          type: 'bytes';
-        },
+          name: "args";
+          type: "bytes";
+        }
       ];
     },
     {
-      name: 'apply2';
+      name: "apply2";
       discriminator: [120, 32, 116, 154, 158, 159, 208, 73];
       accounts: [
         {
-          name: 'boltSystem';
+          name: "boltSystem";
         },
         {
-          name: 'componentProgram1';
+          name: "componentProgram1";
         },
         {
-          name: 'boltComponent1';
+          name: "boltComponent1";
           writable: true;
         },
         {
-          name: 'componentProgram2';
+          name: "componentProgram2";
         },
         {
-          name: 'boltComponent2';
+          name: "boltComponent2";
           writable: true;
         },
         {
-          name: 'authority';
+          name: "authority";
           signer: true;
         },
         {
-          name: 'instructionSysvarAccount';
-          address: 'Sysvar1nstructions1111111111111111111111111';
+          name: "instructionSysvarAccount";
+          address: "Sysvar1nstructions1111111111111111111111111";
         },
         {
-          name: 'world';
-        },
+          name: "world";
+        }
       ];
       args: [
         {
-          name: 'args';
-          type: 'bytes';
-        },
+          name: "args";
+          type: "bytes";
+        }
       ];
     },
     {
-      name: 'apply3';
+      name: "apply3";
       discriminator: [254, 146, 49, 7, 236, 131, 105, 221];
       accounts: [
         {
-          name: 'boltSystem';
+          name: "boltSystem";
         },
         {
-          name: 'componentProgram1';
+          name: "componentProgram1";
         },
         {
-          name: 'boltComponent1';
+          name: "boltComponent1";
           writable: true;
         },
         {
-          name: 'componentProgram2';
+          name: "componentProgram2";
         },
         {
-          name: 'boltComponent2';
+          name: "boltComponent2";
           writable: true;
         },
         {
-          name: 'componentProgram3';
+          name: "componentProgram3";
         },
         {
-          name: 'boltComponent3';
+          name: "boltComponent3";
           writable: true;
         },
         {
-          name: 'authority';
+          name: "authority";
           signer: true;
         },
         {
-          name: 'instructionSysvarAccount';
-          address: 'Sysvar1nstructions1111111111111111111111111';
+          name: "instructionSysvarAccount";
+          address: "Sysvar1nstructions1111111111111111111111111";
         },
         {
-          name: 'world';
-        },
+          name: "world";
+        }
       ];
       args: [
         {
-          name: 'args';
-          type: 'bytes';
-        },
+          name: "args";
+          type: "bytes";
+        }
       ];
     },
     {
-      name: 'apply4';
+      name: "apply4";
       discriminator: [223, 104, 24, 79, 252, 196, 14, 109];
       accounts: [
         {
-          name: 'boltSystem';
+          name: "boltSystem";
         },
         {
-          name: 'componentProgram1';
+          name: "componentProgram1";
         },
         {
-          name: 'boltComponent1';
+          name: "boltComponent1";
           writable: true;
         },
         {
-          name: 'componentProgram2';
+          name: "componentProgram2";
         },
         {
-          name: 'boltComponent2';
+          name: "boltComponent2";
           writable: true;
         },
         {
-          name: 'componentProgram3';
+          name: "componentProgram3";
         },
         {
-          name: 'boltComponent3';
+          name: "boltComponent3";
           writable: true;
         },
         {
-          name: 'componentProgram4';
+          name: "componentProgram4";
         },
         {
-          name: 'boltComponent4';
+          name: "boltComponent4";
           writable: true;
         },
         {
-          name: 'authority';
+          name: "authority";
           signer: true;
         },
         {
-          name: 'instructionSysvarAccount';
-          address: 'Sysvar1nstructions1111111111111111111111111';
+          name: "instructionSysvarAccount";
+          address: "Sysvar1nstructions1111111111111111111111111";
         },
         {
-          name: 'world';
-        },
+          name: "world";
+        }
       ];
       args: [
         {
-          name: 'args';
-          type: 'bytes';
-        },
+          name: "args";
+          type: "bytes";
+        }
       ];
     },
     {
-      name: 'apply5';
+      name: "apply5";
       discriminator: [70, 164, 214, 28, 136, 116, 84, 153];
       accounts: [
         {
-          name: 'boltSystem';
+          name: "boltSystem";
         },
         {
-          name: 'componentProgram1';
+          name: "componentProgram1";
         },
         {
-          name: 'boltComponent1';
+          name: "boltComponent1";
           writable: true;
         },
         {
-          name: 'componentProgram2';
+          name: "componentProgram2";
         },
         {
-          name: 'boltComponent2';
+          name: "boltComponent2";
           writable: true;
         },
         {
-          name: 'componentProgram3';
+          name: "componentProgram3";
         },
         {
-          name: 'boltComponent3';
+          name: "boltComponent3";
           writable: true;
         },
         {
-          name: 'componentProgram4';
+          name: "componentProgram4";
         },
         {
-          name: 'boltComponent4';
+          name: "boltComponent4";
           writable: true;
         },
         {
-          name: 'componentProgram5';
+          name: "componentProgram5";
         },
         {
-          name: 'boltComponent5';
+          name: "boltComponent5";
           writable: true;
         },
         {
-          name: 'authority';
+          name: "authority";
           signer: true;
         },
         {
-          name: 'instructionSysvarAccount';
-          address: 'Sysvar1nstructions1111111111111111111111111';
+          name: "instructionSysvarAccount";
+          address: "Sysvar1nstructions1111111111111111111111111";
         },
         {
-          name: 'world';
-        },
+          name: "world";
+        }
       ];
       args: [
         {
-          name: 'args';
-          type: 'bytes';
-        },
+          name: "args";
+          type: "bytes";
+        }
       ];
     },
     {
-      name: 'approveSystem';
+      name: "approveSystem";
       discriminator: [114, 165, 105, 68, 52, 67, 207, 121];
       accounts: [
         {
-          name: 'authority';
+          name: "authority";
           writable: true;
           signer: true;
         },
         {
-          name: 'world';
+          name: "world";
           writable: true;
         },
         {
-          name: 'system';
+          name: "system";
         },
         {
-          name: 'systemProgram';
-          address: '11111111111111111111111111111111';
-        },
+          name: "systemProgram";
+          address: "11111111111111111111111111111111";
+        }
       ];
       args: [];
     },
     {
-      name: 'initializeComponent';
+      name: "initializeComponent";
       discriminator: [36, 143, 233, 113, 12, 234, 61, 30];
       accounts: [
         {
-          name: 'payer';
+          name: "payer";
           writable: true;
           signer: true;
         },
         {
-          name: 'data';
+          name: "data";
           writable: true;
         },
         {
-          name: 'entity';
+          name: "entity";
         },
         {
-          name: 'componentProgram';
+          name: "componentProgram";
         },
         {
-          name: 'authority';
+          name: "authority";
         },
         {
-          name: 'instructionSysvarAccount';
-          address: 'Sysvar1nstructions1111111111111111111111111';
+          name: "instructionSysvarAccount";
+          address: "Sysvar1nstructions1111111111111111111111111";
         },
         {
-          name: 'systemProgram';
-          address: '11111111111111111111111111111111';
-        },
+          name: "systemProgram";
+          address: "11111111111111111111111111111111";
+        }
       ];
       args: [];
     },
     {
-      name: 'initializeNewWorld';
+      name: "initializeNewWorld";
       discriminator: [23, 96, 88, 194, 200, 203, 200, 98];
       accounts: [
         {
-          name: 'payer';
+          name: "payer";
           writable: true;
           signer: true;
         },
         {
-          name: 'world';
+          name: "world";
           writable: true;
         },
         {
-          name: 'registry';
+          name: "registry";
           writable: true;
         },
         {
-          name: 'systemProgram';
-          address: '11111111111111111111111111111111';
-        },
+          name: "systemProgram";
+          address: "11111111111111111111111111111111";
+        }
       ];
       args: [];
     },
     {
-      name: 'initializeRegistry';
+      name: "initializeRegistry";
       discriminator: [189, 181, 20, 17, 174, 57, 249, 59];
       accounts: [
         {
-          name: 'registry';
+          name: "registry";
           writable: true;
         },
         {
-          name: 'payer';
+          name: "payer";
           writable: true;
           signer: true;
         },
         {
-          name: 'systemProgram';
-          address: '11111111111111111111111111111111';
-        },
+          name: "systemProgram";
+          address: "11111111111111111111111111111111";
+        }
       ];
       args: [];
     },
     {
-      name: 'removeAuthority';
+      name: "removeAuthority";
       discriminator: [242, 104, 208, 132, 190, 250, 74, 216];
       accounts: [
         {
-          name: 'authority';
+          name: "authority";
           writable: true;
           signer: true;
         },
         {
-          name: 'authorityToDelete';
+          name: "authorityToDelete";
         },
         {
-          name: 'world';
+          name: "world";
           writable: true;
         },
         {
-          name: 'systemProgram';
-          address: '11111111111111111111111111111111';
-        },
+          name: "systemProgram";
+          address: "11111111111111111111111111111111";
+        }
       ];
       args: [
         {
-          name: 'worldId';
-          type: 'u64';
-        },
+          name: "worldId";
+          type: "u64";
+        }
       ];
     },
     {
-      name: 'removeSystem';
+      name: "removeSystem";
       discriminator: [218, 80, 71, 80, 161, 130, 149, 120];
       accounts: [
         {
-          name: 'authority';
+          name: "authority";
           writable: true;
           signer: true;
         },
         {
-          name: 'world';
+          name: "world";
           writable: true;
         },
         {
-          name: 'system';
+          name: "system";
         },
         {
-          name: 'systemProgram';
-          address: '11111111111111111111111111111111';
-        },
+          name: "systemProgram";
+          address: "11111111111111111111111111111111";
+        }
       ];
       args: [];
-    },
+    }
   ];
   accounts: [
     {
-      name: 'entity';
+      name: "entity";
       discriminator: [46, 157, 161, 161, 254, 46, 79, 24];
     },
     {
-      name: 'registry';
+      name: "registry";
       discriminator: [47, 174, 110, 246, 184, 182, 252, 218];
     },
     {
-      name: 'world';
+      name: "world";
       discriminator: [145, 45, 170, 174, 122, 32, 155, 124];
-    },
+    }
   ];
   errors: [
     {
       code: 6000;
-      name: 'invalidAuthority';
-      msg: 'Invalid authority for instruction';
+      name: "invalidAuthority";
+      msg: "Invalid authority for instruction";
     },
     {
       code: 6001;
-      name: 'worldAccountMismatch';
-      msg: 'The provided world account does not match the expected PDA.';
+      name: "worldAccountMismatch";
+      msg: "The provided world account does not match the expected PDA.";
     },
     {
       code: 6002;
-      name: 'tooManyAuthorities';
-      msg: 'Exceed the maximum number of authorities.';
+      name: "tooManyAuthorities";
+      msg: "Exceed the maximum number of authorities.";
     },
     {
       code: 6003;
-      name: 'authorityNotFound';
-      msg: 'The provided authority not found';
+      name: "authorityNotFound";
+      msg: "The provided authority not found";
     },
     {
       code: 6004;
-      name: 'systemNotApproved';
-      msg: 'The system is not approved in this world instance';
-    },
+      name: "systemNotApproved";
+      msg: "The system is not approved in this world instance";
+    }
   ];
   types: [
     {
-      name: 'entity';
+      name: "entity";
       type: {
-        kind: 'struct';
+        kind: "struct";
         fields: [
           {
-            name: 'id';
-            type: 'u64';
-          },
+            name: "id";
+            type: "u64";
+          }
         ];
       };
     },
     {
-      name: 'registry';
+      name: "registry";
       type: {
-        kind: 'struct';
+        kind: "struct";
         fields: [
           {
-            name: 'worlds';
-            type: 'u64';
-          },
+            name: "worlds";
+            type: "u64";
+          }
         ];
       };
     },
     {
-      name: 'world';
+      name: "world";
       type: {
-        kind: 'struct';
+        kind: "struct";
         fields: [
           {
-            name: 'id';
-            type: 'u64';
+            name: "id";
+            type: "u64";
           },
           {
-            name: 'entities';
-            type: 'u64';
+            name: "entities";
+            type: "u64";
           },
           {
-            name: 'authorities';
+            name: "authorities";
             type: {
-              vec: 'pubkey';
+              vec: "pubkey";
             };
           },
           {
-            name: 'permissionless';
-            type: 'bool';
+            name: "permissionless";
+            type: "bool";
           },
           {
-            name: 'systems';
-            type: 'bytes';
-          },
+            name: "systems";
+            type: "bytes";
+          }
         ];
       };
-    },
+    }
   ];
 }

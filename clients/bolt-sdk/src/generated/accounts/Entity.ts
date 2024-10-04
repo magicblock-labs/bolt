@@ -5,9 +5,9 @@
  * See: https://github.com/metaplex-foundation/solita
  */
 
-import * as beet from '@metaplex-foundation/beet';
-import * as web3 from '@solana/web3.js';
-import * as beetSolana from '@metaplex-foundation/beet-solana';
+import * as beet from "@metaplex-foundation/beet";
+import * as web3 from "@solana/web3.js";
+import * as beetSolana from "@metaplex-foundation/beet-solana";
 
 /**
  * Arguments used to create {@link Entity}
@@ -42,7 +42,7 @@ export class Entity implements EntityArgs {
    */
   static fromAccountInfo(
     accountInfo: web3.AccountInfo<Buffer>,
-    offset = 0,
+    offset = 0
   ): [Entity, number] {
     return Entity.deserialize(accountInfo.data, offset);
   }
@@ -56,11 +56,11 @@ export class Entity implements EntityArgs {
   static async fromAccountAddress(
     connection: web3.Connection,
     address: web3.PublicKey,
-    commitmentOrConfig?: web3.Commitment | web3.GetAccountInfoConfig,
+    commitmentOrConfig?: web3.Commitment | web3.GetAccountInfoConfig
   ): Promise<Entity> {
     const accountInfo = await connection.getAccountInfo(
       address,
-      commitmentOrConfig,
+      commitmentOrConfig
     );
     if (accountInfo == null) {
       throw new Error(`Unable to find Entity account at ${address}`);
@@ -76,8 +76,8 @@ export class Entity implements EntityArgs {
    */
   static gpaBuilder(
     programId: web3.PublicKey = new web3.PublicKey(
-      'WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n',
-    ),
+      "WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n"
+    )
   ) {
     return beetSolana.GpaBuilder.fromStruct(programId, entityBeet);
   }
@@ -117,11 +117,11 @@ export class Entity implements EntityArgs {
    */
   static async getMinimumBalanceForRentExemption(
     connection: web3.Connection,
-    commitment?: web3.Commitment,
+    commitment?: web3.Commitment
   ): Promise<number> {
     return connection.getMinimumBalanceForRentExemption(
       Entity.byteSize,
-      commitment,
+      commitment
     );
   }
 
@@ -141,7 +141,7 @@ export class Entity implements EntityArgs {
     return {
       id: (() => {
         const x = this.id as { toNumber: () => number };
-        if (typeof x.toNumber === 'function') {
+        if (typeof x.toNumber === "function") {
           try {
             return x.toNumber();
           } catch (_) {
@@ -165,9 +165,9 @@ export const entityBeet = new beet.BeetStruct<
   }
 >(
   [
-    ['accountDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)],
-    ['id', beet.u64],
+    ["accountDiscriminator", beet.uniformFixedSizeArray(beet.u8, 8)],
+    ["id", beet.u64],
   ],
   Entity.fromArgs,
-  'Entity',
+  "Entity"
 );
