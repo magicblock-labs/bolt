@@ -7,7 +7,7 @@ members = [
 ]
 
 [workspace.package]
-version = "0.1.9"
+version = "0.1.10"
 authors = ["Magicblock Labs <dev@magicblock.gg>"]
 repository = "https://github.com/magicblock-labs/bolt"
 homepage = "https://www.magicblock.gg/"
