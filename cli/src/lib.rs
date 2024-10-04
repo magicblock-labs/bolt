@@ -173,8 +173,12 @@ pub fn entry(opts: Opts) -> Result<()> {
             command.world,
             command.authority_to_remove,
         ),
-        BoltCommand::ApproveSystem(command) => approve_system(&opts.cfg_override, command.world, command.system_to_approve),
-        BoltCommand::RemoveSystem(command) => remove_system(&opts.cfg_override, command.world, command.system_to_remove)
+        BoltCommand::ApproveSystem(command) => {
+            approve_system(&opts.cfg_override, command.world, command.system_to_approve)
+        }
+        BoltCommand::RemoveSystem(command) => {
+            remove_system(&opts.cfg_override, command.world, command.system_to_remove)
+        }
     }
 }
 // Bolt Init

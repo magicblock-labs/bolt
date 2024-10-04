@@ -5,9 +5,9 @@ use anchor_client::solana_sdk::pubkey::Pubkey;
 use anchor_client::solana_sdk::signature::{read_keypair_file, Keypair};
 use anchor_client::solana_sdk::signer::Signer;
 use anchor_client::solana_sdk::system_program;
+use anchor_client::Client;
 use anyhow::{anyhow, Result};
 use std::rc::Rc;
-use anchor_client::Client;
 use world::{accounts, instruction, World, ID};
 
 fn setup_client(cfg_override: &ConfigOverride) -> Result<(Client<Rc<Keypair>>, Keypair)> {
@@ -29,9 +29,16 @@ fn setup_client(cfg_override: &ConfigOverride) -> Result<(Client<Rc<Keypair>>, K
 }
 
 fn parse_pubkey(input: &str, error_message: &str) -> Result<Pubkey> {
-    input.parse::<Pubkey>().map_err(|_| anyhow!(error_message.to_string()))}
+    input
+        .parse::<Pubkey>()
+        .map_err(|_| anyhow!(error_message.to_string()))
+}
 
-pub fn authorize(cfg_override: &ConfigOverride, world: String, new_authority: String) -> Result<()> {
+pub fn authorize(
+    cfg_override: &ConfigOverride,
+    world: String,
+    new_authority: String,
+) -> Result<()> {
     let world_pubkey = parse_pubkey(&world, "Invalid world public key")?;
     let new_authority_pubkey = parse_pubkey(&new_authority, "Invalid new authority public key")?;
 
@@ -60,9 +67,14 @@ pub fn authorize(cfg_override: &ConfigOverride, world: String, new_authority: St
     Ok(())
 }
 
-pub fn deauthorize(cfg_override: &ConfigOverride, world: String, authority_to_delete: String) -> Result<()> {
+pub fn deauthorize(
+    cfg_override: &ConfigOverride,
+    world: String,
+    authority_to_delete: String,
+) -> Result<()> {
     let world_pubkey = parse_pubkey(&world, "Invalid world public key")?;
-    let authority_to_delete_pubkey = parse_pubkey(&authority_to_delete, "Invalid authority public key")?;
+    let authority_to_delete_pubkey =
+        parse_pubkey(&authority_to_delete, "Invalid authority public key")?;
 
     let (client, payer) = setup_client(cfg_override)?;
     let program = client.program(ID)?;
@@ -92,7 +104,11 @@ pub fn deauthorize(cfg_override: &ConfigOverride, world: String, authority_to_de
     Ok(())
 }
 
-pub fn approve_system(cfg_override: &ConfigOverride, world: String, system_to_approve: String) -> Result<()> {
+pub fn approve_system(
+    cfg_override: &ConfigOverride,
+    world: String,
+    system_to_approve: String,
+) -> Result<()> {
     let world_pubkey = parse_pubkey(&world, "Invalid world public key")?;
     let system_to_approve_pubkey = parse_pubkey(&system_to_approve, "Invalid system public key")?;
 
@@ -119,7 +135,11 @@ pub fn approve_system(cfg_override: &ConfigOverride, world: String, system_to_ap
     Ok(())
 }
 
-pub fn remove_system(cfg_override: &ConfigOverride, world: String, system_to_remove: String) -> Result<()> {
+pub fn remove_system(
+    cfg_override: &ConfigOverride,
+    world: String,
+    system_to_remove: String,
+) -> Result<()> {
     let world_pubkey = parse_pubkey(&world, "Invalid world public key")?;
     let system_to_remove_pubkey = parse_pubkey(&system_to_remove, "Invalid system public key")?;
 
