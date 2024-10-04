@@ -39,15 +39,17 @@ pub mod world {
 
     #[allow(unused_variables)]
     pub fn add_authority(ctx: Context<AddAuthority>, world_id: u64) -> Result<()> {
-        if ctx.accounts.world.authorities.len() == 3 {
-            return Err(WorldError::TooManyAuthorities.into());
-        }
         if ctx.accounts.world.authorities.is_empty()
-            || ctx
+            || (ctx
                 .accounts
                 .world
                 .authorities
                 .contains(ctx.accounts.authority.key)
+                && !ctx
+                    .accounts
+                    .world
+                    .authorities
+                    .contains(ctx.accounts.new_authority.key))
         {
             ctx.accounts
                 .world
@@ -216,6 +218,10 @@ pub mod world {
             ctx.accounts.world.authorities.len(),
             encoded_world_systems.len(),
         );
+
+        if world_systems.approved_systems.is_empty() {
+            ctx.accounts.world.permissionless = true;
+        }
 
         // Remove the extra rent
         let rent = Rent::get()?;

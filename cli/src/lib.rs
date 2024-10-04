@@ -1,10 +1,12 @@
 mod component;
+mod instructions;
 mod rust_template;
 mod system;
 mod templates;
 mod workspace;
 
 use crate::component::new_component;
+use crate::instructions::{approve_system, authorize, deauthorize, remove_system};
 use crate::rust_template::{create_component, create_system};
 use crate::system::new_system;
 use anchor_cli::config;
@@ -12,11 +14,6 @@ use anchor_cli::config::{
     BootstrapMode, Config, ConfigOverride, GenesisEntry, ProgramArch, ProgramDeployment,
     TestValidator, Validator, WithPath,
 };
-use anchor_client::solana_sdk::commitment_config::CommitmentConfig;
-use anchor_client::solana_sdk::pubkey::Pubkey;
-use anchor_client::solana_sdk::signature::{read_keypair_file, Keypair};
-use anchor_client::solana_sdk::signer::Signer;
-use anchor_client::solana_sdk::system_program;
 use anchor_client::Cluster;
 use anyhow::{anyhow, Result};
 use clap::{Parser, Subcommand};
@@ -28,13 +25,9 @@ use std::io::Write;
 use std::io::{self, BufRead};
 use std::path::{Path, PathBuf};
 use std::process::Stdio;
-use std::rc::Rc;
 use std::string::ToString;
-use world::{accounts, instruction, World, ID};
-
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 pub const ANCHOR_VERSION: &str = anchor_cli::VERSION;
-
 #[derive(Subcommand)]
 pub enum BoltCommand {
     #[clap(about = "Create a new component")]
@@ -46,13 +39,14 @@ pub enum BoltCommand {
     Anchor(anchor_cli::Command),
     #[clap(about = "Add a new authority for a world instance")]
     Authorize(AuthorizeCommand),
+    #[clap(about = "Remove an authority from a world instance")]
+    Deauthorize(DeauthorizeCommand),
+    #[clap(about = "Approve a system for a world instance")]
+    ApproveSystem(ApproveSystemCommand),
+    #[clap(about = "Remove a system from a world instance")]
+    RemoveSystem(RemoveSystemCommand),
 }
 
-#[derive(Debug, Parser)]
-pub struct AuthorizeCommand {
-    pub world: String,
-    pub new_authority: String,
-}
 #[derive(Debug, Parser)]
 pub struct InitCommand {
     #[clap(short, long, help = "Workspace name")]
@@ -67,6 +61,30 @@ pub struct ComponentCommand {
 #[derive(Debug, Parser)]
 pub struct SystemCommand {
     pub name: String,
+}
+
+#[derive(Debug, Parser)]
+pub struct AuthorizeCommand {
+    pub world: String,
+    pub new_authority: String,
+}
+
+#[derive(Debug, Parser)]
+pub struct DeauthorizeCommand {
+    pub world: String,
+    pub authority_to_remove: String,
+}
+
+#[derive(Debug, Parser)]
+pub struct ApproveSystemCommand {
+    pub world: String,
+    pub system_to_approve: String,
+}
+
+#[derive(Debug, Parser)]
+pub struct RemoveSystemCommand {
+    pub world: String,
+    pub system_to_remove: String,
 }
 
 #[derive(Parser)]
@@ -150,9 +168,16 @@ pub fn entry(opts: Opts) -> Result<()> {
         BoltCommand::Authorize(command) => {
             authorize(&opts.cfg_override, command.world, command.new_authority)
         }
+        BoltCommand::Deauthorize(command) => deauthorize(
+            &opts.cfg_override,
+            command.world,
+            command.authority_to_remove,
+        ),
+        BoltCommand::ApproveSystem(command) => approve_system(&opts.cfg_override, command.world, command.system_to_approve),
+        BoltCommand::RemoveSystem(command) => remove_system(&opts.cfg_override, command.world, command.system_to_remove)
     }
-} // Bolt Init
-
+}
+// Bolt Init
 #[allow(clippy::too_many_arguments)]
 fn init(
     cfg_override: &ConfigOverride,
@@ -610,52 +635,5 @@ fn add_types_crate_dependency(program_name: &str, types_path: &str) -> Result<()
                 e.to_string()
             )
         })?;
-    Ok(())
-}
-
-fn authorize(cfg_override: &ConfigOverride, world: String, new_authority: String) -> Result<()> {
-    let world_pubkey = world
-        .parse::<Pubkey>()
-        .map_err(|_| anyhow!("Invalid world public key"))?;
-    let new_authority_pubkey = new_authority
-        .parse::<Pubkey>()
-        .map_err(|_| anyhow!("Invalid new authority public key"))?;
-
-    let cfg = Config::discover(cfg_override)?.expect("Not in workspace.");
-    let wallet_path = cfg.provider.wallet.clone();
-
-    let payer = read_keypair_file(wallet_path.to_string())
-        .map_err(|e| anyhow!("Failed to read keypair file: {}", e))?;
-
-    let payer_for_client =
-        Keypair::from_bytes(&payer.to_bytes()).expect("Failed to create Keypair from bytes");
-
-    let client = anchor_client::Client::new_with_options(
-        cfg.provider.cluster.clone(),
-        Rc::new(payer_for_client),
-        CommitmentConfig::confirmed(),
-    );
-    let program = client.program(ID)?;
-
-    // Read and parse the World account to get the id
-    let world_account = program.account::<World>(world_pubkey)?;
-    let world_id = world_account.id;
-    let signature = program
-        .request()
-        .accounts(accounts::AddAuthority {
-            authority: payer.pubkey(),
-            new_authority: new_authority_pubkey,
-            system_program: system_program::ID,
-            world: world_pubkey,
-        })
-        .args(instruction::AddAuthority { world_id })
-        .signer(&payer)
-        .send()?;
-
-    println!(
-        "Authority {} added to world {} with signature {}",
-        new_authority, world, signature
-    );
-
     Ok(())
 }
