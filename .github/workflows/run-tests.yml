@@ -95,7 +95,6 @@ jobs:
           export PATH="$HOME/.local/share/solana/install/active_release/bin:$PATH"
           solana --version
           solana-keygen new --silent --no-bip39-passphrase
-          solana airdrop 100
 
       - name: Set Deployment Keys
         run: |
