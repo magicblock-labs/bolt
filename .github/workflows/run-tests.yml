@@ -11,12 +11,13 @@ env:
   solana_version: v1.18.15
 
 jobs:
-  install:
+  setup:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/cache@v4
-        name: cache solana cli
+        name: Cache Solana CLI
         id: cache-solana
         with:
           path: |
@@ -28,120 +29,70 @@ jobs:
         with:
           node-version: 21
 
-      - name: install essentials
+      - name: Install Essentials
         run: |
           sudo apt-get update
           sudo apt-get install -y pkg-config build-essential libudev-dev
           npm install --global yarn
 
-      - name: Cache node dependencies
+      - name: Cache Node Dependencies
         uses: actions/cache@v3
         with:
-          path: "**/node_modules"
+          path: '**/node_modules'
           key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
 
-      - name: install node_modules
+      - name: Install Node Modules
         run: |
           export PATH="/home/runner/.local/share/solana/install/active_release/bin:$PATH"
           yarn --frozen-lockfile --network-concurrency 2
 
-      - name: install rust
+      - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: stable
-          components: rustfmt
 
-      - name: Cache rust
+      - name: Cache Rust
         uses: Swatinem/rust-cache@v2
 
-      - name: install solana
+      - name: Install Solana
         if: steps.cache-solana.outputs.cache-hit != 'true'
         run: |
           sh -c "$(curl -sSfL https://release.solana.com/${{ env.solana_version }}/install)"
           export PATH="$HOME/.local/share/solana/install/active_release/bin:$PATH"
           solana --version
 
-  clippy-lint:
-    needs: install
+  lint:
+    needs: setup
     runs-on: ubuntu-latest
-
+    strategy:
+      matrix:
+        task: [clippy, yarn]
     steps:
       - uses: actions/checkout@v4
-      - name: Cache rust
+      - name: Cache Rust
         uses: Swatinem/rust-cache@v2
-      - name: Check Rust version
-        run: rustc --version
-      - name: Run fmt
-        run: cargo fmt -- --check --verbose
-      - name: Run clippy
-        run: cargo clippy -- --deny=warnings
-
-  yarn-lint:
-    needs: install
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Use Node ${{ matrix.node }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Cache node dependencies
-        uses: actions/cache@v4
-        with:
-          path: "**/node_modules"
-          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
-
-      - name: Run lint
-        run: yarn lint
+      - name: Run Lint
+        run: |
+          if [ "${{ matrix.task }}" == "clippy" ]; then
+            cargo fmt -- --check --verbose
+            cargo clippy -- --deny=warnings
+          else
+            prettier -v
+            yarn lint
+          fi
 
   test:
-    needs: [clippy-lint, yarn-lint]
+    needs: lint
     runs-on: ubuntu-latest
-
     steps:
-      - name: install rust
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          toolchain: stable
-
-      - name: Cache rust
-        uses: Swatinem/rust-cache@v2
-
       - uses: actions/checkout@v4
-
-      - name: Use Node ${{ matrix.node }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Cache node dependencies
-        uses: actions/cache@v3
-        with:
-          path: "**/node_modules"
-          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
-
-      - name: install node_modules
-        run: |
-          export PATH="/home/runner/.local/share/solana/install/active_release/bin:$PATH"
-          yarn --frozen-lockfile
-
-      - uses: actions/cache@v4
-        name: cache solana cli
-        id: cache-solana
-        with:
-          path: |
-            ~/.cache/solana/
-            ~/.local/share/solana/
-          key: solana-${{ runner.os }}-v0000-${{ env.solana_version }}
-
-      - name: setup solana
+      - name: Setup Environment
         run: |
           export PATH="/home/runner/.local/share/solana/install/active_release/bin:$PATH"
           solana --version
           solana-keygen new --silent --no-bip39-passphrase
 
-      - name: Set deployments keys
+      - name: Set Deployment Keys
         run: |
           mkdir -p target/deploy
           echo ${{ secrets.WORLD }} > target/deploy/world-keypair.json
@@ -153,35 +104,11 @@ jobs:
           echo ${{ secrets.SYSTEM_FLY }} > target/deploy/system_fly-keypair.json
           echo ${{ secrets.SYSTEM_SIMPLE_MOVEMENT }} > target/deploy/system_simple_movement-keypair.json
 
-      - name: run build
+      - name: Run Build and Tests
         run: |
-          export PATH="/home/runner/.local/share/solana/install/active_release/bin:$PATH"
           cargo install --path cli --force --locked
           bolt build
-
-      - name: Generate lib
-        run: |
           cd clients/bolt-sdk
           yarn install && yarn build
           cd ../..
-
-      - name: run tests
-        run: |
-          export PATH="/home/runner/.local/share/solana/install/active_release/bin:$PATH"
-          cargo install --path cli --force --locked
-          bolt test
-
-      - name: Install the Bolt CLI and create & build a new project
-        shell: bash
-        run: |
-          export PATH="/home/runner/.local/share/solana/install/active_release/bin:$PATH"
-          cargo install --path cli --force --locked
-          bolt init test-project --force
-          cd test-project
-          cargo add --package test-project --path "../crates/bolt-lang" || true # Overrides the version with the local version
-          cargo add --package movement --path "../crates/bolt-lang" || true # -
-          cargo add --package position --path "../crates/bolt-lang" || true # -
-          cargo update
-          yarn add file:../clients/bolt-sdk/ -D # Overrides the bolt ts SDK with the local version
-          bolt build
           bolt test

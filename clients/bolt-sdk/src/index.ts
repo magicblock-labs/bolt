@@ -10,13 +10,13 @@ export * from "./delegation/allow_undelegation";
 export { DELEGATION_PROGRAM_ID } from "@magicblock-labs/ephemeral-rollups-sdk";
 
 export const SYSVAR_INSTRUCTIONS_PUBKEY = new PublicKey(
-  "Sysvar1nstructions1111111111111111111111111"
+  "Sysvar1nstructions1111111111111111111111111",
 );
 
 export function FindRegistryPda({ programId }: { programId?: PublicKey }) {
   return PublicKey.findProgramAddressSync(
     [Buffer.from("registry")],
-    programId ?? PROGRAM_ID
+    programId ?? PROGRAM_ID,
   )[0];
 }
 
@@ -30,7 +30,7 @@ export function FindWorldPda({
   const idBuffer = Buffer.from(worldId.toArrayLike(Buffer, "be", 8));
   return PublicKey.findProgramAddressSync(
     [Buffer.from("world"), idBuffer],
-    programId ?? PROGRAM_ID
+    programId ?? PROGRAM_ID,
   )[0];
 }
 
@@ -70,7 +70,7 @@ export function FindComponentPda({
 }) {
   return PublicKey.findProgramAddressSync(
     [Buffer.from(seed ?? ""), entity.toBytes()],
-    componentId
+    componentId,
   )[0];
 }
 
@@ -86,6 +86,6 @@ export function SerializeArgs(args: any = {}) {
   return Buffer.from(
     binaryData.buffer,
     binaryData.byteOffset,
-    binaryData.byteLength
+    binaryData.byteLength,
   );
 }

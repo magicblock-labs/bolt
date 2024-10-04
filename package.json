@@ -13,20 +13,10 @@
         "@types/bn.js": "^5.1.0",
         "@types/chai": "^4.3.0",
         "@types/mocha": "^9.0.0",
-        "@typescript-eslint/eslint-plugin": "^5.50.0",
-        "@typescript-eslint/parser": "^5.50.0",
         "typescript": "^4.3.5",
-        "eslint": "^8.33.0",
-        "eslint-config-prettier": "^8.6.0",
-        "eslint-config-standard-with-typescript": "^34.0.0",
         "@metaplex-foundation/beet": "^0.7.1",
         "@metaplex-foundation/beet-solana": "^0.4.0",
-        "eslint-plugin-import": "^2.25.3",
-        "eslint-plugin-n": "^15.6.1",
-        "eslint-plugin-prettier": "^4.2.1",
-        "eslint-plugin-promise": "6.1.1",
-        "eslint-plugin-react": "^7.32.2",
-        "prettier": "^2.6.2"
+        "prettier": "^3.1.1"
     },
     "license": "MIT",
     "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"

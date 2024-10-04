@@ -33,13 +33,13 @@ export interface World {
         {
           name: "systemProgram";
           address: "11111111111111111111111111111111";
-        }
+        },
       ];
       args: [
         {
           name: "worldId";
           type: "u64";
-        }
+        },
       ];
     },
     {
@@ -62,7 +62,7 @@ export interface World {
         {
           name: "systemProgram";
           address: "11111111111111111111111111111111";
-        }
+        },
       ];
       args: [
         {
@@ -70,7 +70,7 @@ export interface World {
           type: {
             option: "string";
           };
-        }
+        },
       ];
     },
     {
@@ -97,13 +97,13 @@ export interface World {
         },
         {
           name: "world";
-        }
+        },
       ];
       args: [
         {
           name: "args";
           type: "bytes";
-        }
+        },
       ];
     },
     {
@@ -137,13 +137,13 @@ export interface World {
         },
         {
           name: "world";
-        }
+        },
       ];
       args: [
         {
           name: "args";
           type: "bytes";
-        }
+        },
       ];
     },
     {
@@ -184,13 +184,13 @@ export interface World {
         },
         {
           name: "world";
-        }
+        },
       ];
       args: [
         {
           name: "args";
           type: "bytes";
-        }
+        },
       ];
     },
     {
@@ -238,13 +238,13 @@ export interface World {
         },
         {
           name: "world";
-        }
+        },
       ];
       args: [
         {
           name: "args";
           type: "bytes";
-        }
+        },
       ];
     },
     {
@@ -299,13 +299,13 @@ export interface World {
         },
         {
           name: "world";
-        }
+        },
       ];
       args: [
         {
           name: "args";
           type: "bytes";
-        }
+        },
       ];
     },
     {
@@ -327,7 +327,7 @@ export interface World {
         {
           name: "systemProgram";
           address: "11111111111111111111111111111111";
-        }
+        },
       ];
       args: [];
     },
@@ -360,7 +360,7 @@ export interface World {
         {
           name: "systemProgram";
           address: "11111111111111111111111111111111";
-        }
+        },
       ];
       args: [];
     },
@@ -384,7 +384,7 @@ export interface World {
         {
           name: "systemProgram";
           address: "11111111111111111111111111111111";
-        }
+        },
       ];
       args: [];
     },
@@ -404,7 +404,7 @@ export interface World {
         {
           name: "systemProgram";
           address: "11111111111111111111111111111111";
-        }
+        },
       ];
       args: [];
     },
@@ -427,13 +427,13 @@ export interface World {
         {
           name: "systemProgram";
           address: "11111111111111111111111111111111";
-        }
+        },
       ];
       args: [
         {
           name: "worldId";
           type: "u64";
-        }
+        },
       ];
     },
     {
@@ -455,10 +455,10 @@ export interface World {
         {
           name: "systemProgram";
           address: "11111111111111111111111111111111";
-        }
+        },
       ];
       args: [];
-    }
+    },
   ];
   accounts: [
     {
@@ -472,7 +472,7 @@ export interface World {
     {
       name: "world";
       discriminator: [145, 45, 170, 174, 122, 32, 155, 124];
-    }
+    },
   ];
   errors: [
     {
@@ -499,7 +499,7 @@ export interface World {
       code: 6004;
       name: "systemNotApproved";
       msg: "The system is not approved in this world instance";
-    }
+    },
   ];
   types: [
     {
@@ -510,7 +510,7 @@ export interface World {
           {
             name: "id";
             type: "u64";
-          }
+          },
         ];
       };
     },
@@ -522,7 +522,7 @@ export interface World {
           {
             name: "worlds";
             type: "u64";
-          }
+          },
         ];
       };
     },
@@ -552,9 +552,9 @@ export interface World {
           {
             name: "systems";
             type: "bytes";
-          }
+          },
         ];
       };
-    }
+    },
   ];
 }
