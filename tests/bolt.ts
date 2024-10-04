@@ -314,6 +314,7 @@ describe("bolt", () => {
     const applySystem = await ApplySystem({
       authority: provider.wallet.publicKey,
       systemId: exampleSystemSimpleMovement,
+      world: worldPda,
       entities: [
         {
           entity: entity1Pda,
@@ -324,7 +325,12 @@ describe("bolt", () => {
         direction: Direction.Up,
       },
     });
-    await provider.sendAndConfirm(applySystem.transaction);
+    const signature = await provider.sendAndConfirm(
+      applySystem.transaction,
+      [],
+      { skipPreflight: true }
+    );
+    console.log(`Signature: ${signature}`);
 
     const position = await exampleComponentPosition.account.position.fetch(
       componentPositionEntity1Pda
@@ -339,6 +345,7 @@ describe("bolt", () => {
     const applySystem = await ApplySystem({
       authority: provider.wallet.publicKey,
       systemId: exampleSystemSimpleMovement,
+      world: worldPda,
       entities: [
         {
           entity: entity1Pda,
@@ -364,6 +371,7 @@ describe("bolt", () => {
     const applySystem = await ApplySystem({
       authority: provider.wallet.publicKey,
       systemId: exampleSystemFly,
+      world: worldPda,
       entities: [
         {
           entity: entity1Pda,
@@ -386,6 +394,7 @@ describe("bolt", () => {
     const applySystem = await ApplySystem({
       authority: provider.wallet.publicKey,
       systemId: exampleSystemApplyVelocity,
+      world: worldPda,
       entities: [
         {
           entity: entity1Pda,
@@ -423,6 +432,7 @@ describe("bolt", () => {
     const applySystem = await ApplySystem({
       authority: provider.wallet.publicKey,
       systemId: exampleSystemApplyVelocity,
+      world: worldPda,
       entities: [
         {
           entity: entity1Pda,
@@ -460,6 +470,7 @@ describe("bolt", () => {
     const applySystem = await ApplySystem({
       authority: provider.wallet.publicKey,
       systemId: exampleSystemFly,
+      world: worldPda,
       entities: [
         {
           entity: entity4Pda,
@@ -487,6 +498,7 @@ describe("bolt", () => {
     const applySystem = await ApplySystem({
       authority: provider.wallet.publicKey,
       systemId: exampleSystemFly,
+      world: worldPda,
       entities: [
         {
           entity: entity5Pda,
@@ -554,10 +566,25 @@ describe("bolt", () => {
     expect(worldAccount.systems.length).to.be.greaterThan(0);
   });
 
-  it("Remove System 2", async () => {
+  it("Apply Fly System on Entity 1", async () => {
+    const applySystem = await ApplySystem({
+      authority: provider.wallet.publicKey,
+      systemId: exampleSystemFly,
+      world: worldPda,
+      entities: [
+        {
+          entity: entity1Pda,
+          components: [{ componentId: exampleComponentPosition.programId }],
+        },
+      ],
+    });
+    await provider.sendAndConfirm(applySystem.transaction);
+  });
+
+  it("Remove System 1", async () => {
     const approveSystem = await RemoveSystem({
       authority: provider.wallet.publicKey,
-      systemToRemove: exampleSystemApplyVelocity,
+      systemToRemove: exampleSystemFly,
       world: worldPda,
     });
 
@@ -572,6 +599,28 @@ describe("bolt", () => {
     const worldAccount = await worldProgram.account.world.fetch(worldPda);
     expect(worldAccount.permissionless).to.equal(false);
     expect(worldAccount.systems.length).to.be.greaterThan(0);
+  });
+
+  it("Apply Invalid Fly System on Entity 1", async () => {
+    const applySystem = await ApplySystem({
+      authority: provider.wallet.publicKey,
+      systemId: exampleSystemFly,
+      world: worldPda,
+      entities: [
+        {
+          entity: entity1Pda,
+          components: [{ componentId: exampleComponentPosition.programId }],
+        },
+      ],
+    });
+    let invalid = false;
+    try {
+      await provider.sendAndConfirm(applySystem.transaction);
+    } catch (error) {
+      expect(error.logs.join(" ")).to.contain("Error Code: SystemNotApproved");
+      invalid = true;
+    }
+    expect(invalid).to.equal(true);
   });
 
   it("Check invalid component init without CPI", async () => {

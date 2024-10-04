@@ -1,10 +1,5 @@
 import {
   createAddEntityInstruction,
-  createApply2Instruction,
-  createApply3Instruction,
-  createApply4Instruction,
-  createApply5Instruction,
-  createApplyInstruction,
   createInitializeComponentInstruction,
   createInitializeNewWorldInstruction,
   FindComponentPda,
@@ -312,12 +307,12 @@ interface ApplySystemInstruction {
   authority: PublicKey;
   systemId: PublicKey;
   entities: ApplySystemEntity[];
+  world: PublicKey;
   extraAccounts?: web3.AccountMeta[];
   args?: object;
 }
 function getApplyInstructionFunctionName(componentsCount: number) {
-  if (componentsCount === 1) return "createApplyInstruction";
-  return `createApply${componentsCount}Instruction`;
+  return `apply${componentsCount > 1 ? componentsCount : ""}`;
 }
 function getBoltComponentName(index: number, componentsCount: number) {
   if (componentsCount === 1) return "boltComponent";
@@ -327,13 +322,14 @@ function getBoltComponentProgramName(index: number, componentsCount: number) {
   if (componentsCount === 1) return "componentProgram";
   return `componentProgram${index + 1}`;
 }
-function createApplySystemInstruction({
+async function createApplySystemInstruction({
   authority,
   systemId,
   entities,
+  world,
   extraAccounts,
   args,
-}: ApplySystemInstruction): web3.TransactionInstruction {
+}: ApplySystemInstruction): Promise<web3.TransactionInstruction> {
   const program = new Program(
     worldIdl as Idl
   ) as unknown as Program<WorldProgram>;
@@ -350,11 +346,11 @@ function createApplySystemInstruction({
     );
   }
 
-  const instructionArgs = {
+  const applyAccounts = {
     authority: authority ?? PROGRAM_ID,
     boltSystem: systemId,
     instructionSysvarAccount: SYSVAR_INSTRUCTIONS_PUBKEY,
-    anchorRemainingAccounts: extraAccounts,
+    world,
   };
 
   let componentIndex = 0;
@@ -365,26 +361,20 @@ function createApplySystemInstruction({
         entity: entity.entity,
         seed: component.seed,
       });
-      instructionArgs[
+      applyAccounts[
         getBoltComponentProgramName(componentIndex, componentCount)
       ] = component.componentId;
-      instructionArgs[getBoltComponentName(componentIndex, componentCount)] =
+      applyAccounts[getBoltComponentName(componentIndex, componentCount)] =
         componentPda;
       componentIndex++;
     });
   });
-
-  const instructionFunctions = {
-    createApplyInstruction,
-    createApply2Instruction,
-    createApply3Instruction,
-    createApply4Instruction,
-    createApply5Instruction,
-  };
-  const functionName = getApplyInstructionFunctionName(componentCount);
-  return instructionFunctions[functionName](instructionArgs, {
-    args: SerializeArgs(args),
-  });
+  return program.methods[getApplyInstructionFunctionName(componentCount)](
+    SerializeArgs(args)
+  )
+    .accounts(applyAccounts)
+    .remainingAccounts(extraAccounts ?? [])
+    .instruction();
 }
 
 interface ApplySystemEntity {
@@ -409,19 +399,22 @@ export async function ApplySystem({
   authority,
   systemId,
   entities,
+  world,
   extraAccounts,
   args,
 }: {
   authority: PublicKey;
   systemId: PublicKey;
   entities: ApplySystemEntity[];
+  world: PublicKey;
   extraAccounts?: web3.AccountMeta[];
   args?: object;
 }): Promise<{ instruction: TransactionInstruction; transaction: Transaction }> {
-  const applySystemIx = createApplySystemInstruction({
+  const applySystemIx = await createApplySystemInstruction({
     authority,
     systemId,
     entities,
+    world,
     extraAccounts,
     args,
   });

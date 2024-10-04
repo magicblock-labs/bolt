@@ -31,6 +31,7 @@ pub mod world {
     }
 
     pub fn initialize_new_world(ctx: Context<InitializeNewWorld>) -> Result<()> {
+        ctx.accounts.world.set_inner(World::default());
         ctx.accounts.world.id = ctx.accounts.registry.worlds;
         ctx.accounts.registry.worlds += 1;
         Ok(())
@@ -61,13 +62,14 @@ pub mod world {
             // Transfer to make it rent exempt
             let rent = Rent::get()?;
             let new_minimum_balance = rent.minimum_balance(new_space);
-            let lamports_diff = new_minimum_balance.saturating_sub(ctx.accounts.world.to_account_info().lamports());
+            let lamports_diff =
+                new_minimum_balance.saturating_sub(ctx.accounts.world.to_account_info().lamports());
             if lamports_diff > 0 {
                 anchor_lang::solana_program::program::invoke(
                     &anchor_lang::solana_program::system_instruction::transfer(
                         ctx.accounts.authority.key,
                         ctx.accounts.world.to_account_info().key,
-                        lamports_diff
+                        lamports_diff,
                     ),
                     &[
                         ctx.accounts.authority.to_account_info(),
@@ -76,7 +78,10 @@ pub mod world {
                     ],
                 )?;
             }
-            ctx.accounts.world.to_account_info().realloc(new_space, false)?;
+            ctx.accounts
+                .world
+                .to_account_info()
+                .realloc(new_space, false)?;
         }
         Ok(())
     }
@@ -108,10 +113,22 @@ pub mod world {
             // Remove the extra rent
             let rent = Rent::get()?;
             let new_minimum_balance = rent.minimum_balance(new_space);
-            let lamports_diff = new_minimum_balance.saturating_sub(ctx.accounts.world.to_account_info().lamports());
-            **ctx.accounts.world.to_account_info().try_borrow_mut_lamports()? += lamports_diff;
-            **ctx.accounts.authority.to_account_info().try_borrow_mut_lamports()? -= lamports_diff;
-            ctx.accounts.world.to_account_info().realloc(new_space, false)?;
+            let lamports_diff =
+                new_minimum_balance.saturating_sub(ctx.accounts.world.to_account_info().lamports());
+            **ctx
+                .accounts
+                .world
+                .to_account_info()
+                .try_borrow_mut_lamports()? += lamports_diff;
+            **ctx
+                .accounts
+                .authority
+                .to_account_info()
+                .try_borrow_mut_lamports()? -= lamports_diff;
+            ctx.accounts
+                .world
+                .to_account_info()
+                .realloc(new_space, false)?;
             Ok(())
         } else {
             Err(WorldError::AuthorityNotFound.into())
@@ -134,8 +151,10 @@ pub mod world {
             ctx.accounts.world.permissionless = false;
         }
 
-        let mut world_systems = WorldSystems::try_from_slice(ctx.accounts.world.systems.as_ref()).unwrap_or_default();
-        world_systems.approved_systems.insert(ctx.accounts.system.key());
+        let mut world_systems = ctx.accounts.world.systems();
+        world_systems
+            .approved_systems
+            .insert(ctx.accounts.system.key());
 
         let encoded_world_systems = world_systems.try_to_vec()?;
         ctx.accounts.world.systems = encoded_world_systems.clone();
@@ -148,13 +167,14 @@ pub mod world {
         // Transfer to make it rent exempt
         let rent = Rent::get()?;
         let new_minimum_balance = rent.minimum_balance(new_space);
-        let lamports_diff = new_minimum_balance.saturating_sub(ctx.accounts.world.to_account_info().lamports());
+        let lamports_diff =
+            new_minimum_balance.saturating_sub(ctx.accounts.world.to_account_info().lamports());
         if lamports_diff > 0 {
             anchor_lang::solana_program::program::invoke(
                 &anchor_lang::solana_program::system_instruction::transfer(
                     ctx.accounts.authority.key,
                     ctx.accounts.world.to_account_info().key,
-                    lamports_diff
+                    lamports_diff,
                 ),
                 &[
                     ctx.accounts.authority.to_account_info(),
@@ -163,11 +183,13 @@ pub mod world {
                 ],
             )?;
         }
-        ctx.accounts.world.to_account_info().realloc(new_space, false)?;
+        ctx.accounts
+            .world
+            .to_account_info()
+            .realloc(new_space, false)?;
         msg!("Approved system: {:?}", world_systems);
         Ok(())
     }
-
 
     pub fn remove_system(ctx: Context<RemoveSystem>) -> Result<()> {
         if !ctx.accounts.authority.is_signer {
@@ -182,8 +204,10 @@ pub mod world {
             return Err(WorldError::InvalidAuthority.into());
         }
 
-        let mut world_systems = WorldSystems::try_from_slice(ctx.accounts.world.systems.as_ref()).unwrap_or_default();
-        world_systems.approved_systems.remove(&ctx.accounts.system.key());
+        let mut world_systems = ctx.accounts.world.systems();
+        world_systems
+            .approved_systems
+            .remove(&ctx.accounts.system.key());
 
         let encoded_world_systems = world_systems.try_to_vec()?;
         ctx.accounts.world.systems = encoded_world_systems.clone();
@@ -196,10 +220,22 @@ pub mod world {
         // Remove the extra rent
         let rent = Rent::get()?;
         let new_minimum_balance = rent.minimum_balance(new_space);
-        let lamports_diff = new_minimum_balance.saturating_sub(ctx.accounts.world.to_account_info().lamports());
-        **ctx.accounts.world.to_account_info().try_borrow_mut_lamports()? += lamports_diff;
-        **ctx.accounts.authority.to_account_info().try_borrow_mut_lamports()? -= lamports_diff;
-        ctx.accounts.world.to_account_info().realloc(new_space, false)?;
+        let lamports_diff =
+            new_minimum_balance.saturating_sub(ctx.accounts.world.to_account_info().lamports());
+        **ctx
+            .accounts
+            .world
+            .to_account_info()
+            .try_borrow_mut_lamports()? += lamports_diff;
+        **ctx
+            .accounts
+            .authority
+            .to_account_info()
+            .try_borrow_mut_lamports()? -= lamports_diff;
+        ctx.accounts
+            .world
+            .to_account_info()
+            .realloc(new_space, false)?;
         msg!("Approved system: {:?}", world_systems);
         Ok(())
     }
@@ -229,6 +265,18 @@ pub mod world {
     ) -> Result<()> {
         if !ctx.accounts.authority.is_signer && ctx.accounts.authority.key != &ID {
             return Err(WorldError::InvalidAuthority.into());
+        }
+        msg!("Applying system");
+        msg!("Permisionless: {:?}", ctx.accounts.world.permissionless);
+        if !ctx.accounts.world.permissionless
+            && !ctx
+                .accounts
+                .world
+                .systems()
+                .approved_systems
+                .contains(&ctx.accounts.bolt_system.key())
+        {
+            return Err(WorldError::SystemNotApproved.into());
         }
         let remaining_accounts: Vec<AccountInfo<'info>> = ctx.remaining_accounts.to_vec();
         let res = bolt_system::cpi::execute(
@@ -453,13 +501,20 @@ impl World {
     fn space_for_authorities(auths: usize, systems_space: usize) -> usize {
         16 + 8 + 32 * auths + 1 + 8 + systems_space
     }
+
+    pub fn systems(&self) -> WorldSystems {
+        if self.permissionless {
+            return WorldSystems::default();
+        }
+        WorldSystems::try_from_slice(self.systems.as_ref()).unwrap_or_default()
+    }
 }
 
 #[derive(
     anchor_lang::prelude::borsh::BorshSerialize,
     anchor_lang::prelude::borsh::BorshDeserialize,
     Default,
-    Debug
+    Debug,
 )]
 pub struct WorldSystems {
     pub approved_systems: BTreeSet<Pubkey>,

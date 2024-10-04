@@ -494,6 +494,11 @@ export interface World {
       code: 6003;
       name: "authorityNotFound";
       msg: "The provided authority not found";
+    },
+    {
+      code: 6004;
+      name: "systemNotApproved";
+      msg: "The system is not approved in this world instance";
     }
   ];
   types: [

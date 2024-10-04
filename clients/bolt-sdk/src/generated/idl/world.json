@@ -632,6 +632,11 @@
       "code": 6003,
       "name": "AuthorityNotFound",
       "msg": "The provided authority not found"
+    },
+    {
+      "code": 6004,
+      "name": "SystemNotApproved",
+      "msg": "The system is not approved in this world instance"
     }
   ],
   "types": [

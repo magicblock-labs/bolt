@@ -10,4 +10,6 @@ pub enum WorldError {
     TooManyAuthorities,
     #[msg("The provided authority not found")]
     AuthorityNotFound,
+    #[msg("The system is not approved in this world instance")]
+    SystemNotApproved,
 }
