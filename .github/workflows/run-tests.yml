@@ -44,7 +44,7 @@ jobs:
       - name: Install Node Modules
         run: |
           export PATH="/home/runner/.local/share/solana/install/active_release/bin:$PATH"
-          yarn --frozen-lockfile --network-concurrency 2
+          yarn install
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
@@ -77,7 +77,6 @@ jobs:
             cargo fmt -- --check --verbose
             cargo clippy -- --deny=warnings
           else
-            prettier -v
             yarn lint
           fi
 
