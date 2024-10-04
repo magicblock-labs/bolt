@@ -43,7 +43,7 @@ jobs:
       - name: Install Solana
         run: |
           sh -c "$(curl -sSfL https://release.solana.com/${{ env.solana_version }}/install)"
-          export PATH="$HOME/.local/share/solana/install/active_release/bin:$PATH"
+          echo "/home/runner/.local/share/solana/install/active_release/bin" >> $GITHUB_PATH
           solana --version
 
   lint:
@@ -73,12 +73,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Install Solana
+      - name: Create keypair
         run: |
-          sh -c "$(curl -sSfL https://release.solana.com/${{ env.solana_version }}/install)"
-          export PATH="$HOME/.local/share/solana/install/active_release/bin:$PATH"
           solana --version
           solana-keygen new --silent --no-bip39-passphrase
+          solana airdrop 100
 
       - name: Set Deployment Keys
         run: |
