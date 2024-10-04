@@ -1018,7 +1018,7 @@ dependencies = [
  "heck 0.5.0",
  "serde_json",
  "syn 1.0.109",
- "world 0.1.9",
+ "world 0.1.10",
 ]
 
 [[package]]
