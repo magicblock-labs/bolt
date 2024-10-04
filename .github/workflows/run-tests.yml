@@ -74,11 +74,25 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+
+      - name: Cache Rust
+        uses: Swatinem/rust-cache@v2
+
+      - name: Install Solana
+        run: |
+          sh -c "$(curl -sSfL https://release.solana.com/${{ env.solana_version }}/install)"
+          export PATH="$HOME/.local/share/solana/install/active_release/bin:$PATH"
+          echo "$HOME/.local/share/solana/install/active_release/bin" >> $GITHUB_PATH
+          solana --version
+
       - name: Create keypair
         run: |
           export PATH="$HOME/.local/share/solana/install/active_release/bin:$PATH"
-          echo $PATH
-          ls -la $HOME/.local/share/solana/install/active_release/bin
           solana --version
           solana-keygen new --silent --no-bip39-passphrase
           solana airdrop 100
