@@ -30,7 +30,7 @@ export const addEntityStruct = new beet.FixableBeetArgsStruct<
     ["instructionDiscriminator", beet.uniformFixedSizeArray(beet.u8, 8)],
     ["extraSeed", beet.coption(beet.utf8String)],
   ],
-  "AddEntityInstructionArgs"
+  "AddEntityInstructionArgs",
 );
 /**
  * Accounts required by the _addEntity_ instruction
@@ -67,7 +67,7 @@ export const addEntityInstructionDiscriminator = [
 export function createAddEntityInstruction(
   accounts: AddEntityInstructionAccounts,
   args: AddEntityInstructionArgs,
-  programId = new web3.PublicKey("WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n")
+  programId = new web3.PublicKey("WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n"),
 ) {
   const [data] = addEntityStruct.serialize({
     instructionDiscriminator: addEntityInstructionDiscriminator,

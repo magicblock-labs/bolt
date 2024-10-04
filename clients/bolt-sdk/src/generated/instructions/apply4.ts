@@ -30,7 +30,7 @@ export const apply4Struct = new beet.FixableBeetArgsStruct<
     ["instructionDiscriminator", beet.uniformFixedSizeArray(beet.u8, 8)],
     ["args", beet.bytes],
   ],
-  "Apply4InstructionArgs"
+  "Apply4InstructionArgs",
 );
 /**
  * Accounts required by the _apply4_ instruction
@@ -82,7 +82,7 @@ export const apply4InstructionDiscriminator = [
 export function createApply4Instruction(
   accounts: Apply4InstructionAccounts,
   args: Apply4InstructionArgs,
-  programId = new web3.PublicKey("WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n")
+  programId = new web3.PublicKey("WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n"),
 ) {
   const [data] = apply4Struct.serialize({
     instructionDiscriminator: apply4InstructionDiscriminator,

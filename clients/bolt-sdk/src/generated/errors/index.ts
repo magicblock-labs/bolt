@@ -31,7 +31,7 @@ export class InvalidAuthorityError extends Error {
 createErrorFromCodeLookup.set(0x1770, () => new InvalidAuthorityError());
 createErrorFromNameLookup.set(
   "InvalidAuthority",
-  () => new InvalidAuthorityError()
+  () => new InvalidAuthorityError(),
 );
 
 /**

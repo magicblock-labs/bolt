@@ -17,7 +17,7 @@ export const initializeRegistryStruct = new beet.BeetArgsStruct<{
   instructionDiscriminator: number[] /* size: 8 */;
 }>(
   [["instructionDiscriminator", beet.uniformFixedSizeArray(beet.u8, 8)]],
-  "InitializeRegistryInstructionArgs"
+  "InitializeRegistryInstructionArgs",
 );
 /**
  * Accounts required by the _initializeRegistry_ instruction
@@ -49,7 +49,7 @@ export const initializeRegistryInstructionDiscriminator = [
  */
 export function createInitializeRegistryInstruction(
   accounts: InitializeRegistryInstructionAccounts,
-  programId = new web3.PublicKey("WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n")
+  programId = new web3.PublicKey("WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n"),
 ) {
   const [data] = initializeRegistryStruct.serialize({
     instructionDiscriminator: initializeRegistryInstructionDiscriminator,

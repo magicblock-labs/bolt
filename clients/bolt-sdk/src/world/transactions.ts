@@ -83,7 +83,7 @@ export async function AddAuthority({
   transaction: Transaction;
 }> {
   const program = new Program(
-    worldIdl as Idl
+    worldIdl as Idl,
   ) as unknown as Program<WorldProgram>;
   const worldInstance = await World.fromAccountAddress(connection, world);
   const worldId = new BN(worldInstance.id);
@@ -124,7 +124,7 @@ export async function RemoveAuthority({
   transaction: Transaction;
 }> {
   const program = new Program(
-    worldIdl as Idl
+    worldIdl as Idl,
   ) as unknown as Program<WorldProgram>;
   const worldInstance = await World.fromAccountAddress(connection, world);
   const worldId = new BN(worldInstance.id);
@@ -162,7 +162,7 @@ export async function ApproveSystem({
   transaction: Transaction;
 }> {
   const program = new Program(
-    worldIdl as Idl
+    worldIdl as Idl,
   ) as unknown as Program<WorldProgram>;
   const approveSystemIx = await program.methods
     .approveSystem()
@@ -198,7 +198,7 @@ export async function RemoveSystem({
   transaction: Transaction;
 }> {
   const program = new Program(
-    worldIdl as Idl
+    worldIdl as Idl,
   ) as unknown as Program<WorldProgram>;
   const removeSystemIx = await program.methods
     .removeSystem()
@@ -248,7 +248,7 @@ export async function AddEntity({
       payer,
       entity: entityPda,
     },
-    { extraSeed: seed ?? null }
+    { extraSeed: seed ?? null },
   );
   return {
     instruction: addEntityIx,
@@ -331,7 +331,7 @@ async function createApplySystemInstruction({
   args,
 }: ApplySystemInstruction): Promise<web3.TransactionInstruction> {
   const program = new Program(
-    worldIdl as Idl
+    worldIdl as Idl,
   ) as unknown as Program<WorldProgram>;
   let componentCount = 0;
   entities.forEach(function (entity) {
@@ -342,7 +342,7 @@ async function createApplySystemInstruction({
   }
   if (componentCount > MAX_COMPONENTS) {
     throw new Error(
-      `Not implemented for component counts outside 1-${MAX_COMPONENTS}`
+      `Not implemented for component counts outside 1-${MAX_COMPONENTS}`,
     );
   }
 
@@ -370,7 +370,7 @@ async function createApplySystemInstruction({
     });
   });
   return program.methods[getApplyInstructionFunctionName(componentCount)](
-    SerializeArgs(args)
+    SerializeArgs(args),
   )
     .accounts(applyAccounts)
     .remainingAccounts(extraAccounts ?? [])

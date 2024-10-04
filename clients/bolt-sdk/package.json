@@ -12,13 +12,6 @@
   },
   "devDependencies": {
     "@metaplex-foundation/solita": "^0.20.1",
-    "@typescript-eslint/eslint-plugin": "^6.14.0",
-    "@typescript-eslint/parser": "^6.14.0",
-    "eslint": "^8.55.0",
-    "eslint-config-prettier": "^9.1.0",
-    "eslint-config-standard-with-typescript": "^42.0.0",
-    "eslint-plugin-import": "^2.29.0",
-    "eslint-plugin-react": "^7.33.2",
     "prettier": "^3.1.1",
     "rimraf": "^5.0.5",
     "typedoc": "^0.25.4",
@@ -41,8 +34,8 @@
     "build:docs": "typedoc && typedoc --plugin typedoc-plugin-markdown --out docs-mk",
     "dev": "tsc --watch",
     "start": "tsc",
-    "lint": "eslint -c ../../.eslintrc.yml --ext .ts,.tsx src",
-    "lint:fix": "eslint -c ../../.eslintrc.yml --ext .ts,.tsx src --fix"
+    "lint": "prettier */*.js \"*/**/*{.js,.ts}\" --check",
+    "lint:fix": "prettier */*.js \"*/**/*{.js,.ts}\" -w"
   },
   "files": [
     "lib"

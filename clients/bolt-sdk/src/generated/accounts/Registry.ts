@@ -42,7 +42,7 @@ export class Registry implements RegistryArgs {
    */
   static fromAccountInfo(
     accountInfo: web3.AccountInfo<Buffer>,
-    offset = 0
+    offset = 0,
   ): [Registry, number] {
     return Registry.deserialize(accountInfo.data, offset);
   }
@@ -56,11 +56,11 @@ export class Registry implements RegistryArgs {
   static async fromAccountAddress(
     connection: web3.Connection,
     address: web3.PublicKey,
-    commitmentOrConfig?: web3.Commitment | web3.GetAccountInfoConfig
+    commitmentOrConfig?: web3.Commitment | web3.GetAccountInfoConfig,
   ): Promise<Registry> {
     const accountInfo = await connection.getAccountInfo(
       address,
-      commitmentOrConfig
+      commitmentOrConfig,
     );
     if (accountInfo == null) {
       throw new Error(`Unable to find Registry account at ${address}`);
@@ -76,8 +76,8 @@ export class Registry implements RegistryArgs {
    */
   static gpaBuilder(
     programId: web3.PublicKey = new web3.PublicKey(
-      "WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n"
-    )
+      "WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n",
+    ),
   ) {
     return beetSolana.GpaBuilder.fromStruct(programId, registryBeet);
   }
@@ -117,11 +117,11 @@ export class Registry implements RegistryArgs {
    */
   static async getMinimumBalanceForRentExemption(
     connection: web3.Connection,
-    commitment?: web3.Commitment
+    commitment?: web3.Commitment,
   ): Promise<number> {
     return connection.getMinimumBalanceForRentExemption(
       Registry.byteSize,
-      commitment
+      commitment,
     );
   }
 
@@ -169,5 +169,5 @@ export const registryBeet = new beet.BeetStruct<
     ["worlds", beet.u64],
   ],
   Registry.fromArgs,
-  "Registry"
+  "Registry",
 );

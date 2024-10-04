@@ -9,7 +9,7 @@ export const undelegateStruct = new beet.BeetArgsStruct<{
   instructionDiscriminator: number[] /* size: 8 */;
 }>(
   [["instructionDiscriminator", beet.uniformFixedSizeArray(beet.u8, 8)]],
-  "undelegateInstructionArgs"
+  "undelegateInstructionArgs",
 );
 
 export interface UndelegateInstructionAccounts {
@@ -26,7 +26,7 @@ export const undelegateInstructionDiscriminator = [
  * Creates an Undelegate instruction.
  */
 export function createUndelegateInstruction(
-  accounts: UndelegateInstructionAccounts
+  accounts: UndelegateInstructionAccounts,
 ) {
   const [data] = undelegateStruct.serialize({
     instructionDiscriminator: undelegateInstructionDiscriminator,

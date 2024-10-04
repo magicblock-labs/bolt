@@ -9,7 +9,7 @@ export const allowUndelegationStruct = new beet.BeetArgsStruct<{
   instructionDiscriminator: number[] /* size: 8 */;
 }>(
   [["instructionDiscriminator", beet.uniformFixedSizeArray(beet.u8, 8)]],
-  "allowUndelegationInstructionArgs"
+  "allowUndelegationInstructionArgs",
 );
 
 export interface AllowUndelegationInstructionAccounts {
@@ -27,7 +27,7 @@ export const allowUndelegateInstructionDiscriminator = [
  */
 
 export function createAllowUndelegationInstruction(
-  accounts: AllowUndelegationInstructionAccounts
+  accounts: AllowUndelegationInstructionAccounts,
 ) {
   const [data] = allowUndelegationStruct.serialize({
     instructionDiscriminator: allowUndelegateInstructionDiscriminator,
@@ -35,7 +35,7 @@ export function createAllowUndelegationInstruction(
 
   const { delegationPda, delegationMetadata, bufferPda } = DelegateAccounts(
     accounts.delegatedAccount,
-    accounts.ownerProgram
+    accounts.ownerProgram,
   );
 
   const keys: web3.AccountMeta[] = [

@@ -28,7 +28,7 @@ function getExePath(): string {
     return require.resolve(binaryName);
   } catch (e) {
     throw new Error(
-      `Couldn't find application binary inside node_modules for ${os}-${arch()}`
+      `Couldn't find application binary inside node_modules for ${os}-${arch()}`,
     );
   }
 }
@@ -60,7 +60,7 @@ function tryPackageBolt(): boolean {
   } catch (e) {
     console.error(
       "Failed to run bolt from package:",
-      e instanceof Error ? e.message : e
+      e instanceof Error ? e.message : e,
     );
     return false;
   }
@@ -80,7 +80,7 @@ function trySystemBolt(): void {
 
   if (!absolutePath) {
     console.error(
-      `Could not find globally installed bolt, please install with cargo.`
+      `Could not find globally installed bolt, please install with cargo.`,
     );
     process.exit(1);
   }
@@ -94,7 +94,7 @@ function trySystemBolt(): void {
   }
   if (binaryVersion !== PACKAGE_VERSION) {
     console.error(
-      `Globally installed bolt version is not correct. Expected "${PACKAGE_VERSION}", found "${binaryVersion}".`
+      `Globally installed bolt version is not correct. Expected "${PACKAGE_VERSION}", found "${binaryVersion}".`,
     );
     return;
   }

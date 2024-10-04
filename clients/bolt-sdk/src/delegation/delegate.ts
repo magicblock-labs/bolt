@@ -26,7 +26,7 @@ export const delegateStruct = new beet.FixableBeetArgsStruct<
     ["validUntil", beet.i64],
     ["commitFrequencyMs", beet.u32],
   ],
-  "DelegateInstructionArgs"
+  "DelegateInstructionArgs",
 );
 
 /**
@@ -58,7 +58,7 @@ export function createDelegateInstruction(
   accounts: DelegateInstructionAccounts,
   validUntil: beet.bignum = 0,
   commitFrequencyMs: number = 30000,
-  programId = accounts.ownerProgram
+  programId = accounts.ownerProgram,
 ) {
   const [data] = delegateStruct.serialize({
     instructionDiscriminator: delegateInstructionDiscriminator,
@@ -68,7 +68,7 @@ export function createDelegateInstruction(
 
   const { delegationPda, delegationMetadata, bufferPda } = DelegateAccounts(
     accounts.account,
-    accounts.ownerProgram
+    accounts.ownerProgram,
   );
 
   const keys: web3.AccountMeta[] = [
