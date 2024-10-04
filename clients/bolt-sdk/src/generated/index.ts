@@ -6,6 +6,8 @@
  */
 
 import { PublicKey } from "@solana/web3.js";
+import { type World as WorldProgram } from "./types/world";
+import idl from "./idl/world.json";
 export * from "./accounts";
 export * from "./errors";
 export * from "./instructions";
@@ -25,3 +27,6 @@ export const PROGRAM_ADDRESS = "WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n";
  * @category generated
  */
 export const PROGRAM_ID = new PublicKey(PROGRAM_ADDRESS);
+
+export default WorldProgram;
+export { idl as worldIdl };

@@ -1,0 +1,698 @@
+{
+  "address": "WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n",
+  "metadata": {
+    "name": "world",
+    "version": "0.1.9",
+    "spec": "0.1.0",
+    "description": "Bolt World program",
+    "repository": "https://github.com/magicblock-labs/bolt"
+  },
+  "instructions": [
+    {
+      "name": "add_authority",
+      "discriminator": [
+        229,
+        9,
+        106,
+        73,
+        91,
+        213,
+        109,
+        183
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "new_authority"
+        },
+        {
+          "name": "world",
+          "writable": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "world_id",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "add_entity",
+      "discriminator": [
+        163,
+        241,
+        57,
+        35,
+        244,
+        244,
+        48,
+        57
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "entity",
+          "writable": true
+        },
+        {
+          "name": "world",
+          "writable": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "extra_seed",
+          "type": {
+            "option": "string"
+          }
+        }
+      ]
+    },
+    {
+      "name": "apply",
+      "discriminator": [
+        248,
+        243,
+        145,
+        24,
+        105,
+        50,
+        162,
+        225
+      ],
+      "accounts": [
+        {
+          "name": "component_program"
+        },
+        {
+          "name": "bolt_system"
+        },
+        {
+          "name": "bolt_component",
+          "writable": true
+        },
+        {
+          "name": "authority",
+          "signer": true
+        },
+        {
+          "name": "instruction_sysvar_account",
+          "address": "Sysvar1nstructions1111111111111111111111111"
+        },
+        {
+          "name": "world"
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": "bytes"
+        }
+      ]
+    },
+    {
+      "name": "apply2",
+      "discriminator": [
+        120,
+        32,
+        116,
+        154,
+        158,
+        159,
+        208,
+        73
+      ],
+      "accounts": [
+        {
+          "name": "bolt_system"
+        },
+        {
+          "name": "component_program_1"
+        },
+        {
+          "name": "bolt_component_1",
+          "writable": true
+        },
+        {
+          "name": "component_program_2"
+        },
+        {
+          "name": "bolt_component_2",
+          "writable": true
+        },
+        {
+          "name": "authority",
+          "signer": true
+        },
+        {
+          "name": "instruction_sysvar_account",
+          "address": "Sysvar1nstructions1111111111111111111111111"
+        },
+        {
+          "name": "world"
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": "bytes"
+        }
+      ]
+    },
+    {
+      "name": "apply3",
+      "discriminator": [
+        254,
+        146,
+        49,
+        7,
+        236,
+        131,
+        105,
+        221
+      ],
+      "accounts": [
+        {
+          "name": "bolt_system"
+        },
+        {
+          "name": "component_program_1"
+        },
+        {
+          "name": "bolt_component_1",
+          "writable": true
+        },
+        {
+          "name": "component_program_2"
+        },
+        {
+          "name": "bolt_component_2",
+          "writable": true
+        },
+        {
+          "name": "component_program_3"
+        },
+        {
+          "name": "bolt_component_3",
+          "writable": true
+        },
+        {
+          "name": "authority",
+          "signer": true
+        },
+        {
+          "name": "instruction_sysvar_account",
+          "address": "Sysvar1nstructions1111111111111111111111111"
+        },
+        {
+          "name": "world"
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": "bytes"
+        }
+      ]
+    },
+    {
+      "name": "apply4",
+      "discriminator": [
+        223,
+        104,
+        24,
+        79,
+        252,
+        196,
+        14,
+        109
+      ],
+      "accounts": [
+        {
+          "name": "bolt_system"
+        },
+        {
+          "name": "component_program_1"
+        },
+        {
+          "name": "bolt_component_1",
+          "writable": true
+        },
+        {
+          "name": "component_program_2"
+        },
+        {
+          "name": "bolt_component_2",
+          "writable": true
+        },
+        {
+          "name": "component_program_3"
+        },
+        {
+          "name": "bolt_component_3",
+          "writable": true
+        },
+        {
+          "name": "component_program_4"
+        },
+        {
+          "name": "bolt_component_4",
+          "writable": true
+        },
+        {
+          "name": "authority",
+          "signer": true
+        },
+        {
+          "name": "instruction_sysvar_account",
+          "address": "Sysvar1nstructions1111111111111111111111111"
+        },
+        {
+          "name": "world"
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": "bytes"
+        }
+      ]
+    },
+    {
+      "name": "apply5",
+      "discriminator": [
+        70,
+        164,
+        214,
+        28,
+        136,
+        116,
+        84,
+        153
+      ],
+      "accounts": [
+        {
+          "name": "bolt_system"
+        },
+        {
+          "name": "component_program_1"
+        },
+        {
+          "name": "bolt_component_1",
+          "writable": true
+        },
+        {
+          "name": "component_program_2"
+        },
+        {
+          "name": "bolt_component_2",
+          "writable": true
+        },
+        {
+          "name": "component_program_3"
+        },
+        {
+          "name": "bolt_component_3",
+          "writable": true
+        },
+        {
+          "name": "component_program_4"
+        },
+        {
+          "name": "bolt_component_4",
+          "writable": true
+        },
+        {
+          "name": "component_program_5"
+        },
+        {
+          "name": "bolt_component_5",
+          "writable": true
+        },
+        {
+          "name": "authority",
+          "signer": true
+        },
+        {
+          "name": "instruction_sysvar_account",
+          "address": "Sysvar1nstructions1111111111111111111111111"
+        },
+        {
+          "name": "world"
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": "bytes"
+        }
+      ]
+    },
+    {
+      "name": "approve_system",
+      "discriminator": [
+        114,
+        165,
+        105,
+        68,
+        52,
+        67,
+        207,
+        121
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "world",
+          "writable": true
+        },
+        {
+          "name": "system"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "initialize_component",
+      "discriminator": [
+        36,
+        143,
+        233,
+        113,
+        12,
+        234,
+        61,
+        30
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "data",
+          "writable": true
+        },
+        {
+          "name": "entity"
+        },
+        {
+          "name": "component_program"
+        },
+        {
+          "name": "authority"
+        },
+        {
+          "name": "instruction_sysvar_account",
+          "address": "Sysvar1nstructions1111111111111111111111111"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "initialize_new_world",
+      "discriminator": [
+        23,
+        96,
+        88,
+        194,
+        200,
+        203,
+        200,
+        98
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "world",
+          "writable": true
+        },
+        {
+          "name": "registry",
+          "writable": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "initialize_registry",
+      "discriminator": [
+        189,
+        181,
+        20,
+        17,
+        174,
+        57,
+        249,
+        59
+      ],
+      "accounts": [
+        {
+          "name": "registry",
+          "writable": true
+        },
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "remove_authority",
+      "discriminator": [
+        242,
+        104,
+        208,
+        132,
+        190,
+        250,
+        74,
+        216
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "authority_to_delete"
+        },
+        {
+          "name": "world",
+          "writable": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "world_id",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "remove_system",
+      "discriminator": [
+        218,
+        80,
+        71,
+        80,
+        161,
+        130,
+        149,
+        120
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "world",
+          "writable": true
+        },
+        {
+          "name": "system"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    }
+  ],
+  "accounts": [
+    {
+      "name": "Entity",
+      "discriminator": [
+        46,
+        157,
+        161,
+        161,
+        254,
+        46,
+        79,
+        24
+      ]
+    },
+    {
+      "name": "Registry",
+      "discriminator": [
+        47,
+        174,
+        110,
+        246,
+        184,
+        182,
+        252,
+        218
+      ]
+    },
+    {
+      "name": "World",
+      "discriminator": [
+        145,
+        45,
+        170,
+        174,
+        122,
+        32,
+        155,
+        124
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "InvalidAuthority",
+      "msg": "Invalid authority for instruction"
+    },
+    {
+      "code": 6001,
+      "name": "WorldAccountMismatch",
+      "msg": "The provided world account does not match the expected PDA."
+    },
+    {
+      "code": 6002,
+      "name": "TooManyAuthorities",
+      "msg": "Exceed the maximum number of authorities."
+    },
+    {
+      "code": 6003,
+      "name": "AuthorityNotFound",
+      "msg": "The provided authority not found"
+    },
+    {
+      "code": 6004,
+      "name": "SystemNotApproved",
+      "msg": "The system is not approved in this world instance"
+    }
+  ],
+  "types": [
+    {
+      "name": "Entity",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "id",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Registry",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "worlds",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "World",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "id",
+            "type": "u64"
+          },
+          {
+            "name": "entities",
+            "type": "u64"
+          },
+          {
+            "name": "authorities",
+            "type": {
+              "vec": "pubkey"
+            }
+          },
+          {
+            "name": "permissionless",
+            "type": "bool"
+          },
+          {
+            "name": "systems",
+            "type": "bytes"
+          }
+        ]
+      }
+    }
+  ]
+}

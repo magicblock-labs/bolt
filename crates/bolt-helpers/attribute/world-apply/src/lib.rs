@@ -96,6 +96,8 @@ pub fn apply_system(attr: TokenStream, item: TokenStream) -> TokenStream {
                 #[account(address = anchor_lang::solana_program::sysvar::instructions::id())]
                 /// CHECK: instruction sysvar check
                 pub instruction_sysvar_account: UncheckedAccount<'info>,
+                #[account()]
+                pub world: Account<'info, World>,
             }
         };
         quote! {

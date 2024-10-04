@@ -1,10 +1,12 @@
 mod component;
+mod instructions;
 mod rust_template;
 mod system;
 mod templates;
 mod workspace;
 
 use crate::component::new_component;
+use crate::instructions::{approve_system, authorize, deauthorize, remove_system};
 use crate::rust_template::{create_component, create_system};
 use crate::system::new_system;
 use anchor_cli::config;
@@ -23,12 +25,9 @@ use std::io::Write;
 use std::io::{self, BufRead};
 use std::path::{Path, PathBuf};
 use std::process::Stdio;
-
+use std::string::ToString;
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 pub const ANCHOR_VERSION: &str = anchor_cli::VERSION;
-
-pub const WORLD_PROGRAM: &str = "WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n";
-
 #[derive(Subcommand)]
 pub enum BoltCommand {
     #[clap(about = "Create a new component")]
@@ -38,6 +37,14 @@ pub enum BoltCommand {
     // Include all existing commands from anchor_cli::Command
     #[clap(flatten)]
     Anchor(anchor_cli::Command),
+    #[clap(about = "Add a new authority for a world instance")]
+    Authorize(AuthorizeCommand),
+    #[clap(about = "Remove an authority from a world instance")]
+    Deauthorize(DeauthorizeCommand),
+    #[clap(about = "Approve a system for a world instance")]
+    ApproveSystem(ApproveSystemCommand),
+    #[clap(about = "Remove a system from a world instance")]
+    RemoveSystem(RemoveSystemCommand),
 }
 
 #[derive(Debug, Parser)]
@@ -54,6 +61,30 @@ pub struct ComponentCommand {
 #[derive(Debug, Parser)]
 pub struct SystemCommand {
     pub name: String,
+}
+
+#[derive(Debug, Parser)]
+pub struct AuthorizeCommand {
+    pub world: String,
+    pub new_authority: String,
+}
+
+#[derive(Debug, Parser)]
+pub struct DeauthorizeCommand {
+    pub world: String,
+    pub authority_to_remove: String,
+}
+
+#[derive(Debug, Parser)]
+pub struct ApproveSystemCommand {
+    pub world: String,
+    pub system_to_approve: String,
+}
+
+#[derive(Debug, Parser)]
+pub struct RemoveSystemCommand {
+    pub world: String,
+    pub system_to_remove: String,
 }
 
 #[derive(Parser)]
@@ -134,11 +165,23 @@ pub fn entry(opts: Opts) -> Result<()> {
         },
         BoltCommand::Component(command) => new_component(&opts.cfg_override, command.name),
         BoltCommand::System(command) => new_system(&opts.cfg_override, command.name),
+        BoltCommand::Authorize(command) => {
+            authorize(&opts.cfg_override, command.world, command.new_authority)
+        }
+        BoltCommand::Deauthorize(command) => deauthorize(
+            &opts.cfg_override,
+            command.world,
+            command.authority_to_remove,
+        ),
+        BoltCommand::ApproveSystem(command) => {
+            approve_system(&opts.cfg_override, command.world, command.system_to_approve)
+        }
+        BoltCommand::RemoveSystem(command) => {
+            remove_system(&opts.cfg_override, command.world, command.system_to_remove)
+        }
     }
 }
-
 // Bolt Init
-
 #[allow(clippy::too_many_arguments)]
 fn init(
     cfg_override: &ConfigOverride,
@@ -268,7 +311,7 @@ fn init(
         shutdown_wait: 2000,
         validator: Some(validator),
         genesis: Some(vec![GenesisEntry {
-            address: WORLD_PROGRAM.to_owned(),
+            address: world::id().to_string(),
             program: "tests/fixtures/world.so".to_owned(),
             upgradeable: Some(false),
         }]),
@@ -345,7 +388,7 @@ fn init(
         .arg("dump")
         .arg("-u")
         .arg("d")
-        .arg(WORLD_PROGRAM)
+        .arg(world::id().to_string())
         .arg("tests/fixtures/world.so")
         .stdout(Stdio::inherit())
         .stderr(Stdio::inherit())
