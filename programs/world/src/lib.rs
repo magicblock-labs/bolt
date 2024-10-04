@@ -272,8 +272,6 @@ pub mod world {
         if !ctx.accounts.authority.is_signer && ctx.accounts.authority.key != &ID {
             return Err(WorldError::InvalidAuthority.into());
         }
-        msg!("Applying system");
-        msg!("Permisionless: {:?}", ctx.accounts.world.permissionless);
         if !ctx.accounts.world.permissionless
             && !ctx
                 .accounts
