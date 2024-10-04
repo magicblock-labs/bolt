@@ -10,18 +10,18 @@ import {
   SerializeArgs,
   SYSVAR_INSTRUCTIONS_PUBKEY,
   World,
-} from "../index";
-import BN from "bn.js";
-import type web3 from "@solana/web3.js";
+} from '../index';
+import BN from 'bn.js';
+import type web3 from '@solana/web3.js';
 import {
   type Connection,
   type PublicKey,
   Transaction,
   type TransactionInstruction,
-} from "@solana/web3.js";
-import type WorldProgram from "../generated";
-import { PROGRAM_ID, worldIdl } from "../generated";
-import { type Idl, Program } from "@coral-xyz/anchor";
+} from '@solana/web3.js';
+import type WorldProgram from '../generated';
+import { PROGRAM_ID, worldIdl } from '../generated';
+import { type Idl, Program } from '@coral-xyz/anchor';
 
 const MAX_COMPONENTS = 5;
 
@@ -83,7 +83,7 @@ export async function AddAuthority({
   transaction: Transaction;
 }> {
   const program = new Program(
-    worldIdl as Idl
+    worldIdl as Idl,
   ) as unknown as Program<WorldProgram>;
   const worldInstance = await World.fromAccountAddress(connection, world);
   const worldId = new BN(worldInstance.id);
@@ -124,7 +124,7 @@ export async function RemoveAuthority({
   transaction: Transaction;
 }> {
   const program = new Program(
-    worldIdl as Idl
+    worldIdl as Idl,
   ) as unknown as Program<WorldProgram>;
   const worldInstance = await World.fromAccountAddress(connection, world);
   const worldId = new BN(worldInstance.id);
@@ -162,7 +162,7 @@ export async function ApproveSystem({
   transaction: Transaction;
 }> {
   const program = new Program(
-    worldIdl as Idl
+    worldIdl as Idl,
   ) as unknown as Program<WorldProgram>;
   const approveSystemIx = await program.methods
     .approveSystem()
@@ -198,7 +198,7 @@ export async function RemoveSystem({
   transaction: Transaction;
 }> {
   const program = new Program(
-    worldIdl as Idl
+    worldIdl as Idl,
   ) as unknown as Program<WorldProgram>;
   const removeSystemIx = await program.methods
     .removeSystem()
@@ -248,7 +248,7 @@ export async function AddEntity({
       payer,
       entity: entityPda,
     },
-    { extraSeed: seed ?? null }
+    { extraSeed: seed ?? null },
   );
   return {
     instruction: addEntityIx,
@@ -271,7 +271,7 @@ export async function InitializeComponent({
   payer,
   entity,
   componentId,
-  seed = "",
+  seed = '',
   authority,
   anchorRemainingAccounts,
 }: {
@@ -312,14 +312,14 @@ interface ApplySystemInstruction {
   args?: object;
 }
 function getApplyInstructionFunctionName(componentsCount: number) {
-  return `apply${componentsCount > 1 ? componentsCount : ""}`;
+  return `apply${componentsCount > 1 ? componentsCount : ''}`;
 }
 function getBoltComponentName(index: number, componentsCount: number) {
-  if (componentsCount === 1) return "boltComponent";
+  if (componentsCount === 1) return 'boltComponent';
   return `boltComponent${index + 1}`;
 }
 function getBoltComponentProgramName(index: number, componentsCount: number) {
-  if (componentsCount === 1) return "componentProgram";
+  if (componentsCount === 1) return 'componentProgram';
   return `componentProgram${index + 1}`;
 }
 async function createApplySystemInstruction({
@@ -331,18 +331,18 @@ async function createApplySystemInstruction({
   args,
 }: ApplySystemInstruction): Promise<web3.TransactionInstruction> {
   const program = new Program(
-    worldIdl as Idl
+    worldIdl as Idl,
   ) as unknown as Program<WorldProgram>;
   let componentCount = 0;
   entities.forEach(function (entity) {
     componentCount += entity.components.length;
   });
   if (componentCount <= 0) {
-    throw new Error("No components provided");
+    throw new Error('No components provided');
   }
   if (componentCount > MAX_COMPONENTS) {
     throw new Error(
-      `Not implemented for component counts outside 1-${MAX_COMPONENTS}`
+      `Not implemented for component counts outside 1-${MAX_COMPONENTS}`,
     );
   }
 
@@ -370,7 +370,7 @@ async function createApplySystemInstruction({
     });
   });
   return program.methods[getApplyInstructionFunctionName(componentCount)](
-    SerializeArgs(args)
+    SerializeArgs(args),
   )
     .accounts(applyAccounts)
     .remainingAccounts(extraAccounts ?? [])

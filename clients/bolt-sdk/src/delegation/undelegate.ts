@@ -1,15 +1,15 @@
-import * as beet from "@metaplex-foundation/beet";
-import * as web3 from "@solana/web3.js";
+import * as beet from '@metaplex-foundation/beet';
+import * as web3 from '@solana/web3.js';
 import {
   MAGIC_CONTEXT_ID,
   MAGIC_PROGRAM_ID,
-} from "@magicblock-labs/ephemeral-rollups-sdk";
+} from '@magicblock-labs/ephemeral-rollups-sdk';
 
 export const undelegateStruct = new beet.BeetArgsStruct<{
   instructionDiscriminator: number[] /* size: 8 */;
 }>(
-  [["instructionDiscriminator", beet.uniformFixedSizeArray(beet.u8, 8)]],
-  "undelegateInstructionArgs"
+  [['instructionDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)]],
+  'undelegateInstructionArgs',
 );
 
 export interface UndelegateInstructionAccounts {
@@ -26,7 +26,7 @@ export const undelegateInstructionDiscriminator = [
  * Creates an Undelegate instruction.
  */
 export function createUndelegateInstruction(
-  accounts: UndelegateInstructionAccounts
+  accounts: UndelegateInstructionAccounts,
 ) {
   const [data] = undelegateStruct.serialize({
     instructionDiscriminator: undelegateInstructionDiscriminator,

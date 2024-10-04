@@ -21,7 +21,7 @@ var __awaiter =
       }
       function rejected(value) {
         try {
-          step(generator["throw"](value));
+          step(generator['throw'](value));
         } catch (e) {
           reject(e);
         }
@@ -34,7 +34,7 @@ var __awaiter =
       step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
   };
-const anchor = require("@coral-xyz/anchor");
+const anchor = require('@coral-xyz/anchor');
 module.exports = function (provider) {
   return __awaiter(this, void 0, void 0, function* () {
     // Configure client to use the provider.

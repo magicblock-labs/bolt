@@ -1,15 +1,15 @@
-import * as beet from "@metaplex-foundation/beet";
-import * as web3 from "@solana/web3.js";
+import * as beet from '@metaplex-foundation/beet';
+import * as web3 from '@solana/web3.js';
 import {
   DelegateAccounts,
   DELEGATION_PROGRAM_ID,
-} from "@magicblock-labs/ephemeral-rollups-sdk";
+} from '@magicblock-labs/ephemeral-rollups-sdk';
 
 export const allowUndelegationStruct = new beet.BeetArgsStruct<{
   instructionDiscriminator: number[] /* size: 8 */;
 }>(
-  [["instructionDiscriminator", beet.uniformFixedSizeArray(beet.u8, 8)]],
-  "allowUndelegationInstructionArgs"
+  [['instructionDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)]],
+  'allowUndelegationInstructionArgs',
 );
 
 export interface AllowUndelegationInstructionAccounts {
@@ -27,7 +27,7 @@ export const allowUndelegateInstructionDiscriminator = [
  */
 
 export function createAllowUndelegationInstruction(
-  accounts: AllowUndelegationInstructionAccounts
+  accounts: AllowUndelegationInstructionAccounts,
 ) {
   const [data] = allowUndelegationStruct.serialize({
     instructionDiscriminator: allowUndelegateInstructionDiscriminator,
@@ -35,7 +35,7 @@ export function createAllowUndelegationInstruction(
 
   const { delegationPda, delegationMetadata, bufferPda } = DelegateAccounts(
     accounts.delegatedAccount,
-    accounts.ownerProgram
+    accounts.ownerProgram,
   );
 
   const keys: web3.AccountMeta[] = [

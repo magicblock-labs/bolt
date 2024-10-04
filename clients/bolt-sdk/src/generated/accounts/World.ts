@@ -5,9 +5,9 @@
  * See: https://github.com/metaplex-foundation/solita
  */
 
-import * as beet from "@metaplex-foundation/beet";
-import * as web3 from "@solana/web3.js";
-import * as beetSolana from "@metaplex-foundation/beet-solana";
+import * as beet from '@metaplex-foundation/beet';
+import * as web3 from '@solana/web3.js';
+import * as beetSolana from '@metaplex-foundation/beet-solana';
 
 /**
  * Arguments used to create {@link World}
@@ -30,7 +30,7 @@ export const worldDiscriminator = [145, 45, 170, 174, 122, 32, 155, 124];
 export class World implements WorldArgs {
   private constructor(
     readonly id: beet.bignum,
-    readonly entities: beet.bignum
+    readonly entities: beet.bignum,
   ) {}
 
   /**
@@ -46,7 +46,7 @@ export class World implements WorldArgs {
    */
   static fromAccountInfo(
     accountInfo: web3.AccountInfo<Buffer>,
-    offset = 0
+    offset = 0,
   ): [World, number] {
     return World.deserialize(accountInfo.data, offset);
   }
@@ -60,11 +60,11 @@ export class World implements WorldArgs {
   static async fromAccountAddress(
     connection: web3.Connection,
     address: web3.PublicKey,
-    commitmentOrConfig?: web3.Commitment | web3.GetAccountInfoConfig
+    commitmentOrConfig?: web3.Commitment | web3.GetAccountInfoConfig,
   ): Promise<World> {
     const accountInfo = await connection.getAccountInfo(
       address,
-      commitmentOrConfig
+      commitmentOrConfig,
     );
     if (accountInfo == null) {
       throw new Error(`Unable to find World account at ${address}`);
@@ -80,8 +80,8 @@ export class World implements WorldArgs {
    */
   static gpaBuilder(
     programId: web3.PublicKey = new web3.PublicKey(
-      "WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n"
-    )
+      'WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n',
+    ),
   ) {
     return beetSolana.GpaBuilder.fromStruct(programId, worldBeet);
   }
@@ -121,11 +121,11 @@ export class World implements WorldArgs {
    */
   static async getMinimumBalanceForRentExemption(
     connection: web3.Connection,
-    commitment?: web3.Commitment
+    commitment?: web3.Commitment,
   ): Promise<number> {
     return connection.getMinimumBalanceForRentExemption(
       World.byteSize,
-      commitment
+      commitment,
     );
   }
 
@@ -145,7 +145,7 @@ export class World implements WorldArgs {
     return {
       id: (() => {
         const x = this.id as { toNumber: () => number };
-        if (typeof x.toNumber === "function") {
+        if (typeof x.toNumber === 'function') {
           try {
             return x.toNumber();
           } catch (_) {
@@ -156,7 +156,7 @@ export class World implements WorldArgs {
       })(),
       entities: (() => {
         const x = this.entities as { toNumber: () => number };
-        if (typeof x.toNumber === "function") {
+        if (typeof x.toNumber === 'function') {
           try {
             return x.toNumber();
           } catch (_) {
@@ -180,10 +180,10 @@ export const worldBeet = new beet.BeetStruct<
   }
 >(
   [
-    ["accountDiscriminator", beet.uniformFixedSizeArray(beet.u8, 8)],
-    ["id", beet.u64],
-    ["entities", beet.u64],
+    ['accountDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)],
+    ['id', beet.u64],
+    ['entities', beet.u64],
   ],
   World.fromArgs,
-  "World"
+  'World',
 );

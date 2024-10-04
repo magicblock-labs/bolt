@@ -1,22 +1,22 @@
-import { PublicKey } from "@solana/web3.js";
-import type BN from "bn.js";
-import { PROGRAM_ID } from "./generated";
-export * from "./generated/accounts";
-export * from "./generated/instructions";
-export * from "./world/transactions";
-export * from "./delegation/delegate";
-export * from "./delegation/undelegate";
-export * from "./delegation/allow_undelegation";
-export { DELEGATION_PROGRAM_ID } from "@magicblock-labs/ephemeral-rollups-sdk";
+import { PublicKey } from '@solana/web3.js';
+import type BN from 'bn.js';
+import { PROGRAM_ID } from './generated';
+export * from './generated/accounts';
+export * from './generated/instructions';
+export * from './world/transactions';
+export * from './delegation/delegate';
+export * from './delegation/undelegate';
+export * from './delegation/allow_undelegation';
+export { DELEGATION_PROGRAM_ID } from '@magicblock-labs/ephemeral-rollups-sdk';
 
 export const SYSVAR_INSTRUCTIONS_PUBKEY = new PublicKey(
-  "Sysvar1nstructions1111111111111111111111111"
+  'Sysvar1nstructions1111111111111111111111111',
 );
 
 export function FindRegistryPda({ programId }: { programId?: PublicKey }) {
   return PublicKey.findProgramAddressSync(
-    [Buffer.from("registry")],
-    programId ?? PROGRAM_ID
+    [Buffer.from('registry')],
+    programId ?? PROGRAM_ID,
   )[0];
 }
 
@@ -27,10 +27,10 @@ export function FindWorldPda({
   worldId: BN;
   programId?: PublicKey;
 }) {
-  const idBuffer = Buffer.from(worldId.toArrayLike(Buffer, "be", 8));
+  const idBuffer = Buffer.from(worldId.toArrayLike(Buffer, 'be', 8));
   return PublicKey.findProgramAddressSync(
-    [Buffer.from("world"), idBuffer],
-    programId ?? PROGRAM_ID
+    [Buffer.from('world'), idBuffer],
+    programId ?? PROGRAM_ID,
   )[0];
 }
 
@@ -45,16 +45,16 @@ export function FindEntityPda({
   seed?: string;
   programId?: PublicKey;
 }) {
-  const worldIdBuffer = Buffer.from(worldId.toArrayLike(Buffer, "be", 8));
-  const seeds = [Buffer.from("entity"), worldIdBuffer];
+  const worldIdBuffer = Buffer.from(worldId.toArrayLike(Buffer, 'be', 8));
+  const seeds = [Buffer.from('entity'), worldIdBuffer];
   if (seed !== undefined) {
     seeds.push(Buffer.from(new Uint8Array(8)));
     seeds.push(Buffer.from(seed));
   } else if (entityId !== undefined) {
-    const entityIdBuffer = Buffer.from(entityId.toArrayLike(Buffer, "be", 8));
+    const entityIdBuffer = Buffer.from(entityId.toArrayLike(Buffer, 'be', 8));
     seeds.push(entityIdBuffer);
   } else {
-    throw new Error("An entity must have either an Id or a Seed");
+    throw new Error('An entity must have either an Id or a Seed');
   }
   return PublicKey.findProgramAddressSync(seeds, programId ?? PROGRAM_ID)[0];
 }
@@ -69,8 +69,8 @@ export function FindComponentPda({
   seed?: string;
 }) {
   return PublicKey.findProgramAddressSync(
-    [Buffer.from(seed ?? ""), entity.toBytes()],
-    componentId
+    [Buffer.from(seed ?? ''), entity.toBytes()],
+    componentId,
   )[0];
 }
 
@@ -86,6 +86,6 @@ export function SerializeArgs(args: any = {}) {
   return Buffer.from(
     binaryData.buffer,
     binaryData.byteOffset,
-    binaryData.byteLength
+    binaryData.byteLength,
   );
 }

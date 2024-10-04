@@ -5,8 +5,8 @@
  * See: https://github.com/metaplex-foundation/solita
  */
 
-import * as beet from "@metaplex-foundation/beet";
-import * as web3 from "@solana/web3.js";
+import * as beet from '@metaplex-foundation/beet';
+import * as web3 from '@solana/web3.js';
 
 /**
  * @category Instructions
@@ -16,8 +16,8 @@ import * as web3 from "@solana/web3.js";
 export const initializeNewWorldStruct = new beet.BeetArgsStruct<{
   instructionDiscriminator: number[] /* size: 8 */;
 }>(
-  [["instructionDiscriminator", beet.uniformFixedSizeArray(beet.u8, 8)]],
-  "InitializeNewWorldInstructionArgs"
+  [['instructionDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)]],
+  'InitializeNewWorldInstructionArgs',
 );
 /**
  * Accounts required by the _initializeNewWorld_ instruction
@@ -51,7 +51,7 @@ export const initializeNewWorldInstructionDiscriminator = [
  */
 export function createInitializeNewWorldInstruction(
   accounts: InitializeNewWorldInstructionAccounts,
-  programId = new web3.PublicKey("WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n")
+  programId = new web3.PublicKey('WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n'),
 ) {
   const [data] = initializeNewWorldStruct.serialize({
     instructionDiscriminator: initializeNewWorldInstructionDiscriminator,
