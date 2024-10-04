@@ -27,7 +27,7 @@ pub fn package_json(jest: bool) -> String {
         format!(
             r#"{{
         "scripts": {{
-            "lint:fix": "prettier */*.js \"*/**/*{{.js,.ts}}\" -w",
+            "lint:fix": "node_modules/.bin/prettier */*.js \"*/**/*{{.js,.ts}}\" -w",
             "lint": "prettier */*.js \"*/**/*{{.js,.ts}}\" --check"
         }},
         "dependencies": {{
@@ -44,7 +44,7 @@ pub fn package_json(jest: bool) -> String {
         format!(
             r#"{{
     "scripts": {{
-        "lint:fix": "prettier */*.js \"*/**/*{{.js,.ts}}\" -w",
+        "lint:fix": "node_modules/.bin/prettier */*.js \"*/**/*{{.js,.ts}}\" -w",
         "lint": "prettier */*.js \"*/**/*{{.js,.ts}}\" --check"
     }},
     "dependencies": {{
@@ -69,7 +69,7 @@ pub fn ts_package_json(jest: bool) -> String {
         format!(
             r#"{{
         "scripts": {{
-            "lint:fix": "prettier */*.js \"*/**/*{{.js,.ts}}\" -w",
+            "lint:fix": "node_modules/.bin/prettier */*.js \"*/**/*{{.js,.ts}}\" -w",
             "lint": "prettier */*.js \"*/**/*{{.js,.ts}}\" --check"
         }},
         "dependencies": {{
@@ -93,7 +93,7 @@ pub fn ts_package_json(jest: bool) -> String {
         format!(
             r#"{{
     "scripts": {{
-        "lint:fix": "prettier */*.js \"*/**/*{{.js,.ts}}\" -w",
+        "lint:fix": "node_modules/.bin/prettier */*.js \"*/**/*{{.js,.ts}}\" -w",
         "lint": "prettier */*.js \"*/**/*{{.js,.ts}}\" --check"
     }},
     "dependencies": {{

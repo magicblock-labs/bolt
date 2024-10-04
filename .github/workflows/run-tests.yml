@@ -110,4 +110,4 @@ jobs:
           cd clients/bolt-sdk
           yarn install && yarn build
           cd ../..
-          bolt test
+

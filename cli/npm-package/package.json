@@ -17,7 +17,7 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "lint": "prettier */*.js \"*/**/*{.js,.ts}\" --check ",
-    "lint:fix": "prettier */*.js \"*/**/*{.js,.ts}\" -w",
+    "lint:fix": "node_modules/.bin/prettier */*.js \"*/**/*{.js,.ts}\" -w",
     "build": "tsc",
     "dev": "yarn build && node lib/index.js"
   },

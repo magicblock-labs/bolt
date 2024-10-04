@@ -35,7 +35,7 @@
     "dev": "tsc --watch",
     "start": "tsc",
     "lint": "prettier */*.js \"*/**/*{.js,.ts}\" --check",
-    "lint:fix": "prettier */*.js \"*/**/*{.js,.ts}\" -w"
+    "lint:fix": "node_modules/.bin/prettier */*.js \"*/**/*{.js,.ts}\" -w"
   },
   "files": [
     "lib"
