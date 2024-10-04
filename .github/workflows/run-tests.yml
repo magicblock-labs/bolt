@@ -41,11 +41,6 @@ jobs:
           path: '**/node_modules'
           key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
 
-      - name: Install Node Modules
-        run: |
-          export PATH="/home/runner/.local/share/solana/install/active_release/bin:$PATH"
-          yarn install
-
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
         with:
@@ -69,6 +64,9 @@ jobs:
         task: [clippy, yarn]
     steps:
       - uses: actions/checkout@v4
+      - name: Install node modules
+        run: |
+          yarn --frozen-lockfile --network-concurrency 2
       - name: Cache Rust
         uses: Swatinem/rust-cache@v2
       - name: Run Lint
