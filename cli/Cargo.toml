@@ -30,3 +30,4 @@ serde_json = { workspace = true }
 heck = { workspace = true }
 clap = { workspace = true }
 syn = { workspace = true, features = ["full", "extra-traits"] }
+world = { workspace = true }

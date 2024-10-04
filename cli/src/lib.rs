@@ -12,6 +12,11 @@ use anchor_cli::config::{
     BootstrapMode, Config, ConfigOverride, GenesisEntry, ProgramArch, ProgramDeployment,
     TestValidator, Validator, WithPath,
 };
+use anchor_client::solana_sdk::commitment_config::CommitmentConfig;
+use anchor_client::solana_sdk::pubkey::Pubkey;
+use anchor_client::solana_sdk::signature::{read_keypair_file, Keypair};
+use anchor_client::solana_sdk::signer::Signer;
+use anchor_client::solana_sdk::system_program;
 use anchor_client::Cluster;
 use anyhow::{anyhow, Result};
 use clap::{Parser, Subcommand};
@@ -23,11 +28,12 @@ use std::io::Write;
 use std::io::{self, BufRead};
 use std::path::{Path, PathBuf};
 use std::process::Stdio;
+use std::rc::Rc;
+use std::string::ToString;
+use world::{accounts, instruction, World, ID};
 
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 pub const ANCHOR_VERSION: &str = anchor_cli::VERSION;
-
-pub const WORLD_PROGRAM: &str = "WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n";
 
 #[derive(Subcommand)]
 pub enum BoltCommand {
@@ -38,8 +44,15 @@ pub enum BoltCommand {
     // Include all existing commands from anchor_cli::Command
     #[clap(flatten)]
     Anchor(anchor_cli::Command),
+    #[clap(about = "Add a new authority for a world instance")]
+    Authorize(AuthorizeCommand),
 }
 
+#[derive(Debug, Parser)]
+pub struct AuthorizeCommand {
+    pub world: String,
+    pub new_authority: String,
+}
 #[derive(Debug, Parser)]
 pub struct InitCommand {
     #[clap(short, long, help = "Workspace name")]
@@ -134,10 +147,11 @@ pub fn entry(opts: Opts) -> Result<()> {
         },
         BoltCommand::Component(command) => new_component(&opts.cfg_override, command.name),
         BoltCommand::System(command) => new_system(&opts.cfg_override, command.name),
+        BoltCommand::Authorize(command) => {
+            authorize(&opts.cfg_override, command.world, command.new_authority)
+        }
     }
-}
-
-// Bolt Init
+} // Bolt Init
 
 #[allow(clippy::too_many_arguments)]
 fn init(
@@ -268,7 +282,7 @@ fn init(
         shutdown_wait: 2000,
         validator: Some(validator),
         genesis: Some(vec![GenesisEntry {
-            address: WORLD_PROGRAM.to_owned(),
+            address: world::id().to_string(),
             program: "tests/fixtures/world.so".to_owned(),
             upgradeable: Some(false),
         }]),
@@ -345,7 +359,7 @@ fn init(
         .arg("dump")
         .arg("-u")
         .arg("d")
-        .arg(WORLD_PROGRAM)
+        .arg(world::id().to_string())
         .arg("tests/fixtures/world.so")
         .stdout(Stdio::inherit())
         .stderr(Stdio::inherit())
@@ -596,5 +610,52 @@ fn add_types_crate_dependency(program_name: &str, types_path: &str) -> Result<()
                 e.to_string()
             )
         })?;
+    Ok(())
+}
+
+fn authorize(cfg_override: &ConfigOverride, world: String, new_authority: String) -> Result<()> {
+    let world_pubkey = world
+        .parse::<Pubkey>()
+        .map_err(|_| anyhow!("Invalid world public key"))?;
+    let new_authority_pubkey = new_authority
+        .parse::<Pubkey>()
+        .map_err(|_| anyhow!("Invalid new authority public key"))?;
+
+    let cfg = Config::discover(cfg_override)?.expect("Not in workspace.");
+    let wallet_path = cfg.provider.wallet.clone();
+
+    let payer = read_keypair_file(wallet_path.to_string())
+        .map_err(|e| anyhow!("Failed to read keypair file: {}", e))?;
+
+    let payer_for_client =
+        Keypair::from_bytes(&payer.to_bytes()).expect("Failed to create Keypair from bytes");
+
+    let client = anchor_client::Client::new_with_options(
+        cfg.provider.cluster.clone(),
+        Rc::new(payer_for_client),
+        CommitmentConfig::confirmed(),
+    );
+    let program = client.program(ID)?;
+
+    // Read and parse the World account to get the id
+    let world_account = program.account::<World>(world_pubkey)?;
+    let world_id = world_account.id;
+    let signature = program
+        .request()
+        .accounts(accounts::AddAuthority {
+            authority: payer.pubkey(),
+            new_authority: new_authority_pubkey,
+            system_program: system_program::ID,
+            world: world_pubkey,
+        })
+        .args(instruction::AddAuthority { world_id })
+        .signer(&payer)
+        .send()?;
+
+    println!(
+        "Authority {} added to world {} with signature {}",
+        new_authority, world, signature
+    );
+
     Ok(())
 }

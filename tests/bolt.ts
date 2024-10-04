@@ -104,7 +104,7 @@ describe("bolt", () => {
 
   const secondAuthority = Keypair.generate().publicKey;
 
-  it("InitializeRegistry", async () => {
+  it.only("InitializeRegistry", async () => {
     const registryPda = FindRegistryPda({});
     const initializeRegistryIx = createInitializeRegistryInstruction({
       registry: registryPda,
@@ -114,12 +114,13 @@ describe("bolt", () => {
     await provider.sendAndConfirm(tx);
   });
 
-  it("InitializeNewWorld", async () => {
+  it.only("InitializeNewWorld", async () => {
     const initializeNewWorld = await InitializeNewWorld({
       payer: provider.wallet.publicKey,
       connection: provider.connection,
     });
-    await provider.sendAndConfirm(initializeNewWorld.transaction);
+    const signature = await provider.sendAndConfirm(initializeNewWorld.transaction);
+    console.log("InitializeNewWorld signature: ", signature);
     worldPda = initializeNewWorld.worldPda; // Saved for later
   });
 
