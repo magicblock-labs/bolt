@@ -4,11 +4,11 @@
  * Note that this is only a type helper and is not the actual IDL. The original
  * IDL can be found at `target/idl/world.json`.
  */
-export interface World {
+export type World = {
   address: "WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n";
   metadata: {
     name: "world";
-    version: "0.1.9";
+    version: "0.1.10";
     spec: "0.1.0";
     description: "Bolt World program";
     repository: "https://github.com/magicblock-labs/bolt";
@@ -557,4 +557,4 @@ export interface World {
       };
     },
   ];
-}
+};
