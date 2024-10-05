@@ -92,7 +92,7 @@ jobs:
           override: true
 
       - name: Build (linux/macos)
-        if: matrix.build.OS != 'macos-latest'
+        if: matrix.build.OS != 'windows-latest'
         uses: actions-rs/cargo@v1
         with:
           use-cross: true
