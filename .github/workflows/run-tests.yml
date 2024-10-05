@@ -111,6 +111,7 @@ jobs:
       - name: Run Build and Tests
         run: |
           cargo install --path cli --force --locked
+          yarn install
           bolt build
           cd clients/bolt-sdk
           yarn install && yarn build
