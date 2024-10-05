@@ -92,7 +92,7 @@ jobs:
           override: true
 
       - name: Build (linux/macos)
-        if: matrix.build.OS != 'windows-2022'
+        if: matrix.build.OS != 'macos-latest'
         uses: actions-rs/cargo@v1
         with:
           use-cross: true
@@ -100,7 +100,7 @@ jobs:
           args: --manifest-path=cli/Cargo.toml --release --locked --target ${{ matrix.build.TARGET }}
 
       - name: Build (windows)
-        if: matrix.build.OS == 'windows-2022'
+        if: matrix.build.OS == 'windows-latest'
         uses: actions-rs/cargo@v1
         with:
           command: build
