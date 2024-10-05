@@ -127,7 +127,7 @@ jobs:
           export node_version="${{ env.RELEASE_VERSION }}"
           # set the package name
           # note: use 'windows' as OS name instead of 'win32'
-          if [ "${{ matrix.build.OS }}" = "windows-2022" ]; then
+          if [ "${{ matrix.build.OS }}" = "windows-latest" ]; then
             export node_pkg="${bin}-cli-windows-${node_arch}"
           else
             export node_pkg="${bin}-cli-${node_os}-${node_arch}"
@@ -140,7 +140,7 @@ jobs:
           cat "${node_pkg}/package.json"
           # copy the binary into the package
           # note: windows binaries has '.exe' extension
-          if [ "${{ matrix.build.OS }}" = "windows-2022" ]; then
+          if [ "${{ matrix.build.OS }}" = "windows-latest" ]; then
             bin="${bin}.exe"
           fi
           echo "bin_name=${bin}" >> $GITHUB_ENV
@@ -149,7 +149,7 @@ jobs:
           
           # Create the release bin file
           release_name="bolt-cli-${{ matrix.build.NAME }}"
-          if [ "${{ matrix.build.OS }}" = "windows-2022" ]; then
+          if [ "${{ matrix.build.OS }}" = "windows-latest" ]; then
             release_name="${release_name}.exe"
           fi
           echo "release_name=${release_name}" >> $GITHUB_ENV
