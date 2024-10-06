@@ -34,7 +34,7 @@ fn parse_pubkey(input: &str, error_message: &str) -> Result<Pubkey> {
         .map_err(|_| anyhow!(error_message.to_string()))
 }
 
-pub fn create_registry(cfg_override: &ConfigOverride) -> Result<()> {
+pub fn create_registry(cfg_override: &ConfigOverride, seed: String) -> Result<()> {
     let (client, payer) = setup_client(cfg_override)?;
     let program = client.program(ID)?;
 
@@ -54,7 +54,7 @@ pub fn create_registry(cfg_override: &ConfigOverride) -> Result<()> {
     Ok(())
 }
 
-pub fn create_world(cfg_override: &ConfigOverride, world: String) -> Result<()> {
+pub fn create_world(cfg_override: &ConfigOverride, seed: String, world: String) -> Result<()> {
     let world_pubkey = parse_pubkey(&world, "Invalid world public key")?;
 
     let (client, payer) = setup_client(cfg_override)?;
