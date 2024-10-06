@@ -34,6 +34,26 @@ fn parse_pubkey(input: &str, error_message: &str) -> Result<Pubkey> {
         .map_err(|_| anyhow!(error_message.to_string()))
 }
 
+pub fn create_registry(cfg_override: &ConfigOverride) -> Result<()> {
+    let (client, payer) = setup_client(cfg_override)?;
+    let program = client.program(ID)?;
+
+    let signature = program
+        .request()
+        .accounts(accounts::InitializeRegistry {
+            payer: payer.pubkey(),
+            registry: program.payer(),
+            system_program: system_program::ID,
+        })
+        .args(instruction::InitializeNewWorld {})
+        .signer(&payer)
+        .send()?;
+
+    println!("New registry created with signature {}", signature);
+
+    Ok(())
+}
+
 pub fn authorize(
     cfg_override: &ConfigOverride,
     world: String,
