@@ -54,6 +54,29 @@ pub fn create_registry(cfg_override: &ConfigOverride) -> Result<()> {
     Ok(())
 }
 
+pub fn create_world(cfg_override: &ConfigOverride, world: String) -> Result<()> {
+    let world_pubkey = parse_pubkey(&world, "Invalid world public key")?;
+
+    let (client, payer) = setup_client(cfg_override)?;
+    let program = client.program(ID)?;
+
+    let signature = program
+        .request()
+        .accounts(accounts::InitializeNewWorld {
+            payer: payer.pubkey(),
+            world: world_pubkey,
+            registry: program.payer(),
+            system_program: system_program::ID,
+        })
+        .args(instruction::InitializeNewWorld {})
+        .signer(&payer)
+        .send()?;
+
+    println!("New world created {} with signature {}", world, signature);
+
+    Ok(())
+}
+
 pub fn authorize(
     cfg_override: &ConfigOverride,
     world: String,
