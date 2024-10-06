@@ -6,7 +6,9 @@ mod templates;
 mod workspace;
 
 use crate::component::new_component;
-use crate::instructions::{approve_system, authorize, deauthorize, remove_system};
+use crate::instructions::{
+    approve_system, authorize, create_registry, create_world, deauthorize, remove_system,
+};
 use crate::rust_template::{create_component, create_system};
 use crate::system::new_system;
 use anchor_cli::config;
@@ -37,6 +39,10 @@ pub enum BoltCommand {
     // Include all existing commands from anchor_cli::Command
     #[clap(flatten)]
     Anchor(anchor_cli::Command),
+    #[clap(about = "Add a new registry instance")]
+    Registry(RegistryCommand),
+    #[clap(about = "Add a new world instance")]
+    World(WorldCommand),
     #[clap(about = "Add a new authority for a world instance")]
     Authorize(AuthorizeCommand),
     #[clap(about = "Remove an authority from a world instance")]
@@ -61,6 +67,17 @@ pub struct ComponentCommand {
 #[derive(Debug, Parser)]
 pub struct SystemCommand {
     pub name: String,
+}
+
+#[derive(Debug, Parser)]
+pub struct RegistryCommand {
+    pub seed: String,
+}
+
+#[derive(Debug, Parser)]
+pub struct WorldCommand {
+    pub seed: String,
+    pub world: String,
 }
 
 #[derive(Debug, Parser)]
@@ -165,6 +182,10 @@ pub fn entry(opts: Opts) -> Result<()> {
         },
         BoltCommand::Component(command) => new_component(&opts.cfg_override, command.name),
         BoltCommand::System(command) => new_system(&opts.cfg_override, command.name),
+        BoltCommand::Registry(command) => create_registry(&opts.cfg_override, command.seed),
+        BoltCommand::World(command) => {
+            create_world(&opts.cfg_override, command.seed, command.world)
+        }
         BoltCommand::Authorize(command) => {
             authorize(&opts.cfg_override, command.world, command.new_authority)
         }
