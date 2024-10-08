@@ -39,14 +39,7 @@ pub fn create_registry(cfg_override: &ConfigOverride, seed: String) -> Result<()
     let (client, payer) = setup_client(cfg_override)?;
     let program = client.program(ID)?;
 
-    // Include 'registry' in the seeds for PDA derivation
-    let (registry_pda, _) = Pubkey::find_program_address(
-        &[
-            b"registry",     // Registry::seed()
-            seed.as_bytes(), // Dynamic seed
-        ],
-        &ID,
-    );
+    let (registry_pda, _) = Pubkey::find_program_address(&[b"registry", seed.as_bytes()], &ID);
 
     let signature = program
         .request()
@@ -69,33 +62,29 @@ pub fn create_registry(cfg_override: &ConfigOverride, seed: String) -> Result<()
     Ok(())
 }
 
-pub fn create_world(cfg_override: &ConfigOverride) -> Result<()> {
+pub fn create_world(cfg_override: &ConfigOverride, seed: String) -> Result<()> {
     let (client, payer) = setup_client(cfg_override)?;
     let program = client.program(ID)?;
 
-    // Compute the registry PDA
-    let (registry_pda, _) = Pubkey::find_program_address(&[Registry::seed()], &ID);
+    let (registry_pda, _) = Pubkey::find_program_address(&[b"registry", seed.as_bytes()], &ID);
 
-    // Fetch the registry account to get the current world count
     let registry_account: Registry = program.account(registry_pda)?;
-
-    // Get the world ID from the registry
     let world_id = registry_account.worlds;
 
-    // Compute the new world PDA using the world ID
     let (world_pda, _) =
-        Pubkey::find_program_address(&[World::seed(), &world_id.to_be_bytes()], &ID);
+        Pubkey::find_program_address(&[b"world", &world_id.to_be_bytes(), seed.as_bytes()], &ID);
 
-    // Initialize the new world
     let signature = program
         .request()
         .accounts(accounts::InitializeNewWorld {
             payer: payer.pubkey(),
             world: world_pda,
-            registry: registry_pda, // Use the correct registry PDA
+            registry: registry_pda,
             system_program: system_program::ID,
         })
-        .args(instruction::InitializeNewWorld {})
+        .args(instruction::InitializeNewWorld {
+            extra_seed: Some(seed.clone()),
+        })
         .signer(&payer)
         .send()?;
 

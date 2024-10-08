@@ -6,7 +6,7 @@ use tuple_conv::RepeatedTuple;
 #[cfg(not(feature = "no-entrypoint"))]
 use solana_security_txt::security_txt;
 
-declare_id!("WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n");
+declare_id!("FBmdiXs7YwX7Q1HNvqM2CKtRbthode4Qf9dkhho4r2xp");
 
 #[cfg(not(feature = "no-entrypoint"))]
 security_txt! {
@@ -26,6 +26,7 @@ pub mod world {
     use super::*;
     use crate::error::WorldError;
 
+    #[allow(unused_variables)]
     pub fn initialize_registry(
         _ctx: Context<InitializeRegistry>,
         extra_seed: Option<String>,
@@ -33,7 +34,11 @@ pub mod world {
         Ok(())
     }
 
-    pub fn initialize_new_world(ctx: Context<InitializeNewWorld>) -> Result<()> {
+    #[allow(unused_variables)]
+    pub fn initialize_new_world(
+        ctx: Context<InitializeNewWorld>,
+        extra_seed: Option<String>,
+    ) -> Result<()> {
         ctx.accounts.world.set_inner(World::default());
         ctx.accounts.world.id = ctx.accounts.registry.worlds;
         ctx.accounts.registry.worlds += 1;
