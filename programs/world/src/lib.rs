@@ -6,7 +6,7 @@ use tuple_conv::RepeatedTuple;
 #[cfg(not(feature = "no-entrypoint"))]
 use solana_security_txt::security_txt;
 
-declare_id!("FBmdiXs7YwX7Q1HNvqM2CKtRbthode4Qf9dkhho4r2xp");
+declare_id!("WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n");
 
 #[cfg(not(feature = "no-entrypoint"))]
 security_txt! {
