@@ -8,7 +8,7 @@ use anchor_client::solana_sdk::system_program;
 use anchor_client::Client;
 use anyhow::{anyhow, Result};
 use std::rc::Rc;
-use world::{accounts, instruction, World, ID};
+use world::{accounts, instruction, Registry, World, ID};
 
 fn setup_client(cfg_override: &ConfigOverride) -> Result<(Client<Rc<Keypair>>, Keypair)> {
     let cfg = Config::discover(cfg_override)?.expect("Not in workspace.");
@@ -25,6 +25,7 @@ fn setup_client(cfg_override: &ConfigOverride) -> Result<(Client<Rc<Keypair>>, K
         Rc::new(payer_for_client),
         CommitmentConfig::confirmed(),
     );
+
     Ok((client, payer))
 }
 
@@ -38,41 +39,70 @@ pub fn create_registry(cfg_override: &ConfigOverride, seed: String) -> Result<()
     let (client, payer) = setup_client(cfg_override)?;
     let program = client.program(ID)?;
 
+    // Include 'registry' in the seeds for PDA derivation
+    let (registry_pda, _) = Pubkey::find_program_address(
+        &[
+            b"registry",     // Registry::seed()
+            seed.as_bytes(), // Dynamic seed
+        ],
+        &ID,
+    );
+
     let signature = program
         .request()
         .accounts(accounts::InitializeRegistry {
+            registry: registry_pda,
             payer: payer.pubkey(),
-            registry: program.payer(),
             system_program: system_program::ID,
         })
-        .args(instruction::InitializeNewWorld {})
+        .args(instruction::InitializeRegistry {
+            extra_seed: Some(seed.clone()),
+        })
         .signer(&payer)
         .send()?;
 
-    println!("New registry created with signature {}", signature);
+    println!(
+        "New registry {} created with signature {}",
+        registry_pda, signature
+    );
 
     Ok(())
 }
 
-pub fn create_world(cfg_override: &ConfigOverride, seed: String, world: String) -> Result<()> {
-    let world_pubkey = parse_pubkey(&world, "Invalid world public key")?;
-
+pub fn create_world(cfg_override: &ConfigOverride) -> Result<()> {
     let (client, payer) = setup_client(cfg_override)?;
     let program = client.program(ID)?;
 
+    // Compute the registry PDA
+    let (registry_pda, _) = Pubkey::find_program_address(&[Registry::seed()], &ID);
+
+    // Fetch the registry account to get the current world count
+    let registry_account: Registry = program.account(registry_pda)?;
+
+    // Get the world ID from the registry
+    let world_id = registry_account.worlds;
+
+    // Compute the new world PDA using the world ID
+    let (world_pda, _) =
+        Pubkey::find_program_address(&[World::seed(), &world_id.to_be_bytes()], &ID);
+
+    // Initialize the new world
     let signature = program
         .request()
         .accounts(accounts::InitializeNewWorld {
             payer: payer.pubkey(),
-            world: world_pubkey,
-            registry: program.payer(),
+            world: world_pda,
+            registry: registry_pda, // Use the correct registry PDA
             system_program: system_program::ID,
         })
         .args(instruction::InitializeNewWorld {})
         .signer(&payer)
         .send()?;
 
-    println!("New world created {} with signature {}", world, signature);
+    println!(
+        "New world created {} with signature {}",
+        world_pda, signature
+    );
 
     Ok(())
 }
