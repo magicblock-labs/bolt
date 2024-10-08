@@ -77,7 +77,6 @@ pub struct RegistryCommand {
 #[derive(Debug, Parser)]
 pub struct WorldCommand {
     pub seed: String,
-    pub world: String,
 }
 
 #[derive(Debug, Parser)]
@@ -183,9 +182,7 @@ pub fn entry(opts: Opts) -> Result<()> {
         BoltCommand::Component(command) => new_component(&opts.cfg_override, command.name),
         BoltCommand::System(command) => new_system(&opts.cfg_override, command.name),
         BoltCommand::Registry(command) => create_registry(&opts.cfg_override, command.seed),
-        BoltCommand::World(command) => {
-            create_world(&opts.cfg_override, command.seed, command.world)
-        }
+        BoltCommand::World(_command) => create_world(&opts.cfg_override),
         BoltCommand::Authorize(command) => {
             authorize(&opts.cfg_override, command.world, command.new_authority)
         }
