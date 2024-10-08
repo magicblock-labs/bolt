@@ -25,7 +25,6 @@ fn setup_client(cfg_override: &ConfigOverride) -> Result<(Client<Rc<Keypair>>, K
         Rc::new(payer_for_client),
         CommitmentConfig::confirmed(),
     );
-
     Ok((client, payer))
 }
 
