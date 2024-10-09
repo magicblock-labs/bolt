@@ -127,7 +127,7 @@ describe("bolt", () => {
       extraSeed: extraSeed,
     });
     const signature = await provider.sendAndConfirm(
-      initializeNewWorld.transaction
+      initializeNewWorld.transaction,
     );
     console.log("InitializeNewWorld signature: ", signature);
     worldPda = initializeNewWorld.worldPda; // Saved for later
@@ -146,7 +146,7 @@ describe("bolt", () => {
     const worldAccount = await worldProgram.account.world.fetch(worldPda);
     expect(
       worldAccount.authorities.some((auth) =>
-        auth.equals(provider.wallet.publicKey)
+        auth.equals(provider.wallet.publicKey),
       ),
     );
   });
@@ -421,7 +421,7 @@ describe("bolt", () => {
     await provider.sendAndConfirm(applySystem.transaction);
 
     const velocity = await exampleComponentVelocity.account.velocity.fetch(
-      componentVelocityEntity1Pda
+      componentVelocityEntity1Pda,
     );
     logVelocity("Apply System Velocity: Entity 1", velocity);
     expect(velocity.x.toNumber()).to.equal(10);
@@ -430,7 +430,7 @@ describe("bolt", () => {
     expect(velocity.lastApplied.toNumber()).to.not.equal(0);
 
     const position = await exampleComponentPosition.account.position.fetch(
-      componentPositionEntity1Pda
+      componentPositionEntity1Pda,
     );
     logPosition("Apply System Velocity: Entity 1", position);
     expect(position.x.toNumber()).to.greaterThan(1);
@@ -502,7 +502,7 @@ describe("bolt", () => {
   it("Apply Fly System on Entity 5 (should fail with wrong authority)", async () => {
     const positionBefore =
       await exampleComponentPosition.account.position.fetch(
-        componentPositionEntity5Pda
+        componentPositionEntity5Pda,
       );
 
     const applySystem = await ApplySystem({
@@ -601,7 +601,7 @@ describe("bolt", () => {
     const signature = await provider.sendAndConfirm(
       approveSystem.transaction,
       [],
-      { skipPreflight: true }
+      { skipPreflight: true },
     );
     console.log(`Whitelist 2 system approval signature: ${signature}`);
 
