@@ -54,7 +54,7 @@ function logPosition(title: string, { x, y, z }: { x: BN; y: BN; z: BN }) {
 
 function logVelocity(
   title: string,
-  { x, y, z, lastApplied }: { x: BN; y: BN; z: BN; lastApplied: BN }
+  { x, y, z, lastApplied }: { x: BN; y: BN; z: BN; lastApplied: BN },
 ) {
   console.log(" +----------------------------------+");
   console.log(` | ${padCenter(title, 32)} |`);
