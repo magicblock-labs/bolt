@@ -392,7 +392,7 @@ describe("bolt", () => {
     await provider.sendAndConfirm(applySystem.transaction);
 
     const position = await exampleComponentPosition.account.position.fetch(
-      componentPositionEntity1Pda
+      componentPositionEntity1Pda,
     );
     logPosition("Fly System: Entity 1", position);
     expect(position.x.toNumber()).to.equal(1);
