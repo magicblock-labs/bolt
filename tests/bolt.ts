@@ -103,14 +103,20 @@ describe("bolt", () => {
   let componentPositionEntity5Pda: PublicKey;
 
   const secondAuthority = Keypair.generate().publicKey;
+  const extraSeed = "default-seed";
 
   it.only("InitializeRegistry", async () => {
-    const registryPda = FindRegistryPda({});
-    const initializeRegistryIx = createInitializeRegistryInstruction({
-      registry: registryPda,
-      payer: provider.wallet.publicKey,
-    });
-    const tx = new anchor.web3.Transaction().add(initializeRegistryIx);
+    const registryPda = FindRegistryPda({ extraSeed });
+    const initializeRegistryIx = createInitializeRegistryInstruction(
+      {
+        registry: registryPda,
+        payer: provider.wallet.publicKey,
+      },
+      {
+        extraSeed: extraSeed,
+      }
+    );
+    const tx = new web3.Transaction().add(initializeRegistryIx);
     await provider.sendAndConfirm(tx);
   });
 
@@ -118,6 +124,7 @@ describe("bolt", () => {
     const initializeNewWorld = await InitializeNewWorld({
       payer: provider.wallet.publicKey,
       connection: provider.connection,
+      extraSeed: extraSeed,
     });
     const signature = await provider.sendAndConfirm(
       initializeNewWorld.transaction,
