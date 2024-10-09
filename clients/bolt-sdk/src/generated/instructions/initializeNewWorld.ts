@@ -61,9 +61,7 @@ export const initializeNewWorldInstructionDiscriminator = [
 export function createInitializeNewWorldInstruction(
   accounts: InitializeNewWorldInstructionAccounts,
   args: InitializeNewWorldInstructionArgs,
-  programId = new web3.PublicKey(
-    "FBmdiXs7YwX7Q1HNvqM2CKtRbthode4Qf9dkhho4r2xp",
-  ),
+  programId = new web3.PublicKey("WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n")
 ) {
   const [data] = initializeNewWorldStruct.serialize({
     instructionDiscriminator: initializeNewWorldInstructionDiscriminator,
