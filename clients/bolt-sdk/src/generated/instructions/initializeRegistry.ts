@@ -53,9 +53,7 @@ export const initializeRegistryInstructionDiscriminator = [
 export function createInitializeRegistryInstruction(
   accounts: InitializeRegistryInstructionAccounts,
   args: InitializeRegistryInstructionArgs,
-  programId = new web3.PublicKey(
-    "FBmdiXs7YwX7Q1HNvqM2CKtRbthode4Qf9dkhho4r2xp",
-  ),
+  programId = new web3.PublicKey("WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n")
 ) {
   const [data] = initializeRegistryStruct.serialize({
     instructionDiscriminator: initializeRegistryInstructionDiscriminator,
