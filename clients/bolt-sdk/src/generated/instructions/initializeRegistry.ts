@@ -4,19 +4,22 @@
  *
  * See: https://github.com/metaplex-foundation/solita
  */
-
 import * as beet from "@metaplex-foundation/beet";
 import * as web3 from "@solana/web3.js";
 
-/**
- * @category Instructions
- * @category InitializeRegistry
- * @category generated
- */
-export const initializeRegistryStruct = new beet.BeetArgsStruct<{
-  instructionDiscriminator: number[] /* size: 8 */;
-}>(
-  [["instructionDiscriminator", beet.uniformFixedSizeArray(beet.u8, 8)]],
+export type InitializeRegistryInstructionArgs = {
+  extraSeed: beet.COption<string>;
+};
+
+export const initializeRegistryStruct = new beet.FixableBeetArgsStruct<
+  InitializeRegistryInstructionArgs & {
+    instructionDiscriminator: number[] /* size: 8 */;
+  }
+>(
+  [
+    ["instructionDiscriminator", beet.uniformFixedSizeArray(beet.u8, 8)],
+    ["extraSeed", beet.coption(beet.utf8String)],
+  ],
   "InitializeRegistryInstructionArgs",
 );
 /**
@@ -49,10 +52,14 @@ export const initializeRegistryInstructionDiscriminator = [
  */
 export function createInitializeRegistryInstruction(
   accounts: InitializeRegistryInstructionAccounts,
-  programId = new web3.PublicKey("WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n"),
+  args: InitializeRegistryInstructionArgs,
+  programId = new web3.PublicKey(
+    "FBmdiXs7YwX7Q1HNvqM2CKtRbthode4Qf9dkhho4r2xp",
+  ),
 ) {
   const [data] = initializeRegistryStruct.serialize({
     instructionDiscriminator: initializeRegistryInstructionDiscriminator,
+    ...args,
   });
   const keys: web3.AccountMeta[] = [
     {

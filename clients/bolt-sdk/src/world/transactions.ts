@@ -34,24 +34,31 @@ const MAX_COMPONENTS = 5;
 export async function InitializeNewWorld({
   payer,
   connection,
+  extraSeed,
 }: {
   payer: PublicKey;
   connection: Connection;
+  extraSeed?: any;
 }): Promise<{
   instruction: TransactionInstruction;
   transaction: Transaction;
   worldPda: PublicKey;
   worldId: BN;
 }> {
-  const registryPda = FindRegistryPda({});
+  const registryPda = FindRegistryPda({ extraSeed });
   const registry = await Registry.fromAccountAddress(connection, registryPda);
   const worldId = new BN(registry.worlds);
-  const worldPda = FindWorldPda({ worldId });
-  const initializeWorldIx = createInitializeNewWorldInstruction({
-    world: worldPda,
-    registry: registryPda,
-    payer,
-  });
+  const worldPda = FindWorldPda({ worldId, extraSeed });
+  const initializeWorldIx = createInitializeNewWorldInstruction(
+    {
+      world: worldPda,
+      registry: registryPda,
+      payer,
+    },
+    {
+      extraSeed,
+    },
+  );
   return {
     instruction: initializeWorldIx,
     transaction: new Transaction().add(initializeWorldIx),
