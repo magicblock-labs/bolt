@@ -80,7 +80,7 @@
         {
           "name": "extra_seed",
           "type": {
-            "option": "string"
+            "option": "bytes"
           }
         }
       ]
