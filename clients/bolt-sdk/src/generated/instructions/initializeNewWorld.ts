@@ -13,19 +13,10 @@ import * as web3 from "@solana/web3.js";
  * @category InitializeNewWorld
  * @category generated
  */
-export type InitializeNewWorldInstructionArgs = {
-  extraSeed: beet.COption<string>;
-};
-
-export const initializeNewWorldStruct = new beet.FixableBeetArgsStruct<
-  InitializeNewWorldInstructionArgs & {
-    instructionDiscriminator: number[] /* size: 8 */;
-  }
->(
-  [
-    ["instructionDiscriminator", beet.uniformFixedSizeArray(beet.u8, 8)],
-    ["extraSeed", beet.coption(beet.utf8String)],
-  ],
+export const initializeNewWorldStruct = new beet.BeetArgsStruct<{
+  instructionDiscriminator: number[] /* size: 8 */;
+}>(
+  [["instructionDiscriminator", beet.uniformFixedSizeArray(beet.u8, 8)]],
   "InitializeNewWorldInstructionArgs",
 );
 /**
@@ -60,12 +51,10 @@ export const initializeNewWorldInstructionDiscriminator = [
  */
 export function createInitializeNewWorldInstruction(
   accounts: InitializeNewWorldInstructionAccounts,
-  args: InitializeNewWorldInstructionArgs,
-  programId = new web3.PublicKey("WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n")
+  programId = new web3.PublicKey("WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n"),
 ) {
   const [data] = initializeNewWorldStruct.serialize({
     instructionDiscriminator: initializeNewWorldInstructionDiscriminator,
-    ...args,
   });
   const keys: web3.AccountMeta[] = [
     {

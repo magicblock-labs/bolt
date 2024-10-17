@@ -26,19 +26,11 @@ pub mod world {
     use super::*;
     use crate::error::WorldError;
 
-    #[allow(unused_variables)]
-    pub fn initialize_registry(
-        _ctx: Context<InitializeRegistry>,
-        extra_seed: Option<String>,
-    ) -> Result<()> {
+    pub fn initialize_registry(_ctx: Context<InitializeRegistry>) -> Result<()> {
         Ok(())
     }
 
-    #[allow(unused_variables)]
-    pub fn initialize_new_world(
-        ctx: Context<InitializeNewWorld>,
-        extra_seed: Option<String>,
-    ) -> Result<()> {
+    pub fn initialize_new_world(ctx: Context<InitializeNewWorld>) -> Result<()> {
         ctx.accounts.world.set_inner(World::default());
         ctx.accounts.world.id = ctx.accounts.registry.worlds;
         ctx.accounts.registry.worlds += 1;
@@ -343,50 +335,21 @@ pub mod world {
 }
 
 #[derive(Accounts)]
-#[instruction(extra_seed: Option<String>)]
 pub struct InitializeRegistry<'info> {
-    #[account(
-        init,
-        payer = payer,
-        space = Registry::size(),
-        seeds = [
-            Registry::seed(),
-            match &extra_seed {
-                Some(seed) => seed.as_bytes(),
-                None => &[],
-            }
-        ],
-        bump
-    )]
+    #[account(init, payer = payer, space = Registry::size(), seeds = [Registry::seed()], bump)]
     pub registry: Account<'info, Registry>,
     #[account(mut)]
     pub payer: Signer<'info>,
     pub system_program: Program<'info, System>,
 }
+
 #[derive(Accounts)]
-#[instruction(extra_seed: Option<String>)]
 pub struct InitializeNewWorld<'info> {
     #[account(mut)]
     pub payer: Signer<'info>,
-    #[account(
-        init,
-        payer = payer,
-        space = World::size(),
-        seeds = [
-            World::seed(),
-            &registry.worlds.to_be_bytes(),
-            match &extra_seed {
-                Some(seed) => seed.as_bytes(),
-                None => &[],
-            }
-        ],
-        bump
-    )]
+    #[account(init, payer = payer, space = World::size(), seeds = [World::seed(), &registry.worlds.to_be_bytes()], bump)]
     pub world: Account<'info, World>,
-    #[account(
-        mut,
-        address = Registry::pda(extra_seed.as_deref()).0
-    )]
+    #[account(mut, address = Registry::pda().0)]
     pub registry: Account<'info, Registry>,
     pub system_program: Program<'info, System>,
 }
@@ -511,15 +474,8 @@ impl Registry {
         8 + Registry::INIT_SPACE
     }
 
-    pub fn pda(extra_seed: Option<&str>) -> (Pubkey, u8) {
-        let seeds: &[&[u8]] = &[
-            Registry::seed(),
-            match extra_seed {
-                Some(seed) => seed.as_bytes(),
-                None => &[],
-            },
-        ];
-        Pubkey::find_program_address(seeds, &crate::ID)
+    pub fn pda() -> (Pubkey, u8) {
+        Pubkey::find_program_address(&[Registry::seed()], &crate::ID)
     }
 }
 
