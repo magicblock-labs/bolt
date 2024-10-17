@@ -13,34 +13,25 @@ export const SYSVAR_INSTRUCTIONS_PUBKEY = new PublicKey(
   "Sysvar1nstructions1111111111111111111111111",
 );
 
-export function FindRegistryPda({
-  extraSeed,
-  programId,
-}: {
-  extraSeed?: string;
-  programId?: PublicKey;
-}) {
-  const seeds = [Buffer.from("registry")];
-  if (extraSeed) {
-    seeds.push(Buffer.from(extraSeed));
-  }
-  return PublicKey.findProgramAddressSync(seeds, programId ?? PROGRAM_ID)[0];
+export function FindRegistryPda({ programId }: { programId?: PublicKey }) {
+  return PublicKey.findProgramAddressSync(
+    [Buffer.from("registry")],
+    programId ?? PROGRAM_ID,
+  )[0];
 }
 
 export function FindWorldPda({
   worldId,
-  extraSeed,
   programId,
 }: {
   worldId: BN;
-  extraSeed?: string;
   programId?: PublicKey;
 }) {
-  const seeds = [Buffer.from("world"), worldId.toArrayLike(Buffer, "be", 8)];
-  if (extraSeed) {
-    seeds.push(Buffer.from(extraSeed));
-  }
-  return PublicKey.findProgramAddressSync(seeds, programId ?? PROGRAM_ID)[0];
+  const idBuffer = Buffer.from(worldId.toArrayLike(Buffer, "be", 8));
+  return PublicKey.findProgramAddressSync(
+    [Buffer.from("world"), idBuffer],
+    programId ?? PROGRAM_ID,
+  )[0];
 }
 
 export function FindEntityPda({

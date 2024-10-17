@@ -54,7 +54,7 @@ function logPosition(title: string, { x, y, z }: { x: BN; y: BN; z: BN }) {
 
 function logVelocity(
   title: string,
-  { x, y, z, lastApplied }: { x: BN; y: BN; z: BN; lastApplied: BN }
+  { x, y, z, lastApplied }: { x: BN; y: BN; z: BN; lastApplied: BN },
 ) {
   console.log(" +----------------------------------+");
   console.log(` | ${padCenter(title, 32)} |`);
@@ -120,7 +120,7 @@ describe("bolt", () => {
       connection: provider.connection,
     });
     const signature = await provider.sendAndConfirm(
-      initializeNewWorld.transaction
+      initializeNewWorld.transaction,
     );
     console.log("InitializeNewWorld signature: ", signature);
     worldPda = initializeNewWorld.worldPda; // Saved for later
@@ -139,8 +139,8 @@ describe("bolt", () => {
     const worldAccount = await worldProgram.account.world.fetch(worldPda);
     expect(
       worldAccount.authorities.some((auth) =>
-        auth.equals(provider.wallet.publicKey)
-      )
+        auth.equals(provider.wallet.publicKey),
+      ),
     );
   });
 
@@ -155,7 +155,7 @@ describe("bolt", () => {
     console.log(`Add Authority signature: ${signature}`);
     const worldAccount = await worldProgram.account.world.fetch(worldPda);
     expect(
-      worldAccount.authorities.some((auth) => auth.equals(secondAuthority))
+      worldAccount.authorities.some((auth) => auth.equals(secondAuthority)),
     );
   });
 
@@ -170,7 +170,7 @@ describe("bolt", () => {
     console.log(`Add Authority signature: ${signature}`);
     const worldAccount = await worldProgram.account.world.fetch(worldPda);
     expect(
-      !worldAccount.authorities.some((auth) => auth.equals(secondAuthority))
+      !worldAccount.authorities.some((auth) => auth.equals(secondAuthority)),
     );
   });
 
@@ -305,7 +305,7 @@ describe("bolt", () => {
 
   it("Check Position on Entity 1 is default", async () => {
     const position = await exampleComponentPosition.account.position.fetch(
-      componentPositionEntity1Pda
+      componentPositionEntity1Pda,
     );
     logPosition("Default State: Entity 1", position);
     expect(position.x.toNumber()).to.equal(0);
@@ -331,12 +331,12 @@ describe("bolt", () => {
     const signature = await provider.sendAndConfirm(
       applySystem.transaction,
       [],
-      { skipPreflight: true }
+      { skipPreflight: true },
     );
     console.log(`Signature: ${signature}`);
 
     const position = await exampleComponentPosition.account.position.fetch(
-      componentPositionEntity1Pda
+      componentPositionEntity1Pda,
     );
     logPosition("Movement System: Entity 1", position);
     expect(position.x.toNumber()).to.equal(0);
@@ -362,7 +362,7 @@ describe("bolt", () => {
     await provider.sendAndConfirm(applySystem.transaction);
 
     const position = await exampleComponentPosition.account.position.fetch(
-      componentPositionEntity1Pda
+      componentPositionEntity1Pda,
     );
     logPosition("Movement System: Entity 1", position);
     expect(position.x.toNumber()).to.equal(1);
@@ -385,7 +385,7 @@ describe("bolt", () => {
     await provider.sendAndConfirm(applySystem.transaction);
 
     const position = await exampleComponentPosition.account.position.fetch(
-      componentPositionEntity1Pda
+      componentPositionEntity1Pda,
     );
     logPosition("Fly System: Entity 1", position);
     expect(position.x.toNumber()).to.equal(1);
@@ -414,7 +414,7 @@ describe("bolt", () => {
     await provider.sendAndConfirm(applySystem.transaction);
 
     const velocity = await exampleComponentVelocity.account.velocity.fetch(
-      componentVelocityEntity1Pda
+      componentVelocityEntity1Pda,
     );
     logVelocity("Apply System Velocity: Entity 1", velocity);
     expect(velocity.x.toNumber()).to.equal(10);
@@ -423,7 +423,7 @@ describe("bolt", () => {
     expect(velocity.lastApplied.toNumber()).to.not.equal(0);
 
     const position = await exampleComponentPosition.account.position.fetch(
-      componentPositionEntity1Pda
+      componentPositionEntity1Pda,
     );
     logPosition("Apply System Velocity: Entity 1", position);
     expect(position.x.toNumber()).to.greaterThan(1);
@@ -451,7 +451,7 @@ describe("bolt", () => {
       extraAccounts: [
         {
           pubkey: new web3.PublicKey(
-            "SysvarC1ock11111111111111111111111111111111"
+            "SysvarC1ock11111111111111111111111111111111",
           ),
           isWritable: false,
           isSigner: false,
@@ -461,7 +461,7 @@ describe("bolt", () => {
     await provider.sendAndConfirm(applySystem.transaction);
 
     const position = await exampleComponentPosition.account.position.fetch(
-      componentPositionEntity1Pda
+      componentPositionEntity1Pda,
     );
     logPosition("Apply System Velocity: Entity 1", position);
     expect(position.x.toNumber()).to.greaterThan(1);
@@ -484,7 +484,7 @@ describe("bolt", () => {
     await provider.sendAndConfirm(applySystem.transaction);
 
     const position = await exampleComponentPosition.account.position.fetch(
-      componentPositionEntity4Pda
+      componentPositionEntity4Pda,
     );
     logPosition("Fly System: Entity 4", position);
     expect(position.x.toNumber()).to.equal(0);
@@ -495,7 +495,7 @@ describe("bolt", () => {
   it("Apply Fly System on Entity 5 (should fail with wrong authority)", async () => {
     const positionBefore =
       await exampleComponentPosition.account.position.fetch(
-        componentPositionEntity5Pda
+        componentPositionEntity5Pda,
       );
 
     const applySystem = await ApplySystem({
@@ -521,7 +521,7 @@ describe("bolt", () => {
     expect(failed).to.equal(true);
 
     const positionAfter = await exampleComponentPosition.account.position.fetch(
-      componentPositionEntity5Pda
+      componentPositionEntity5Pda,
     );
 
     expect(positionBefore.x.toNumber()).to.equal(positionAfter.x.toNumber());
@@ -539,7 +539,7 @@ describe("bolt", () => {
     const signature = await provider.sendAndConfirm(
       approveSystem.transaction,
       [],
-      { skipPreflight: true }
+      { skipPreflight: true },
     );
     console.log(`Whitelist 2 system approval signature: ${signature}`);
 
@@ -559,7 +559,7 @@ describe("bolt", () => {
     const signature = await provider.sendAndConfirm(
       approveSystem.transaction,
       [],
-      { skipPreflight: true }
+      { skipPreflight: true },
     );
     console.log(`Whitelist 2 system approval signature: ${signature}`);
 
@@ -594,7 +594,7 @@ describe("bolt", () => {
     const signature = await provider.sendAndConfirm(
       approveSystem.transaction,
       [],
-      { skipPreflight: true }
+      { skipPreflight: true },
     );
     console.log(`Whitelist 2 system approval signature: ${signature}`);
 
@@ -659,7 +659,7 @@ describe("bolt", () => {
     } catch (error) {
       // console.log("error", error);
       expect(error.message).to.contain(
-        "bolt_component. Error Code: AccountOwnedByWrongProgram"
+        "bolt_component. Error Code: AccountOwnedByWrongProgram",
       );
       invalid = true;
     }
@@ -676,11 +676,11 @@ describe("bolt", () => {
     const txSign = await provider.sendAndConfirm(
       delegateComponent.transaction,
       [],
-      { skipPreflight: true, commitment: "confirmed" }
+      { skipPreflight: true, commitment: "confirmed" },
     );
     console.log(`Delegation signature: ${txSign}`);
     const acc = await provider.connection.getAccountInfo(
-      delegateComponent.componentPda
+      delegateComponent.componentPda,
     );
     expect(acc?.owner.toString()).to.equal(DELEGATION_PROGRAM_ID);
   });
