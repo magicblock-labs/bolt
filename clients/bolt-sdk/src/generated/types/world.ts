@@ -68,7 +68,7 @@ export type World = {
         {
           name: "extraSeed";
           type: {
-            option: "string";
+            option: "bytes";
           };
         },
       ];

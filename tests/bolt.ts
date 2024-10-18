@@ -215,7 +215,7 @@ describe("bolt", () => {
     const addEntity = await AddEntity({
       payer: provider.wallet.publicKey,
       world: worldPda,
-      seed: "extra-seed",
+      seed: Buffer.from("extra-seed"),
       connection: provider.connection,
     });
     await provider.sendAndConfirm(addEntity.transaction);
