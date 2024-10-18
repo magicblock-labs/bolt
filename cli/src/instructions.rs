@@ -8,7 +8,7 @@ use anchor_client::solana_sdk::system_program;
 use anchor_client::Client;
 use anyhow::{anyhow, Result};
 use std::rc::Rc;
-use world::{accounts, instruction, World, ID};
+use world::{accounts, instruction, Registry, World, ID};
 
 fn setup_client(cfg_override: &ConfigOverride) -> Result<(Client<Rc<Keypair>>, Keypair)> {
     let cfg = Config::discover(cfg_override)?.expect("Not in workspace.");
@@ -32,6 +32,63 @@ fn parse_pubkey(input: &str, error_message: &str) -> Result<Pubkey> {
     input
         .parse::<Pubkey>()
         .map_err(|_| anyhow!(error_message.to_string()))
+}
+
+pub fn create_registry(cfg_override: &ConfigOverride) -> Result<()> {
+    let (client, payer) = setup_client(cfg_override)?;
+    let program = client.program(ID)?;
+
+    let (registry_pda, _) = Pubkey::find_program_address(&[Registry::seed()], &ID);
+
+    let signature = program
+        .request()
+        .accounts(accounts::InitializeRegistry {
+            registry: registry_pda,
+            payer: payer.pubkey(),
+            system_program: system_program::ID,
+        })
+        .args(instruction::InitializeRegistry {})
+        .signer(&payer)
+        .send()?;
+
+    println!(
+        "New registry {} created with signature {}",
+        registry_pda, signature
+    );
+
+    Ok(())
+}
+
+pub fn create_world(cfg_override: &ConfigOverride) -> Result<()> {
+    let (client, payer) = setup_client(cfg_override)?;
+    let program = client.program(ID)?;
+
+    let (registry_pda, _) = Pubkey::find_program_address(&[Registry::seed()], &ID);
+
+    let registry_account: Registry = program.account(registry_pda)?;
+    let world_id = registry_account.worlds;
+
+    let (world_pda, _) =
+        Pubkey::find_program_address(&[World::seed(), &world_id.to_be_bytes()], &ID);
+
+    let signature = program
+        .request()
+        .accounts(accounts::InitializeNewWorld {
+            payer: payer.pubkey(),
+            world: world_pda,
+            registry: registry_pda,
+            system_program: system_program::ID,
+        })
+        .args(instruction::InitializeNewWorld {})
+        .signer(&payer)
+        .send()?;
+
+    println!(
+        "New world created {} with signature {}",
+        world_pda, signature
+    );
+
+    Ok(())
 }
 
 pub fn authorize(
