@@ -9,6 +9,11 @@ export * from "./delegation/undelegate";
 export * from "./delegation/allow_undelegation";
 export { DELEGATION_PROGRAM_ID } from "@magicblock-labs/ephemeral-rollups-sdk";
 
+// Re-export anchor
+import * as anchor from "@coral-xyz/anchor";
+export { anchor };
+export { Provider, Program, Wallet, web3, workspace } from "@coral-xyz/anchor";
+
 export const SYSVAR_INSTRUCTIONS_PUBKEY = new PublicKey(
   "Sysvar1nstructions1111111111111111111111111",
 );

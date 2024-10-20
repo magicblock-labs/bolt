@@ -30,12 +30,10 @@ pub fn package_json(jest: bool) -> String {
             "lint:fix": "node_modules/.bin/prettier */*.js \"*/**/*{{.js,.ts}}\" -w",
             "lint": "prettier */*.js \"*/**/*{{.js,.ts}}\" --check"
         }},
-        "dependencies": {{
-            "@coral-xyz/anchor": "^{ANCHOR_VERSION}"
-        }},
         "devDependencies": {{
             "jest": "^29.0.3",
-            "prettier": "^2.6.2"
+            "prettier": "^2.6.2",
+            "@magicblock-labs/bolt-sdk": "latest"
         }}
     }}
     "#
@@ -47,16 +45,13 @@ pub fn package_json(jest: bool) -> String {
         "lint:fix": "node_modules/.bin/prettier */*.js \"*/**/*{{.js,.ts}}\" -w",
         "lint": "prettier */*.js \"*/**/*{{.js,.ts}}\" --check"
     }},
-    "dependencies": {{
-        "@coral-xyz/anchor": "^{ANCHOR_VERSION}"
-    }},
     "devDependencies": {{
         "chai": "^4.3.4",
         "mocha": "^9.0.3",
         "prettier": "^2.6.2",
         "@metaplex-foundation/beet": "^0.7.1",
         "@metaplex-foundation/beet-solana": "^0.4.0",
-         "@magicblock-labs/bolt-sdk": "latest"
+        "@magicblock-labs/bolt-sdk": "latest"
     }}
 }}
 "#
@@ -71,9 +66,6 @@ pub fn ts_package_json(jest: bool) -> String {
         "scripts": {{
             "lint:fix": "node_modules/.bin/prettier */*.js \"*/**/*{{.js,.ts}}\" -w",
             "lint": "prettier */*.js \"*/**/*{{.js,.ts}}\" --check"
-        }},
-        "dependencies": {{
-            "@coral-xyz/anchor": "^{ANCHOR_VERSION}"
         }},
         "devDependencies": {{
             "@types/bn.js": "^5.1.0",
@@ -96,9 +88,6 @@ pub fn ts_package_json(jest: bool) -> String {
         "lint:fix": "node_modules/.bin/prettier */*.js \"*/**/*{{.js,.ts}}\" -w",
         "lint": "prettier */*.js \"*/**/*{{.js,.ts}}\" --check"
     }},
-    "dependencies": {{
-        "@coral-xyz/anchor": "^{ANCHOR_VERSION}"
-    }},
     "devDependencies": {{
         "chai": "^4.3.4",
         "mocha": "^9.0.3",
@@ -120,10 +109,10 @@ pub fn ts_package_json(jest: bool) -> String {
 
 pub fn mocha(name: &str) -> String {
     format!(
-        r#"const anchor = require("@coral-xyz/anchor");
-const boltSdk = require("@magicblock-labs/bolt-sdk");
+        r#"const boltSdk = require("@magicblock-labs/bolt-sdk");
 const {{
     InitializeNewWorld,
+    anchor,
 }} = boltSdk;
 
 describe("{}", () => {{
@@ -148,10 +137,10 @@ describe("{}", () => {{
 
 pub fn jest(name: &str) -> String {
     format!(
-        r#"const anchor = require("@coral-xyz/anchor");
-const boltSdk = require("@magicblock-labs/bolt-sdk");
+        r#"const boltSdk = require("@magicblock-labs/bolt-sdk");
 const {{
     InitializeNewWorld,
+    anchor,
 }} = boltSdk;
 
 describe("{}", () => {{
@@ -179,9 +168,7 @@ describe("{}", () => {{
 
 pub fn ts_mocha(name: &str) -> String {
     format!(
-        r#"import * as anchor from "@coral-xyz/anchor";
-import {{ Program }} from "@coral-xyz/anchor";
-import {{ PublicKey }} from "@solana/web3.js";
+        r#"import {{ PublicKey }} from "@solana/web3.js";
 import {{ Position }} from "../target/types/position";
 import {{ Movement }} from "../target/types/movement";
 import {{
@@ -189,6 +176,8 @@ import {{
     AddEntity,
     InitializeComponent,
     ApplySystem,
+    anchor,
+    Program
 }} from "@magicblock-labs/bolt-sdk"
 import {{expect}} from "chai";
 
