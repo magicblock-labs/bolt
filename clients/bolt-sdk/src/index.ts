@@ -42,7 +42,7 @@ export function FindEntityPda({
 }: {
   worldId: BN;
   entityId?: BN;
-  seed?: string;
+  seed?: Uint8Array;
   programId?: PublicKey;
 }) {
   const worldIdBuffer = Buffer.from(worldId.toArrayLike(Buffer, "be", 8));

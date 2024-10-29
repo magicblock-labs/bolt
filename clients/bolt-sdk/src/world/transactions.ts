@@ -229,7 +229,7 @@ export async function AddEntity({
 }: {
   payer: PublicKey;
   world: PublicKey;
-  seed?: string;
+  seed?: Uint8Array;
   connection: Connection;
 }): Promise<{
   instruction: TransactionInstruction;
