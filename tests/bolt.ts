@@ -1,5 +1,3 @@
-import * as anchor from "@coral-xyz/anchor";
-import { type Program, web3 } from "@coral-xyz/anchor";
 import { Keypair, type PublicKey } from "@solana/web3.js";
 import { type Position } from "../target/types/position";
 import { type Velocity } from "../target/types/velocity";
@@ -23,6 +21,9 @@ import {
   RemoveAuthority,
   ApproveSystem,
   RemoveSystem,
+  anchor,
+  type Program,
+  web3,
 } from "../clients/bolt-sdk";
 
 enum Direction {
