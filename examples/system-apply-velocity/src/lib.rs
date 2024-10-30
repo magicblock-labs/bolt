@@ -19,7 +19,8 @@ pub mod system_apply_velocity {
         ctx.accounts.position.x += 10 * (ctx.accounts.velocity.x + 2) + 3;
         msg!("last applied: {}", ctx.accounts.velocity.last_applied);
         msg!("Position: {}", ctx.accounts.position.x);
-        msg!("Remaining accounts: {}", ctx.remaining_accounts.len());
+        msg!("Remaining accounts len: {}", ctx.remaining_accounts.len());
+        msg!("Remaining accounts: {:?}", ctx.remaining_accounts);
         msg!("Authority: {}", ctx.accounts.authority.key);
         Ok(ctx.accounts)
     }
@@ -34,7 +35,7 @@ pub mod system_apply_velocity {
     pub struct ExtraAccounts {
         #[account(address = bolt_lang::solana_program::sysvar::clock::id())]
         pub sysvar_clock: AccountInfo,
-        #[account(address = pubkey!("6LHhFVwif6N9Po3jHtSmMVtPjF6zRfL3xMosSzcrQAS8"))]
+        #[account(address = pubkey!("tEsT3eV6RFCWs1BZ7AXTzasHqTtMnMLCB2tjQ42TDXD"))]
         pub some_extra_account: AccountInfo,
         #[account(address = Metadata::id())]
         pub program_metadata: Program<Metadata>,

@@ -43,6 +43,16 @@ pub fn apply_system(attr: TokenStream, item: TokenStream) -> TokenStream {
             if !ctx.accounts.authority.is_signer && ctx.accounts.authority.key != &ID {
                 return Err(WorldError::InvalidAuthority.into());
             }
+            if !ctx.accounts.world.permissionless
+                && !ctx
+                    .accounts
+                    .world
+                    .systems()
+                    .approved_systems
+                    .contains(&ctx.accounts.bolt_system.key())
+            {
+                return Err(WorldError::SystemNotApproved.into());
+            }
             let remaining_accounts: Vec<AccountInfo<'info>> = ctx.remaining_accounts.to_vec();
             let res = bolt_system::cpi::#execute_func_name(
                     ctx.accounts
