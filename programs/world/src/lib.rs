@@ -1,3 +1,4 @@
+#![allow(clippy::manual_unwrap_or_default)]
 use anchor_lang::prelude::*;
 use bolt_helpers_world_apply::apply_system;
 use std::collections::BTreeSet;

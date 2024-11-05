@@ -24,50 +24,47 @@ codegen-units = 1
 
 pub fn package_json(jest: bool) -> String {
     if jest {
-        format!(
-            r#"{{
-        "scripts": {{
-            "lint:fix": "node_modules/.bin/prettier */*.js \"*/**/*{{.js,.ts}}\" -w",
-            "lint": "prettier */*.js \"*/**/*{{.js,.ts}}\" --check"
-        }},
-        "devDependencies": {{
+        r#"{
+        "scripts": {
+            "lint:fix": "node_modules/.bin/prettier */*.js \"*/**/*{.js,.ts}\" -w",
+            "lint": "prettier */*.js \"*/**/*{.js,.ts}\" --check"
+        },
+        "devDependencies": {
             "jest": "^29.0.3",
             "prettier": "^2.6.2",
             "@magicblock-labs/bolt-sdk": "latest"
-        }}
-    }}
+        }
+    }
     "#
-        )
+        .to_string()
     } else {
-        format!(
-            r#"{{
-    "scripts": {{
-        "lint:fix": "node_modules/.bin/prettier */*.js \"*/**/*{{.js,.ts}}\" -w",
-        "lint": "prettier */*.js \"*/**/*{{.js,.ts}}\" --check"
-    }},
-    "devDependencies": {{
+        r#"{
+    "scripts": {
+        "lint:fix": "node_modules/.bin/prettier */*.js \"*/**/*{.js,.ts}\" -w",
+        "lint": "prettier */*.js \"*/**/*{.js,.ts}\" --check"
+    },
+    "devDependencies": {
         "chai": "^4.3.4",
         "mocha": "^9.0.3",
         "prettier": "^2.6.2",
         "@metaplex-foundation/beet": "^0.7.1",
         "@metaplex-foundation/beet-solana": "^0.4.0",
         "@magicblock-labs/bolt-sdk": "latest"
-    }}
-}}
+    }
+}
 "#
-        )
+        .to_string()
     }
 }
 
 pub fn ts_package_json(jest: bool) -> String {
     if jest {
-        format!(
-            r#"{{
-        "scripts": {{
-            "lint:fix": "node_modules/.bin/prettier */*.js \"*/**/*{{.js,.ts}}\" -w",
-            "lint": "prettier */*.js \"*/**/*{{.js,.ts}}\" --check"
-        }},
-        "devDependencies": {{
+        r#"{
+        "scripts": {
+            "lint:fix": "node_modules/.bin/prettier */*.js \"*/**/*{.js,.ts}\" -w",
+            "lint": "prettier */*.js \"*/**/*{.js,.ts}\" --check"
+        },
+        "devDependencies": {
             "@types/bn.js": "^5.1.0",
             "@types/jest": "^29.0.3",
             "jest": "^29.0.3",
@@ -77,18 +74,17 @@ pub fn ts_package_json(jest: bool) -> String {
             "@metaplex-foundation/beet": "^0.7.1",
             "@metaplex-foundation/beet-solana": "^0.4.0",
             "@magicblock-labs/bolt-sdk": "latest"
-        }}
-    }}
+        }
+    }
     "#
-        )
+        .to_string()
     } else {
-        format!(
-            r#"{{
-    "scripts": {{
-        "lint:fix": "node_modules/.bin/prettier */*.js \"*/**/*{{.js,.ts}}\" -w",
-        "lint": "prettier */*.js \"*/**/*{{.js,.ts}}\" --check"
-    }},
-    "devDependencies": {{
+        r#"{
+    "scripts": {
+        "lint:fix": "node_modules/.bin/prettier */*.js \"*/**/*{.js,.ts}\" -w",
+        "lint": "prettier */*.js \"*/**/*{.js,.ts}\" --check"
+    },
+    "devDependencies": {
         "chai": "^4.3.4",
         "mocha": "^9.0.3",
         "ts-mocha": "^10.0.0",
@@ -100,10 +96,10 @@ pub fn ts_package_json(jest: bool) -> String {
         "@metaplex-foundation/beet": "^0.7.1",
         "@metaplex-foundation/beet-solana": "^0.4.0",
         "@magicblock-labs/bolt-sdk": "latest"
-    }}
-}}
+    }
+}
 "#
-        )
+        .to_string()
     }
 }
 
