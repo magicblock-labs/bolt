@@ -233,7 +233,7 @@ describe("bolt", () => {
     entity5Pda = addEntity.entityPda; // Saved for later
   });
 
-  it("Initialize Original Component on Entity 1, trough the world instance", async () => {
+  it("Initialize Original Component on Entity 1, through the world instance", async () => {
     const initializeComponent = await InitializeComponent({
       payer: provider.wallet.publicKey,
       entity: entity1Pda,
@@ -243,7 +243,7 @@ describe("bolt", () => {
     await provider.sendAndConfirm(initializeComponent.transaction);
   });
 
-  it("Initialize Original Component on Entity 2, trough the world instance", async () => {
+  it("Initialize Original Component on Entity 2, through the world instance", async () => {
     const initializeComponent = await InitializeComponent({
       payer: provider.wallet.publicKey,
       entity: entity2Pda,
