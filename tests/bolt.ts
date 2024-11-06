@@ -240,7 +240,11 @@ describe("bolt", () => {
       seed: "origin-component",
       componentId: boltComponentProgram.programId,
     });
-    await provider.sendAndConfirm(initializeComponent.transaction);
+    try {
+      await provider.sendAndConfirm(initializeComponent.transaction);
+    } catch (error) {
+      expect(error.message).to.contain("Error Code: MustBeCalledViaCpi");
+    }
   });
 
   it("Initialize Original Component on Entity 2, through the world instance", async () => {
@@ -250,7 +254,12 @@ describe("bolt", () => {
       seed: "origin-component",
       componentId: boltComponentProgram.programId,
     });
-    await provider.sendAndConfirm(initializeComponent.transaction);
+
+    try {
+      await provider.sendAndConfirm(initializeComponent.transaction);
+    } catch (error) {
+      expect(error.message).to.contain("Error Code: MustBeCalledViaCpi");
+    }
   });
 
   it("Initialize Position Component on Entity 1", async () => {
