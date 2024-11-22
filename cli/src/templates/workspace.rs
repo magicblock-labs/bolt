@@ -233,6 +233,7 @@ describe("{}", () => {{
     const applySystem = await ApplySystem({{
       authority: provider.wallet.publicKey,
       systemId: systemMovement.programId,
+      world: worldPda,
       entities: [{{
         entity: entityPda,
         components: [{{ componentId: positionComponent.programId }}],
