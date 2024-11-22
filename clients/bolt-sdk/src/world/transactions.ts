@@ -1,4 +1,5 @@
 import {
+  createApplyInstruction,
   createAddEntityInstruction,
   createInitializeComponentInstruction,
   createInitializeNewWorldInstruction,
@@ -300,6 +301,40 @@ export async function InitializeComponent({
     instruction: initializeComponentIx,
     transaction: new Transaction().add(initializeComponentIx),
     componentPda,
+  };
+}
+
+export async function Apply({
+  authority,
+  boltSystem,
+  boltComponent,
+  componentProgram,
+  anchorRemainingAccounts,
+  args
+}: {
+  authority: PublicKey;
+  boltSystem: PublicKey;
+  boltComponent: PublicKey;
+  componentProgram: PublicKey;
+  anchorRemainingAccounts?: web3.AccountMeta[];
+  args: Uint8Array;
+}): Promise<{
+  instruction: TransactionInstruction;
+  transaction: Transaction;
+}> {
+  const initializeComponentIx = createApplyInstruction({
+    authority,
+    boltSystem,
+    boltComponent,
+    componentProgram,
+    instructionSysvarAccount: SYSVAR_INSTRUCTIONS_PUBKEY,
+    anchorRemainingAccounts
+  }, {
+    args
+  });
+  return {
+    instruction: initializeComponentIx,
+    transaction: new Transaction().add(initializeComponentIx)
   };
 }
 
