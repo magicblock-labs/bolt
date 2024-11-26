@@ -3,7 +3,6 @@
         "lint:fix": "node_modules/.bin/prettier */*.js \"*/**/*{.js,.ts}\" -w",
         "lint": "node_modules/.bin/prettier */*.js \"*/**/*{.js,.ts}\" --check"
     },
-    "dependencies": {},
     "devDependencies": {
         "@metaplex-foundation/beet": "^0.7.1",
         "@metaplex-foundation/beet-solana": "^0.4.0",

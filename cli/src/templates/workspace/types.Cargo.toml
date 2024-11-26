@@ -1,0 +1,13 @@
+[package]
+name = "{name}"
+version = "{VERSION}"
+description = "Autogenerate types for the bolt language"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "{snake_case_name}"
+
+[dependencies]
+bolt-lang.workspace = true
+anchor-lang.workspace = true

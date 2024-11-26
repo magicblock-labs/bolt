@@ -1,0 +1,11 @@
+{
+    "scripts": {
+        "lint:fix": "node_modules/.bin/prettier */*.js \"*/**/*{.js,.ts}\" -w",
+        "lint": "prettier */*.js \"*/**/*{.js,.ts}\" --check"
+    },
+    "devDependencies": {
+        "jest": "^29.0.3",
+        "prettier": "^2.6.2",
+        "@magicblock-labs/bolt-sdk": "latest"
+    }
+}

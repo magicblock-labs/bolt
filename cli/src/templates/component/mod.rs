@@ -8,26 +8,11 @@ use crate::rust_template::convert_idl_type_to_str; // Import the trait
 
 /// Create a component which holds position data.
 pub fn create_component_template_simple(name: &str, program_path: &Path) -> Files {
+    let program_id = anchor_cli::rust_template::get_or_create_program_id(name);
+    let program_name = name.to_upper_camel_case();
     vec![(
         program_path.join("src").join("lib.rs"),
-        format!(
-            r#"use bolt_lang::*;
-
-declare_id!("{}");
-
-#[component]
-#[derive(Default)]
-pub struct {} {{
-    pub x: i64,
-    pub y: i64,
-    pub z: i64,
-    #[max_len(20)]
-    pub description: String,
-}}
-"#,
-            anchor_cli::rust_template::get_or_create_program_id(name),
-            name.to_upper_camel_case(),
-        ),
+        format!(include_str!("lib.rs"), program_id=program_id, program_name=program_name)
     )]
 }
 

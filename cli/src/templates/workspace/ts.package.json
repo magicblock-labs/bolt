@@ -1,0 +1,19 @@
+{
+    "scripts": {
+        "lint:fix": "node_modules/.bin/prettier */*.js \"*/**/*{.js,.ts}\" -w",
+        "lint": "prettier */*.js \"*/**/*{.js,.ts}\" --check"
+    },
+    "devDependencies": {
+        "chai": "^4.3.4",
+        "mocha": "^9.0.3",
+        "ts-mocha": "^10.0.0",
+        "@types/bn.js": "^5.1.0",
+        "@types/chai": "^4.3.0",
+        "@types/mocha": "^9.0.0",
+        "typescript": "^4.3.5",
+        "prettier": "^2.6.2",
+        "@metaplex-foundation/beet": "^0.7.1",
+        "@metaplex-foundation/beet-solana": "^0.4.0",
+        "@magicblock-labs/bolt-sdk": "latest"
+    }
+}

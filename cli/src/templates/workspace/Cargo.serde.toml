@@ -1,16 +1,12 @@
 [package]
-name = "position"
+name = "{name}"
+version = "{VERSION}"
 description = "Created with Bolt"
-version = { workspace = true }
-authors = { workspace = true }
-repository = { workspace = true }
-homepage = { workspace = true }
-license = { workspace = true }
-edition = { workspace = true }
+edition = "2021"
 
 [lib]
 crate-type = ["cdylib", "lib"]
-name = "position"
+name = "{snake_case_name}"
 
 [features]
 no-entrypoint = []
@@ -23,6 +19,8 @@ anchor-debug = ["anchor-lang/anchor-debug"]
 custom-heap = []
 custom-panic = []
 
+
 [dependencies]
-anchor-lang = { workspace = true }
-bolt-lang = { path = "../../crates/bolt-lang" }
+bolt-lang.workspace = true
+anchor-lang.workspace = true
+serde = {{ version = "1.0", features = ["derive"] }}
