@@ -12,7 +12,11 @@ pub fn create_component_template_simple(name: &str, program_path: &Path) -> File
     let program_name = name.to_upper_camel_case();
     vec![(
         program_path.join("src").join("lib.rs"),
-        format!(include_str!("lib.rs"), program_id=program_id, program_name=program_name)
+        format!(
+            include_str!("lib.rs"),
+            program_id = program_id,
+            program_name = program_name
+        ),
     )]
 }
 

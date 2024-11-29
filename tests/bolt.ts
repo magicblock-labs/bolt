@@ -22,9 +22,9 @@ import {
   ApproveSystem,
   RemoveSystem,
   type Program,
+  anchor,
   web3,
 } from "../clients/bolt-sdk";
-import * as anchor from "@coral-xyz/anchor";
 
 enum Direction {
   Left = "Left",
