@@ -3,7 +3,11 @@ use heck::ToSnakeCase;
 pub const ANCHOR_VERSION: &str = anchor_cli::VERSION;
 
 pub fn workspace_manifest() -> String {
-    format!(include_str!("workspace.toml"), VERSION=VERSION, ANCHOR_VERSION=ANCHOR_VERSION)
+    format!(
+        include_str!("workspace.toml"),
+        VERSION = VERSION,
+        ANCHOR_VERSION = ANCHOR_VERSION
+    )
 }
 
 pub fn package_json(jest: bool) -> String {
@@ -36,13 +40,23 @@ pub fn ts_mocha(name: &str) -> String {
 
 pub fn cargo_toml(name: &str) -> String {
     let snake_case_name = name.to_snake_case();
-    format!(include_str!("Cargo.toml"), name=name, snake_case_name=snake_case_name, VERSION=VERSION)
+    format!(
+        include_str!("Cargo.toml"),
+        name = name,
+        snake_case_name = snake_case_name,
+        VERSION = VERSION
+    )
 }
 
 /// TODO: Remove serde dependency
 pub fn cargo_toml_with_serde(name: &str) -> String {
     let snake_case_name = name.to_snake_case();
-    format!(include_str!("Cargo.serde.toml"), name=name, snake_case_name=snake_case_name, VERSION=VERSION)
+    format!(
+        include_str!("Cargo.serde.toml"),
+        name = name,
+        snake_case_name = snake_case_name,
+        VERSION = VERSION
+    )
 }
 
 pub fn xargo_toml() -> &'static str {
@@ -59,5 +73,10 @@ pub fn prettier_ignore() -> &'static str {
 pub(crate) fn types_cargo_toml() -> String {
     let name = "bolt-types";
     let snake_case_name = name.to_snake_case();
-    format!(include_str!("types.Cargo.toml"), name=name, snake_case_name=snake_case_name, VERSION=VERSION)
+    format!(
+        include_str!("types.Cargo.toml"),
+        name = name,
+        snake_case_name = snake_case_name,
+        VERSION = VERSION
+    )
 }

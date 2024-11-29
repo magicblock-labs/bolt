@@ -47,7 +47,7 @@ pub(crate) fn create_system(name: &str) -> Result<()> {
 pub fn create_program(name: &str, template: ProgramTemplate) -> Result<()> {
     let program_path = Path::new("programs").join(name);
     let common_files = vec![
-        ("Cargo.toml".into(), workspace_manifest().into()),
+        ("Cargo.toml".into(), workspace_manifest()),
         (program_path.join("Cargo.toml"), cargo_toml(name)),
         (program_path.join("Xargo.toml"), xargo_toml().into()),
     ];

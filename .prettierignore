@@ -7,3 +7,4 @@ dist
 build
 test-ledger
 clients/bolt-sdk/lib
+cli/src/templates/**/*

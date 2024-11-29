@@ -7,7 +7,11 @@ pub fn create_program_template_single(name: &str, program_path: &Path) -> Files 
     let program_name = name.to_snake_case();
     vec![(
         program_path.join("src").join("lib.rs"),
-        format!(include_str!("single.lib.rs"), program_id=program_id, program_name=program_name),
+        format!(
+            include_str!("single.lib.rs"),
+            program_id = program_id,
+            program_name = program_name
+        ),
     )]
 }
 
@@ -19,16 +23,17 @@ pub fn create_program_template_multiple(name: &str, program_path: &Path) -> File
     vec![
         (
             src_path.join("lib.rs"),
-            format!(include_str!("multiple.lib.rs"), program_id=program_id, program_name=program_name),
+            format!(
+                include_str!("multiple.lib.rs"),
+                program_id = program_id,
+                program_name = program_name
+            ),
         ),
         (
             src_path.join("constants.rs"),
             include_str!("constants.rs").into(),
         ),
-        (
-            src_path.join("error.rs"),
-            include_str!("error.rs").into(),
-        ),
+        (src_path.join("error.rs"), include_str!("error.rs").into()),
         (
             src_path.join("instructions").join("mod.rs"),
             include_str!("instructions/mod.rs").into(),

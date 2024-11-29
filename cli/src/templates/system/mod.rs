@@ -8,6 +8,10 @@ pub fn create_system_template_simple(name: &str, program_path: &Path) -> Files {
     let program_name = name.to_snake_case();
     vec![(
         program_path.join("src").join("lib.rs"),
-        format!(include_str!("lib.rs"), program_id=program_id, program_name=program_name)
+        format!(
+            include_str!("lib.rs"),
+            program_id = program_id,
+            program_name = program_name
+        ),
     )]
 }
