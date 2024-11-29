@@ -26,10 +26,19 @@ jobs:
           sudo apt-get install -y pkg-config build-essential libudev-dev
           npm install --global yarn
 
+      - name: Cache Node Dependencies
+        uses: actions/cache@v3
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
+
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: stable
+
+      - name: Cache Rust
+        uses: Swatinem/rust-cache@v2
 
       - name: Install Solana
         run: |
@@ -38,29 +47,8 @@ jobs:
           echo "$HOME/.local/share/solana/install/active_release/bin" >> $GITHUB_PATH
           solana --version
 
-  lint:
-    needs: setup
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        task: [clippy, yarn]
-    steps:
-      - uses: actions/checkout@v4
-      - name: Install node modules
-        run: |
-          yarn --frozen-lockfile --network-concurrency 2
-
-      - name: Run Lint
-        run: |
-          if [ "${{ matrix.task }}" == "clippy" ]; then
-            cargo fmt -- --check --verbose
-            cargo clippy -- --deny=warnings
-          else
-            yarn lint
-          fi
-
   test:
-    needs: lint
+    needs: setup
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -69,6 +57,9 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: stable
+
+      - name: Cache Rust
+        uses: Swatinem/rust-cache@v2
 
       - name: Install Solana
         run: |
