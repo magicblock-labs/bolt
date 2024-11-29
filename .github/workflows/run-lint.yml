@@ -1,0 +1,70 @@
+name: Run Bolt Lint
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+env:
+  solana_version: v1.18.15
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 21
+
+      - name: Install Essentials
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pkg-config build-essential libudev-dev
+          npm install --global yarn
+
+      - name: Cache Node Dependencies
+        uses: actions/cache@v3
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+
+      - name: Cache Rust
+        uses: Swatinem/rust-cache@v2
+
+      - name: Install Solana
+        run: |
+          sh -c "$(curl -sSfL https://release.solana.com/${{ env.solana_version }}/install)"
+          export PATH="$HOME/.local/share/solana/install/active_release/bin:$PATH"
+          echo "$HOME/.local/share/solana/install/active_release/bin" >> $GITHUB_PATH
+          solana --version
+
+  lint:
+    needs: setup
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        task: [clippy, yarn]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install node modules
+        run: |
+          yarn --frozen-lockfile --network-concurrency 2
+      - name: Cache Rust
+        uses: Swatinem/rust-cache@v2
+      - name: Run Lint
+        run: |
+          if [ "${{ matrix.task }}" == "clippy" ]; then
+            cargo fmt -- --check --verbose
+            cargo clippy -- --deny=warnings
+          else
+            yarn lint
+          fi
