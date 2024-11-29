@@ -50,6 +50,7 @@ export interface ApplyInstructionAccounts {
   boltComponent: web3.PublicKey;
   authority: web3.PublicKey;
   instructionSysvarAccount: web3.PublicKey;
+  world: web3.PublicKey;
   anchorRemainingAccounts?: web3.AccountMeta[];
 }
 
@@ -99,6 +100,11 @@ export function createApplyInstruction(
     },
     {
       pubkey: accounts.instructionSysvarAccount,
+      isWritable: false,
+      isSigner: false,
+    },
+    {
+      pubkey: accounts.world,
       isWritable: false,
       isSigner: false,
     },
