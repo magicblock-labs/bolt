@@ -26,19 +26,10 @@ jobs:
           sudo apt-get install -y pkg-config build-essential libudev-dev
           npm install --global yarn
 
-      - name: Cache Node Dependencies
-        uses: actions/cache@v3
-        with:
-          path: '**/node_modules'
-          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
-
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: stable
-
-      - name: Cache Rust
-        uses: Swatinem/rust-cache@v2
 
       - name: Install Solana
         run: |
@@ -58,8 +49,7 @@ jobs:
       - name: Install node modules
         run: |
           yarn --frozen-lockfile --network-concurrency 2
-      - name: Cache Rust
-        uses: Swatinem/rust-cache@v2
+
       - name: Run Lint
         run: |
           if [ "${{ matrix.task }}" == "clippy" ]; then
@@ -79,9 +69,6 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: stable
-
-      - name: Cache Rust
-        uses: Swatinem/rust-cache@v2
 
       - name: Install Solana
         run: |
