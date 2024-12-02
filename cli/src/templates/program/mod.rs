@@ -33,7 +33,10 @@ pub fn create_program_template_multiple(name: &str, program_path: &Path) -> File
             src_path.join("constants.rs"),
             include_str!("constants.rs.template").into(),
         ),
-        (src_path.join("error.rs"), include_str!("error.rs.template").into()),
+        (
+            src_path.join("error.rs"),
+            include_str!("error.rs.template").into(),
+        ),
         (
             src_path.join("instructions").join("mod.rs"),
             include_str!("instructions/mod.rs.template").into(),
