@@ -1,4 +1,5 @@
 use anchor_lang::prelude::*;
+use anchor_lang::solana_program::sysvar::instructions::get_instruction_relative;
 
 declare_id!("CmP2djJgABZ4cRokm4ndxuq6LerqpNHLBsaUv2XKEJua");
 
@@ -7,15 +8,22 @@ pub mod bolt_component {
     use super::*;
 
     pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
-        let instruction =
-            anchor_lang::solana_program::sysvar::instructions::get_instruction_relative(
-                0,
-                &ctx.accounts.instruction_sysvar_account.to_account_info(),
-            )
-            .unwrap();
-        if instruction.program_id == id() {
-            panic!("The instruction must be called from a CPI");
+        // Check if the program is called via CPI
+        match get_instruction_relative(
+            -1,
+            &ctx.accounts.instruction_sysvar_account.to_account_info(),
+        ) {
+            Ok(instruction) => {
+                // Verify the caller's program ID, if necessary
+                if instruction.program_id != ctx.accounts.authority.key() {
+                    return Err(ErrorCode::UnauthorizedCaller.into());
+                }
+            }
+            Err(_) => {
+                return Err(ErrorCode::MustBeCalledViaCpi.into());
+            }
         }
+
         ctx.accounts.data.bolt_metadata.authority = *ctx.accounts.authority.key;
         Ok(())
     }
@@ -47,14 +55,19 @@ pub mod bolt_component {
     }
 
     pub fn update(ctx: Context<Update>, _data: Vec<u8>) -> Result<()> {
-        let instruction =
-            anchor_lang::solana_program::sysvar::instructions::get_instruction_relative(
-                0,
-                &ctx.accounts.instruction_sysvar_account.to_account_info(),
-            )
-            .unwrap();
-        if instruction.program_id == id() {
-            panic!("The instruction must be called from a CPI");
+        // Same CPI check as in initialize
+        match get_instruction_relative(
+            -1,
+            &ctx.accounts.instruction_sysvar_account.to_account_info(),
+        ) {
+            Ok(instruction) => {
+                if instruction.program_id != ctx.accounts.authority.key() {
+                    return Err(ErrorCode::UnauthorizedCaller.into());
+                }
+            }
+            Err(_) => {
+                return Err(ErrorCode::MustBeCalledViaCpi.into());
+            }
         }
         Ok(())
     }
@@ -117,4 +130,12 @@ pub struct Position {
 #[derive(InitSpace, AnchorSerialize, AnchorDeserialize, Default, Copy, Clone)]
 pub struct BoltMetadata {
     pub authority: Pubkey,
+}
+
+#[error_code]
+pub enum ErrorCode {
+    #[msg("The instruction must be called from a CPI")]
+    MustBeCalledViaCpi,
+    #[msg("Unauthorized caller program")]
+    UnauthorizedCaller,
 }
