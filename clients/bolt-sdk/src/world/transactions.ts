@@ -1,4 +1,5 @@
 import {
+  createApplyInstruction,
   createAddEntityInstruction,
   createInitializeComponentInstruction,
   createInitializeNewWorldInstruction,
@@ -47,14 +48,15 @@ export async function InitializeNewWorld({
   const registry = await Registry.fromAccountAddress(connection, registryPda);
   const worldId = new BN(registry.worlds);
   const worldPda = FindWorldPda({ worldId });
-  const initializeWorldIx = createInitializeNewWorldInstruction({
+  const instruction = createInitializeNewWorldInstruction({
     world: worldPda,
     registry: registryPda,
     payer,
   });
+  const transaction = new Transaction().add(instruction);
   return {
-    instruction: initializeWorldIx,
-    transaction: new Transaction().add(initializeWorldIx),
+    instruction,
+    transaction,
     worldPda,
     worldId,
   };
@@ -87,7 +89,7 @@ export async function AddAuthority({
   ) as unknown as Program<WorldProgram>;
   const worldInstance = await World.fromAccountAddress(connection, world);
   const worldId = new BN(worldInstance.id);
-  const addAuthorityIx = await program.methods
+  const instruction = await program.methods
     .addAuthority(worldId)
     .accounts({
       authority,
@@ -95,9 +97,10 @@ export async function AddAuthority({
       world,
     })
     .instruction();
+  const transaction = new Transaction().add(instruction);
   return {
-    instruction: addAuthorityIx,
-    transaction: new Transaction().add(addAuthorityIx),
+    instruction,
+    transaction,
   };
 }
 
@@ -128,7 +131,7 @@ export async function RemoveAuthority({
   ) as unknown as Program<WorldProgram>;
   const worldInstance = await World.fromAccountAddress(connection, world);
   const worldId = new BN(worldInstance.id);
-  const removeAuthorityIx = await program.methods
+  const instruction = await program.methods
     .removeAuthority(worldId)
     .accounts({
       authority,
@@ -136,9 +139,10 @@ export async function RemoveAuthority({
       world,
     })
     .instruction();
+  const transaction = new Transaction().add(instruction);
   return {
-    instruction: removeAuthorityIx,
-    transaction: new Transaction().add(removeAuthorityIx),
+    instruction,
+    transaction,
   };
 }
 
@@ -164,7 +168,7 @@ export async function ApproveSystem({
   const program = new Program(
     worldIdl as Idl,
   ) as unknown as Program<WorldProgram>;
-  const approveSystemIx = await program.methods
+  const instruction = await program.methods
     .approveSystem()
     .accounts({
       authority,
@@ -172,9 +176,10 @@ export async function ApproveSystem({
       world,
     })
     .instruction();
+  const transaction = new Transaction().add(instruction);
   return {
-    instruction: approveSystemIx,
-    transaction: new Transaction().add(approveSystemIx),
+    instruction,
+    transaction,
   };
 }
 
@@ -200,7 +205,7 @@ export async function RemoveSystem({
   const program = new Program(
     worldIdl as Idl,
   ) as unknown as Program<WorldProgram>;
-  const removeSystemIx = await program.methods
+  const instruction = await program.methods
     .removeSystem()
     .accounts({
       authority,
@@ -208,9 +213,10 @@ export async function RemoveSystem({
       world,
     })
     .instruction();
+  const transaction = new Transaction().add(instruction);
   return {
-    instruction: removeSystemIx,
-    transaction: new Transaction().add(removeSystemIx),
+    instruction,
+    transaction,
   };
 }
 
@@ -242,7 +248,7 @@ export async function AddEntity({
     seed !== undefined
       ? FindEntityPda({ worldId, seed })
       : FindEntityPda({ worldId, entityId: new BN(worldInstance.entities) });
-  const addEntityIx = createAddEntityInstruction(
+  const instruction = createAddEntityInstruction(
     {
       world,
       payer,
@@ -250,9 +256,10 @@ export async function AddEntity({
     },
     { extraSeed: seed ?? null },
   );
+  const transaction = new Transaction().add(instruction);
   return {
-    instruction: addEntityIx,
-    transaction: new Transaction().add(addEntityIx),
+    instruction,
+    transaction,
     entityPda,
   };
 }
@@ -287,7 +294,7 @@ export async function InitializeComponent({
   componentPda: PublicKey;
 }> {
   const componentPda = FindComponentPda({ componentId, entity, seed });
-  const initializeComponentIx = createInitializeComponentInstruction({
+  const instruction = createInitializeComponentInstruction({
     payer,
     entity,
     data: componentPda,
@@ -296,10 +303,52 @@ export async function InitializeComponent({
     instructionSysvarAccount: SYSVAR_INSTRUCTIONS_PUBKEY,
     anchorRemainingAccounts,
   });
+  const transaction = new Transaction().add(instruction);
   return {
-    instruction: initializeComponentIx,
-    transaction: new Transaction().add(initializeComponentIx),
+    instruction,
+    transaction,
     componentPda,
+  };
+}
+
+export async function Apply({
+  authority,
+  boltSystem,
+  boltComponent,
+  componentProgram,
+  anchorRemainingAccounts,
+  world,
+  args,
+}: {
+  authority: PublicKey;
+  boltSystem: PublicKey;
+  boltComponent: PublicKey;
+  componentProgram: PublicKey;
+  world: PublicKey;
+  anchorRemainingAccounts?: web3.AccountMeta[];
+  args: Uint8Array;
+}): Promise<{
+  instruction: TransactionInstruction;
+  transaction: Transaction;
+}> {
+  const instruction = createApplyInstruction(
+    {
+      authority,
+      boltSystem,
+      boltComponent,
+      componentProgram,
+      instructionSysvarAccount: SYSVAR_INSTRUCTIONS_PUBKEY,
+      anchorRemainingAccounts,
+      world,
+    },
+    {
+      args,
+    },
+  );
+  const transaction = new Transaction().add(instruction);
+  return {
+    instruction,
+    transaction,
   };
 }
 
@@ -410,7 +459,7 @@ export async function ApplySystem({
   extraAccounts?: web3.AccountMeta[];
   args?: object;
 }): Promise<{ instruction: TransactionInstruction; transaction: Transaction }> {
-  const applySystemIx = await createApplySystemInstruction({
+  const instruction = await createApplySystemInstruction({
     authority,
     systemId,
     entities,
@@ -418,8 +467,9 @@ export async function ApplySystem({
     extraAccounts,
     args,
   });
+  const transaction = new Transaction().add(instruction);
   return {
-    instruction: applySystemIx,
-    transaction: new Transaction().add(applySystemIx),
+    instruction,
+    transaction,
   };
 }
