@@ -157,7 +157,7 @@ jobs:
       - name: Check versions are aligned
         run: |
           # Fails if versions are not aligned
-          cargo install git-cliff
+          cargo install git-cliff@2.6.1 --locked
           ./version-align.sh --check
 
       - name: run build
