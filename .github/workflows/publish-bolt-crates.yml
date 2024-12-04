@@ -157,7 +157,7 @@ jobs:
       - name: Check versions are aligned
         run: |
           # Fails if versions are not aligned
-          cargo install git-cliff
+          cargo install git-cliff@2.6.1 --locked
           ./version-align.sh --check
 
       - name: run build
@@ -205,6 +205,9 @@ jobs:
           cargo publish $DRY_RUN_FLAG --manifest-path=programs/bolt-component/Cargo.toml --token $CRATES_TOKEN $NO_VERIFY_FLAG
           cargo publish $DRY_RUN_FLAG --manifest-path=programs/world/Cargo.toml --token $CRATES_TOKEN $NO_VERIFY_FLAG
           cargo publish $DRY_RUN_FLAG --manifest-path=crates/bolt-lang/Cargo.toml --token $CRATES_TOKEN $NO_VERIFY_FLAG
+          if [ "${DRY_RUN}" != "true" ]; then
+            cargo publish --manifest-path=cli/Cargo.toml --token $CRATES_TOKEN
+          fi
         env:
           CRATES_TOKEN: ${{ secrets.CRATES_TOKEN }}
           DRY_RUN: ${{ env.DRY_RUN }}
