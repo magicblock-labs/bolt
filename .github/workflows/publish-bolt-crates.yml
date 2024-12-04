@@ -205,6 +205,7 @@ jobs:
           cargo publish $DRY_RUN_FLAG --manifest-path=programs/bolt-component/Cargo.toml --token $CRATES_TOKEN $NO_VERIFY_FLAG
           cargo publish $DRY_RUN_FLAG --manifest-path=programs/world/Cargo.toml --token $CRATES_TOKEN $NO_VERIFY_FLAG
           cargo publish $DRY_RUN_FLAG --manifest-path=crates/bolt-lang/Cargo.toml --token $CRATES_TOKEN $NO_VERIFY_FLAG
+          cargo publish $DRY_RUN_FLAG --manifest-path=cli/Cargo.toml --token $CRATES_TOKEN $NO_VERIFY_FLAG
         env:
           CRATES_TOKEN: ${{ secrets.CRATES_TOKEN }}
           DRY_RUN: ${{ env.DRY_RUN }}
