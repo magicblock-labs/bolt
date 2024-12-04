@@ -1,5 +1,18 @@
 
-## [0.1.10] - 2024-10-04
+## [0.1.11] - 2024-12-04
+
+
+### 🐛 Bug Fixes
+
+### 📚 Documentation
+
+### 👷 CI/CD
+ - Reorganizing templates, using bolt.workspace an… (#95)
+
+### ♻️ Refactor
+ - Fixing test template, broken after code refactor (#93)
+
+## [0.1.10] - 2024-10-05
 
 ### 👷 CI/CD
 
