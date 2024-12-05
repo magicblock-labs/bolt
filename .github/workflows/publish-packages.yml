@@ -110,7 +110,7 @@ jobs:
         run: |
           # Fails if versions are not aligned
           cargo install git-cliff@2.6.1 --locked
-          ./version-align.sh --check
+          ./scripts/version-align.sh --check
 
       - name: Build the NPM package
         shell: bash
