@@ -97,14 +97,14 @@ jobs:
         with:
           use-cross: true
           command: build
-          args: --manifest-path=cli/Cargo.toml --release --locked --target ${{ matrix.build.TARGET }}
+          args: --manifest-path=crates/bolt-cli/Cargo.toml --release --locked --target ${{ matrix.build.TARGET }}
 
       - name: Build (windows)
         if: matrix.build.OS == 'windows-latest'
         uses: actions-rs/cargo@v1
         with:
           command: build
-          args: --manifest-path=cli/Cargo.toml --no-default-features --release --locked --target ${{ matrix.build.TARGET }}
+          args: --manifest-path=crates/bolt-cli/Cargo.toml --no-default-features --release --locked --target ${{ matrix.build.TARGET }}
 
       - name: Check versions are aligned
         run: |
@@ -136,7 +136,7 @@ jobs:
           # create the package directory
           mkdir -p "${node_pkg}/bin"
           # generate package.json from the template
-          envsubst < cli/npm-package/package.json.tmpl > "${node_pkg}/package.json"
+          envsubst < crates/bolt-cli/npm-package/package.json.tmpl > "${node_pkg}/package.json"
           cat "${node_pkg}/package.json"
           # copy the binary into the package
           # note: windows binaries has '.exe' extension

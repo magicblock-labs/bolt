@@ -24,7 +24,16 @@ cluster = "Localnet"
 wallet = "./tests/fixtures/provider.json"
 
 [workspace]
-members = ["programs/bolt-component", "programs/bolt-system", "programs/world", "examples/component-position", "examples/component-velocity", "examples/system-apply-velocity", "examples/system-fly", "examples/system-simple-movement"]
+members = [
+    "crates/programs/bolt-component",
+    "crates/programs/bolt-system",
+    "crates/programs/world",
+    "examples/component-position",
+    "examples/component-velocity",
+    "examples/system-apply-velocity",
+    "examples/system-fly",
+    "examples/system-simple-movement"
+]
 
 [scripts]
 test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/bolt.ts"

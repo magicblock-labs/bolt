@@ -163,7 +163,7 @@ jobs:
       - name: run build
         run: |
           export PATH="/home/runner/.local/share/solana/install/active_release/bin:$PATH"
-          cargo install --path cli --force --locked
+          cargo install --path crates/bolt-cli --force --locked
           bolt build
 
       - name: Generate lib
@@ -175,7 +175,7 @@ jobs:
       - name: run tests
         run: |
           export PATH="/home/runner/.local/share/solana/install/active_release/bin:$PATH"
-          cargo install --path cli --force --locked
+          cargo install --path crates/bolt-cli --force --locked
           bolt test
 
       - name: cargo publish
@@ -201,12 +201,12 @@ jobs:
           cargo publish $DRY_RUN_FLAG --manifest-path=crates/bolt-lang/attribute/delegate/Cargo.toml --token $CRATES_TOKEN $NO_VERIFY_FLAG
           cargo publish $DRY_RUN_FLAG --manifest-path=crates/bolt-helpers/attribute/system-template/Cargo.toml --token $CRATES_TOKEN $NO_VERIFY_FLAG
           cargo publish $DRY_RUN_FLAG --manifest-path=crates/bolt-helpers/attribute/world-apply/Cargo.toml --token $CRATES_TOKEN $NO_VERIFY_FLAG
-          cargo publish $DRY_RUN_FLAG --manifest-path=programs/bolt-system/Cargo.toml --token $CRATES_TOKEN $NO_VERIFY_FLAG
-          cargo publish $DRY_RUN_FLAG --manifest-path=programs/bolt-component/Cargo.toml --token $CRATES_TOKEN $NO_VERIFY_FLAG
-          cargo publish $DRY_RUN_FLAG --manifest-path=programs/world/Cargo.toml --token $CRATES_TOKEN $NO_VERIFY_FLAG
+          cargo publish $DRY_RUN_FLAG --manifest-path=crates/programs/bolt-system/Cargo.toml --token $CRATES_TOKEN $NO_VERIFY_FLAG
+          cargo publish $DRY_RUN_FLAG --manifest-path=crates/programs/bolt-component/Cargo.toml --token $CRATES_TOKEN $NO_VERIFY_FLAG
+          cargo publish $DRY_RUN_FLAG --manifest-path=crates/programs/world/Cargo.toml --token $CRATES_TOKEN $NO_VERIFY_FLAG
           cargo publish $DRY_RUN_FLAG --manifest-path=crates/bolt-lang/Cargo.toml --token $CRATES_TOKEN $NO_VERIFY_FLAG
           if [ "${DRY_RUN}" != "true" ]; then
-            cargo publish --manifest-path=cli/Cargo.toml --token $CRATES_TOKEN
+            cargo publish --manifest-path=crates/bolt-cli/Cargo.toml --token $CRATES_TOKEN
           fi
         env:
           CRATES_TOKEN: ${{ secrets.CRATES_TOKEN }}
