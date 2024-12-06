@@ -158,12 +158,12 @@ jobs:
         run: |
           # Fails if versions are not aligned
           cargo install git-cliff@2.6.1 --locked
-          ./version-align.sh --check
+          ./scripts/version-align.sh --check
 
       - name: run build
         run: |
           export PATH="/home/runner/.local/share/solana/install/active_release/bin:$PATH"
-          cargo install --path cli --force --locked
+          cargo install --path crates/bolt-cli --force --locked
           bolt build
 
       - name: Generate lib
@@ -175,7 +175,7 @@ jobs:
       - name: run tests
         run: |
           export PATH="/home/runner/.local/share/solana/install/active_release/bin:$PATH"
-          cargo install --path cli --force --locked
+          cargo install --path crates/bolt-cli --force --locked
           bolt test
 
       - name: npm publish

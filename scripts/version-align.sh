@@ -35,7 +35,7 @@ jq --arg version "$version" '(.version = $version) | (.optionalDependencies[] = 
 cargo update --workspace
 
 # Generate CHANGELOG.md
-git-cliff -c cliff.toml -o CHANGELOG.md -t $version
+git-cliff -c cliff.toml -o docs/CHANGELOG.md -t $version
 
 # Check if the any changes have been made to the specified files, if running with --check
 if [[ "$1" == "--check" ]]; then
