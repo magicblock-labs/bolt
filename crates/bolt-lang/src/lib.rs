@@ -1,3 +1,6 @@
+pub mod prelude;
+
+pub use anchor_lang;
 pub use anchor_lang::error::ErrorCode::AccountDidNotDeserialize as AccountDidNotDeserializeErrorCode;
 pub use anchor_lang::prelude::*;
 pub use anchor_lang::{

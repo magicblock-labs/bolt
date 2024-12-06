@@ -1,4 +1,4 @@
-use anchor_lang::prelude::*;
+use bolt_lang::prelude::*;
 
 #[error_code]
 pub enum ErrorCode {
