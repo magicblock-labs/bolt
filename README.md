@@ -26,14 +26,14 @@ With Bolt, you can create games that live forever on the blockchain. These games
 
 | Package                     | Description                                                                      | Version                                                                                                                                  | Docs                                                                                                            |
 |:----------------------------|:---------------------------------------------------------------------------------|:-----------------------------------------------------------------------------------------------------------------------------------------|:----------------------------------------------------------------------------------------------------------------|
+| `bolt-cli`                  | CLI to support building and managing a Bolt workspace                            | [![Crates.io](https://img.shields.io/crates/v/bolt-cli?color=blue)](https://crates.io/crates/bolt-cli)                                 | [![Docs](https://img.shields.io/badge/docs-tutorials-blue)](https://book.boltengine.gg/getting_started/installation.html) |
 | `bolt-lang`                 | Rust primitives for creating components, systems and writing programs on Solana | [![Crates.io](https://img.shields.io/crates/v/bolt-lang?color=blue)](https://crates.io/crates/bolt-lang)                                 | [![Docs.rs](https://img.shields.io/badge/docs-tutorials-blue)](https://book.boltengine.gg/)                                    |
 | `@magicblock-labs/bolt-sdk` | TypeScript client for Anchor programs                                            | [![npm](https://img.shields.io/npm/v/@magicblock-labs/bolt-sdk.svg?color=blue)](https://www.npmjs.com/package/@magicblock-labs/bolt-sdk)         | [![Docs](https://img.shields.io/badge/docs-tutorials-blue)](https://book.boltengine.gg/getting_started/world_program.html#typescript-sdk-installation)     |
-| `@magicblock-labs/bolt-cli` | CLI to support building and managing a Bolt workspace                            | [![npm](https://img.shields.io/npm/v/@magicblock-labs/bolt-cli.svg?color=blue)](https://www.npmjs.com/package/@magicblock-labs/bolt-cli) | [![Docs](https://img.shields.io/badge/docs-tutorials-blue)](https://book.boltengine.gg/getting_started/installation.html) |
 
 ## ⚡️ Installing the bolt-cli
 
 ```bash
-npm install -g @magicblock-labs/bolt-cli
+cargo install bolt-cli
 ```
 
 ## 🔩️ Getting Started

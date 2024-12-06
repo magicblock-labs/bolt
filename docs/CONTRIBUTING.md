@@ -4,7 +4,7 @@ Thank you for considering contributing to [Bolt](https://github.com/magicblock-l
 
 When contributing, please first discuss the change you wish to make via [issue](https://github.com/magicblock-labs/bolt/issues), or any other method with the owners of this repository before making a change.
 
-Note that we have a [Code of Conduct](CODE_OF_CONDUCT.md), please follow it in all your interactions with the project.
+Note that we have a [Code of Conduct](./CODE_OF_CONDUCT.md), please follow it in all your interactions with the project.
 
 ## Setup
 
@@ -35,7 +35,7 @@ cargo test
 
 ## Create a Pull Request
 
-1. Ensure that you updated the documentation and filled the [Pull Request template](./.github/PULL_REQUEST_TEMPLATE.md) according to the changes you made.
+1. Ensure that you updated the documentation and filled the [Pull Request template](/.github/pull_request_template.md) according to the changes you made.
 
 2. Wait for approval from the project owner/maintainer. Discuss the possible changes and update your Pull Request if necessary.
 
@@ -50,4 +50,4 @@ cargo test
 
 # License
 
-By contributing, you agree that your contributions will be licensed under [The MIT License](./LICENSE-MIT) or [Apache License 2.0](./LICENSE-APACHE).
+By contributing, you agree that your contributions will be licensed under [The MIT License](/LICENSE) or [Apache License 2.0](/LICENSE-APACHE).
