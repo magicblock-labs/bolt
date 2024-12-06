@@ -25,24 +25,24 @@ sed "${sedi[@]}" "/\[workspace.dependencies\]/,/\## External crates/s/version = 
 # Update the version in clients/bolt-sdk/package.json
 jq --arg version "$version" '.version = $version' clients/bolt-sdk/package.json > temp.json && mv temp.json clients/bolt-sdk/package.json
 
-# Update the version in cli/npm-package/package.json.tmpl
-jq --arg version "$version" '.version = $version' cli/npm-package/package.json.tmpl > temp.json && mv temp.json cli/npm-package/package.json.tmpl
+# Update the version in crates/bolt-cli/npm-package/package.json.tmpl
+jq --arg version "$version" '.version = $version' crates/bolt-cli/npm-package/package.json.tmpl > temp.json && mv temp.json crates/bolt-cli/npm-package/package.json.tmpl
 
-# Update the main package version and all optionalDependencies versions in cli/npm-package/package.json
-jq --arg version "$version" '(.version = $version) | (.optionalDependencies[] = $version)' cli/npm-package/package.json > temp.json && mv temp.json cli/npm-package/package.json
+# Update the main package version and all optionalDependencies versions in crates/bolt-cli/npm-package/package.json
+jq --arg version "$version" '(.version = $version) | (.optionalDependencies[] = $version)' crates/bolt-cli/npm-package/package.json > temp.json && mv temp.json crates/bolt-cli/npm-package/package.json
 
 # Potential for collisions in Cargo.lock, use cargo update to update it
 cargo update --workspace
 
 # Generate CHANGELOG.md
-git-cliff -c cliff.toml -o docs/CHANGELOG.md -t $version
+git-cliff -c Cliff.toml -o docs/CHANGELOG.md -t $version
 
 # Check if the any changes have been made to the specified files, if running with --check
 if [[ "$1" == "--check" ]]; then
     files_to_check=(
         "clients/bolt-sdk/package.json"
-        "cli/npm-package/package.json.tmpl"
-        "cli/npm-package/package.json"
+        "crates/bolt-cli/npm-package/package.json.tmpl"
+        "crates/bolt-cli/npm-package/package.json"
         "Cargo.toml"
         "CHANGELOG.toml"
     )

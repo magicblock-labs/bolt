@@ -1,8 +1,15 @@
 
+## [0.1.12] - 2024-12-06
+
+### ♻️ Refactor
+ - Refactor: re-exporting anchor-lang (#114)
+ - Refactor: files structure (#113)
+
 ## [0.1.11] - 2024-12-04
 
 
 ### 🐛 Bug Fixes
+ - Fix: removing test caches (#100)
 
 ### 📚 Documentation
 
@@ -10,13 +17,33 @@
  - Reorganizing templates, using bolt.workspace an… (#95)
 
 ### ♻️ Refactor
+ - Refactor: Adding .template extension to template files (#107)
  - Fixing test template, broken after code refactor (#93)
+
+### 🧪 Testing
+ - Test: test and lint scripts (#99)
+ - Test: running lint on pull request (#101)
+ - Test: adding test script (#97)
+
+### 🔧 Maintenance
 
 ## [0.1.10] - 2024-10-05
 
 ### 👷 CI/CD
 
 ### ♻️ Refactor
+
+## [0.1.9] - 2024-10-02
+
+
+### 🐛 Bug Fixes
+ - Fix: secret ENV variables should be read by forked PR's also (#76)
+
+### 📚 Documentation
+ - Docs: Fix typo in README (#77)
+
+### ♻️ Refactor
+ - Refactor: break down the cli application function to specific file (#74)
 
 ## [0.1.8] - 2024-06-27
 
@@ -42,6 +69,26 @@ Add Ephemeral Rollups manual commit instruction to the typescript sdk
 
 ## Description
 Upgrade Anchor dependency to 0.30.1
+
+
+### 🐛 Bug Fixes
+ - Fix: removing generated files from lib and .crates files off of git (#54)
+
+## Problem
+The `lib` and `.crates` folder files in the `bolt-sdk` were not supposed
+to be git tracked
+
+## Solution
+`git rm -r lib` and add those to `.gitignore`
+ - Fix: make sure CI is recompiling the /lib folder when we make changes (#53)
+
+## Problem
+When changing the Typescript files, yarn build was not running in the
+CI, leading to the CI's test succeeding even if we just introduced a
+bug.
+
+## Solution
+Make the CI run `yarn build` before testing
 
 ### 👷 CI/CD
 
