@@ -2,10 +2,7 @@ use crate::VERSION;
 use heck::ToSnakeCase;
 
 pub fn workspace_manifest() -> String {
-    format!(
-        include_str!("workspace.toml.template"),
-        VERSION = VERSION
-    )
+    format!(include_str!("workspace.toml.template"), VERSION = VERSION)
 }
 
 pub fn package_json(jest: bool) -> String {
