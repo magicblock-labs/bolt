@@ -194,7 +194,7 @@ jobs:
       - name: Publish the NPM package
         shell: bash
         run: |
-          cd cli/npm-package
+          cd crates/bolt-cli/npm-package
           npm install
           npm run build
           cd lib
