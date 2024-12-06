@@ -8,7 +8,6 @@ resolver = "2"
 
 [workspace.dependencies]
 bolt-lang = "{VERSION}"
-anchor-lang = "{ANCHOR_VERSION}"
 
 [profile.release]
 overflow-checks = true

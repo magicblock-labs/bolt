@@ -1,13 +1,8 @@
 use crate::VERSION;
 use heck::ToSnakeCase;
-pub const ANCHOR_VERSION: &str = anchor_cli::VERSION;
 
 pub fn workspace_manifest() -> String {
-    format!(
-        include_str!("workspace.toml.template"),
-        VERSION = VERSION,
-        ANCHOR_VERSION = ANCHOR_VERSION
-    )
+    format!(include_str!("workspace.toml.template"), VERSION = VERSION)
 }
 
 pub fn package_json(jest: bool) -> String {

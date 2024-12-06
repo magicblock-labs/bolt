@@ -8,6 +8,10 @@ homepage = { workspace = true }
 license = { workspace = true }
 edition = { workspace = true }
 
+[features]
+anchor-debug = ["anchor-lang/anchor-debug"]
+idl-build = ["anchor-lang/idl-build"]
+
 [dependencies]
 anchor-lang = { workspace = true }
 

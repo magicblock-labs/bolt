@@ -3490,7 +3490,6 @@ dependencies = [
 name = "position"
 version = "0.1.11"
 dependencies = [
- "anchor-lang",
  "bolt-lang 0.1.11",
 ]
 
@@ -5628,7 +5627,6 @@ dependencies = [
 name = "system-apply-velocity"
 version = "0.1.11"
 dependencies = [
- "anchor-lang",
  "anchor-spl",
  "bolt-lang 0.1.11",
  "position",
@@ -5660,7 +5658,6 @@ dependencies = [
 name = "system-fly"
 version = "0.1.11"
 dependencies = [
- "anchor-lang",
  "bolt-lang 0.1.11",
  "position",
 ]
@@ -5669,7 +5666,6 @@ dependencies = [
 name = "system-simple-movement"
 version = "0.1.11"
 dependencies = [
- "anchor-lang",
  "bolt-lang 0.1.11",
  "bolt-types",
  "serde",
@@ -6198,7 +6194,6 @@ checksum = "f1bddf1187be692e79c5ffeab891132dfb0f236ed36a43c7ed39f1165ee20191"
 name = "velocity"
 version = "0.1.11"
 dependencies = [
- "anchor-lang",
  "bolt-lang 0.1.11",
 ]
 
