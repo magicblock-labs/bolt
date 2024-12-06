@@ -95,4 +95,10 @@ jobs:
           yarn install && yarn build
           cd ../..
           bolt test
+      
+      - name: Initialize and test a new project
+        run: |
+          bolt init test-project
+          cd test-project
+          bolt test
 
