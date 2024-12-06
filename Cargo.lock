@@ -834,7 +834,7 @@ dependencies = [
 
 [[package]]
 name = "bolt-attribute-bolt-arguments"
-version = "0.1.11"
+version = "0.1.12"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -855,9 +855,9 @@ dependencies = [
 
 [[package]]
 name = "bolt-attribute-bolt-component"
-version = "0.1.11"
+version = "0.1.12"
 dependencies = [
- "bolt-utils 0.1.11",
+ "bolt-utils 0.1.12",
  "proc-macro2",
  "quote",
  "syn 1.0.109",
@@ -877,9 +877,9 @@ dependencies = [
 
 [[package]]
 name = "bolt-attribute-bolt-component-deserialize"
-version = "0.1.11"
+version = "0.1.12"
 dependencies = [
- "bolt-utils 0.1.11",
+ "bolt-utils 0.1.12",
  "proc-macro2",
  "quote",
  "syn 1.0.109",
@@ -898,7 +898,7 @@ dependencies = [
 
 [[package]]
 name = "bolt-attribute-bolt-component-id"
-version = "0.1.11"
+version = "0.1.12"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -918,7 +918,7 @@ dependencies = [
 
 [[package]]
 name = "bolt-attribute-bolt-delegate"
-version = "0.1.11"
+version = "0.1.12"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -938,7 +938,7 @@ dependencies = [
 
 [[package]]
 name = "bolt-attribute-bolt-extra-accounts"
-version = "0.1.11"
+version = "0.1.12"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -958,7 +958,7 @@ dependencies = [
 
 [[package]]
 name = "bolt-attribute-bolt-program"
-version = "0.1.11"
+version = "0.1.12"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -978,7 +978,7 @@ dependencies = [
 
 [[package]]
 name = "bolt-attribute-bolt-system"
-version = "0.1.11"
+version = "0.1.12"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -998,7 +998,7 @@ dependencies = [
 
 [[package]]
 name = "bolt-attribute-bolt-system-input"
-version = "0.1.11"
+version = "0.1.12"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1007,7 +1007,7 @@ dependencies = [
 
 [[package]]
 name = "bolt-cli"
-version = "0.1.11"
+version = "0.1.12"
 dependencies = [
  "anchor-cli",
  "anchor-client",
@@ -1018,7 +1018,7 @@ dependencies = [
  "heck 0.5.0",
  "serde_json",
  "syn 1.0.109",
- "world 0.1.11",
+ "world 0.1.12",
 ]
 
 [[package]]
@@ -1033,10 +1033,10 @@ dependencies = [
 
 [[package]]
 name = "bolt-component"
-version = "0.1.11"
+version = "0.1.12"
 dependencies = [
  "anchor-lang",
- "bolt-system 0.1.11",
+ "bolt-system 0.1.12",
 ]
 
 [[package]]
@@ -1056,7 +1056,7 @@ dependencies = [
 
 [[package]]
 name = "bolt-helpers-system-template"
-version = "0.1.11"
+version = "0.1.12"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1076,7 +1076,7 @@ dependencies = [
 
 [[package]]
 name = "bolt-helpers-world-apply"
-version = "0.1.11"
+version = "0.1.12"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1109,24 +1109,24 @@ dependencies = [
 
 [[package]]
 name = "bolt-lang"
-version = "0.1.11"
+version = "0.1.12"
 dependencies = [
  "ahash 0.8.11",
  "anchor-lang",
- "bolt-attribute-bolt-arguments 0.1.11",
- "bolt-attribute-bolt-component 0.1.11",
- "bolt-attribute-bolt-component-deserialize 0.1.11",
- "bolt-attribute-bolt-component-id 0.1.11",
- "bolt-attribute-bolt-delegate 0.1.11",
- "bolt-attribute-bolt-extra-accounts 0.1.11",
- "bolt-attribute-bolt-program 0.1.11",
- "bolt-attribute-bolt-system 0.1.11",
- "bolt-attribute-bolt-system-input 0.1.11",
- "bolt-system 0.1.11",
+ "bolt-attribute-bolt-arguments 0.1.12",
+ "bolt-attribute-bolt-component 0.1.12",
+ "bolt-attribute-bolt-component-deserialize 0.1.12",
+ "bolt-attribute-bolt-component-id 0.1.12",
+ "bolt-attribute-bolt-delegate 0.1.12",
+ "bolt-attribute-bolt-extra-accounts 0.1.12",
+ "bolt-attribute-bolt-program 0.1.12",
+ "bolt-attribute-bolt-system 0.1.12",
+ "bolt-attribute-bolt-system-input 0.1.12",
+ "bolt-system 0.1.12",
  "ephemeral-rollups-sdk",
  "serde",
  "serde_json",
- "world 0.1.11",
+ "world 0.1.12",
 ]
 
 [[package]]
@@ -1141,10 +1141,10 @@ dependencies = [
 
 [[package]]
 name = "bolt-system"
-version = "0.1.11"
+version = "0.1.12"
 dependencies = [
  "anchor-lang",
- "bolt-helpers-system-template 0.1.11",
+ "bolt-helpers-system-template 0.1.12",
 ]
 
 [[package]]
@@ -1168,7 +1168,7 @@ dependencies = [
 
 [[package]]
 name = "bolt-utils"
-version = "0.1.11"
+version = "0.1.12"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -3488,9 +3488,9 @@ dependencies = [
 
 [[package]]
 name = "position"
-version = "0.1.11"
+version = "0.1.12"
 dependencies = [
- "bolt-lang 0.1.11",
+ "bolt-lang 0.1.12",
 ]
 
 [[package]]
@@ -5625,10 +5625,10 @@ dependencies = [
 
 [[package]]
 name = "system-apply-velocity"
-version = "0.1.11"
+version = "0.1.12"
 dependencies = [
  "anchor-spl",
- "bolt-lang 0.1.11",
+ "bolt-lang 0.1.12",
  "position",
  "velocity",
 ]
@@ -5656,17 +5656,17 @@ dependencies = [
 
 [[package]]
 name = "system-fly"
-version = "0.1.11"
+version = "0.1.12"
 dependencies = [
- "bolt-lang 0.1.11",
+ "bolt-lang 0.1.12",
  "position",
 ]
 
 [[package]]
 name = "system-simple-movement"
-version = "0.1.11"
+version = "0.1.12"
 dependencies = [
- "bolt-lang 0.1.11",
+ "bolt-lang 0.1.12",
  "bolt-types",
  "serde",
 ]
@@ -6192,9 +6192,9 @@ checksum = "f1bddf1187be692e79c5ffeab891132dfb0f236ed36a43c7ed39f1165ee20191"
 
 [[package]]
 name = "velocity"
-version = "0.1.11"
+version = "0.1.12"
 dependencies = [
- "bolt-lang 0.1.11",
+ "bolt-lang 0.1.12",
 ]
 
 [[package]]
@@ -6574,12 +6574,12 @@ dependencies = [
 
 [[package]]
 name = "world"
-version = "0.1.11"
+version = "0.1.12"
 dependencies = [
  "anchor-lang",
- "bolt-component 0.1.11",
- "bolt-helpers-world-apply 0.1.11",
- "bolt-system 0.1.11",
+ "bolt-component 0.1.12",
+ "bolt-helpers-world-apply 0.1.12",
+ "bolt-system 0.1.12",
  "solana-security-txt",
  "tuple-conv",
 ]

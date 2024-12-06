@@ -78,6 +78,14 @@ commit_parsers = [
     { message = "^:art:", group = "<!-- 5 -->🎨 Styling" },
     { message = "^:construction_worker:", group = "<!-- 6 -->👷 CI/CD" },
     { message = "^:recycle:", group = "<!-- 7 -->♻️ Refactor" },
+    { message = "^fix", group = "<!-- 1 -->🐛 Bug Fixes" },
+    { message = "^docs", group = "<!-- 3 -->📚 Documentation" },
+    { message = "^perf", group = "<!-- 4 -->⚡️ Performance" },
+    { message = "^style", group = "<!-- 5 -->🎨 Styling" },
+    { message = "^ci", group = "<!-- 6 -->👷 CI/CD" },
+    { message = "^refactor", group = "<!-- 7 -->♻️ Refactor" },
+    { message = "^test", group = "<!-- 8 -->🧪 Testing" },
+    { message = "^chore", group = "<!-- 9 -->🔧 Maintenance" }
 ]
 # protect breaking changes from being skipped due to matching a skipping commit_parser
 protect_breaking_commits = false
