@@ -8,7 +8,7 @@ members = [
     "crates/programs/bolt-system",
     "crates/programs/world",
     "crates/types",
-    "examples/*",
+    "examples/*", "crates/bolt-sdk",
 ]
 
 [workspace.package]

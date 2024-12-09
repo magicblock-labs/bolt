@@ -1130,6 +1130,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "bolt-sdk"
+version = "0.1.12"
+dependencies = [
+ "solana-client",
+ "solana-sdk",
+ "tokio",
+]
+
+[[package]]
 name = "bolt-system"
 version = "0.1.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"

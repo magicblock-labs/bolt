@@ -1,0 +1,16 @@
+[package]
+name = "bolt-sdk"
+description = "Bolt SDK"
+version = { workspace = true }
+authors = { workspace = true }
+repository = { workspace = true }
+homepage = { workspace = true }
+license = { workspace = true }
+edition = { workspace = true }
+
+[dependencies]
+solana-sdk = "1.18.25"
+solana-client = "1.18.25"
+
+[dev-dependencies]
+tokio = { version = "1", features = ["full"] }
