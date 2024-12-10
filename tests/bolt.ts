@@ -11,8 +11,6 @@ import type BN from "bn.js";
 import {
   AddEntity,
   createInitializeRegistryInstruction,
-  DELEGATION_PROGRAM_ID,
-  FindRegistryPda,
   InitializeComponent,
   InitializeNewWorld,
   ApplySystem,
@@ -27,6 +25,8 @@ import {
   web3,
   SerializeArgs,
 } from "../clients/bolt-sdk";
+
+import { FindRegistryPda, DELEGATION_PROGRAM_ID } from "../crates/bolt-sdk/pkg";
 
 enum Direction {
   Left = "Left",
@@ -108,11 +108,12 @@ describe("bolt", () => {
   const secondAuthority = Keypair.generate().publicKey;
 
   it("InitializeRegistry", async () => {
-    const registryPda = FindRegistryPda({});
+    const registryPda = FindRegistryPda();
     const initializeRegistryIx = createInitializeRegistryInstruction({
       registry: registryPda,
       payer: provider.wallet.publicKey,
     });
+    console.log("initializeRegistryIx", initializeRegistryIx);
     const tx = new anchor.web3.Transaction().add(initializeRegistryIx);
     await provider.sendAndConfirm(tx);
   });

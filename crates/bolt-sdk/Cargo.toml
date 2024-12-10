@@ -8,9 +8,16 @@ homepage = { workspace = true }
 license = { workspace = true }
 edition = { workspace = true }
 
+[lib]
+crate-type = ["cdylib", "rlib"]
+
 [dependencies]
+anchor-lang = { workspace = true }
 solana-sdk = "1.18.25"
-solana-client = "1.18.25"
+wasm-bindgen = "0.2.99"
+js-sys = "0.3.67"
 
 [dev-dependencies]
+anchor-client = { workspace = true, features = ["async"] }
+solana-client = "1.18.25"
 tokio = { version = "1", features = ["full"] }
