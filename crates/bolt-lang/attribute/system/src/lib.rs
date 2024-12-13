@@ -70,10 +70,38 @@ pub fn system(attr: TokenStream, item: TokenStream) -> TokenStream {
     }
 }
 
+impl SystemTransform {
+    fn visit_stmts_mut(&mut self, stmts: &mut Vec<Stmt>) {
+        for stmt in stmts {
+            if let Stmt::Expr(ref mut expr) | Stmt::Semi(ref mut expr, _) = stmt {
+                self.visit_expr_mut(expr);
+            }
+        }
+    }
+}
+
 /// Visits the AST and modifies the system function
 impl VisitMut for SystemTransform {
     // Modify the return instruction to return Result<Vec<u8>>
     fn visit_expr_mut(&mut self, expr: &mut Expr) {
+        match expr {
+            Expr::ForLoop(for_loop_expr) => {
+                self.visit_stmts_mut(&mut for_loop_expr.body.stmts);
+            },
+            Expr::Loop(loop_expr) => {
+                self.visit_stmts_mut(&mut loop_expr.body.stmts);
+            },
+            Expr::If(if_expr) => {
+                self.visit_stmts_mut(&mut if_expr.then_branch.stmts);
+                if let Some((_, else_expr)) = &mut if_expr.else_branch {
+                    self.visit_expr_mut(else_expr);
+                }
+            },
+            Expr::Block(block_expr) => {
+                self.visit_stmts_mut(&mut block_expr.block.stmts);
+            },
+            _ => ()
+        }
         if let Some(inner_variable) = Self::extract_inner_ok_expression(expr) {
             let new_return_expr: Expr = match inner_variable {
                 Expr::Tuple(tuple_expr) => {
@@ -88,7 +116,11 @@ impl VisitMut for SystemTransform {
                     }
                 }
             };
-            *expr = new_return_expr;
+            if let Expr::Return(return_expr) = expr {
+                return_expr.expr = Some(Box::new(new_return_expr));
+            } else {
+                *expr = new_return_expr;
+            }
         }
     }
 
@@ -108,11 +140,7 @@ impl VisitMut for SystemTransform {
                         Self::modify_fn_return_type(item_fn, self.return_values);
                         // Modify the return statement inside the function body
                         let block = &mut item_fn.block;
-                        for stmt in &mut block.stmts {
-                            if let Stmt::Expr(ref mut expr) | Stmt::Semi(ref mut expr, _) = stmt {
-                                self.visit_expr_mut(expr);
-                            }
-                        }
+                        self.visit_stmts_mut(&mut block.stmts);
                     }
                 }
             }
