@@ -87,20 +87,20 @@ impl VisitMut for SystemTransform {
         match expr {
             Expr::ForLoop(for_loop_expr) => {
                 self.visit_stmts_mut(&mut for_loop_expr.body.stmts);
-            },
+            }
             Expr::Loop(loop_expr) => {
                 self.visit_stmts_mut(&mut loop_expr.body.stmts);
-            },
+            }
             Expr::If(if_expr) => {
                 self.visit_stmts_mut(&mut if_expr.then_branch.stmts);
                 if let Some((_, else_expr)) = &mut if_expr.else_branch {
                     self.visit_expr_mut(else_expr);
                 }
-            },
+            }
             Expr::Block(block_expr) => {
                 self.visit_stmts_mut(&mut block_expr.block.stmts);
-            },
-            _ => ()
+            }
+            _ => (),
         }
         if let Some(inner_variable) = Self::extract_inner_ok_expression(expr) {
             let new_return_expr: Expr = match inner_variable {
