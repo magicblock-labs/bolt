@@ -10,9 +10,8 @@ import { expect } from "chai";
 import type BN from "bn.js";
 import {
   AddEntity,
-  createInitializeRegistryInstruction,
   DELEGATION_PROGRAM_ID,
-  FindRegistryPda,
+  InitializeRegistry,
   InitializeComponent,
   InitializeNewWorld,
   ApplySystem,
@@ -24,8 +23,7 @@ import {
   RemoveSystem,
   type Program,
   anchor,
-  web3,
-  SerializeArgs,
+  web3
 } from "../clients/bolt-sdk";
 
 enum Direction {
@@ -108,13 +106,11 @@ describe("bolt", () => {
   const secondAuthority = Keypair.generate().publicKey;
 
   it("InitializeRegistry", async () => {
-    const registryPda = FindRegistryPda({});
-    const initializeRegistryIx = createInitializeRegistryInstruction({
-      registry: registryPda,
+    const initializeRegistry = await InitializeRegistry({
       payer: provider.wallet.publicKey,
+      connection: provider.connection,
     });
-    const tx = new anchor.web3.Transaction().add(initializeRegistryIx);
-    await provider.sendAndConfirm(tx);
+    await provider.sendAndConfirm(initializeRegistry.transaction);
   });
 
   it("InitializeNewWorld", async () => {
@@ -122,9 +118,7 @@ describe("bolt", () => {
       payer: provider.wallet.publicKey,
       connection: provider.connection,
     });
-    const signature = await provider.sendAndConfirm(
-      initializeNewWorld.transaction,
-    );
+    const signature = await provider.sendAndConfirm(initializeNewWorld.transaction);
     console.log("InitializeNewWorld signature: ", signature);
     worldPda = initializeNewWorld.worldPda; // Saved for later
   });
@@ -317,23 +311,18 @@ describe("bolt", () => {
   });
 
   it("Apply Simple Movement System (Up) on Entity 1 using Apply", async () => {
-    console.log("Apply", Apply);
     const apply = await Apply({
       authority: provider.wallet.publicKey,
       boltSystem: exampleSystemSimpleMovement,
       boltComponent: componentPositionEntity1Pda,
       componentProgram: exampleComponentPosition.programId,
       world: worldPda,
-      args: SerializeArgs({
-        direction: Direction.Up,
-      }),
+      args: { direction: Direction.Up },
     });
 
     await provider.sendAndConfirm(apply.transaction);
 
-    const position = await exampleComponentPosition.account.position.fetch(
-      componentPositionEntity1Pda,
-    );
+    const position = await exampleComponentPosition.account.position.fetch(componentPositionEntity1Pda);
     logPosition("Movement System: Entity 1", position);
     expect(position.x.toNumber()).to.equal(0);
     expect(position.y.toNumber()).to.equal(1);

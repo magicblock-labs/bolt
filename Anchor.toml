@@ -36,7 +36,7 @@ members = [
 ]
 
 [scripts]
-test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/bolt.ts"
+test = "sleep 2 && yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/bolt.low-level.api.ts"
 
 [test]
 startup_wait = 5000

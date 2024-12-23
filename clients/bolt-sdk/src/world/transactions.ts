@@ -21,10 +21,33 @@ import {
   type TransactionInstruction,
 } from "@solana/web3.js";
 import type WorldProgram from "../generated";
-import { PROGRAM_ID, worldIdl } from "../generated";
+import {
+  createInitializeRegistryInstruction,
+  PROGRAM_ID,
+  worldIdl,
+} from "../generated";
 import { type Idl, Program } from "@coral-xyz/anchor";
 
 const MAX_COMPONENTS = 5;
+
+export async function InitializeRegistry({
+  payer,
+  connection,
+}: {
+  payer: PublicKey;
+  connection: Connection;
+}): Promise<{
+  instruction: TransactionInstruction;
+  transaction: Transaction;
+}> {
+  const registry = FindRegistryPda({});
+  const instruction = createInitializeRegistryInstruction({ registry, payer });
+  const transaction = new Transaction().add(instruction);
+  return {
+    instruction,
+    transaction,
+  };
+}
 
 /**
  * Create the transaction to Initialize a new world
@@ -299,7 +322,7 @@ export async function InitializeComponent({
     entity,
     data: componentPda,
     componentProgram: componentId,
-    authority: authority ?? PROGRAM_ID,
+    authority: authority ?? PROGRAM_ID, // TODO: Should this be handled on the program side?
     instructionSysvarAccount: SYSVAR_INSTRUCTIONS_PUBKEY,
     anchorRemainingAccounts,
   });
@@ -326,11 +349,14 @@ export async function Apply({
   componentProgram: PublicKey;
   world: PublicKey;
   anchorRemainingAccounts?: web3.AccountMeta[];
-  args: Uint8Array;
+  args: Uint8Array | any;
 }): Promise<{
   instruction: TransactionInstruction;
   transaction: Transaction;
 }> {
+  if (!(args instanceof Uint8Array)) {
+    args = SerializeArgs(args);
+  }
   const instruction = createApplyInstruction(
     {
       authority,

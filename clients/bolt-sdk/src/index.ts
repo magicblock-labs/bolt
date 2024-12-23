@@ -64,6 +64,7 @@ export function FindEntityPda({
   return PublicKey.findProgramAddressSync(seeds, programId ?? PROGRAM_ID)[0];
 }
 
+// TODO: seed must be Uint8Array like the other FindPda functions
 export function FindComponentPda({
   componentId,
   entity,

@@ -8,7 +8,7 @@ export type World = {
   address: "WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n";
   metadata: {
     name: "world";
-    version: "0.1.10";
+    version: "0.1.12";
     spec: "0.1.0";
     description: "Bolt World program";
     repository: "https://github.com/magicblock-labs/bolt";
