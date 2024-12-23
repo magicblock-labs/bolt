@@ -17,8 +17,7 @@ import {
   FindWorldPda,
   FindEntityPda,
   FindComponentPda,
-  SerializeArgs,
-  WORLD_PROGRAM_IDL as World,
+  SerializeArgs
 } from "../clients/bolt-sdk";
 
 enum Direction {
