@@ -41,23 +41,22 @@ export function FindWorldPda({
 }
 
 export function FindEntityPda({
-  worldId,
+  world,
   entityId,
   seed,
   programId,
 }: {
-  worldId: BN;
+  world: PublicKey;
   entityId?: BN;
   seed?: Uint8Array;
   programId?: PublicKey;
 }) {
-  const worldIdBuffer = Buffer.from(worldId.toArrayLike(Buffer, "be", 8));
-  const seeds = [Buffer.from("entity"), worldIdBuffer];
+  const seeds = [Buffer.from("entity"), world.toBytes()];
   if (seed !== undefined) {
     seeds.push(Buffer.from(new Uint8Array(8)));
     seeds.push(Buffer.from(seed));
   } else if (entityId !== undefined) {
-    const entityIdBuffer = Buffer.from(entityId.toArrayLike(Buffer, "be", 8));
+    const entityIdBuffer = entityId.toArrayLike(Buffer, "be", 8);
     seeds.push(entityIdBuffer);
   } else {
     throw new Error("An entity must have either an Id or a Seed");

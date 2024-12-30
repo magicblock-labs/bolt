@@ -245,7 +245,7 @@ pub mod world {
     }
 
     #[allow(unused_variables)]
-    pub fn add_entity(ctx: Context<AddEntity>, extra_seed: Option<Vec<u8>>) -> Result<()> {
+    pub fn add_entity(ctx: Context<AddEntity>, seed: Option<Vec<u8>>) -> Result<()> {
         require!(
             ctx.accounts.world.key() == ctx.accounts.world.pda().0,
             WorldError::WorldAccountMismatch
@@ -423,16 +423,16 @@ pub struct RemoveSystem<'info> {
 }
 
 #[derive(Accounts)]
-#[instruction(extra_seed: Option<Vec<u8>>)]
+#[instruction(seed: Option<Vec<u8>>)]
 pub struct AddEntity<'info> {
     #[account(mut)]
     pub payer: Signer<'info>,
     #[account(init, payer = payer, space = World::size(), seeds = [Entity::seed(), &world.id.to_be_bytes(),
-    &match extra_seed {
+    &match seed {
         Some(ref seed) => [0; 8],
         None => world.entities.to_be_bytes()
     },
-    match extra_seed {
+    match seed {
         Some(ref seed) => seed,
         None => &[],
     }], bump)]

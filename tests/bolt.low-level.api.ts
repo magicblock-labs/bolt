@@ -5,6 +5,7 @@ import { type BoltComponent } from "../target/types/bolt_component";
 import { type SystemSimpleMovement } from "../target/types/system_simple_movement";
 import { type SystemFly } from "../target/types/system_fly";
 import { type SystemApplyVelocity } from "../target/types/system_apply_velocity";
+import { type World } from "../target/types/world";
 import { expect } from "chai";
 import BN from "bn.js";
 import {
