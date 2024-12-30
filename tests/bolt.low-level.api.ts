@@ -21,7 +21,7 @@ import {
   FindWorldPda,
   FindEntityPda,
   FindComponentPda,
-  SerializeArgs
+  SerializeArgs,
 } from "../clients/bolt-sdk";
 
 enum Direction {
@@ -137,34 +137,33 @@ describe("bolt", () => {
 
   it("Add authority", async () => {
     const instruction = await worldProgram.methods
-        .addAuthority(worldId)
-        .accounts({
-            authority: provider.wallet.publicKey,
-            newAuthority: provider.wallet.publicKey,
-            world: worldPda
-        })
-        .instruction();
-    
+      .addAuthority(worldId)
+      .accounts({
+        authority: provider.wallet.publicKey,
+        newAuthority: provider.wallet.publicKey,
+        world: worldPda,
+      })
+      .instruction();
 
     const transaction = new anchor.web3.Transaction().add(instruction);
     await provider.sendAndConfirm(transaction, [], { skipPreflight: true });
     const worldAccount = await worldProgram.account.world.fetch(worldPda);
     expect(
-        worldAccount.authorities.some((auth) =>
-            auth.equals(provider.wallet.publicKey),
-        ),
+      worldAccount.authorities.some((auth) =>
+        auth.equals(provider.wallet.publicKey),
+      ),
     );
   });
 
   it("Add a second authority", async () => {
     const instruction = await worldProgram.methods
-        .addAuthority(worldId)
-        .accounts({
-            authority: provider.wallet.publicKey,
-            newAuthority: secondAuthority,
-            world: worldPda
-        })
-        .instruction();    
+      .addAuthority(worldId)
+      .accounts({
+        authority: provider.wallet.publicKey,
+        newAuthority: secondAuthority,
+        world: worldPda,
+      })
+      .instruction();
 
     const transaction = new anchor.web3.Transaction().add(instruction);
     const signature = await provider.sendAndConfirm(transaction);
@@ -177,13 +176,13 @@ describe("bolt", () => {
 
   it("Remove an authority", async () => {
     const instruction = await worldProgram.methods
-        .removeAuthority(worldId)
-        .accounts({
-            authority: provider.wallet.publicKey,
-            authorityToDelete: secondAuthority,
-            world: worldPda
-        })
-        .instruction();
+      .removeAuthority(worldId)
+      .accounts({
+        authority: provider.wallet.publicKey,
+        authorityToDelete: secondAuthority,
+        world: worldPda,
+      })
+      .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
     const signature = await provider.sendAndConfirm(transaction);
     console.log(`Remove Authority signature: ${signature}`);
@@ -215,13 +214,13 @@ describe("bolt", () => {
     const world = await worldProgram.account.world.fetch(worldPda);
     entity1Pda = FindEntityPda({ worldId, entityId: world.entities });
     const instruction = await worldProgram.methods
-        .addEntity(null)
-        .accounts({
-            payer: provider.wallet.publicKey,
-            world: worldPda,
-            entity: entity1Pda
-        })
-        .instruction();
+      .addEntity(null)
+      .accounts({
+        payer: provider.wallet.publicKey,
+        world: worldPda,
+        entity: entity1Pda,
+      })
+      .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
     const signature = await provider.sendAndConfirm(transaction);
     console.log("Add Entity 1 signature: ", signature);
@@ -231,13 +230,13 @@ describe("bolt", () => {
     const world = await worldProgram.account.world.fetch(worldPda);
     entity2Pda = FindEntityPda({ worldId, entityId: world.entities });
     const instruction = await worldProgram.methods
-        .addEntity(null)
-        .accounts({
-            payer: provider.wallet.publicKey,
-            world: worldPda,
-            entity: entity2Pda
-        })
-        .instruction();
+      .addEntity(null)
+      .accounts({
+        payer: provider.wallet.publicKey,
+        world: worldPda,
+        entity: entity2Pda,
+      })
+      .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
     const signature = await provider.sendAndConfirm(transaction);
     console.log("Add Entity 2 signature: ", signature);
@@ -247,13 +246,13 @@ describe("bolt", () => {
     const world = await worldProgram.account.world.fetch(worldPda);
     const entity3Pda = FindEntityPda({ worldId, entityId: world.entities });
     const instruction = await worldProgram.methods
-        .addEntity(null)
-        .accounts({
-            payer: provider.wallet.publicKey,
-            world: worldPda,
-            entity: entity3Pda
-        })
-        .instruction();
+      .addEntity(null)
+      .accounts({
+        payer: provider.wallet.publicKey,
+        world: worldPda,
+        entity: entity3Pda,
+      })
+      .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
     const signature = await provider.sendAndConfirm(transaction);
     console.log("Add Entity 3 signature: ", signature);
@@ -263,13 +262,13 @@ describe("bolt", () => {
     const seed = Buffer.from("custom-seed");
     entity4Pda = FindEntityPda({ worldId, seed });
     const instruction = await worldProgram.methods
-        .addEntity(seed)
-        .accounts({
-            payer: provider.wallet.publicKey,
-            world: worldPda,
-            entity: entity4Pda
-        })
-        .instruction();
+      .addEntity(seed)
+      .accounts({
+        payer: provider.wallet.publicKey,
+        world: worldPda,
+        entity: entity4Pda,
+      })
+      .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
     const signature = await provider.sendAndConfirm(transaction);
     console.log("Add Entity 4 signature: ", signature);
@@ -279,13 +278,13 @@ describe("bolt", () => {
     const world = await worldProgram.account.world.fetch(worldPda);
     entity5Pda = FindEntityPda({ worldId, entityId: world.entities });
     const instruction = await worldProgram.methods
-        .addEntity(null)
-        .accounts({
-            payer: provider.wallet.publicKey,
-            world: worldPda,
-            entity: entity5Pda
-        })
-        .instruction();
+      .addEntity(null)
+      .accounts({
+        payer: provider.wallet.publicKey,
+        world: worldPda,
+        entity: entity5Pda,
+      })
+      .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
     const signature = await provider.sendAndConfirm(transaction);
     console.log("Add Entity 5 signature: ", signature);
@@ -293,128 +292,173 @@ describe("bolt", () => {
 
   it("Initialize Original Component on Entity 1, trough the world instance", async () => {
     const componentId = boltComponentProgram.programId;
-    const componentPda = FindComponentPda({ componentId, entity: entity1Pda, seed: "origin-component" });
+    const componentPda = FindComponentPda({
+      componentId,
+      entity: entity1Pda,
+      seed: "origin-component",
+    });
     const instruction = await worldProgram.methods
-        .initializeComponent()
-        .accounts({
-            payer: provider.wallet.publicKey,
-            entity: entity1Pda,
-            data: componentPda,
-            componentProgram: componentId,
-            authority: provider.wallet.publicKey,
-        })
-        .instruction();
+      .initializeComponent()
+      .accounts({
+        payer: provider.wallet.publicKey,
+        entity: entity1Pda,
+        data: componentPda,
+        componentProgram: componentId,
+        authority: provider.wallet.publicKey,
+      })
+      .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
     const signature = await provider.sendAndConfirm(transaction);
-    console.log("Initialize Original Component on Entity 1 signature: ", signature);
+    console.log(
+      "Initialize Original Component on Entity 1 signature: ",
+      signature,
+    );
   });
 
   it("Initialize Original Component on Entity 2, trough the world instance", async () => {
     const componentId = boltComponentProgram.programId;
-    const componentPda = FindComponentPda({ componentId, entity: entity2Pda, seed: "origin-component" });
+    const componentPda = FindComponentPda({
+      componentId,
+      entity: entity2Pda,
+      seed: "origin-component",
+    });
     const instruction = await worldProgram.methods
-        .initializeComponent()
-        .accounts({
-            payer: provider.wallet.publicKey,
-            entity: entity2Pda,
-            data: componentPda,
-            componentProgram: componentId,
-            authority: provider.wallet.publicKey,
-        })
-        .instruction();
+      .initializeComponent()
+      .accounts({
+        payer: provider.wallet.publicKey,
+        entity: entity2Pda,
+        data: componentPda,
+        componentProgram: componentId,
+        authority: provider.wallet.publicKey,
+      })
+      .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
     const signature = await provider.sendAndConfirm(transaction);
-    console.log("Initialize Original Component on Entity 2 signature: ", signature);
+    console.log(
+      "Initialize Original Component on Entity 2 signature: ",
+      signature,
+    );
   });
 
   it("Initialize Position Component on Entity 1", async () => {
     const componentId = exampleComponentPosition.programId;
-    componentPositionEntity1Pda = FindComponentPda({ componentId, entity: entity1Pda });
+    componentPositionEntity1Pda = FindComponentPda({
+      componentId,
+      entity: entity1Pda,
+    });
     const instruction = await worldProgram.methods
-        .initializeComponent()
-        .accounts({
-            payer: provider.wallet.publicKey,
-            entity: entity1Pda,
-            data: componentPositionEntity1Pda,
-            componentProgram: componentId,
-            authority: worldProgram.programId,
-        })
-        .instruction();
+      .initializeComponent()
+      .accounts({
+        payer: provider.wallet.publicKey,
+        entity: entity1Pda,
+        data: componentPositionEntity1Pda,
+        componentProgram: componentId,
+        authority: worldProgram.programId,
+      })
+      .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
     const signature = await provider.sendAndConfirm(transaction);
-    console.log("Initialize Position Component on Entity 1 signature: ", signature);
+    console.log(
+      "Initialize Position Component on Entity 1 signature: ",
+      signature,
+    );
   });
 
   it("Initialize Velocity Component on Entity 1 (with seed)", async () => {
     const componentId = exampleComponentVelocity.programId;
-    componentVelocityEntity1Pda = FindComponentPda({ componentId, entity: entity1Pda, seed: "component-velocity" });
+    componentVelocityEntity1Pda = FindComponentPda({
+      componentId,
+      entity: entity1Pda,
+      seed: "component-velocity",
+    });
     const instruction = await worldProgram.methods
-        .initializeComponent()
-        .accounts({
-            payer: provider.wallet.publicKey,
-            entity: entity1Pda,
-            data: componentVelocityEntity1Pda,
-            componentProgram: componentId,
-            authority: worldProgram.programId,
-        })
-        .instruction();
+      .initializeComponent()
+      .accounts({
+        payer: provider.wallet.publicKey,
+        entity: entity1Pda,
+        data: componentVelocityEntity1Pda,
+        componentProgram: componentId,
+        authority: worldProgram.programId,
+      })
+      .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
     const signature = await provider.sendAndConfirm(transaction);
-    console.log("Initialize Velocity Component on Entity 1 signature: ", signature);
+    console.log(
+      "Initialize Velocity Component on Entity 1 signature: ",
+      signature,
+    );
   });
 
   it("Initialize Position Component on Entity 2", async () => {
     const componentId = exampleComponentPosition.programId;
-    const componentPositionEntity2Pda = FindComponentPda({ componentId, entity: entity2Pda });
+    const componentPositionEntity2Pda = FindComponentPda({
+      componentId,
+      entity: entity2Pda,
+    });
     const instruction = await worldProgram.methods
-        .initializeComponent()
-        .accounts({
-            payer: provider.wallet.publicKey,
-            entity: entity2Pda,
-            data: componentPositionEntity2Pda,
-            componentProgram: componentId,
-            authority: worldProgram.programId,
-        })
-        .instruction();
+      .initializeComponent()
+      .accounts({
+        payer: provider.wallet.publicKey,
+        entity: entity2Pda,
+        data: componentPositionEntity2Pda,
+        componentProgram: componentId,
+        authority: worldProgram.programId,
+      })
+      .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
     const signature = await provider.sendAndConfirm(transaction);
-    console.log("Initialize Position Component on Entity 2 signature: ", signature);
+    console.log(
+      "Initialize Position Component on Entity 2 signature: ",
+      signature,
+    );
   });
 
   it("Initialize Position Component on Entity 4", async () => {
     const componentId = exampleComponentPosition.programId;
-    componentPositionEntity4Pda = FindComponentPda({ componentId, entity: entity4Pda });
+    componentPositionEntity4Pda = FindComponentPda({
+      componentId,
+      entity: entity4Pda,
+    });
     const instruction = await worldProgram.methods
-        .initializeComponent()
-        .accounts({
-            payer: provider.wallet.publicKey,
-            entity: entity4Pda,
-            data: componentPositionEntity4Pda,
-            componentProgram: componentId,
-            authority: worldProgram.programId,
-        })
-        .instruction();
+      .initializeComponent()
+      .accounts({
+        payer: provider.wallet.publicKey,
+        entity: entity4Pda,
+        data: componentPositionEntity4Pda,
+        componentProgram: componentId,
+        authority: worldProgram.programId,
+      })
+      .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
     const signature = await provider.sendAndConfirm(transaction);
-    console.log("Initialize Position Component on Entity 4 signature: ", signature);
+    console.log(
+      "Initialize Position Component on Entity 4 signature: ",
+      signature,
+    );
   });
 
   it("Initialize Position Component on Entity 5 (with authority)", async () => {
     const componentId = exampleComponentPosition.programId;
-    componentPositionEntity5Pda = FindComponentPda({ componentId, entity: entity5Pda });
+    componentPositionEntity5Pda = FindComponentPda({
+      componentId,
+      entity: entity5Pda,
+    });
     const instruction = await worldProgram.methods
-        .initializeComponent()
-        .accounts({
-            payer: provider.wallet.publicKey,
-            entity: entity5Pda,
-            data: componentPositionEntity5Pda,
-            componentProgram: componentId,
-            authority: provider.wallet.publicKey,
-        })
-        .instruction();
+      .initializeComponent()
+      .accounts({
+        payer: provider.wallet.publicKey,
+        entity: entity5Pda,
+        data: componentPositionEntity5Pda,
+        componentProgram: componentId,
+        authority: provider.wallet.publicKey,
+      })
+      .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
     const signature = await provider.sendAndConfirm(transaction);
-    console.log("Initialize Position Component on Entity 5 signature: ", signature);
+    console.log(
+      "Initialize Position Component on Entity 5 signature: ",
+      signature,
+    );
   });
 
   it("Check Position on Entity 1 is default", async () => {
@@ -441,9 +485,14 @@ describe("bolt", () => {
 
     const transaction = new anchor.web3.Transaction().add(instruction);
     const signature = await provider.sendAndConfirm(transaction);
-    console.log("Apply Simple Movement System (Up) on Entity 1 signature: ", signature);
+    console.log(
+      "Apply Simple Movement System (Up) on Entity 1 signature: ",
+      signature,
+    );
 
-    const position = await exampleComponentPosition.account.position.fetch(componentPositionEntity1Pda);
+    const position = await exampleComponentPosition.account.position.fetch(
+      componentPositionEntity1Pda,
+    );
     logPosition("Movement System: Entity 1", position);
     expect(position.x.toNumber()).to.equal(0);
     expect(position.y.toNumber()).to.equal(1);
@@ -464,9 +513,14 @@ describe("bolt", () => {
 
     const transaction = new anchor.web3.Transaction().add(instruction);
     const signature = await provider.sendAndConfirm(transaction);
-    console.log("Apply Simple Movement System (Up) on Entity 1 signature: ", signature);
+    console.log(
+      "Apply Simple Movement System (Up) on Entity 1 signature: ",
+      signature,
+    );
 
-    const position = await exampleComponentPosition.account.position.fetch(componentPositionEntity1Pda);
+    const position = await exampleComponentPosition.account.position.fetch(
+      componentPositionEntity1Pda,
+    );
     logPosition("Movement System: Entity 1", position);
     expect(position.x.toNumber()).to.equal(0);
     expect(position.y.toNumber()).to.equal(2);
@@ -486,7 +540,10 @@ describe("bolt", () => {
       .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
     const signature = await provider.sendAndConfirm(transaction);
-    console.log("Apply Simple Movement System (Right) on Entity 1 signature: ", signature);
+    console.log(
+      "Apply Simple Movement System (Right) on Entity 1 signature: ",
+      signature,
+    );
 
     const position = await exampleComponentPosition.account.position.fetch(
       componentPositionEntity1Pda,

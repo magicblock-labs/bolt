@@ -23,7 +23,7 @@ import {
   RemoveSystem,
   type Program,
   anchor,
-  web3
+  web3,
 } from "../clients/bolt-sdk";
 
 enum Direction {
@@ -122,7 +122,9 @@ describe("bolt", () => {
       payer: provider.wallet.publicKey,
       connection: provider.connection,
     });
-    const signature = await provider.sendAndConfirm(initializeNewWorld.transaction);
+    const signature = await provider.sendAndConfirm(
+      initializeNewWorld.transaction,
+    );
     console.log("InitializeNewWorld signature: ", signature);
     worldPda = initializeNewWorld.worldPda; // Saved for later
   });
@@ -326,7 +328,9 @@ describe("bolt", () => {
 
     await provider.sendAndConfirm(apply.transaction);
 
-    const position = await exampleComponentPosition.account.position.fetch(componentPositionEntity1Pda);
+    const position = await exampleComponentPosition.account.position.fetch(
+      componentPositionEntity1Pda,
+    );
     logPosition("Movement System: Entity 1", position);
     expect(position.x.toNumber()).to.equal(0);
     expect(position.y.toNumber()).to.equal(1);
