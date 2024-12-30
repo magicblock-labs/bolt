@@ -110,7 +110,11 @@ describe("bolt", () => {
       payer: provider.wallet.publicKey,
       connection: provider.connection,
     });
-    await provider.sendAndConfirm(initializeRegistry.transaction);
+    try {
+      await provider.sendAndConfirm(initializeRegistry.transaction);
+    } catch (error) {
+      // This is expected to fail because the registry already exists if another api level test ran before
+    }
   });
 
   it("InitializeNewWorld", async () => {
@@ -212,7 +216,7 @@ describe("bolt", () => {
     const addEntity = await AddEntity({
       payer: provider.wallet.publicKey,
       world: worldPda,
-      seed: Buffer.from("extra-seed"),
+      seed: Buffer.from("custom-seed"),
       connection: provider.connection,
     });
     await provider.sendAndConfirm(addEntity.transaction);

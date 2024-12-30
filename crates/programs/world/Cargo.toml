@@ -24,10 +24,10 @@ custom-heap = []
 custom-panic = []
 
 [dependencies]
-anchor-lang = { workspace = true }
-bolt-component = { workspace = true, cpi = true }
-bolt-helpers-world-apply = { workspace = true }
-bolt-system = { workspace = true, cpi = true }
-solana-security-txt = { workspace = true }
-tuple-conv = { workspace = true }
+anchor-lang.workspace = true
+bolt-component.workspace = true
+bolt-helpers-world-apply.workspace = true
+bolt-system.workspace = true
+solana-security-txt.workspace = true
+tuple-conv.workspace = true
 

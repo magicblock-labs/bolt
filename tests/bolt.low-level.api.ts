@@ -9,16 +9,9 @@ import { type SystemApplyVelocity } from "../target/types/system_apply_velocity"
 import { expect } from "chai";
 import BN from "bn.js";
 import {
-  AddEntity,
   DELEGATION_PROGRAM_ID,
-  InitializeRegistry,
-  InitializeComponent,
-  InitializeNewWorld,
   ApplySystem,
-  Apply,
   DelegateComponent,
-  AddAuthority,
-  RemoveAuthority,
   ApproveSystem,
   RemoveSystem,
   type Program,
@@ -267,7 +260,7 @@ describe("bolt", () => {
   });
 
   it("Add entity 4 (with seed)", async () => {
-    const seed = Buffer.from("extra-seed");
+    const seed = Buffer.from("custom-seed");
     entity4Pda = FindEntityPda({ worldId, seed });
     const instruction = await worldProgram.methods
         .addEntity(seed)

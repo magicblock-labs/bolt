@@ -75,7 +75,7 @@
       ],
       "args": [
         {
-          "name": "extraSeed",
+          "name": "seed",
           "type": {
             "option": "string"
           }

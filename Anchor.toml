@@ -36,7 +36,14 @@ members = [
 ]
 
 [scripts]
-test = "sleep 2 && yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/bolt.low-level.api.ts"
+test = """
+echo "Waiting for 2 seconds..."
+sleep 2
+echo "Running low level API tests..."
+yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/bolt.low-level.api.ts
+echo "Running intermediate level API tests..."
+yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/bolt.intermediate-level.api.ts
+"""
 
 [test]
 startup_wait = 5000
