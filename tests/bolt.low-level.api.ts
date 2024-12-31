@@ -579,23 +579,22 @@ describe("bolt", () => {
   });
 
   it("Apply System Velocity on Entity 1", async () => {
-    const instruction = await worldProgram.methods.apply2(SerializeArgs()).accounts({
+    const instruction = await worldProgram.methods
+      .apply2(SerializeArgs())
+      .accounts({
         authority: provider.wallet.publicKey,
         boltSystem: exampleSystemApplyVelocity,
         boltComponent1: componentVelocityEntity1Pda,
         componentProgram1: exampleComponentVelocity.programId,
         boltComponent2: componentPositionEntity1Pda,
         componentProgram2: exampleComponentPosition.programId,
-        world: worldPda
+        world: worldPda,
       })
       .remainingAccounts([])
       .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
     const signature = await provider.sendAndConfirm(transaction);
-    console.log(
-      "Apply System Velocity on Entity 1 signature: ",
-      signature,
-    );
+    console.log("Apply System Velocity on Entity 1 signature: ", signature);
 
     const velocity = await exampleComponentVelocity.account.velocity.fetch(
       componentVelocityEntity1Pda,
@@ -616,23 +615,25 @@ describe("bolt", () => {
   });
 
   it("Apply System Velocity on Entity 1, with Clock external account", async () => {
-    const instruction = await worldProgram.methods.apply2(SerializeArgs()).accounts({
+    const instruction = await worldProgram.methods
+      .apply2(SerializeArgs())
+      .accounts({
         authority: provider.wallet.publicKey,
         boltSystem: exampleSystemApplyVelocity,
         boltComponent1: componentVelocityEntity1Pda,
         componentProgram1: exampleComponentVelocity.programId,
         boltComponent2: componentPositionEntity1Pda,
         componentProgram2: exampleComponentPosition.programId,
-        world: worldPda
+        world: worldPda,
       })
       .remainingAccounts([
-          {
-            pubkey: new web3.PublicKey(
-              "SysvarC1ock11111111111111111111111111111111",
-            ),
-            isWritable: false,
-            isSigner: false,
-          }
+        {
+          pubkey: new web3.PublicKey(
+            "SysvarC1ock11111111111111111111111111111111",
+          ),
+          isWritable: false,
+          isSigner: false,
+        },
       ])
       .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
@@ -676,16 +677,16 @@ describe("bolt", () => {
         componentPositionEntity5Pda,
       );
 
-      const instruction = await worldProgram.methods
-        .apply(SerializeArgs())
-        .accounts({
-          authority: provider.wallet.publicKey,
-          boltSystem: exampleSystemFly,
-          boltComponent: componentPositionEntity5Pda,
-          componentProgram: exampleComponentPosition.programId,
-          world: worldPda,
-        })
-        .instruction();
+    const instruction = await worldProgram.methods
+      .apply(SerializeArgs())
+      .accounts({
+        authority: provider.wallet.publicKey,
+        boltSystem: exampleSystemFly,
+        boltComponent: componentPositionEntity5Pda,
+        componentProgram: exampleComponentPosition.programId,
+        world: worldPda,
+      })
+      .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
 
     let failed = false;
@@ -717,11 +718,9 @@ describe("bolt", () => {
       })
       .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
-    const signature = await provider.sendAndConfirm(
-      transaction,
-      [],
-      { skipPreflight: true },
-    );
+    const signature = await provider.sendAndConfirm(transaction, [], {
+      skipPreflight: true,
+    });
     console.log(`Whitelist 2 system approval signature: ${signature}`);
 
     // Get World and check permissionless and systems
@@ -740,11 +739,9 @@ describe("bolt", () => {
       })
       .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
-    const signature = await provider.sendAndConfirm(
-      transaction,
-      [],
-      { skipPreflight: true },
-    );
+    const signature = await provider.sendAndConfirm(transaction, [], {
+      skipPreflight: true,
+    });
     console.log(`Whitelist 2 system approval signature: ${signature}`);
 
     // Get World and check permissionless and systems
@@ -778,11 +775,9 @@ describe("bolt", () => {
       })
       .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
-    const signature = await provider.sendAndConfirm(
-      transaction,
-      [],
-      { skipPreflight: true },
-    );
+    const signature = await provider.sendAndConfirm(transaction, [], {
+      skipPreflight: true,
+    });
     console.log(`Remove System 1 signature: ${signature}`);
 
     // Get World and check permissionless and systems
