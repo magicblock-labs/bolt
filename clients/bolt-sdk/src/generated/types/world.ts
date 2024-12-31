@@ -66,7 +66,7 @@ export type World = {
       ];
       args: [
         {
-          name: "extraSeed";
+          name: "seed";
           type: {
             option: "bytes";
           };
