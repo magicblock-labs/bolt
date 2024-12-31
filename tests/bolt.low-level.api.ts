@@ -212,7 +212,7 @@ describe("bolt", () => {
 
   it("Add entity 1", async () => {
     const world = await worldProgram.account.world.fetch(worldPda);
-    entity1Pda = FindEntityPda({ worldId, entityId: world.entities });
+    entity1Pda = FindEntityPda({ world: worldPda, entityId: world.entities });
     const instruction = await worldProgram.methods
       .addEntity(null)
       .accounts({
@@ -228,7 +228,7 @@ describe("bolt", () => {
 
   it("Add entity 2", async () => {
     const world = await worldProgram.account.world.fetch(worldPda);
-    entity2Pda = FindEntityPda({ worldId, entityId: world.entities });
+    entity2Pda = FindEntityPda({ world: worldPda, entityId: world.entities });
     const instruction = await worldProgram.methods
       .addEntity(null)
       .accounts({
@@ -244,7 +244,10 @@ describe("bolt", () => {
 
   it("Add entity 3", async () => {
     const world = await worldProgram.account.world.fetch(worldPda);
-    const entity3Pda = FindEntityPda({ worldId, entityId: world.entities });
+    const entity3Pda = FindEntityPda({
+      world: worldPda,
+      entityId: world.entities,
+    });
     const instruction = await worldProgram.methods
       .addEntity(null)
       .accounts({
@@ -260,7 +263,7 @@ describe("bolt", () => {
 
   it("Add entity 4 (with seed)", async () => {
     const seed = Buffer.from("custom-seed");
-    entity4Pda = FindEntityPda({ worldId, seed });
+    entity4Pda = FindEntityPda({ world: worldPda, seed });
     const instruction = await worldProgram.methods
       .addEntity(seed)
       .accounts({
@@ -276,7 +279,7 @@ describe("bolt", () => {
 
   it("Add entity 5", async () => {
     const world = await worldProgram.account.world.fetch(worldPda);
-    entity5Pda = FindEntityPda({ worldId, entityId: world.entities });
+    entity5Pda = FindEntityPda({ world: worldPda, entityId: world.entities });
     const instruction = await worldProgram.methods
       .addEntity(null)
       .accounts({
@@ -596,7 +599,25 @@ describe("bolt", () => {
         },
       ],
     });
-    await provider.sendAndConfirm(applySystem.transaction);
+    const transaction = applySystem.transaction;
+    // const instruction = await worldProgram.methods.apply2(SerializeArgs({
+    //     direction: Direction.Up,
+    //   })).accounts({
+    //     authority: provider.wallet.publicKey,
+    //     boltSystem: exampleSystemApplyVelocity,
+    //     boltComponent1: componentPositionEntity1Pda,
+    //     componentProgram1: exampleComponentPosition.programId,
+    //     boltComponent2: componentVelocityEntity1Pda,
+    //     componentProgram2: exampleComponentVelocity.programId,
+    //     world: worldPda
+    //   })
+    //   .instruction();
+    // const transaction = new anchor.web3.Transaction().add(instruction);
+    const signature = await provider.sendAndConfirm(transaction);
+    console.log(
+      "Apply System Velocity on Entity 1 signature: ",
+      signature,
+    );
 
     const velocity = await exampleComponentVelocity.account.velocity.fetch(
       componentVelocityEntity1Pda,

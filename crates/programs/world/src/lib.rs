@@ -408,7 +408,7 @@ pub struct RemoveSystem<'info> {
 pub struct AddEntity<'info> {
     #[account(mut)]
     pub payer: Signer<'info>,
-    #[account(init, payer = payer, space = World::size(), seeds = [Entity::seed(), &world.id.to_be_bytes(),
+    #[account(init, payer = payer, space = World::size(), seeds = [Entity::seed(), &world.key().to_bytes(),
     &match seed {
         Some(ref seed) => [0; 8],
         None => world.entities.to_be_bytes()

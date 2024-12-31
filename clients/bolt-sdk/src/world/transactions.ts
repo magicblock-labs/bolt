@@ -424,7 +424,6 @@ async function createApplySystemInstruction({
   const applyAccounts = {
     authority: authority ?? PROGRAM_ID,
     boltSystem: systemId,
-    instructionSysvarAccount: SYSVAR_INSTRUCTIONS_PUBKEY,
     world,
   };
 
