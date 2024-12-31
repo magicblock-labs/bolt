@@ -10,10 +10,7 @@ import { expect } from "chai";
 import BN from "bn.js";
 import {
   DELEGATION_PROGRAM_ID,
-  ApplySystem,
   DelegateComponent,
-  ApproveSystem,
-  RemoveSystem,
   type Program,
   anchor,
   web3,
@@ -559,7 +556,7 @@ describe("bolt", () => {
 
   it("Apply Fly System on Entity 1", async () => {
     const instruction = await worldProgram.methods
-      .apply(SerializeArgs({ direction: Direction.Up }))
+      .apply(SerializeArgs())
       .accounts({
         authority: provider.wallet.publicKey,
         boltSystem: exampleSystemFly,
@@ -582,37 +579,18 @@ describe("bolt", () => {
   });
 
   it("Apply System Velocity on Entity 1", async () => {
-    const applySystem = await ApplySystem({
-      authority: provider.wallet.publicKey,
-      systemId: exampleSystemApplyVelocity,
-      world: worldPda,
-      entities: [
-        {
-          entity: entity1Pda,
-          components: [
-            {
-              componentId: exampleComponentVelocity.programId,
-              seed: "component-velocity",
-            },
-            { componentId: exampleComponentPosition.programId },
-          ],
-        },
-      ],
-    });
-    const transaction = applySystem.transaction;
-    // const instruction = await worldProgram.methods.apply2(SerializeArgs({
-    //     direction: Direction.Up,
-    //   })).accounts({
-    //     authority: provider.wallet.publicKey,
-    //     boltSystem: exampleSystemApplyVelocity,
-    //     boltComponent1: componentPositionEntity1Pda,
-    //     componentProgram1: exampleComponentPosition.programId,
-    //     boltComponent2: componentVelocityEntity1Pda,
-    //     componentProgram2: exampleComponentVelocity.programId,
-    //     world: worldPda
-    //   })
-    //   .instruction();
-    // const transaction = new anchor.web3.Transaction().add(instruction);
+    const instruction = await worldProgram.methods.apply2(SerializeArgs()).accounts({
+        authority: provider.wallet.publicKey,
+        boltSystem: exampleSystemApplyVelocity,
+        boltComponent1: componentVelocityEntity1Pda,
+        componentProgram1: exampleComponentVelocity.programId,
+        boltComponent2: componentPositionEntity1Pda,
+        componentProgram2: exampleComponentPosition.programId,
+        world: worldPda
+      })
+      .remainingAccounts([])
+      .instruction();
+    const transaction = new anchor.web3.Transaction().add(instruction);
     const signature = await provider.sendAndConfirm(transaction);
     console.log(
       "Apply System Velocity on Entity 1 signature: ",
@@ -638,33 +616,27 @@ describe("bolt", () => {
   });
 
   it("Apply System Velocity on Entity 1, with Clock external account", async () => {
-    const applySystem = await ApplySystem({
-      authority: provider.wallet.publicKey,
-      systemId: exampleSystemApplyVelocity,
-      world: worldPda,
-      entities: [
-        {
-          entity: entity1Pda,
-          components: [
-            {
-              componentId: exampleComponentVelocity.programId,
-              seed: "component-velocity",
-            },
-            { componentId: exampleComponentPosition.programId },
-          ],
-        },
-      ],
-      extraAccounts: [
-        {
-          pubkey: new web3.PublicKey(
-            "SysvarC1ock11111111111111111111111111111111",
-          ),
-          isWritable: false,
-          isSigner: false,
-        },
-      ],
-    });
-    await provider.sendAndConfirm(applySystem.transaction);
+    const instruction = await worldProgram.methods.apply2(SerializeArgs()).accounts({
+        authority: provider.wallet.publicKey,
+        boltSystem: exampleSystemApplyVelocity,
+        boltComponent1: componentVelocityEntity1Pda,
+        componentProgram1: exampleComponentVelocity.programId,
+        boltComponent2: componentPositionEntity1Pda,
+        componentProgram2: exampleComponentPosition.programId,
+        world: worldPda
+      })
+      .remainingAccounts([
+          {
+            pubkey: new web3.PublicKey(
+              "SysvarC1ock11111111111111111111111111111111",
+            ),
+            isWritable: false,
+            isSigner: false,
+          }
+      ])
+      .instruction();
+    const transaction = new anchor.web3.Transaction().add(instruction);
+    await provider.sendAndConfirm(transaction);
 
     const position = await exampleComponentPosition.account.position.fetch(
       componentPositionEntity1Pda,
@@ -676,18 +648,18 @@ describe("bolt", () => {
   });
 
   it("Apply Fly System on Entity 4", async () => {
-    const applySystem = await ApplySystem({
-      authority: provider.wallet.publicKey,
-      systemId: exampleSystemFly,
-      world: worldPda,
-      entities: [
-        {
-          entity: entity4Pda,
-          components: [{ componentId: exampleComponentPosition.programId }],
-        },
-      ],
-    });
-    await provider.sendAndConfirm(applySystem.transaction);
+    const instruction = await worldProgram.methods
+      .apply(SerializeArgs())
+      .accounts({
+        authority: provider.wallet.publicKey,
+        boltSystem: exampleSystemFly,
+        boltComponent: componentPositionEntity4Pda,
+        componentProgram: exampleComponentPosition.programId,
+        world: worldPda,
+      })
+      .instruction();
+    const transaction = new anchor.web3.Transaction().add(instruction);
+    await provider.sendAndConfirm(transaction);
 
     const position = await exampleComponentPosition.account.position.fetch(
       componentPositionEntity4Pda,
@@ -704,21 +676,21 @@ describe("bolt", () => {
         componentPositionEntity5Pda,
       );
 
-    const applySystem = await ApplySystem({
-      authority: provider.wallet.publicKey,
-      systemId: exampleSystemFly,
-      world: worldPda,
-      entities: [
-        {
-          entity: entity5Pda,
-          components: [{ componentId: exampleComponentPosition.programId }],
-        },
-      ],
-    });
+      const instruction = await worldProgram.methods
+        .apply(SerializeArgs())
+        .accounts({
+          authority: provider.wallet.publicKey,
+          boltSystem: exampleSystemFly,
+          boltComponent: componentPositionEntity5Pda,
+          componentProgram: exampleComponentPosition.programId,
+          world: worldPda,
+        })
+        .instruction();
+    const transaction = new anchor.web3.Transaction().add(instruction);
 
     let failed = false;
     try {
-      await provider.sendAndConfirm(applySystem.transaction);
+      await provider.sendAndConfirm(transaction);
     } catch (error) {
       failed = true;
       // console.log("error", error);
@@ -736,14 +708,17 @@ describe("bolt", () => {
   });
 
   it("Whitelist System", async () => {
-    const approveSystem = await ApproveSystem({
-      authority: provider.wallet.publicKey,
-      systemToApprove: exampleSystemFly,
-      world: worldPda,
-    });
-
+    const instruction = await worldProgram.methods
+      .approveSystem()
+      .accounts({
+        authority: provider.wallet.publicKey,
+        system: exampleSystemFly,
+        world: worldPda,
+      })
+      .instruction();
+    const transaction = new anchor.web3.Transaction().add(instruction);
     const signature = await provider.sendAndConfirm(
-      approveSystem.transaction,
+      transaction,
       [],
       { skipPreflight: true },
     );
@@ -756,14 +731,17 @@ describe("bolt", () => {
   });
 
   it("Whitelist System 2", async () => {
-    const approveSystem = await ApproveSystem({
-      authority: provider.wallet.publicKey,
-      systemToApprove: exampleSystemApplyVelocity,
-      world: worldPda,
-    });
-
+    const instruction = await worldProgram.methods
+      .approveSystem()
+      .accounts({
+        authority: provider.wallet.publicKey,
+        system: exampleSystemApplyVelocity,
+        world: worldPda,
+      })
+      .instruction();
+    const transaction = new anchor.web3.Transaction().add(instruction);
     const signature = await provider.sendAndConfirm(
-      approveSystem.transaction,
+      transaction,
       [],
       { skipPreflight: true },
     );
@@ -776,33 +754,36 @@ describe("bolt", () => {
   });
 
   it("Apply Fly System on Entity 1", async () => {
-    const applySystem = await ApplySystem({
-      authority: provider.wallet.publicKey,
-      systemId: exampleSystemFly,
-      world: worldPda,
-      entities: [
-        {
-          entity: entity1Pda,
-          components: [{ componentId: exampleComponentPosition.programId }],
-        },
-      ],
-    });
-    await provider.sendAndConfirm(applySystem.transaction);
+    const instruction = await worldProgram.methods
+      .apply(SerializeArgs())
+      .accounts({
+        authority: provider.wallet.publicKey,
+        boltSystem: exampleSystemFly,
+        boltComponent: componentPositionEntity1Pda,
+        componentProgram: exampleComponentPosition.programId,
+        world: worldPda,
+      })
+      .instruction();
+    const transaction = new anchor.web3.Transaction().add(instruction);
+    await provider.sendAndConfirm(transaction);
   });
 
   it("Remove System 1", async () => {
-    const approveSystem = await RemoveSystem({
-      authority: provider.wallet.publicKey,
-      systemToRemove: exampleSystemFly,
-      world: worldPda,
-    });
-
+    const instruction = await worldProgram.methods
+      .removeSystem()
+      .accounts({
+        authority: provider.wallet.publicKey,
+        system: exampleSystemFly,
+        world: worldPda,
+      })
+      .instruction();
+    const transaction = new anchor.web3.Transaction().add(instruction);
     const signature = await provider.sendAndConfirm(
-      approveSystem.transaction,
+      transaction,
       [],
       { skipPreflight: true },
     );
-    console.log(`Whitelist 2 system approval signature: ${signature}`);
+    console.log(`Remove System 1 signature: ${signature}`);
 
     // Get World and check permissionless and systems
     const worldAccount = await worldProgram.account.world.fetch(worldPda);
@@ -811,20 +792,20 @@ describe("bolt", () => {
   });
 
   it("Apply Invalid Fly System on Entity 1", async () => {
-    const applySystem = await ApplySystem({
-      authority: provider.wallet.publicKey,
-      systemId: exampleSystemFly,
-      world: worldPda,
-      entities: [
-        {
-          entity: entity1Pda,
-          components: [{ componentId: exampleComponentPosition.programId }],
-        },
-      ],
-    });
+    const instruction = await worldProgram.methods
+      .apply(SerializeArgs())
+      .accounts({
+        authority: provider.wallet.publicKey,
+        boltSystem: exampleSystemFly,
+        boltComponent: componentPositionEntity1Pda,
+        componentProgram: exampleComponentPosition.programId,
+        world: worldPda,
+      })
+      .instruction();
+    const transaction = new anchor.web3.Transaction().add(instruction);
     let invalid = false;
     try {
-      await provider.sendAndConfirm(applySystem.transaction);
+      await provider.sendAndConfirm(transaction);
     } catch (error) {
       expect(error.logs.join(" ")).to.contain("Error Code: SystemNotApproved");
       invalid = true;
