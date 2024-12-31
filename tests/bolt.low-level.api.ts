@@ -209,7 +209,11 @@ describe("bolt", () => {
 
   it("Add entity 1", async () => {
     const world = await worldProgram.account.world.fetch(worldPda);
+<<<<<<< HEAD
     entity1Pda = FindEntityPda({ worldId: world.id, entityId: world.entities });
+=======
+    entity1Pda = FindEntityPda({ world: worldPda, entityId: world.entities });
+>>>>>>> a1970b1 (fix: fixing world program AddEntity constraints and tests)
     const instruction = await worldProgram.methods
       .addEntity(null)
       .accounts({
@@ -225,7 +229,11 @@ describe("bolt", () => {
 
   it("Add entity 2", async () => {
     const world = await worldProgram.account.world.fetch(worldPda);
+<<<<<<< HEAD
     entity2Pda = FindEntityPda({ worldId: world.id, entityId: world.entities });
+=======
+    entity2Pda = FindEntityPda({ world: worldPda, entityId: world.entities });
+>>>>>>> a1970b1 (fix: fixing world program AddEntity constraints and tests)
     const instruction = await worldProgram.methods
       .addEntity(null)
       .accounts({
@@ -242,7 +250,11 @@ describe("bolt", () => {
   it("Add entity 3", async () => {
     const world = await worldProgram.account.world.fetch(worldPda);
     const entity3Pda = FindEntityPda({
+<<<<<<< HEAD
       worldId: world.id,
+=======
+      world: worldPda,
+>>>>>>> a1970b1 (fix: fixing world program AddEntity constraints and tests)
       entityId: world.entities,
     });
     const instruction = await worldProgram.methods
@@ -277,7 +289,11 @@ describe("bolt", () => {
 
   it("Add entity 5", async () => {
     const world = await worldProgram.account.world.fetch(worldPda);
+<<<<<<< HEAD
     entity5Pda = FindEntityPda({ worldId: world.id, entityId: world.entities });
+=======
+    entity5Pda = FindEntityPda({ world: worldPda, entityId: world.entities });
+>>>>>>> a1970b1 (fix: fixing world program AddEntity constraints and tests)
     const instruction = await worldProgram.methods
       .addEntity(null)
       .accounts({
@@ -633,6 +649,7 @@ describe("bolt", () => {
           isSigner: false,
           isWritable: false,
         },
+<<<<<<< HEAD
         {
           pubkey: componentVelocityEntity1Pda,
           isSigner: false,
@@ -653,6 +670,29 @@ describe("bolt", () => {
     const transaction = new anchor.web3.Transaction().add(instruction);
     const signature = await provider.sendAndConfirm(transaction);
     console.log("Apply System Velocity on Entity 1 signature: ", signature);
+=======
+      ],
+    });
+    const transaction = applySystem.transaction;
+    // const instruction = await worldProgram.methods.apply2(SerializeArgs({
+    //     direction: Direction.Up,
+    //   })).accounts({
+    //     authority: provider.wallet.publicKey,
+    //     boltSystem: exampleSystemApplyVelocity,
+    //     boltComponent1: componentPositionEntity1Pda,
+    //     componentProgram1: exampleComponentPosition.programId,
+    //     boltComponent2: componentVelocityEntity1Pda,
+    //     componentProgram2: exampleComponentVelocity.programId,
+    //     world: worldPda
+    //   })
+    //   .instruction();
+    // const transaction = new anchor.web3.Transaction().add(instruction);
+    const signature = await provider.sendAndConfirm(transaction);
+    console.log(
+      "Apply System Velocity on Entity 1 signature: ",
+      signature,
+    );
+>>>>>>> a1970b1 (fix: fixing world program AddEntity constraints and tests)
 
     const velocity = await exampleComponentVelocity.account.velocity.fetch(
       componentVelocityEntity1Pda,
