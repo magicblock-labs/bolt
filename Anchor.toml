@@ -51,7 +51,7 @@ upgradeable = false
 [test.validator]
 bind_address = "0.0.0.0"
 ledger = ".anchor/test-ledger"
-rpc_port = 7799
+rpc_port = 8899
 
 [[test.validator.account]]
 address = "EEmsg7GbxEAw5f9hGfZRmJRJ27HK8KeGDp7ViW9X2mYa"
