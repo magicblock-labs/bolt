@@ -16,7 +16,6 @@ import {
   InitializeComponent,
   InitializeNewWorld,
   ApplySystem,
-  Apply,
   DelegateComponent,
   AddAuthority,
   RemoveAuthority,
@@ -25,7 +24,6 @@ import {
   type Program,
   anchor,
   web3,
-  SerializeArgs,
 } from "../clients/bolt-sdk";
 
 enum Direction {
@@ -317,16 +315,19 @@ describe("bolt", () => {
   });
 
   it("Apply Simple Movement System (Up) on Entity 1 using Apply", async () => {
-    console.log("Apply", Apply);
-    const apply = await Apply({
+    const apply = await ApplySystem({
       authority: provider.wallet.publicKey,
-      boltSystem: exampleSystemSimpleMovement,
-      boltComponent: componentPositionEntity1Pda,
-      componentProgram: exampleComponentPosition.programId,
+      systemId: exampleSystemSimpleMovement,
+      entities: [
+        {
+          entity: entity1Pda,
+          components: [{ componentId: exampleComponentPosition.programId }],
+        },
+      ],
       world: worldPda,
-      args: SerializeArgs({
+      args: {
         direction: Direction.Up,
-      }),
+      },
     });
 
     await provider.sendAndConfirm(apply.transaction);
@@ -705,10 +706,9 @@ describe("bolt", () => {
       [],
       { skipPreflight: true, commitment: "confirmed" },
     );
-    console.log(`Delegation signature: ${txSign}`);
     const acc = await provider.connection.getAccountInfo(
       delegateComponent.componentPda,
     );
-    expect(acc?.owner.toString()).to.equal(DELEGATION_PROGRAM_ID);
+    expect(acc?.owner.toBase58()).to.equal(DELEGATION_PROGRAM_ID.toBase58());
   });
 });

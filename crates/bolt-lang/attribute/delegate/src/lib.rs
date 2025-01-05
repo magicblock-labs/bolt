@@ -137,35 +137,31 @@ fn generate_delegate(component_type: &Type) -> (TokenStream2, TokenStream2) {
     (
         quote! {
             #[automatically_derived]
-            pub fn delegate(ctx: Context<DelegateInput>, valid_until: i64, commit_frequency_ms: u32) -> Result<()> {
+            pub fn delegate(ctx: Context<DelegateInput>, commit_frequency_ms: u32, validator: Option<Pubkey>) -> Result<()> {
+                let pda_seeds: &[&[u8]] = &[<#component_type>::seed(), &ctx.accounts.entity.key().to_bytes()];
 
-                let [payer, entity, account, owner_program, buffer, delegation_record, delegate_account_seeds, delegation_program, system_program] = [
-                    &ctx.accounts.payer,
-                    &ctx.accounts.entity.to_account_info(),
-                    &ctx.accounts.account,
-                    &ctx.accounts.owner_program,
-                    &ctx.accounts.buffer,
-                    &ctx.accounts.delegation_record,
-                    &ctx.accounts.delegate_account_seeds,
-                    &ctx.accounts.delegation_program,
-                    &ctx.accounts.system_program,
-                ];
+                let del_accounts = ::bolt_lang::DelegateAccounts {
+                    payer: &ctx.accounts.payer,
+                    pda: &ctx.accounts.account,
+                    owner_program: &ctx.accounts.owner_program,
+                    buffer: &ctx.accounts.buffer,
+                    delegation_record: &ctx.accounts.delegation_record,
+                    delegation_metadata: &ctx.accounts.delegation_metadata,
+                    delegation_program: &ctx.accounts.delegation_program,
+                    system_program: &ctx.accounts.system_program,
+                };
 
-                let pda_seeds: &[&[u8]] = &[<#component_type>::seed(), &entity.key.to_bytes()];
+                let config = ::bolt_lang::DelegateConfig {
+                    commit_frequency_ms,
+                    validator,
+                };
 
                 ::bolt_lang::delegate_account(
-                    payer,
-                    account,
-                    owner_program,
-                    buffer,
-                    delegation_record,
-                    delegate_account_seeds,
-                    delegation_program,
-                    system_program,
+                    del_accounts,
                     pda_seeds,
-                    valid_until,
-                    commit_frequency_ms,
+                    config,
                 )?;
+
                 Ok(())
             }
         },
@@ -189,7 +185,7 @@ fn generate_delegate(component_type: &Type) -> (TokenStream2, TokenStream2) {
                 pub delegation_record: AccountInfo<'info>,
                 /// CHECK:`
                 #[account(mut)]
-                pub delegate_account_seeds: AccountInfo<'info>,
+                pub delegation_metadata: AccountInfo<'info>,
                 /// CHECK:`
                 pub delegation_program: AccountInfo<'info>,
                 /// CHECK:`

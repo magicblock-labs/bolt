@@ -1,8 +1,11 @@
 import * as beet from "@metaplex-foundation/beet";
+import * as beetSolana from "@metaplex-foundation/beet-solana";
 import * as web3 from "@solana/web3.js";
 import {
-  DelegateAccounts,
+  delegateBufferPdaFromDelegatedAccountAndOwnerProgram,
   DELEGATION_PROGRAM_ID,
+  delegationMetadataPdaFromDelegatedAccount,
+  delegationRecordPdaFromDelegatedAccount,
 } from "@magicblock-labs/ephemeral-rollups-sdk";
 import { FindComponentPda } from "../index";
 import {
@@ -12,8 +15,8 @@ import {
 } from "@solana/web3.js";
 
 export interface DelegateInstructionArgs {
-  validUntil: beet.bignum;
   commitFrequencyMs: number;
+  validator: beet.COption<PublicKey>;
 }
 
 export const delegateStruct = new beet.FixableBeetArgsStruct<
@@ -23,8 +26,8 @@ export const delegateStruct = new beet.FixableBeetArgsStruct<
 >(
   [
     ["instructionDiscriminator", beet.uniformFixedSizeArray(beet.u8, 8)],
-    ["validUntil", beet.i64],
     ["commitFrequencyMs", beet.u32],
+    ["validator", beet.coption(beetSolana.publicKey)],
   ],
   "DelegateInstructionArgs",
 );
@@ -56,17 +59,25 @@ export const delegateInstructionDiscriminator = [
 
 export function createDelegateInstruction(
   accounts: DelegateInstructionAccounts,
-  validUntil: beet.bignum = 0,
-  commitFrequencyMs: number = 30000,
+  commitFrequencyMs: number = 0,
+  validator?: PublicKey,
   programId = accounts.ownerProgram,
 ) {
   const [data] = delegateStruct.serialize({
     instructionDiscriminator: delegateInstructionDiscriminator,
-    validUntil,
     commitFrequencyMs,
+    validator: validator ?? null,
   });
 
-  const { delegationPda, delegationMetadata, bufferPda } = DelegateAccounts(
+  const delegationRecord = delegationRecordPdaFromDelegatedAccount(
+    accounts.account,
+  );
+
+  const delegationMetadata = delegationMetadataPdaFromDelegatedAccount(
+    accounts.account,
+  );
+
+  const bufferPda = delegateBufferPdaFromDelegatedAccountAndOwnerProgram(
     accounts.account,
     accounts.ownerProgram,
   );
@@ -98,7 +109,7 @@ export function createDelegateInstruction(
       isSigner: false,
     },
     {
-      pubkey: accounts.delegationRecord ?? delegationPda,
+      pubkey: accounts.delegationRecord ?? delegationRecord,
       isWritable: true,
       isSigner: false,
     },
