@@ -3,7 +3,6 @@ import { type Position } from "../target/types/position";
 import { type Velocity } from "../target/types/velocity";
 import { type BoltComponent } from "../target/types/bolt_component";
 import { type SystemSimpleMovement } from "../target/types/system_simple_movement";
-import { type World } from "../target/types/world";
 import { type SystemFly } from "../target/types/system_fly";
 import { type SystemApplyVelocity } from "../target/types/system_apply_velocity";
 import { expect } from "chai";
@@ -19,6 +18,7 @@ import {
   FindEntityPda,
   FindComponentPda,
   SerializeArgs,
+  WORLD_PROGRAM_IDL as World,
 } from "../clients/bolt-sdk";
 
 enum Direction {
@@ -291,7 +291,7 @@ describe("bolt", () => {
     console.log("Add Entity 5 signature: ", signature);
   });
 
-  it("Initialize Original Component on Entity 1, trough the world instance", async () => {
+  it("Initialize Original Component on Entity 1, through the world instance", async () => {
     const componentId = boltComponentProgram.programId;
     const componentPda = FindComponentPda({
       componentId,
@@ -857,11 +857,10 @@ describe("bolt", () => {
     });
     const instruction = delegateComponent.transaction;
     const transaction = new anchor.web3.Transaction().add(instruction);
-    const txSign = await provider.sendAndConfirm(
-      transaction,
-      [],
-      { skipPreflight: true, commitment: "confirmed" },
-    );
+    const txSign = await provider.sendAndConfirm(transaction, [], {
+      skipPreflight: true,
+      commitment: "confirmed",
+    });
     console.log(`Delegation signature: ${txSign}`);
     const acc = await provider.connection.getAccountInfo(
       delegateComponent.componentPda,
