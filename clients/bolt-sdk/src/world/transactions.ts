@@ -334,50 +334,6 @@ export async function InitializeComponent({
   };
 }
 
-export async function Apply({
-  authority,
-  boltSystem,
-  boltComponent,
-  componentProgram,
-  anchorRemainingAccounts,
-  world,
-  args,
-}: {
-  authority: PublicKey;
-  boltSystem: PublicKey;
-  boltComponent: PublicKey;
-  componentProgram: PublicKey;
-  world: PublicKey;
-  anchorRemainingAccounts?: web3.AccountMeta[];
-  args: Uint8Array | any;
-}): Promise<{
-  instruction: TransactionInstruction;
-  transaction: Transaction;
-}> {
-  if (!(args instanceof Uint8Array)) {
-    args = SerializeArgs(args);
-  }
-  const instruction = createApplyInstruction(
-    {
-      authority,
-      boltSystem,
-      boltComponent,
-      componentProgram,
-      instructionSysvarAccount: SYSVAR_INSTRUCTIONS_PUBKEY,
-      anchorRemainingAccounts,
-      world,
-    },
-    {
-      args,
-    },
-  );
-  const transaction = new Transaction().add(instruction);
-  return {
-    instruction,
-    transaction,
-  };
-}
-
 interface ApplySystemInstruction {
   authority: PublicKey;
   systemId: PublicKey;
