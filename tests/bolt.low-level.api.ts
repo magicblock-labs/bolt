@@ -209,7 +209,7 @@ describe("bolt", () => {
 
   it("Add entity 1", async () => {
     const world = await worldProgram.account.world.fetch(worldPda);
-    entity1Pda = FindEntityPda({ world: worldPda, entityId: world.entities });
+    entity1Pda = FindEntityPda({ worldId: world.id, entityId: world.entities });
     const instruction = await worldProgram.methods
       .addEntity(null)
       .accounts({
@@ -225,7 +225,7 @@ describe("bolt", () => {
 
   it("Add entity 2", async () => {
     const world = await worldProgram.account.world.fetch(worldPda);
-    entity2Pda = FindEntityPda({ world: worldPda, entityId: world.entities });
+    entity2Pda = FindEntityPda({ worldId: world.id, entityId: world.entities });
     const instruction = await worldProgram.methods
       .addEntity(null)
       .accounts({
@@ -242,7 +242,7 @@ describe("bolt", () => {
   it("Add entity 3", async () => {
     const world = await worldProgram.account.world.fetch(worldPda);
     const entity3Pda = FindEntityPda({
-      world: worldPda,
+      worldId: world.id,
       entityId: world.entities,
     });
     const instruction = await worldProgram.methods
@@ -259,8 +259,9 @@ describe("bolt", () => {
   });
 
   it("Add entity 4 (with seed)", async () => {
+    const world = await worldProgram.account.world.fetch(worldPda);
     const seed = Buffer.from("custom-seed");
-    entity4Pda = FindEntityPda({ world: worldPda, seed });
+    entity4Pda = FindEntityPda({ worldId: world.id, seed });
     const instruction = await worldProgram.methods
       .addEntity(seed)
       .accounts({
@@ -276,7 +277,7 @@ describe("bolt", () => {
 
   it("Add entity 5", async () => {
     const world = await worldProgram.account.world.fetch(worldPda);
-    entity5Pda = FindEntityPda({ world: worldPda, entityId: world.entities });
+    entity5Pda = FindEntityPda({ worldId: world.id, entityId: world.entities });
     const instruction = await worldProgram.methods
       .addEntity(null)
       .accounts({

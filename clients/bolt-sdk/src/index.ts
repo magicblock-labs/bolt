@@ -1,7 +1,7 @@
 import { PublicKey } from "@solana/web3.js";
 import type BN from "bn.js";
-import * as PROGRAM_IDL from "./world/idl.json";
 import { PROGRAM_ID } from "./generated";
+import { World as PROGRAM_IDL } from "./generated/types/world";
 export * from "./generated/accounts";
 export * from "./generated/instructions";
 export * from "./world/transactions";
@@ -42,22 +42,23 @@ export function FindWorldPda({
 }
 
 export function FindEntityPda({
-  world,
+  worldId,
   entityId,
   seed,
   programId,
 }: {
-  world: PublicKey;
+  worldId: BN;
   entityId?: BN;
   seed?: Uint8Array;
   programId?: PublicKey;
 }) {
-  const seeds = [Buffer.from("entity"), world.toBytes()];
+  const worldIdBuffer = Buffer.from(worldId.toArrayLike(Buffer, "be", 8));
+  const seeds = [Buffer.from("entity"), worldIdBuffer];
   if (seed !== undefined) {
     seeds.push(Buffer.from(new Uint8Array(8)));
     seeds.push(Buffer.from(seed));
   } else if (entityId !== undefined) {
-    const entityIdBuffer = entityId.toArrayLike(Buffer, "be", 8);
+    const entityIdBuffer = Buffer.from(entityId.toArrayLike(Buffer, "be", 8));
     seeds.push(entityIdBuffer);
   } else {
     throw new Error("An entity must have either an Id or a Seed");
