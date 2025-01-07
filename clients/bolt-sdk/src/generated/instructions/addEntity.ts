@@ -14,7 +14,7 @@ import * as web3 from "@solana/web3.js";
  * @category generated
  */
 export interface AddEntityInstructionArgs {
-  seed: beet.COption<Uint8Array>;
+  extraSeed: beet.COption<Uint8Array>;
 }
 /**
  * @category Instructions
@@ -28,7 +28,7 @@ export const addEntityStruct = new beet.FixableBeetArgsStruct<
 >(
   [
     ["instructionDiscriminator", beet.uniformFixedSizeArray(beet.u8, 8)],
-    ["seed", beet.coption(beet.bytes)],
+    ["extraSeed", beet.coption(beet.bytes)],
   ],
   "AddEntityInstructionArgs",
 );

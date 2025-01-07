@@ -63,6 +63,7 @@ export async function InitializeNewWorld({
   instruction: TransactionInstruction;
   transaction: Transaction;
   worldPda: PublicKey;
+  worldId: BN;
 }> {
   const registryPda = FindRegistryPda({});
   const registry = await Registry.fromAccountAddress(connection, registryPda);
@@ -78,6 +79,7 @@ export async function InitializeNewWorld({
     instruction,
     transaction,
     worldPda,
+    worldId,
   };
 }
 
@@ -261,21 +263,19 @@ export async function AddEntity({
   transaction: Transaction;
   entityPda: PublicKey;
 }> {
-  let entityPda: PublicKey;
-  if (seed !== undefined) {
-    entityPda = FindEntityPda({ world, seed });
-  } else {
-    const worldData = await World.fromAccountAddress(connection, world);
-    const entityId = new BN(worldData.entities);
-    entityPda = FindEntityPda({ world, entityId });
-  }
+  const worldInstance = await World.fromAccountAddress(connection, world);
+  const worldId = new BN(worldInstance.id);
+  const entityPda =
+    seed !== undefined
+      ? FindEntityPda({ worldId, seed })
+      : FindEntityPda({ worldId, entityId: new BN(worldInstance.entities) });
   const instruction = createAddEntityInstruction(
     {
       world,
       payer,
       entity: entityPda,
     },
-    { seed: seed ?? null },
+    { extraSeed: seed ?? null },
   );
   const transaction = new Transaction().add(instruction);
   return {
