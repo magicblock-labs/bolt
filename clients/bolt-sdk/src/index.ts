@@ -1,5 +1,6 @@
 import { PublicKey } from "@solana/web3.js";
 import type BN from "bn.js";
+import * as PROGRAM_IDL from "./world/idl.json";
 import { PROGRAM_ID } from "./generated";
 export * from "./generated/accounts";
 export * from "./generated/instructions";
@@ -13,6 +14,7 @@ export { DELEGATION_PROGRAM_ID } from "@magicblock-labs/ephemeral-rollups-sdk";
 import * as anchor from "@coral-xyz/anchor";
 export { anchor };
 export { Provider, Program, Wallet, web3, workspace } from "@coral-xyz/anchor";
+export { PROGRAM_ID, PROGRAM_IDL };
 
 export const SYSVAR_INSTRUCTIONS_PUBKEY = new PublicKey(
   "Sysvar1nstructions1111111111111111111111111",
