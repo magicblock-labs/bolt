@@ -855,9 +855,10 @@ describe("bolt", () => {
       entity: entity1Pda,
       componentId: exampleComponentPosition.programId,
     });
-
+    const instruction = delegateComponent.transaction;
+    const transaction = new anchor.web3.Transaction().add(instruction);
     const txSign = await provider.sendAndConfirm(
-      delegateComponent.transaction,
+      transaction,
       [],
       { skipPreflight: true, commitment: "confirmed" },
     );
@@ -865,6 +866,6 @@ describe("bolt", () => {
     const acc = await provider.connection.getAccountInfo(
       delegateComponent.componentPda,
     );
-    expect(acc?.owner.toString()).to.equal(DELEGATION_PROGRAM_ID);
+    expect(acc?.owner.toBase58()).to.equal(DELEGATION_PROGRAM_ID.toBase58());
   });
 });

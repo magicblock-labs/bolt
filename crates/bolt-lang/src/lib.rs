@@ -25,7 +25,9 @@ pub use world::Entity;
 
 pub use ephemeral_rollups_sdk::anchor::{DelegationProgram, MagicProgram};
 pub use ephemeral_rollups_sdk::consts::{MAGIC_CONTEXT_ID, MAGIC_PROGRAM_ID};
-pub use ephemeral_rollups_sdk::cpi::{delegate_account, undelegate_account};
+pub use ephemeral_rollups_sdk::cpi::{
+    delegate_account, undelegate_account, DelegateAccounts, DelegateConfig,
+};
 pub use ephemeral_rollups_sdk::ephem::commit_and_undelegate_accounts;
 
 pub use serde;

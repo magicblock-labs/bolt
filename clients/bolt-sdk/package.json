@@ -1,12 +1,12 @@
 {
   "name": "@magicblock-labs/bolt-sdk",
-  "version": "0.1.12",
+  "version": "0.2.0",
   "description": "Bolt typescript SDK",
   "author": "dev@magicblock.gg",
   "license": "MIT",
   "private": false,
   "dependencies": {
-    "@magicblock-labs/ephemeral-rollups-sdk": "0.0.6",
+    "@magicblock-labs/ephemeral-rollups-sdk": "0.2.1",
     "@metaplex-foundation/beet": "^0.7.1",
     "@metaplex-foundation/beet-solana": "^0.4.0",
     "@coral-xyz/anchor": "^0.30.1"

@@ -69,5 +69,5 @@ Open Source is at the heart of what we do at Magicblock. We believe building sof
 ## ✨ Contributors & Community
 
 Thank you for your interest in contributing to Bolt!
-Please see the [CONTRIBUTING.md](./CONTRIBUTING.md) to learn how.
+Please see the [CONTRIBUTING.md](./docs/CONTRIBUTING.md) to learn how.
 

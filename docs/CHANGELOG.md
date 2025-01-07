@@ -1,5 +1,9 @@
 
-## [0.1.12] - 2024-12-06
+## [0.2.0] - 2025-01-05
+
+
+### 🐛 Bug Fixes
+ - Fix(system): fix system return statement in inner blocks (#117)
 
 ### ♻️ Refactor
  - Refactor: re-exporting anchor-lang (#114)
