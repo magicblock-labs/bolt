@@ -78,7 +78,7 @@
       ],
       "args": [
         {
-          "name": "seed",
+          "name": "extra_seed",
           "type": {
             "option": "bytes"
           }
