@@ -34,6 +34,7 @@ bolt-system = { path = "crates/programs/bolt-system", features = ["cpi"], versio
 bolt-component = { path = "crates/programs/bolt-component", features = ["cpi"], version = "=0.2.0"}
 
 ## External crates
+session-keys = { version = "2", features = ["no-entrypoint"] }
 anchor-lang = { version = "=0.30.1", features = ["init-if-needed"] }
 anchor-cli = { version = "=0.30.1" }
 anchor-client = { version = "=0.30.1" }

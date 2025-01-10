@@ -315,31 +315,6 @@ describe("bolt", () => {
     expect(position.z.toNumber()).to.equal(0);
   });
 
-  it("Apply Simple Movement System (Up) on Entity 1 using Apply", async () => {
-    const apply = await ApplySystem({
-      authority: provider.wallet.publicKey,
-      systemId: exampleSystemSimpleMovement,
-      entities: [
-        {
-          entity: entity1Pda,
-          components: [{ componentId: exampleComponentPosition.programId }],
-        },
-      ],
-      world: worldPda,
-      args: { direction: Direction.Up },
-    });
-
-    await provider.sendAndConfirm(apply.transaction);
-
-    const position = await exampleComponentPosition.account.position.fetch(
-      componentPositionEntity1Pda,
-    );
-    logPosition("Movement System: Entity 1", position);
-    expect(position.x.toNumber()).to.equal(0);
-    expect(position.y.toNumber()).to.equal(1);
-    expect(position.z.toNumber()).to.equal(0);
-  });
-
   it("Apply Simple Movement System (Up) on Entity 1", async () => {
     const applySystem = await ApplySystem({
       authority: provider.wallet.publicKey,
@@ -367,7 +342,7 @@ describe("bolt", () => {
     );
     logPosition("Movement System: Entity 1", position);
     expect(position.x.toNumber()).to.equal(0);
-    expect(position.y.toNumber()).to.equal(2);
+    expect(position.y.toNumber()).to.equal(1);
     expect(position.z.toNumber()).to.equal(0);
   });
 
@@ -393,7 +368,7 @@ describe("bolt", () => {
     );
     logPosition("Movement System: Entity 1", position);
     expect(position.x.toNumber()).to.equal(1);
-    expect(position.y.toNumber()).to.equal(2);
+    expect(position.y.toNumber()).to.equal(1);
     expect(position.z.toNumber()).to.equal(0);
   });
 
@@ -416,7 +391,7 @@ describe("bolt", () => {
     );
     logPosition("Fly System: Entity 1", position);
     expect(position.x.toNumber()).to.equal(1);
-    expect(position.y.toNumber()).to.equal(2);
+    expect(position.y.toNumber()).to.equal(1);
     expect(position.z.toNumber()).to.equal(1);
   });
 
@@ -454,7 +429,7 @@ describe("bolt", () => {
     );
     logPosition("Apply System Velocity: Entity 1", position);
     expect(position.x.toNumber()).to.greaterThan(1);
-    expect(position.y.toNumber()).to.equal(2);
+    expect(position.y.toNumber()).to.equal(1);
     expect(position.z.toNumber()).to.equal(1);
   });
 
@@ -492,7 +467,7 @@ describe("bolt", () => {
     );
     logPosition("Apply System Velocity: Entity 1", position);
     expect(position.x.toNumber()).to.greaterThan(1);
-    expect(position.y.toNumber()).to.equal(2);
+    expect(position.y.toNumber()).to.equal(1);
     expect(position.z.toNumber()).to.equal(300);
   });
 

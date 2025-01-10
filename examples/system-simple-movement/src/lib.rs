@@ -4,7 +4,6 @@ declare_id!("FSa6qoJXFBR3a7ThQkTAMrC15p6NkchPEjBdd4n6dXxA");
 
 #[system]
 pub mod system_simple_movement {
-
     pub fn execute(ctx: Context<Components>, args: Args) -> Result<Components> {
         // Compute the new position based on the direction
         let (dx, dy) = match args.direction {

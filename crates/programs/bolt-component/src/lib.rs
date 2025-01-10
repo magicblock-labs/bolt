@@ -1,4 +1,5 @@
 use anchor_lang::prelude::*;
+use bolt_system::CpiContextBuilder;
 
 declare_id!("CmP2djJgABZ4cRokm4ndxuq6LerqpNHLBsaUv2XKEJua");
 
@@ -33,6 +34,8 @@ pub mod bolt_component {
         pub bolt_system: UncheckedAccount<'info>,
         #[account()]
         pub authority: Signer<'info>,
+        #[account()]
+        pub session_token: Option<UncheckedAccount<'info>>,
     }
 
     pub fn update(ctx: Context<Update>, _data: Vec<u8>) -> Result<()> {

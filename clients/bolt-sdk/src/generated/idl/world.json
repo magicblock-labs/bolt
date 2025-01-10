@@ -111,6 +111,10 @@
         },
         {
           "name": "world"
+        },
+        {
+          "name": "session_token",
+          "optional": true
         }
       ],
       "args": [

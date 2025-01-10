@@ -1,13 +1,15 @@
 use proc_macro::TokenStream;
 use proc_macro2::Ident;
-use quote::{quote, ToTokens};
+use quote::{quote, ToTokens, TokenStreamExt};
 use syn::{
     parse_macro_input, parse_quote, visit_mut::VisitMut, Expr, FnArg, GenericArgument, ItemFn,
     ItemMod, ItemStruct, PathArguments, ReturnType, Stmt, Type, TypePath,
 };
 
 #[derive(Default)]
-struct SystemTransform;
+struct SystemTransform {
+    has_session_key: bool,
+}
 
 #[derive(Default)]
 struct Extractor {
@@ -36,7 +38,26 @@ struct Extractor {
 #[proc_macro_attribute]
 pub fn system(attr: TokenStream, item: TokenStream) -> TokenStream {
     let mut ast = parse_macro_input!(item as ItemMod);
-    let _attr = parse_macro_input!(attr as syn::AttributeArgs);
+    let attr = parse_macro_input!(attr as syn::AttributeArgs);
+
+    let has_session_key = attr.iter().any(|meta| {
+        if let syn::NestedMeta::Meta(syn::Meta::Path(path)) = meta {
+            path.segments
+                .first()
+                .map(|segment| segment.ident == "session_key")
+                .unwrap_or(false)
+        } else {
+            false
+        }
+    });
+
+    if has_session_key {
+        if let Some(content) = &mut ast.content {
+            content.1.push(syn::Item::Use(syn::parse_quote! {
+                use bolt_lang::session_keys::{Session, SessionToken};
+            }));
+        }
+    }
 
     // Extract the number of components from the module
     let mut extractor = Extractor::default();
@@ -49,7 +70,9 @@ pub fn system(attr: TokenStream, item: TokenStream) -> TokenStream {
             SystemTransform::add_variadic_execute_function(items);
         }
 
-        let mut transform = SystemTransform;
+        let mut transform = SystemTransform {
+            has_session_key,
+        };
         transform.visit_item_mod_mut(&mut ast);
 
         // Add `#[program]` macro and try_to_vec implementation
@@ -124,6 +147,11 @@ impl VisitMut for SystemTransform {
     // Modify the return type of the system function to Result<Vec<u8>,*>
     fn visit_item_fn_mut(&mut self, item_fn: &mut ItemFn) {
         if item_fn.sig.ident == "execute" {
+            if self.has_session_key {
+                // item_fn.attrs.push(parse_quote! {
+                //     #[session_auth_or(ctx.accounts.position.bolt_metadata.authority.key() == ctx.accounts.authority.key(), SessionError::InvalidToken)] // FIXME: Position is hardcoded here
+                //  });
+            }
             // Modify the return type to Result<Vec<u8>> if necessary
             if let ReturnType::Type(_, type_box) = &item_fn.sig.output {
                 if let Type::Path(type_path) = &**type_box {
@@ -153,14 +181,24 @@ impl VisitMut for SystemTransform {
         for item in content.iter_mut() {
             match item {
                 syn::Item::Fn(item_fn) => self.visit_item_fn_mut(item_fn),
-                syn::Item::Struct(item_struct)
+                syn::Item::Struct(item_struct) => {
+                    if let Some(attr) = item_struct
+                        .attrs
+                        .iter_mut()
+                        .find(|attr| attr.path.is_ident("system_input"))
+                    {
+                        if self.has_session_key {
+                            attr.tokens.append_all(quote! { (session_key) });
+                        }
+                    }
                     if item_struct
                         .attrs
                         .iter()
-                        .any(|attr| attr.path.is_ident("extra_accounts")) =>
-                {
-                    extra_accounts_struct_name = Some(&item_struct.ident);
-                    break;
+                        .any(|attr| attr.path.is_ident("extra_accounts"))
+                    {
+                        extra_accounts_struct_name = Some(&item_struct.ident);
+                        break;
+                    }
                 }
                 _ => {}
             }
