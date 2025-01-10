@@ -3,16 +3,14 @@ import { type Position } from "../target/types/position";
 import { type Velocity } from "../target/types/velocity";
 import { type BoltComponent } from "../target/types/bolt_component";
 import { type SystemSimpleMovement } from "../target/types/system_simple_movement";
-import { type World } from "../target/types/world";
 import { type SystemFly } from "../target/types/system_fly";
 import { type SystemApplyVelocity } from "../target/types/system_apply_velocity";
 import { expect } from "chai";
 import type BN from "bn.js";
 import {
   AddEntity,
-  createInitializeRegistryInstruction,
   DELEGATION_PROGRAM_ID,
-  FindRegistryPda,
+  InitializeRegistry,
   InitializeComponent,
   InitializeNewWorld,
   ApplySystem,
@@ -24,6 +22,7 @@ import {
   type Program,
   anchor,
   web3,
+  WORLD_PROGRAM_IDL as World,
 } from "../clients/bolt-sdk";
 
 enum Direction {
@@ -106,13 +105,15 @@ describe("bolt", () => {
   const secondAuthority = Keypair.generate().publicKey;
 
   it("InitializeRegistry", async () => {
-    const registryPda = FindRegistryPda({});
-    const initializeRegistryIx = createInitializeRegistryInstruction({
-      registry: registryPda,
+    const initializeRegistry = await InitializeRegistry({
       payer: provider.wallet.publicKey,
+      connection: provider.connection,
     });
-    const tx = new anchor.web3.Transaction().add(initializeRegistryIx);
-    await provider.sendAndConfirm(tx);
+    try {
+      await provider.sendAndConfirm(initializeRegistry.transaction);
+    } catch (error) {
+      // This is expected to fail because the registry already exists if another api level test ran before
+    }
   });
 
   it("InitializeNewWorld", async () => {
@@ -216,7 +217,7 @@ describe("bolt", () => {
     const addEntity = await AddEntity({
       payer: provider.wallet.publicKey,
       world: worldPda,
-      seed: Buffer.from("extra-seed"),
+      seed: Buffer.from("custom-seed"),
       connection: provider.connection,
     });
     await provider.sendAndConfirm(addEntity.transaction);
@@ -325,9 +326,7 @@ describe("bolt", () => {
         },
       ],
       world: worldPda,
-      args: {
-        direction: Direction.Up,
-      },
+      args: { direction: Direction.Up },
     });
 
     await provider.sendAndConfirm(apply.transaction);

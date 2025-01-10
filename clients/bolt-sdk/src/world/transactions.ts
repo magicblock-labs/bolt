@@ -21,10 +21,33 @@ import {
   type TransactionInstruction,
 } from "@solana/web3.js";
 import type WorldProgram from "../generated";
-import { PROGRAM_ID, worldIdl } from "../generated";
+import {
+  createInitializeRegistryInstruction,
+  PROGRAM_ID,
+  worldIdl,
+} from "../generated";
 import { type Idl, Program } from "@coral-xyz/anchor";
 
 const MAX_COMPONENTS = 5;
+
+export async function InitializeRegistry({
+  payer,
+  connection,
+}: {
+  payer: PublicKey;
+  connection: Connection;
+}): Promise<{
+  instruction: TransactionInstruction;
+  transaction: Transaction;
+}> {
+  const registry = FindRegistryPda({});
+  const instruction = createInitializeRegistryInstruction({ registry, payer });
+  const transaction = new Transaction().add(instruction);
+  return {
+    instruction,
+    transaction,
+  };
+}
 
 /**
  * Create the transaction to Initialize a new world
@@ -311,47 +334,6 @@ export async function InitializeComponent({
   };
 }
 
-export async function Apply({
-  authority,
-  boltSystem,
-  boltComponent,
-  componentProgram,
-  anchorRemainingAccounts,
-  world,
-  args,
-}: {
-  authority: PublicKey;
-  boltSystem: PublicKey;
-  boltComponent: PublicKey;
-  componentProgram: PublicKey;
-  world: PublicKey;
-  anchorRemainingAccounts?: web3.AccountMeta[];
-  args: Uint8Array;
-}): Promise<{
-  instruction: TransactionInstruction;
-  transaction: Transaction;
-}> {
-  const instruction = createApplyInstruction(
-    {
-      authority,
-      boltSystem,
-      boltComponent,
-      componentProgram,
-      instructionSysvarAccount: SYSVAR_INSTRUCTIONS_PUBKEY,
-      anchorRemainingAccounts,
-      world,
-    },
-    {
-      args,
-    },
-  );
-  const transaction = new Transaction().add(instruction);
-  return {
-    instruction,
-    transaction,
-  };
-}
-
 interface ApplySystemInstruction {
   authority: PublicKey;
   systemId: PublicKey;
@@ -398,7 +380,6 @@ async function createApplySystemInstruction({
   const applyAccounts = {
     authority: authority ?? PROGRAM_ID,
     boltSystem: systemId,
-    instructionSysvarAccount: SYSVAR_INSTRUCTIONS_PUBKEY,
     world,
   };
 
