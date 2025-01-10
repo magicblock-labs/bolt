@@ -91,6 +91,10 @@ export type World = {
         {
           name: "world";
         },
+        {
+          name: "sessionToken";
+          optional: true;
+        },
       ];
       args: [
         {

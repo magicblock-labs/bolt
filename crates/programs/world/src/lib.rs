@@ -2,6 +2,8 @@
 use anchor_lang::prelude::*;
 use std::collections::BTreeSet;
 
+use bolt_system::CpiContextBuilder;
+
 #[cfg(not(feature = "no-entrypoint"))]
 use solana_security_txt::security_txt;
 
@@ -340,16 +342,18 @@ pub mod world {
         pub instruction_sysvar_account: UncheckedAccount<'info>,
         #[account()]
         pub world: Account<'info, World>,
+        #[account()]
+        pub session_token: Option<UncheckedAccount<'info>>,
     }
 
     impl<'info> Apply<'info> {
         pub fn build(
             &self,
         ) -> CpiContext<'_, '_, '_, 'info, bolt_system::cpi::accounts::SetData<'info>> {
-            let authority = self.authority.to_account_info();
-            let cpi_program = self.bolt_system.to_account_info();
-            let cpi_accounts = bolt_system::cpi::accounts::SetData { authority };
-            CpiContext::new(cpi_program, cpi_accounts)
+            bolt_system::cpi::accounts::SetData {
+                authority: self.authority.to_account_info(),
+                session_token: self.session_token.as_ref().map(|x| x.to_account_info()),
+            }.build_cpi_context(self.bolt_system.to_account_info())
         }
     }
 }
