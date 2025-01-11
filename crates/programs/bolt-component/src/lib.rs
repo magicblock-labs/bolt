@@ -33,19 +33,6 @@ pub mod bolt_component {
         pub authority: Signer<'info>,
     }
 
-    impl<'info> Apply<'info> {
-        pub fn set_data_ctx(
-            &self,
-        ) -> CpiContext<'_, '_, '_, 'info, bolt_system::cpi::accounts::SetData<'info>> {
-            let cpi_program = self.bolt_system.to_account_info();
-            let cpi_accounts = bolt_system::cpi::accounts::SetData {
-                component: self.bolt_component.to_account_info().clone(),
-                authority: self.authority.to_account_info(),
-            };
-            CpiContext::new(cpi_program, cpi_accounts)
-        }
-    }
-
     pub fn update(ctx: Context<Update>, _data: Vec<u8>) -> Result<()> {
         let instruction =
             anchor_lang::solana_program::sysvar::instructions::get_instruction_relative(
