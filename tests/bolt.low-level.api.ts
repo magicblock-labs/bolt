@@ -480,6 +480,8 @@ describe("bolt", () => {
         boltSystem: exampleSystemSimpleMovement,
         boltComponent: componentPositionEntity1Pda,
         componentProgram: exampleComponentPosition.programId,
+        boltComponent2: null,
+        componentProgram2: null,
         world: worldPda,
       })
       .instruction();
@@ -508,6 +510,8 @@ describe("bolt", () => {
         boltSystem: exampleSystemSimpleMovement,
         boltComponent: componentPositionEntity1Pda,
         componentProgram: exampleComponentPosition.programId,
+        boltComponent2: null,
+        componentProgram2: null,
         world: worldPda,
       })
       .instruction();
@@ -536,6 +540,8 @@ describe("bolt", () => {
         boltSystem: exampleSystemSimpleMovement,
         boltComponent: componentPositionEntity1Pda,
         componentProgram: exampleComponentPosition.programId,
+        boltComponent2: null,
+        componentProgram2: null,
         world: worldPda,
       })
       .instruction();
@@ -563,6 +569,8 @@ describe("bolt", () => {
         boltSystem: exampleSystemFly,
         boltComponent: componentPositionEntity1Pda,
         componentProgram: exampleComponentPosition.programId,
+        boltComponent2: null,
+        componentProgram2: null,
         world: worldPda,
       })
       .instruction();
@@ -581,12 +589,12 @@ describe("bolt", () => {
 
   it("Apply System Velocity on Entity 1", async () => {
     const instruction = await worldProgram.methods
-      .apply2(SerializeArgs())
+      .apply(SerializeArgs())
       .accounts({
         authority: provider.wallet.publicKey,
         boltSystem: exampleSystemApplyVelocity,
-        boltComponent1: componentVelocityEntity1Pda,
-        componentProgram1: exampleComponentVelocity.programId,
+        boltComponent: componentVelocityEntity1Pda,
+        componentProgram: exampleComponentVelocity.programId,
         boltComponent2: componentPositionEntity1Pda,
         componentProgram2: exampleComponentPosition.programId,
         world: worldPda,
@@ -617,12 +625,12 @@ describe("bolt", () => {
 
   it("Apply System Velocity on Entity 1, with Clock external account", async () => {
     const instruction = await worldProgram.methods
-      .apply2(SerializeArgs())
+      .apply(SerializeArgs())
       .accounts({
         authority: provider.wallet.publicKey,
         boltSystem: exampleSystemApplyVelocity,
-        boltComponent1: componentVelocityEntity1Pda,
-        componentProgram1: exampleComponentVelocity.programId,
+        boltComponent: componentVelocityEntity1Pda,
+        componentProgram: exampleComponentVelocity.programId,
         boltComponent2: componentPositionEntity1Pda,
         componentProgram2: exampleComponentPosition.programId,
         world: worldPda,
@@ -657,6 +665,8 @@ describe("bolt", () => {
         boltSystem: exampleSystemFly,
         boltComponent: componentPositionEntity4Pda,
         componentProgram: exampleComponentPosition.programId,
+        boltComponent2: null,
+        componentProgram2: null,
         world: worldPda,
       })
       .instruction();
@@ -685,6 +695,8 @@ describe("bolt", () => {
         boltSystem: exampleSystemFly,
         boltComponent: componentPositionEntity5Pda,
         componentProgram: exampleComponentPosition.programId,
+        boltComponent2: null,
+        componentProgram2: null,
         world: worldPda,
       })
       .instruction();
@@ -759,6 +771,8 @@ describe("bolt", () => {
         boltSystem: exampleSystemFly,
         boltComponent: componentPositionEntity1Pda,
         componentProgram: exampleComponentPosition.programId,
+        boltComponent2: null,
+        componentProgram2: null,
         world: worldPda,
       })
       .instruction();
@@ -795,6 +809,8 @@ describe("bolt", () => {
         boltSystem: exampleSystemFly,
         boltComponent: componentPositionEntity1Pda,
         componentProgram: exampleComponentPosition.programId,
+        boltComponent2: null,
+        componentProgram2: null,
         world: worldPda,
       })
       .instruction();

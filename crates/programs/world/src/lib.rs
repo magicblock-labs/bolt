@@ -1,8 +1,6 @@
 #![allow(clippy::manual_unwrap_or_default)]
 use anchor_lang::prelude::*;
-use bolt_helpers_world_apply::apply_system;
 use std::collections::BTreeSet;
-use tuple_conv::RepeatedTuple;
 
 #[cfg(not(feature = "no-entrypoint"))]
 use solana_security_txt::security_txt;
@@ -21,7 +19,6 @@ security_txt! {
 
 mod error;
 
-#[apply_system(max_components = 5)]
 #[program]
 pub mod world {
     use super::*;
@@ -284,22 +281,52 @@ pub mod world {
             return Err(WorldError::SystemNotApproved.into());
         }
         let remaining_accounts: Vec<AccountInfo<'info>> = ctx.remaining_accounts.to_vec();
-        let res = bolt_system::cpi::execute(
-            ctx.accounts
-                .build()
-                .with_remaining_accounts(remaining_accounts),
-            args,
-        )?;
+        if let (Some(component_program2), Some(component2)) = (&ctx.accounts.component_program2, &ctx.accounts.bolt_component2) {
+            let res = bolt_system::cpi::execute_2(
+                ctx.accounts
+                    .build_2()
+                    .with_remaining_accounts(remaining_accounts),
+                args,
+            )?;
 
-        bolt_component::cpi::update(
-            build_update_context(
-                ctx.accounts.component_program.clone(),
-                ctx.accounts.bolt_component.clone(),
-                ctx.accounts.authority.clone(),
-                ctx.accounts.instruction_sysvar_account.clone(),
-            ),
-            res.get(),
-        )?;
+            let (res1, res2) = res.get();
+            bolt_component::cpi::update(
+                build_update_context(
+                    ctx.accounts.component_program.clone(),
+                    ctx.accounts.bolt_component.clone(),
+                    ctx.accounts.authority.clone(),
+                    ctx.accounts.instruction_sysvar_account.clone(),
+                ),
+                res1,
+            )?;
+
+            bolt_component::cpi::update(
+                build_update_context(
+                    component_program2.clone(),
+                    component2.clone(),
+                    ctx.accounts.authority.clone(),
+                    ctx.accounts.instruction_sysvar_account.clone(),
+                ),
+                res2,
+            )?;
+        } else {
+            let res = bolt_system::cpi::execute(
+                ctx.accounts
+                    .build()
+                    .with_remaining_accounts(remaining_accounts),
+                args,
+            )?;
+    
+            bolt_component::cpi::update(
+                build_update_context(
+                    ctx.accounts.component_program.clone(),
+                    ctx.accounts.bolt_component.clone(),
+                    ctx.accounts.authority.clone(),
+                    ctx.accounts.instruction_sysvar_account.clone(),
+                ),
+                res.get(),
+            )?;    
+        }
         Ok(())
     }
 
@@ -307,11 +334,17 @@ pub mod world {
     pub struct ApplySystem<'info> {
         /// CHECK: bolt component program check
         pub component_program: UncheckedAccount<'info>,
+        /// CHECK: bolt component program check
+        pub component_program2: Option<UncheckedAccount<'info>>,
         /// CHECK: bolt system program check
         pub bolt_system: UncheckedAccount<'info>,
         #[account(mut)]
         /// CHECK: component account
         pub bolt_component: UncheckedAccount<'info>,
+        #[account(mut)]
+        /// CHECK: component account
+        pub bolt_component2: Option<UncheckedAccount<'info>>,
+        #[account(mut)]
         /// CHECK: authority check
         pub authority: Signer<'info>,
         #[account(address = anchor_lang::solana_program::sysvar::instructions::id())]
@@ -329,6 +362,18 @@ pub mod world {
             let cpi_accounts = bolt_system::cpi::accounts::SetData {
                 component: self.bolt_component.to_account_info(),
                 authority: self.authority.to_account_info(),
+            };
+            CpiContext::new(cpi_program, cpi_accounts)
+        }
+
+        pub fn build_2(
+            &self,
+        ) -> CpiContext<'_, '_, '_, 'info, bolt_system::cpi::accounts::SetData2<'info>> {
+            let cpi_program = self.bolt_system.to_account_info();
+            let cpi_accounts = bolt_system::cpi::accounts::SetData2 {
+                component: self.bolt_component.to_account_info(),
+                authority: self.authority.to_account_info(),
+                component2: self.bolt_component2.as_ref().unwrap().to_account_info(),
             };
             CpiContext::new(cpi_program, cpi_accounts)
         }

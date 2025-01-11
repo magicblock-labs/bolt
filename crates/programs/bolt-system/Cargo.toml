@@ -25,4 +25,3 @@ custom-panic = []
 
 [dependencies]
 anchor-lang.workspace = true
-bolt-helpers-system-template.workspace = true
