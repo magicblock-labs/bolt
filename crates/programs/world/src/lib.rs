@@ -292,13 +292,14 @@ pub mod world {
         }
         if pairs.len() == 1 {
             let (program, component) = pairs.remove(0);
-            let res = bolt_system::cpi::execute(
+            let mut res = bolt_system::cpi::execute(
                 ctx.accounts
                     .build(component.clone())
                     .with_remaining_accounts(remaining_accounts),
                 args,
-            )?;
-    
+            )?.get();
+            let res = res.remove(0);
+
             bolt_component::cpi::update(
                 build_update_context(
                     program,
@@ -306,7 +307,7 @@ pub mod world {
                     ctx.accounts.authority.clone(),
                     ctx.accounts.instruction_sysvar_account.clone(),
                 ),
-                res.get(),
+                res,
             )?;    
         } else if pairs.len() == 2 {
             let (program, component) = pairs.remove(0);
@@ -318,7 +319,9 @@ pub mod world {
                 args,
             )?;
 
-            let (res1, res2) = res.get();
+            let mut res = res.get();
+            let res1 = res.remove(0);
+            let res2 = res.remove(0);
             bolt_component::cpi::update(
                 build_update_context(
                     program,

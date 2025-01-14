@@ -88,20 +88,11 @@ pub fn system_input(_attr: TokenStream, item: TokenStream) -> TokenStream {
         }
     });
 
-    let tuple_elements = (0..try_to_vec_fields.len())
-        .map(|_| quote! {Vec<u8>})
-        .collect::<Vec<_>>();
-    let generated_tuple_type = match tuple_elements.len() {
-        0 => panic!("system_input macro only supports structs with named fields"),
-        1 => quote! { (Vec<u8>,) },
-        _ => quote! { (#(#tuple_elements),*) },
-    };
-
     // Generate the implementation of try_to_vec for the struct
     let output_impl = quote! {
         impl<'info> #name<'info> {
-            pub fn try_to_vec(&self) -> Result<#generated_tuple_type> {
-                Ok((#(#try_to_vec_fields,)*))
+            pub fn try_to_vec(&self) -> Result<Vec<Vec<u8>>> {
+                Ok(vec![#(#try_to_vec_fields,)*])
             }
         }
     };

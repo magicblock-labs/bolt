@@ -137,7 +137,7 @@ impl VisitMut for SystemTransform {
                         );
                     }
                     if !Self::check_is_result_vec_u8(type_path) {
-                        Self::modify_fn_return_type(item_fn, self.return_values);
+                        item_fn.sig.output = parse_quote! { -> Result<Vec<Vec<u8>>> };
                         // Modify the return statement inside the function body
                         let block = &mut item_fn.block;
                         self.visit_stmts_mut(&mut block.stmts);
@@ -225,19 +225,6 @@ impl SystemTransform {
             }
         }
         false
-    }
-
-    // Helper function to modify the return type of a function to be Result<Vec<u8>> or Result<(Vec<u8>, Vec<u8>, ...)>
-    fn modify_fn_return_type(item_fn: &mut ItemFn, ret_values: usize) {
-        item_fn.sig.output = if ret_values == 1 {
-            parse_quote! { -> Result<(Vec<u8>,)> }
-        } else {
-            let types = std::iter::repeat(quote! { Vec<u8> })
-                .take(ret_values)
-                .collect::<Vec<_>>();
-            let tuple = quote! { (#(#types),*) };
-            syn::parse2(quote! { -> Result<#tuple> }).unwrap()
-        };
     }
 
     // Helper function to check if an expression is an `Ok(...)` or `return Ok(...);` variant
