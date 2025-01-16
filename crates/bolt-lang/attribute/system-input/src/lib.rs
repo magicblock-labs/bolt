@@ -76,6 +76,7 @@ pub fn system_input(_attr: TokenStream, item: TokenStream) -> TokenStream {
         #[derive(Accounts)]
         pub struct #name<'info> {
             #(#transformed_fields)*
+            #[account()]
             pub authority: Signer<'info>,
         }
     };
@@ -88,11 +89,39 @@ pub fn system_input(_attr: TokenStream, item: TokenStream) -> TokenStream {
         }
     });
 
+    let try_from_fields = fields.iter().enumerate().map(|(i, f)| {
+        let field_name = &f.ident;
+        quote! {
+            #field_name: Account::try_from(context.remaining_accounts.as_ref().get(#i).ok_or_else(|| ErrorCode::ConstraintAccountIsNone)?)?,
+        }
+    });
+
+    let number_of_components = fields.len();
+
+    let output_trait = quote! {
+        pub trait NumberOfComponents<'a, 'b, 'c, 'info, T> {
+            const NUMBER_OF_COMPONENTS: usize;
+        }
+    };
+
+    let output_trait_implementation = quote! {
+        impl<'a, 'b, 'c, 'info, T: bolt_lang::Bumps> NumberOfComponents<'a, 'b, 'c, 'info, T> for Context<'a, 'b, 'c, 'info, T> {
+            const NUMBER_OF_COMPONENTS: usize = #number_of_components;
+        }
+    };
+
     // Generate the implementation of try_to_vec for the struct
     let output_impl = quote! {
         impl<'info> #name<'info> {
             pub fn try_to_vec(&self) -> Result<Vec<Vec<u8>>> {
                 Ok(vec![#(#try_to_vec_fields,)*])
+            }
+
+            fn try_from<'a, 'b>(context: &Context<'a, 'b, 'info, 'info, VariadicBoltComponents<'info>>) -> Result<Self> {
+                Ok(Self {
+                    authority: context.accounts.authority.clone(),
+                    #(#try_from_fields)*
+                })
             }
         }
     };
@@ -101,7 +130,15 @@ pub fn system_input(_attr: TokenStream, item: TokenStream) -> TokenStream {
     let output = quote! {
         #output_struct
         #output_impl
+        #output_trait
+        #output_trait_implementation
         #(#components_imports)*
+
+        #[derive(Accounts)]
+        pub struct VariadicBoltComponents<'info> {
+            #[account()]
+            pub authority: Signer<'info>,
+        }
     };
 
     TokenStream::from(output)

@@ -855,12 +855,20 @@ describe("bolt", () => {
       .accounts({
         authority: provider.wallet.publicKey,
         boltSystem: exampleSystemFly,
-        boltComponent: componentPositionEntity1Pda,
-        componentProgram: exampleComponentPosition.programId,
-        boltComponent2: null,
-        componentProgram2: null,
         world: worldPda,
       })
+      .remainingAccounts([
+        {
+          pubkey: exampleComponentPosition.programId,
+          isSigner: false,
+          isWritable: false,
+        },
+        {
+          pubkey: componentPositionEntity1Pda,
+          isSigner: false,
+          isWritable: true,
+        },
+      ])
       .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
     await provider.sendAndConfirm(transaction);
@@ -893,12 +901,20 @@ describe("bolt", () => {
       .accounts({
         authority: provider.wallet.publicKey,
         boltSystem: exampleSystemFly,
-        boltComponent: componentPositionEntity1Pda,
-        componentProgram: exampleComponentPosition.programId,
-        boltComponent2: null,
-        componentProgram2: null,
         world: worldPda,
       })
+      .remainingAccounts([
+        {
+          pubkey: exampleComponentPosition.programId,
+          isSigner: false,
+          isWritable: false,
+        },
+        {
+          pubkey: componentPositionEntity1Pda,
+          isSigner: false,
+          isWritable: true,
+        },
+      ])
       .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
     let invalid = false;

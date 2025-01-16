@@ -7,9 +7,7 @@ use syn::{
 };
 
 #[derive(Default)]
-struct SystemTransform {
-    return_values: usize,
-}
+struct SystemTransform;
 
 #[derive(Default)]
 struct Extractor {
@@ -44,15 +42,14 @@ pub fn system(attr: TokenStream, item: TokenStream) -> TokenStream {
     let mut extractor = Extractor::default();
     extractor.visit_item_mod_mut(&mut ast);
 
-    if let Some(components_len) = extractor.field_count {
+    if extractor.field_count.is_some() {
         let use_super = syn::parse_quote! { use super::*; };
-        if let Some(ref mut content) = ast.content {
-            content.1.insert(0, syn::Item::Use(use_super));
+        if let Some((_, ref mut items)) = ast.content {
+            items.insert(0, syn::Item::Use(use_super));
+            SystemTransform::add_variadic_execute_function(items);
         }
 
-        let mut transform = SystemTransform {
-            return_values: components_len,
-        };
+        let mut transform = SystemTransform;
         transform.visit_item_mod_mut(&mut ast);
 
         // Add `#[program]` macro and try_to_vec implementation
@@ -130,12 +127,6 @@ impl VisitMut for SystemTransform {
             // Modify the return type to Result<Vec<u8>> if necessary
             if let ReturnType::Type(_, type_box) = &item_fn.sig.output {
                 if let Type::Path(type_path) = &**type_box {
-                    if self.return_values > 1 {
-                        item_fn.sig.ident = Ident::new(
-                            format!("execute_{}", self.return_values).as_str(),
-                            item_fn.sig.ident.span(),
-                        );
-                    }
                     if !Self::check_is_result_vec_u8(type_path) {
                         item_fn.sig.output = parse_quote! { -> Result<Vec<Vec<u8>>> };
                         // Modify the return statement inside the function body
@@ -188,6 +179,17 @@ impl VisitMut for SystemTransform {
 }
 
 impl SystemTransform {
+    fn add_variadic_execute_function(content: &mut Vec<syn::Item>) {
+        content.push(syn::parse2(quote! {
+            pub fn bolt_execute<'info>(ctx: Context<'_, '_, 'info, 'info, VariadicBoltComponents<'info>>, args: Vec<u8>) -> Result<Vec<Vec<u8>>> {
+                let mut components = Components::try_from(&ctx)?;
+                let bumps = ComponentsBumps {};
+                let context = Context::new(ctx.program_id, &mut components, ctx.remaining_accounts, bumps);
+                execute(context, args)
+            }
+        }).unwrap());
+    }
+
     // Helper function to check if a type is `Vec<u8>` or `(Vec<u8>, Vec<u8>, ...)`
     fn check_is_result_vec_u8(ty: &TypePath) -> bool {
         if let Some(segment) = ty.path.segments.last() {

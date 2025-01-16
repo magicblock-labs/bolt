@@ -29,7 +29,9 @@ pub mod bolt_component {
         #[account(mut)]
         pub bolt_component: Account<'info, Component>,
         /// CHECK: The system can modify the data of the component
+        #[account()]
         pub bolt_system: UncheckedAccount<'info>,
+        #[account()]
         pub authority: Signer<'info>,
     }
 

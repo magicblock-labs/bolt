@@ -280,26 +280,40 @@ pub mod world {
         {
             return Err(WorldError::SystemNotApproved.into());
         }
+
         let mut remaining_accounts: Vec<AccountInfo<'info>> = ctx.remaining_accounts.to_vec();
+
         let mut pairs = Vec::new();
-        loop {
-            if remaining_accounts.is_empty() { break; }
+        while remaining_accounts.len() >= 2 {
             let program = remaining_accounts.remove(0);
-            if program.key() == ID { break; }
-            if remaining_accounts.is_empty() { break; }
+            if program.key() == ID {
+                break;
+            }
             let component = remaining_accounts.remove(0);
             pairs.push((program, component));
         }
-        if pairs.len() == 1 {
-            let (program, component) = pairs.remove(0);
-            let mut res = bolt_system::cpi::execute(
-                ctx.accounts
-                    .build(component.clone())
-                    .with_remaining_accounts(remaining_accounts),
-                args,
-            )?.get();
-            let res = res.remove(0);
 
+        let mut components_accounts = pairs
+            .iter()
+            .map(|(_, component)| component)
+            .cloned()
+            .collect::<Vec<_>>();
+        components_accounts.append(&mut remaining_accounts);
+        let remaining_accounts = components_accounts;
+
+        let results = bolt_system::cpi::bolt_execute(
+            ctx.accounts
+                .build()
+                .with_remaining_accounts(remaining_accounts),
+            args,
+        )?
+        .get();
+
+        if results.len() != pairs.len() {
+            return Err(WorldError::InvalidSystemOutput.into());
+        }
+
+        for ((program, component), result) in pairs.into_iter().zip(results.into_iter()) {
             bolt_component::cpi::update(
                 build_update_context(
                     program,
@@ -307,39 +321,7 @@ pub mod world {
                     ctx.accounts.authority.clone(),
                     ctx.accounts.instruction_sysvar_account.clone(),
                 ),
-                res,
-            )?;    
-        } else if pairs.len() == 2 {
-            let (program, component) = pairs.remove(0);
-            let (program2, component2) = pairs.remove(0);
-            let res = bolt_system::cpi::execute_2(
-                ctx.accounts
-                    .build_2(component.clone(), component2.clone())
-                    .with_remaining_accounts(remaining_accounts),
-                args,
-            )?;
-
-            let mut res = res.get();
-            let res1 = res.remove(0);
-            let res2 = res.remove(0);
-            bolt_component::cpi::update(
-                build_update_context(
-                    program,
-                    component,
-                    ctx.accounts.authority.clone(),
-                    ctx.accounts.instruction_sysvar_account.clone(),
-                ),
-                res1,
-            )?;
-
-            bolt_component::cpi::update(
-                build_update_context(
-                    program2,
-                    component2,
-                    ctx.accounts.authority.clone(),
-                    ctx.accounts.instruction_sysvar_account.clone(),
-                ),
-                res2,
+                result,
             )?;
         }
         Ok(())
@@ -348,12 +330,13 @@ pub mod world {
     #[derive(Accounts)]
     pub struct Apply<'info> {
         /// CHECK: bolt system program check
+        #[account()]
         pub bolt_system: UncheckedAccount<'info>,
-        #[account(mut)]
         /// CHECK: authority check
+        #[account()]
         pub authority: Signer<'info>,
-        #[account(address = anchor_lang::solana_program::sysvar::instructions::id())]
         /// CHECK: instruction sysvar check
+        #[account(address = anchor_lang::solana_program::sysvar::instructions::id())]
         pub instruction_sysvar_account: UncheckedAccount<'info>,
         #[account()]
         pub world: Account<'info, World>,
@@ -362,29 +345,10 @@ pub mod world {
     impl<'info> Apply<'info> {
         pub fn build(
             &self,
-            component: AccountInfo<'info>,
         ) -> CpiContext<'_, '_, '_, 'info, bolt_system::cpi::accounts::SetData<'info>> {
             let authority = self.authority.to_account_info();
             let cpi_program = self.bolt_system.to_account_info();
-            let cpi_accounts = bolt_system::cpi::accounts::SetData {
-                component,
-                authority,
-            };
-            CpiContext::new(cpi_program, cpi_accounts)
-        }
-
-        pub fn build_2(
-            &self,
-            component: AccountInfo<'info>,
-            component2: AccountInfo<'info>,
-        ) -> CpiContext<'_, '_, '_, 'info, bolt_system::cpi::accounts::SetData2<'info>> {
-            let authority = self.authority.to_account_info();
-            let cpi_program = self.bolt_system.to_account_info();
-            let cpi_accounts = bolt_system::cpi::accounts::SetData2 {
-                component,
-                authority,
-                component2,
-            };
+            let cpi_accounts = bolt_system::cpi::accounts::SetData { authority };
             CpiContext::new(cpi_program, cpi_accounts)
         }
     }

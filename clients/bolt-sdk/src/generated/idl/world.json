@@ -103,7 +103,6 @@
         },
         {
           "name": "authority",
-          "writable": true,
           "signer": true
         },
         {
@@ -376,21 +375,26 @@
     },
     {
       "code": 6001,
+      "name": "InvalidSystemOutput",
+      "msg": "Invalid system output"
+    },
+    {
+      "code": 6002,
       "name": "WorldAccountMismatch",
       "msg": "The provided world account does not match the expected PDA."
     },
     {
-      "code": 6002,
+      "code": 6003,
       "name": "TooManyAuthorities",
       "msg": "Exceed the maximum number of authorities."
     },
     {
-      "code": 6003,
+      "code": 6004,
       "name": "AuthorityNotFound",
       "msg": "The provided authority not found"
     },
     {
-      "code": 6004,
+      "code": 6005,
       "name": "SystemNotApproved",
       "msg": "The system is not approved in this world instance"
     }

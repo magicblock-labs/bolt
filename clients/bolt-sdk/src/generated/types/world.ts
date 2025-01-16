@@ -82,7 +82,6 @@ export type World = {
         },
         {
           name: "authority";
-          writable: true;
           signer: true;
         },
         {
@@ -274,21 +273,26 @@ export type World = {
     },
     {
       code: 6001;
+      name: "invalidSystemOutput";
+      msg: "Invalid system output";
+    },
+    {
+      code: 6002;
       name: "worldAccountMismatch";
       msg: "The provided world account does not match the expected PDA.";
     },
     {
-      code: 6002;
+      code: 6003;
       name: "tooManyAuthorities";
       msg: "Exceed the maximum number of authorities.";
     },
     {
-      code: 6003;
+      code: 6004;
       name: "authorityNotFound";
       msg: "The provided authority not found";
     },
     {
-      code: 6004;
+      code: 6005;
       name: "systemNotApproved";
       msg: "The system is not approved in this world instance";
     },
