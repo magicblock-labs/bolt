@@ -1,8 +1,6 @@
 #![allow(clippy::manual_unwrap_or_default)]
 use anchor_lang::prelude::*;
-use bolt_helpers_world_apply::apply_system;
 use std::collections::BTreeSet;
-use tuple_conv::RepeatedTuple;
 
 #[cfg(not(feature = "no-entrypoint"))]
 use solana_security_txt::security_txt;
@@ -21,7 +19,6 @@ security_txt! {
 
 mod error;
 
-#[apply_system(max_components = 5)]
 #[program]
 pub mod world {
     use super::*;
@@ -267,7 +264,7 @@ pub mod world {
     }
 
     pub fn apply<'info>(
-        ctx: Context<'_, '_, '_, 'info, ApplySystem<'info>>,
+        ctx: Context<'_, '_, '_, 'info, Apply<'info>>,
         args: Vec<u8>,
     ) -> Result<()> {
         if !ctx.accounts.authority.is_signer && ctx.accounts.authority.key != &ID {
@@ -283,53 +280,75 @@ pub mod world {
         {
             return Err(WorldError::SystemNotApproved.into());
         }
-        let remaining_accounts: Vec<AccountInfo<'info>> = ctx.remaining_accounts.to_vec();
-        let res = bolt_system::cpi::execute(
+
+        let mut remaining_accounts: Vec<AccountInfo<'info>> = ctx.remaining_accounts.to_vec();
+
+        let mut pairs = Vec::new();
+        while remaining_accounts.len() >= 2 {
+            let program = remaining_accounts.remove(0);
+            if program.key() == ID {
+                break;
+            }
+            let component = remaining_accounts.remove(0);
+            pairs.push((program, component));
+        }
+
+        let mut components_accounts = pairs
+            .iter()
+            .map(|(_, component)| component)
+            .cloned()
+            .collect::<Vec<_>>();
+        components_accounts.append(&mut remaining_accounts);
+        let remaining_accounts = components_accounts;
+
+        let results = bolt_system::cpi::bolt_execute(
             ctx.accounts
                 .build()
                 .with_remaining_accounts(remaining_accounts),
             args,
-        )?;
+        )?
+        .get();
 
-        bolt_component::cpi::update(
-            build_update_context(
-                ctx.accounts.component_program.clone(),
-                ctx.accounts.bolt_component.clone(),
-                ctx.accounts.authority.clone(),
-                ctx.accounts.instruction_sysvar_account.clone(),
-            ),
-            res.get(),
-        )?;
+        if results.len() != pairs.len() {
+            return Err(WorldError::InvalidSystemOutput.into());
+        }
+
+        for ((program, component), result) in pairs.into_iter().zip(results.into_iter()) {
+            bolt_component::cpi::update(
+                build_update_context(
+                    program,
+                    component,
+                    ctx.accounts.authority.clone(),
+                    ctx.accounts.instruction_sysvar_account.clone(),
+                ),
+                result,
+            )?;
+        }
         Ok(())
     }
 
     #[derive(Accounts)]
-    pub struct ApplySystem<'info> {
-        /// CHECK: bolt component program check
-        pub component_program: UncheckedAccount<'info>,
+    pub struct Apply<'info> {
         /// CHECK: bolt system program check
+        #[account()]
         pub bolt_system: UncheckedAccount<'info>,
-        #[account(mut)]
-        /// CHECK: component account
-        pub bolt_component: UncheckedAccount<'info>,
         /// CHECK: authority check
+        #[account()]
         pub authority: Signer<'info>,
-        #[account(address = anchor_lang::solana_program::sysvar::instructions::id())]
         /// CHECK: instruction sysvar check
+        #[account(address = anchor_lang::solana_program::sysvar::instructions::id())]
         pub instruction_sysvar_account: UncheckedAccount<'info>,
         #[account()]
         pub world: Account<'info, World>,
     }
 
-    impl<'info> ApplySystem<'info> {
+    impl<'info> Apply<'info> {
         pub fn build(
             &self,
         ) -> CpiContext<'_, '_, '_, 'info, bolt_system::cpi::accounts::SetData<'info>> {
+            let authority = self.authority.to_account_info();
             let cpi_program = self.bolt_system.to_account_info();
-            let cpi_accounts = bolt_system::cpi::accounts::SetData {
-                component: self.bolt_component.to_account_info(),
-                authority: self.authority.to_account_info(),
-            };
+            let cpi_accounts = bolt_system::cpi::accounts::SetData { authority };
             CpiContext::new(cpi_program, cpi_accounts)
         }
     }
@@ -567,16 +586,18 @@ impl SystemWhitelist {
 
 /// Builds the context for updating a component.
 pub fn build_update_context<'info>(
-    component_program: UncheckedAccount<'info>,
-    component: UncheckedAccount<'info>,
+    component_program: AccountInfo<'info>,
+    bolt_component: AccountInfo<'info>,
     authority: Signer<'info>,
     instruction_sysvar_account: UncheckedAccount<'info>,
 ) -> CpiContext<'info, 'info, 'info, 'info, bolt_component::cpi::accounts::Update<'info>> {
-    let cpi_program = component_program.to_account_info();
+    let authority = authority.to_account_info();
+    let instruction_sysvar_account = instruction_sysvar_account.to_account_info();
+    let cpi_program = component_program;
     let cpi_accounts = bolt_component::cpi::accounts::Update {
-        bolt_component: component.to_account_info(),
-        authority: authority.to_account_info(),
-        instruction_sysvar_account: instruction_sysvar_account.to_account_info(),
+        bolt_component,
+        authority,
+        instruction_sysvar_account,
     };
     CpiContext::new(cpi_program, cpi_accounts)
 }

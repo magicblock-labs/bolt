@@ -78,216 +78,7 @@ export type World = {
       discriminator: [248, 243, 145, 24, 105, 50, 162, 225];
       accounts: [
         {
-          name: "componentProgram";
-        },
-        {
           name: "boltSystem";
-        },
-        {
-          name: "boltComponent";
-          writable: true;
-        },
-        {
-          name: "authority";
-          signer: true;
-        },
-        {
-          name: "instructionSysvarAccount";
-          address: "Sysvar1nstructions1111111111111111111111111";
-        },
-        {
-          name: "world";
-        },
-      ];
-      args: [
-        {
-          name: "args";
-          type: "bytes";
-        },
-      ];
-    },
-    {
-      name: "apply2";
-      discriminator: [120, 32, 116, 154, 158, 159, 208, 73];
-      accounts: [
-        {
-          name: "boltSystem";
-        },
-        {
-          name: "componentProgram1";
-        },
-        {
-          name: "boltComponent1";
-          writable: true;
-        },
-        {
-          name: "componentProgram2";
-        },
-        {
-          name: "boltComponent2";
-          writable: true;
-        },
-        {
-          name: "authority";
-          signer: true;
-        },
-        {
-          name: "instructionSysvarAccount";
-          address: "Sysvar1nstructions1111111111111111111111111";
-        },
-        {
-          name: "world";
-        },
-      ];
-      args: [
-        {
-          name: "args";
-          type: "bytes";
-        },
-      ];
-    },
-    {
-      name: "apply3";
-      discriminator: [254, 146, 49, 7, 236, 131, 105, 221];
-      accounts: [
-        {
-          name: "boltSystem";
-        },
-        {
-          name: "componentProgram1";
-        },
-        {
-          name: "boltComponent1";
-          writable: true;
-        },
-        {
-          name: "componentProgram2";
-        },
-        {
-          name: "boltComponent2";
-          writable: true;
-        },
-        {
-          name: "componentProgram3";
-        },
-        {
-          name: "boltComponent3";
-          writable: true;
-        },
-        {
-          name: "authority";
-          signer: true;
-        },
-        {
-          name: "instructionSysvarAccount";
-          address: "Sysvar1nstructions1111111111111111111111111";
-        },
-        {
-          name: "world";
-        },
-      ];
-      args: [
-        {
-          name: "args";
-          type: "bytes";
-        },
-      ];
-    },
-    {
-      name: "apply4";
-      discriminator: [223, 104, 24, 79, 252, 196, 14, 109];
-      accounts: [
-        {
-          name: "boltSystem";
-        },
-        {
-          name: "componentProgram1";
-        },
-        {
-          name: "boltComponent1";
-          writable: true;
-        },
-        {
-          name: "componentProgram2";
-        },
-        {
-          name: "boltComponent2";
-          writable: true;
-        },
-        {
-          name: "componentProgram3";
-        },
-        {
-          name: "boltComponent3";
-          writable: true;
-        },
-        {
-          name: "componentProgram4";
-        },
-        {
-          name: "boltComponent4";
-          writable: true;
-        },
-        {
-          name: "authority";
-          signer: true;
-        },
-        {
-          name: "instructionSysvarAccount";
-          address: "Sysvar1nstructions1111111111111111111111111";
-        },
-        {
-          name: "world";
-        },
-      ];
-      args: [
-        {
-          name: "args";
-          type: "bytes";
-        },
-      ];
-    },
-    {
-      name: "apply5";
-      discriminator: [70, 164, 214, 28, 136, 116, 84, 153];
-      accounts: [
-        {
-          name: "boltSystem";
-        },
-        {
-          name: "componentProgram1";
-        },
-        {
-          name: "boltComponent1";
-          writable: true;
-        },
-        {
-          name: "componentProgram2";
-        },
-        {
-          name: "boltComponent2";
-          writable: true;
-        },
-        {
-          name: "componentProgram3";
-        },
-        {
-          name: "boltComponent3";
-          writable: true;
-        },
-        {
-          name: "componentProgram4";
-        },
-        {
-          name: "boltComponent4";
-          writable: true;
-        },
-        {
-          name: "componentProgram5";
-        },
-        {
-          name: "boltComponent5";
-          writable: true;
         },
         {
           name: "authority";
@@ -482,21 +273,26 @@ export type World = {
     },
     {
       code: 6001;
+      name: "invalidSystemOutput";
+      msg: "Invalid system output";
+    },
+    {
+      code: 6002;
       name: "worldAccountMismatch";
       msg: "The provided world account does not match the expected PDA.";
     },
     {
-      code: 6002;
+      code: 6003;
       name: "tooManyAuthorities";
       msg: "Exceed the maximum number of authorities.";
     },
     {
-      code: 6003;
+      code: 6004;
       name: "authorityNotFound";
       msg: "The provided authority not found";
     },
     {
-      code: 6004;
+      code: 6005;
       name: "systemNotApproved";
       msg: "The system is not approved in this world instance";
     },

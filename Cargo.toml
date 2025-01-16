@@ -3,7 +3,6 @@ resolver = "2"
 members = [
     "crates/bolt-cli",
     "crates/bolt-lang",
-    "crates/bolt-helpers",
     "crates/programs/bolt-component",
     "crates/programs/bolt-system",
     "crates/programs/world",
@@ -29,8 +28,6 @@ bolt-attribute-bolt-extra-accounts = { path = "crates/bolt-lang/attribute/extra-
 bolt-attribute-bolt-arguments = { path = "crates/bolt-lang/attribute/arguments", version = "=0.2.0" }
 bolt-attribute-bolt-component-deserialize = { path = "crates/bolt-lang/attribute/component-deserialize", version = "=0.2.0" }
 bolt-attribute-bolt-component-id = { path = "crates/bolt-lang/attribute/component-id", version = "=0.2.0" }
-bolt-helpers-system-template = { path = "crates/bolt-helpers/attribute/system-template", version = "=0.2.0" }
-bolt-helpers-world-apply = { path = "crates/bolt-helpers/attribute/world-apply", version = "=0.2.0" }
 bolt-utils = { path = "crates/bolt-lang/utils", version = "=0.2.0" }
 world = { path = "crates/programs/world", features = ["cpi"], version = "=0.2.0"}
 bolt-system = { path = "crates/programs/bolt-system", features = ["cpi"], version = "=0.2.0"}

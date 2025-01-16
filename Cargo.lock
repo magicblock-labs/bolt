@@ -1040,10 +1040,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "bolt-helpers"
-version = "0.0.1"
-
-[[package]]
 name = "bolt-helpers-system-template"
 version = "0.1.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1055,28 +1051,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "bolt-helpers-system-template"
-version = "0.2.0"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 1.0.109",
-]
-
-[[package]]
 name = "bolt-helpers-world-apply"
 version = "0.1.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e768e45f56ba9c9f24439d3ac8c5d0ab4b55997d46ccb7cd7418e12048d75ee8"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 1.0.109",
-]
-
-[[package]]
-name = "bolt-helpers-world-apply"
-version = "0.2.0"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1136,7 +1114,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "465c09a5325776f50a1711aa7c1cc91a0cba91d0922658509e0f465119db49ba"
 dependencies = [
  "anchor-lang",
- "bolt-helpers-system-template 0.1.9",
+ "bolt-helpers-system-template",
 ]
 
 [[package]]
@@ -1144,7 +1122,6 @@ name = "bolt-system"
 version = "0.2.0"
 dependencies = [
  "anchor-lang",
- "bolt-helpers-system-template 0.2.0",
 ]
 
 [[package]]
@@ -6614,7 +6591,7 @@ checksum = "1d7064174d4ffb7bc2ebbd89516fbc09992820386d59176fe612c5ce4d605874"
 dependencies = [
  "anchor-lang",
  "bolt-component 0.1.9",
- "bolt-helpers-world-apply 0.1.9",
+ "bolt-helpers-world-apply",
  "bolt-system 0.1.9",
  "solana-security-txt",
  "tuple-conv",
@@ -6626,7 +6603,6 @@ version = "0.2.0"
 dependencies = [
  "anchor-lang",
  "bolt-component 0.2.0",
- "bolt-helpers-world-apply 0.2.0",
  "bolt-system 0.2.0",
  "solana-security-txt",
  "tuple-conv",

@@ -478,10 +478,20 @@ describe("bolt", () => {
       .accounts({
         authority: provider.wallet.publicKey,
         boltSystem: exampleSystemSimpleMovement,
-        boltComponent: componentPositionEntity1Pda,
-        componentProgram: exampleComponentPosition.programId,
         world: worldPda,
       })
+      .remainingAccounts([
+        {
+          pubkey: exampleComponentPosition.programId,
+          isSigner: false,
+          isWritable: false,
+        },
+        {
+          pubkey: componentPositionEntity1Pda,
+          isSigner: false,
+          isWritable: true,
+        },
+      ])
       .instruction();
 
     const transaction = new anchor.web3.Transaction().add(instruction);
@@ -506,10 +516,20 @@ describe("bolt", () => {
       .accounts({
         authority: provider.wallet.publicKey,
         boltSystem: exampleSystemSimpleMovement,
-        boltComponent: componentPositionEntity1Pda,
-        componentProgram: exampleComponentPosition.programId,
         world: worldPda,
       })
+      .remainingAccounts([
+        {
+          pubkey: exampleComponentPosition.programId,
+          isSigner: false,
+          isWritable: false,
+        },
+        {
+          pubkey: componentPositionEntity1Pda,
+          isSigner: false,
+          isWritable: true,
+        },
+      ])
       .instruction();
 
     const transaction = new anchor.web3.Transaction().add(instruction);
@@ -534,10 +554,20 @@ describe("bolt", () => {
       .accounts({
         authority: provider.wallet.publicKey,
         boltSystem: exampleSystemSimpleMovement,
-        boltComponent: componentPositionEntity1Pda,
-        componentProgram: exampleComponentPosition.programId,
         world: worldPda,
       })
+      .remainingAccounts([
+        {
+          pubkey: exampleComponentPosition.programId,
+          isSigner: false,
+          isWritable: false,
+        },
+        {
+          pubkey: componentPositionEntity1Pda,
+          isSigner: false,
+          isWritable: true,
+        },
+      ])
       .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
     const signature = await provider.sendAndConfirm(transaction);
@@ -561,10 +591,20 @@ describe("bolt", () => {
       .accounts({
         authority: provider.wallet.publicKey,
         boltSystem: exampleSystemFly,
-        boltComponent: componentPositionEntity1Pda,
-        componentProgram: exampleComponentPosition.programId,
         world: worldPda,
       })
+      .remainingAccounts([
+        {
+          pubkey: exampleComponentPosition.programId,
+          isSigner: false,
+          isWritable: false,
+        },
+        {
+          pubkey: componentPositionEntity1Pda,
+          isSigner: false,
+          isWritable: true,
+        },
+      ])
       .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
     const signature = await provider.sendAndConfirm(transaction);
@@ -581,17 +621,34 @@ describe("bolt", () => {
 
   it("Apply System Velocity on Entity 1", async () => {
     const instruction = await worldProgram.methods
-      .apply2(SerializeArgs())
+      .apply(SerializeArgs())
       .accounts({
         authority: provider.wallet.publicKey,
         boltSystem: exampleSystemApplyVelocity,
-        boltComponent1: componentVelocityEntity1Pda,
-        componentProgram1: exampleComponentVelocity.programId,
-        boltComponent2: componentPositionEntity1Pda,
-        componentProgram2: exampleComponentPosition.programId,
         world: worldPda,
       })
-      .remainingAccounts([])
+      .remainingAccounts([
+        {
+          pubkey: exampleComponentVelocity.programId,
+          isSigner: false,
+          isWritable: false,
+        },
+        {
+          pubkey: componentVelocityEntity1Pda,
+          isSigner: false,
+          isWritable: true,
+        },
+        {
+          pubkey: exampleComponentPosition.programId,
+          isSigner: false,
+          isWritable: false,
+        },
+        {
+          pubkey: componentPositionEntity1Pda,
+          isSigner: false,
+          isWritable: true,
+        },
+      ])
       .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
     const signature = await provider.sendAndConfirm(transaction);
@@ -617,17 +674,38 @@ describe("bolt", () => {
 
   it("Apply System Velocity on Entity 1, with Clock external account", async () => {
     const instruction = await worldProgram.methods
-      .apply2(SerializeArgs())
+      .apply(SerializeArgs())
       .accounts({
         authority: provider.wallet.publicKey,
         boltSystem: exampleSystemApplyVelocity,
-        boltComponent1: componentVelocityEntity1Pda,
-        componentProgram1: exampleComponentVelocity.programId,
-        boltComponent2: componentPositionEntity1Pda,
-        componentProgram2: exampleComponentPosition.programId,
         world: worldPda,
       })
       .remainingAccounts([
+        {
+          pubkey: exampleComponentVelocity.programId,
+          isSigner: false,
+          isWritable: false,
+        },
+        {
+          pubkey: componentVelocityEntity1Pda,
+          isSigner: false,
+          isWritable: true,
+        },
+        {
+          pubkey: exampleComponentPosition.programId,
+          isSigner: false,
+          isWritable: false,
+        },
+        {
+          pubkey: componentPositionEntity1Pda,
+          isSigner: false,
+          isWritable: true,
+        },
+        {
+          pubkey: worldProgram.programId, // world program ID is the end of components delimiter
+          isSigner: false,
+          isWritable: false,
+        },
         {
           pubkey: new web3.PublicKey(
             "SysvarC1ock11111111111111111111111111111111",
@@ -655,10 +733,20 @@ describe("bolt", () => {
       .accounts({
         authority: provider.wallet.publicKey,
         boltSystem: exampleSystemFly,
-        boltComponent: componentPositionEntity4Pda,
-        componentProgram: exampleComponentPosition.programId,
         world: worldPda,
       })
+      .remainingAccounts([
+        {
+          pubkey: exampleComponentPosition.programId,
+          isSigner: false,
+          isWritable: false,
+        },
+        {
+          pubkey: componentPositionEntity4Pda,
+          isSigner: false,
+          isWritable: true,
+        },
+      ])
       .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
     await provider.sendAndConfirm(transaction);
@@ -683,10 +771,20 @@ describe("bolt", () => {
       .accounts({
         authority: provider.wallet.publicKey,
         boltSystem: exampleSystemFly,
-        boltComponent: componentPositionEntity5Pda,
-        componentProgram: exampleComponentPosition.programId,
         world: worldPda,
       })
+      .remainingAccounts([
+        {
+          pubkey: exampleComponentPosition.programId,
+          isSigner: false,
+          isWritable: false,
+        },
+        {
+          pubkey: componentPositionEntity5Pda,
+          isSigner: false,
+          isWritable: true,
+        },
+      ])
       .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
 
@@ -757,10 +855,20 @@ describe("bolt", () => {
       .accounts({
         authority: provider.wallet.publicKey,
         boltSystem: exampleSystemFly,
-        boltComponent: componentPositionEntity1Pda,
-        componentProgram: exampleComponentPosition.programId,
         world: worldPda,
       })
+      .remainingAccounts([
+        {
+          pubkey: exampleComponentPosition.programId,
+          isSigner: false,
+          isWritable: false,
+        },
+        {
+          pubkey: componentPositionEntity1Pda,
+          isSigner: false,
+          isWritable: true,
+        },
+      ])
       .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
     await provider.sendAndConfirm(transaction);
@@ -793,10 +901,20 @@ describe("bolt", () => {
       .accounts({
         authority: provider.wallet.publicKey,
         boltSystem: exampleSystemFly,
-        boltComponent: componentPositionEntity1Pda,
-        componentProgram: exampleComponentPosition.programId,
         world: worldPda,
       })
+      .remainingAccounts([
+        {
+          pubkey: exampleComponentPosition.programId,
+          isSigner: false,
+          isWritable: false,
+        },
+        {
+          pubkey: componentPositionEntity1Pda,
+          isSigner: false,
+          isWritable: true,
+        },
+      ])
       .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
     let invalid = false;

@@ -28,8 +28,6 @@ import {
 } from "../generated";
 import { type Idl, Program } from "@coral-xyz/anchor";
 
-const MAX_COMPONENTS = 5;
-
 export async function InitializeRegistry({
   payer,
   connection,
@@ -342,17 +340,6 @@ interface ApplySystemInstruction {
   extraAccounts?: web3.AccountMeta[];
   args?: object;
 }
-function getApplyInstructionFunctionName(componentsCount: number) {
-  return `apply${componentsCount > 1 ? componentsCount : ""}`;
-}
-function getBoltComponentName(index: number, componentsCount: number) {
-  if (componentsCount === 1) return "boltComponent";
-  return `boltComponent${index + 1}`;
-}
-function getBoltComponentProgramName(index: number, componentsCount: number) {
-  if (componentsCount === 1) return "componentProgram";
-  return `componentProgram${index + 1}`;
-}
 async function createApplySystemInstruction({
   authority,
   systemId,
@@ -371,11 +358,6 @@ async function createApplySystemInstruction({
   if (componentCount <= 0) {
     throw new Error("No components provided");
   }
-  if (componentCount > MAX_COMPONENTS) {
-    throw new Error(
-      `Not implemented for component counts outside 1-${MAX_COMPONENTS}`,
-    );
-  }
 
   const applyAccounts = {
     authority: authority ?? PROGRAM_ID,
@@ -383,27 +365,48 @@ async function createApplySystemInstruction({
     world,
   };
 
-  let componentIndex = 0;
-  entities.forEach(function (entity) {
-    entity.components.forEach(function (component) {
+  let remainingAccounts: web3.AccountMeta[] = [];
+  let components: { id: PublicKey; pda: PublicKey }[] = [];
+  for (const entity of entities) {
+    for (const component of entity.components) {
       const componentPda = FindComponentPda({
         componentId: component.componentId,
         entity: entity.entity,
         seed: component.seed,
       });
-      applyAccounts[
-        getBoltComponentProgramName(componentIndex, componentCount)
-      ] = component.componentId;
-      applyAccounts[getBoltComponentName(componentIndex, componentCount)] =
-        componentPda;
-      componentIndex++;
+      components.push({
+        id: component.componentId,
+        pda: componentPda,
+      });
+    }
+  }
+  for (const component of components) {
+    remainingAccounts.push({
+      pubkey: component.id,
+      isSigner: false,
+      isWritable: false,
     });
-  });
-  return program.methods[getApplyInstructionFunctionName(componentCount)](
-    SerializeArgs(args),
-  )
+    remainingAccounts.push({
+      pubkey: component.pda,
+      isSigner: false,
+      isWritable: true,
+    });
+  }
+  let extraAccountsInput = extraAccounts ?? [];
+  if (extraAccountsInput.length > 0) {
+    remainingAccounts.push({
+      pubkey: program.programId, // program id delimits the end of the component list
+      isSigner: false,
+      isWritable: false,
+    });
+    for (const account of extraAccountsInput) {
+      remainingAccounts.push(account);
+    }
+  }
+  return program.methods
+    .apply(SerializeArgs(args))
     .accounts(applyAccounts)
-    .remainingAccounts(extraAccounts ?? [])
+    .remainingAccounts(remainingAccounts)
     .instruction();
 }
 

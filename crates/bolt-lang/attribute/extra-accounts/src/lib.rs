@@ -71,7 +71,7 @@ pub fn extra_accounts(_attr: TokenStream, item: TokenStream) -> TokenStream {
         let index = syn::Index::from(index); // Create a compile-time index representation
         quote! {
             fn #field_name(&self) -> Result<&'c AccountInfo<'info>> {
-                self.remaining_accounts.get(#index).ok_or_else(|| ErrorCode::ConstraintAccountIsNone.into())
+                self.remaining_accounts.get(Self::NUMBER_OF_COMPONENTS + #index).ok_or_else(|| ErrorCode::ConstraintAccountIsNone.into())
             }
         }
     });
