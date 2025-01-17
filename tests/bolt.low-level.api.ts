@@ -6,7 +6,6 @@ import { type SystemSimpleMovement } from "../target/types/system_simple_movemen
 import { type SystemFly } from "../target/types/system_fly";
 import { type SystemApplyVelocity } from "../target/types/system_apply_velocity";
 import { type World } from "../target/types/world";
-import { type World } from "../target/types/world";
 import { expect } from "chai";
 import BN from "bn.js";
 import {
@@ -512,34 +511,6 @@ describe("bolt", () => {
     expect(position.z.toNumber()).to.equal(0);
   });
 
-  it("Apply Simple Movement System (Up) on Entity 1", async () => {
-    const instruction = await worldProgram.methods
-      .apply(SerializeArgs({ direction: Direction.Up }))
-      .accounts({
-        authority: provider.wallet.publicKey,
-        boltSystem: exampleSystemSimpleMovement,
-        boltComponent: componentPositionEntity1Pda,
-        componentProgram: exampleComponentPosition.programId,
-        world: worldPda,
-      })
-      .instruction();
-
-    const transaction = new anchor.web3.Transaction().add(instruction);
-    const signature = await provider.sendAndConfirm(transaction);
-    console.log(
-      "Apply Simple Movement System (Up) on Entity 1 signature: ",
-      signature,
-    );
-
-    const position = await exampleComponentPosition.account.position.fetch(
-      componentPositionEntity1Pda,
-    );
-    logPosition("Movement System: Entity 1", position);
-    expect(position.x.toNumber()).to.equal(0);
-    expect(position.y.toNumber()).to.equal(2);
-    expect(position.z.toNumber()).to.equal(0);
-  });
-
   it("Apply Simple Movement System (Right) on Entity 1", async () => {
     const instruction = await worldProgram.methods
       .apply(SerializeArgs({ direction: Direction.Right }))
@@ -620,6 +591,7 @@ describe("bolt", () => {
         authority: provider.wallet.publicKey,
         boltSystem: exampleSystemApplyVelocity,
         world: worldPda,
+        sessionToken: null
       })
       .remainingAccounts([
         {
@@ -673,6 +645,7 @@ describe("bolt", () => {
         authority: provider.wallet.publicKey,
         boltSystem: exampleSystemApplyVelocity,
         world: worldPda,
+        sessionToken: null
       })
       .remainingAccounts([
         {
