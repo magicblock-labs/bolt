@@ -17,22 +17,9 @@ use syn::{parse_macro_input, Fields, ItemStruct, Lit, Meta, NestedMeta};
 ///
 /// ```
 #[proc_macro_attribute]
-pub fn system_input(attr: TokenStream, item: TokenStream) -> TokenStream {
+pub fn system_input(_attr: TokenStream, item: TokenStream) -> TokenStream {
     // Parse the input TokenStream (the struct) into a Rust data structure
     let input = parse_macro_input!(item as ItemStruct);
-
-    let attr = parse_macro_input!(attr as syn::AttributeArgs);
-
-    let has_session_key = attr.iter().any(|meta| {
-        if let syn::NestedMeta::Meta(syn::Meta::Path(path)) = meta {
-            path.segments
-                .first()
-                .map(|segment| segment.ident == "session_key")
-                .unwrap_or(false)
-        } else {
-            false
-        }
-    });
 
     // Ensure the struct has named fields
     let fields = match &input.fields {
@@ -84,32 +71,15 @@ pub fn system_input(attr: TokenStream, item: TokenStream) -> TokenStream {
         }
     });
 
-    let (derives, optional_fields) = if has_session_key {
-        (
-            quote! {
-                #[derive(Accounts, Session)]
-            },
-            quote! {
-                #[session(signer = authority, authority = position.bolt_metadata.authority.key())] // FIXME: position is hardcoded.
-                pub session_token: Option<Account<'info, SessionToken>>
-            },
-        )
-    } else {
-        (
-            quote! {
-                #[derive(Accounts)]
-            },
-            Default::default(),
-        )
-    };
     // Generate the new struct with the Accounts derive and transformed fields
     let output_struct = quote! {
-        #derives
+        #[derive(Accounts, Session)]
         pub struct #name<'info> {
             #(#transformed_fields)*
             #[account()]
             pub authority: Signer<'info>,
-            #optional_fields
+            #[session(signer = authority, authority = authority.key())] // FIXME: authority = authority.key() is hardcoded.
+            pub session_token: Option<Account<'info, SessionToken>>
         }
     };
 
@@ -152,6 +122,7 @@ pub fn system_input(attr: TokenStream, item: TokenStream) -> TokenStream {
             fn try_from<'a, 'b>(context: &Context<'a, 'b, 'info, 'info, VariadicBoltComponents<'info>>) -> Result<Self> {
                 Ok(Self {
                     authority: context.accounts.authority.clone(),
+                    session_token: context.accounts.session_token.clone(),
                     #(#try_from_fields)*
                 })
             }
@@ -170,6 +141,8 @@ pub fn system_input(attr: TokenStream, item: TokenStream) -> TokenStream {
         pub struct VariadicBoltComponents<'info> {
             #[account()]
             pub authority: Signer<'info>,
+            #[account()]
+            pub session_token: Option<Account<'info, SessionToken>>
         }
     };
 
