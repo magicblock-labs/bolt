@@ -73,11 +73,13 @@ pub fn system_input(_attr: TokenStream, item: TokenStream) -> TokenStream {
 
     // Generate the new struct with the Accounts derive and transformed fields
     let output_struct = quote! {
-        #[derive(Accounts)]
+        #[derive(Accounts, Session)]
         pub struct #name<'info> {
             #(#transformed_fields)*
             #[account()]
             pub authority: Signer<'info>,
+            #[session(signer = authority, authority = authority.key())] // FIXME: authority = authority.key() is hardcoded.
+            pub session_token: Option<Account<'info, SessionToken>>
         }
     };
 
@@ -120,6 +122,7 @@ pub fn system_input(_attr: TokenStream, item: TokenStream) -> TokenStream {
             fn try_from<'a, 'b>(context: &Context<'a, 'b, 'info, 'info, VariadicBoltComponents<'info>>) -> Result<Self> {
                 Ok(Self {
                     authority: context.accounts.authority.clone(),
+                    session_token: context.accounts.session_token.clone(),
                     #(#try_from_fields)*
                 })
             }
@@ -138,6 +141,8 @@ pub fn system_input(_attr: TokenStream, item: TokenStream) -> TokenStream {
         pub struct VariadicBoltComponents<'info> {
             #[account()]
             pub authority: Signer<'info>,
+            #[account()]
+            pub session_token: Option<Account<'info, SessionToken>>
         }
     };
 

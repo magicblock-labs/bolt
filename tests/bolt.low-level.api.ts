@@ -5,6 +5,7 @@ import { type BoltComponent } from "../target/types/bolt_component";
 import { type SystemSimpleMovement } from "../target/types/system_simple_movement";
 import { type SystemFly } from "../target/types/system_fly";
 import { type SystemApplyVelocity } from "../target/types/system_apply_velocity";
+import { type World } from "../target/types/world";
 import { expect } from "chai";
 import BN from "bn.js";
 import {
@@ -18,7 +19,6 @@ import {
   FindEntityPda,
   FindComponentPda,
   SerializeArgs,
-  WORLD_PROGRAM_IDL as World,
 } from "../clients/bolt-sdk";
 
 enum Direction {
@@ -472,13 +472,14 @@ describe("bolt", () => {
     expect(position.z.toNumber()).to.equal(0);
   });
 
-  it("Apply Simple Movement System (Up) on Entity 1 using Apply", async () => {
+  it("Apply Simple Movement System (Up) on Entity 1", async () => {
     const instruction = await worldProgram.methods
       .apply(SerializeArgs({ direction: Direction.Up }))
       .accounts({
         authority: provider.wallet.publicKey,
         boltSystem: exampleSystemSimpleMovement,
         world: worldPda,
+        sessionToken: null
       })
       .remainingAccounts([
         {
@@ -510,44 +511,6 @@ describe("bolt", () => {
     expect(position.z.toNumber()).to.equal(0);
   });
 
-  it("Apply Simple Movement System (Up) on Entity 1", async () => {
-    const instruction = await worldProgram.methods
-      .apply(SerializeArgs({ direction: Direction.Up }))
-      .accounts({
-        authority: provider.wallet.publicKey,
-        boltSystem: exampleSystemSimpleMovement,
-        world: worldPda,
-      })
-      .remainingAccounts([
-        {
-          pubkey: exampleComponentPosition.programId,
-          isSigner: false,
-          isWritable: false,
-        },
-        {
-          pubkey: componentPositionEntity1Pda,
-          isSigner: false,
-          isWritable: true,
-        },
-      ])
-      .instruction();
-
-    const transaction = new anchor.web3.Transaction().add(instruction);
-    const signature = await provider.sendAndConfirm(transaction);
-    console.log(
-      "Apply Simple Movement System (Up) on Entity 1 signature: ",
-      signature,
-    );
-
-    const position = await exampleComponentPosition.account.position.fetch(
-      componentPositionEntity1Pda,
-    );
-    logPosition("Movement System: Entity 1", position);
-    expect(position.x.toNumber()).to.equal(0);
-    expect(position.y.toNumber()).to.equal(2);
-    expect(position.z.toNumber()).to.equal(0);
-  });
-
   it("Apply Simple Movement System (Right) on Entity 1", async () => {
     const instruction = await worldProgram.methods
       .apply(SerializeArgs({ direction: Direction.Right }))
@@ -555,6 +518,7 @@ describe("bolt", () => {
         authority: provider.wallet.publicKey,
         boltSystem: exampleSystemSimpleMovement,
         world: worldPda,
+        sessionToken: null
       })
       .remainingAccounts([
         {
@@ -581,7 +545,7 @@ describe("bolt", () => {
     );
     logPosition("Movement System: Entity 1", position);
     expect(position.x.toNumber()).to.equal(1);
-    expect(position.y.toNumber()).to.equal(2);
+    expect(position.y.toNumber()).to.equal(1);
     expect(position.z.toNumber()).to.equal(0);
   });
 
@@ -592,6 +556,7 @@ describe("bolt", () => {
         authority: provider.wallet.publicKey,
         boltSystem: exampleSystemFly,
         world: worldPda,
+        sessionToken: null
       })
       .remainingAccounts([
         {
@@ -615,7 +580,7 @@ describe("bolt", () => {
     );
     logPosition("Fly System: Entity 1", position);
     expect(position.x.toNumber()).to.equal(1);
-    expect(position.y.toNumber()).to.equal(2);
+    expect(position.y.toNumber()).to.equal(1);
     expect(position.z.toNumber()).to.equal(1);
   });
 
@@ -626,6 +591,7 @@ describe("bolt", () => {
         authority: provider.wallet.publicKey,
         boltSystem: exampleSystemApplyVelocity,
         world: worldPda,
+        sessionToken: null
       })
       .remainingAccounts([
         {
@@ -668,7 +634,7 @@ describe("bolt", () => {
     );
     logPosition("Apply System Velocity: Entity 1", position);
     expect(position.x.toNumber()).to.greaterThan(1);
-    expect(position.y.toNumber()).to.equal(2);
+    expect(position.y.toNumber()).to.equal(1);
     expect(position.z.toNumber()).to.equal(1);
   });
 
@@ -679,6 +645,7 @@ describe("bolt", () => {
         authority: provider.wallet.publicKey,
         boltSystem: exampleSystemApplyVelocity,
         world: worldPda,
+        sessionToken: null
       })
       .remainingAccounts([
         {
@@ -723,7 +690,7 @@ describe("bolt", () => {
     );
     logPosition("Apply System Velocity: Entity 1", position);
     expect(position.x.toNumber()).to.greaterThan(1);
-    expect(position.y.toNumber()).to.equal(2);
+    expect(position.y.toNumber()).to.equal(1);
     expect(position.z.toNumber()).to.equal(300);
   });
 
@@ -734,6 +701,7 @@ describe("bolt", () => {
         authority: provider.wallet.publicKey,
         boltSystem: exampleSystemFly,
         world: worldPda,
+        sessionToken: null
       })
       .remainingAccounts([
         {
@@ -772,6 +740,7 @@ describe("bolt", () => {
         authority: provider.wallet.publicKey,
         boltSystem: exampleSystemFly,
         world: worldPda,
+        sessionToken: null
       })
       .remainingAccounts([
         {
@@ -856,6 +825,7 @@ describe("bolt", () => {
         authority: provider.wallet.publicKey,
         boltSystem: exampleSystemFly,
         world: worldPda,
+        sessionToken: null
       })
       .remainingAccounts([
         {
@@ -902,6 +872,7 @@ describe("bolt", () => {
         authority: provider.wallet.publicKey,
         boltSystem: exampleSystemFly,
         world: worldPda,
+        sessionToken: null
       })
       .remainingAccounts([
         {

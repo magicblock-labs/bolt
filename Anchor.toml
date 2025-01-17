@@ -46,7 +46,7 @@ yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/bolt.intermediate-level.ap
 """
 
 [test]
-startup_wait = 5000
+startup_wait = 10000
 shutdown_wait = 2000
 upgradeable = false
 

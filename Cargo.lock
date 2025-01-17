@@ -1104,6 +1104,7 @@ dependencies = [
  "ephemeral-rollups-sdk 0.2.1",
  "serde",
  "serde_json",
+ "session-keys",
  "world 0.2.0",
 ]
 
@@ -4208,6 +4209,37 @@ dependencies = [
  "ryu",
  "serde",
  "unsafe-libyaml",
+]
+
+[[package]]
+name = "session-keys"
+version = "2.0.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "059475c4228de6bcd7ef7dd9bb52c7329201d62dae701d73a71f2262c86dfc51"
+dependencies = [
+ "anchor-lang",
+ "session-keys-macros",
+ "solana-security-txt",
+]
+
+[[package]]
+name = "session-keys-macros"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6349e5cb01c08d3b3efad6cad6c63d622b703603812258ba6741cbc2c62ca39d"
+dependencies = [
+ "session-keys-macros-attribute",
+]
+
+[[package]]
+name = "session-keys-macros-attribute"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e07d122114bc5388a5440d62374b5b752f6013e270d100b479bb1b650d375d11"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 1.0.109",
 ]
 
 [[package]]

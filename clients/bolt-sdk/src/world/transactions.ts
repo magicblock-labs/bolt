@@ -337,6 +337,7 @@ interface ApplySystemInstruction {
   systemId: PublicKey;
   entities: ApplySystemEntity[];
   world: PublicKey;
+  sessionToken?: PublicKey;
   extraAccounts?: web3.AccountMeta[];
   args?: object;
 }
@@ -345,6 +346,7 @@ async function createApplySystemInstruction({
   systemId,
   entities,
   world,
+  sessionToken,
   extraAccounts,
   args,
 }: ApplySystemInstruction): Promise<web3.TransactionInstruction> {
@@ -362,6 +364,7 @@ async function createApplySystemInstruction({
   const applyAccounts = {
     authority: authority ?? PROGRAM_ID,
     boltSystem: systemId,
+    sessionToken: sessionToken ?? null,
     world,
   };
 
