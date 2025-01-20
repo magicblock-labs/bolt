@@ -6,17 +6,7 @@ declare_id!("CmP2djJgABZ4cRokm4ndxuq6LerqpNHLBsaUv2XKEJua");
 pub mod bolt_component {
     use super::*;
 
-    pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
-        let instruction =
-            anchor_lang::solana_program::sysvar::instructions::get_instruction_relative(
-                0,
-                &ctx.accounts.instruction_sysvar_account.to_account_info(),
-            )
-            .unwrap();
-        if instruction.program_id == id() {
-            panic!("The instruction must be called from a CPI");
-        }
-        ctx.accounts.data.bolt_metadata.authority = *ctx.accounts.authority.key;
+    pub fn initialize(_ctx: Context<Initialize>) -> Result<()> {
         Ok(())
     }
 
@@ -35,16 +25,7 @@ pub mod bolt_component {
         pub authority: Signer<'info>,
     }
 
-    pub fn update(ctx: Context<Update>, _data: Vec<u8>) -> Result<()> {
-        let instruction =
-            anchor_lang::solana_program::sysvar::instructions::get_instruction_relative(
-                0,
-                &ctx.accounts.instruction_sysvar_account.to_account_info(),
-            )
-            .unwrap();
-        if instruction.program_id == id() {
-            panic!("The instruction must be called from a CPI");
-        }
+    pub fn update(_ctx: Context<Update>, _data: Vec<u8>) -> Result<()> {
         Ok(())
     }
 
