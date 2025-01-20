@@ -350,7 +350,6 @@ pub mod world {
         pub fn build(
             &self,
         ) -> CpiContext<'_, '_, '_, 'info, bolt_system::cpi::accounts::SetData<'info>> {
-            msg!("session_token: {:?}", self.session_token);
             bolt_system::cpi::accounts::SetData {
                 authority: self.authority.to_account_info(),
                 session_token: self.session_token.as_ref().map(|x| x.to_account_info()),
