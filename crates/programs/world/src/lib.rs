@@ -2,8 +2,6 @@
 use anchor_lang::prelude::*;
 use std::collections::BTreeSet;
 
-use bolt_system::CpiContextBuilder;
-
 #[cfg(not(feature = "no-entrypoint"))]
 use solana_security_txt::security_txt;
 
@@ -350,10 +348,11 @@ pub mod world {
         pub fn build(
             &self,
         ) -> CpiContext<'_, '_, '_, 'info, bolt_system::cpi::accounts::SetData<'info>> {
-            bolt_system::cpi::accounts::SetData {
+            let cpi_program = self.bolt_system.to_account_info();
+            let cpi_accounts = bolt_system::cpi::accounts::SetData {
                 authority: self.authority.to_account_info(),
-                session_token: self.session_token.as_ref().map(|x| x.to_account_info()),
-            }.build_cpi_context(self.bolt_system.to_account_info())
+            };
+            CpiContext::new(cpi_program, cpi_accounts)
         }
     }
 }

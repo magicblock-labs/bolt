@@ -37,12 +37,6 @@ struct Extractor {
 pub fn system(_attr: TokenStream, item: TokenStream) -> TokenStream {
     let mut ast = parse_macro_input!(item as ItemMod);
 
-    if let Some(content) = &mut ast.content {
-        content.1.push(syn::Item::Use(syn::parse_quote! {
-            use bolt_lang::session_keys::{Session, SessionToken};
-        }));
-    }
-
     // Extract the number of components from the module
     let mut extractor = Extractor::default();
     extractor.visit_item_mod_mut(&mut ast);

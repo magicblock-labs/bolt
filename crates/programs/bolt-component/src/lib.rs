@@ -33,8 +33,6 @@ pub mod bolt_component {
         pub bolt_system: UncheckedAccount<'info>,
         #[account()]
         pub authority: Signer<'info>,
-        #[account()]
-        pub session_token: Option<UncheckedAccount<'info>>,
     }
 
     pub fn update(ctx: Context<Update>, _data: Vec<u8>) -> Result<()> {
