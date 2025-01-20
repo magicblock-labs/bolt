@@ -656,6 +656,7 @@ describe("bolt", () => {
         .accounts({
           boltComponent: componentPositionEntity4Pda,
           authority: provider.wallet.publicKey,
+          sessionToken: null
         })
         .rpc();
     } catch (error) {
