@@ -10,21 +10,6 @@ pub mod bolt_component {
         Ok(())
     }
 
-    pub fn apply(_ctx: Context<Apply>, _args: Vec<u8>) -> Result<()> {
-        Ok(())
-    }
-
-    #[derive(Accounts)]
-    pub struct Apply<'info> {
-        #[account(mut)]
-        pub bolt_component: Account<'info, Component>,
-        /// CHECK: The system can modify the data of the component
-        #[account()]
-        pub bolt_system: UncheckedAccount<'info>,
-        #[account()]
-        pub authority: Signer<'info>,
-    }
-
     pub fn update(_ctx: Context<Update>, _data: Vec<u8>) -> Result<()> {
         Ok(())
     }
@@ -32,7 +17,7 @@ pub mod bolt_component {
     #[derive(Accounts)]
     pub struct Update<'info> {
         #[account(mut)]
-        pub bolt_component: Account<'info, Component>,
+        pub bolt_component: UncheckedAccount<'info>,
         #[account()]
         /// CHECK: The authority of the component
         pub authority: Signer<'info>,
@@ -48,8 +33,8 @@ pub mod bolt_component {
 pub struct Initialize<'info> {
     #[account(mut)]
     pub payer: Signer<'info>,
-    #[account(init_if_needed, payer = payer, space = Component::size(), seeds = [Component::seed(), entity.key().as_ref()], bump)]
-    pub data: Account<'info, Component>,
+    #[account(mut)]
+    pub data: UncheckedAccount<'info>,
     #[account()]
     /// CHECK: A generic entity account
     pub entity: AccountInfo<'info>,
@@ -60,30 +45,6 @@ pub struct Initialize<'info> {
     /// CHECK: The instruction sysvar
     pub instruction_sysvar_account: AccountInfo<'info>,
     pub system_program: Program<'info, System>,
-}
-
-// Component data
-#[account]
-#[derive(InitSpace, Default, Copy)]
-pub struct Component {
-    pub position: Position,
-    pub bolt_metadata: BoltMetadata,
-}
-
-impl Component {
-    pub fn size() -> usize {
-        8 + Component::INIT_SPACE
-    }
-    pub fn seed() -> &'static [u8] {
-        b"origin-component"
-    }
-}
-
-#[derive(InitSpace, AnchorSerialize, AnchorDeserialize, Default, Copy, Clone)]
-pub struct Position {
-    pub x: i64,
-    pub y: i64,
-    pub z: i64,
 }
 
 #[derive(InitSpace, AnchorSerialize, AnchorDeserialize, Default, Copy, Clone)]

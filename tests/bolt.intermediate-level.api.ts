@@ -72,9 +72,6 @@ describe("bolt", () => {
 
   const worldProgram = anchor.workspace.World as Program<World>;
 
-  const boltComponentProgram = anchor.workspace
-    .BoltComponent as Program<BoltComponent>;
-
   const exampleComponentPosition = anchor.workspace
     .Position as Program<Position>;
   const exampleComponentVelocity = anchor.workspace
@@ -238,8 +235,7 @@ describe("bolt", () => {
     const initializeComponent = await InitializeComponent({
       payer: provider.wallet.publicKey,
       entity: entity1Pda,
-      seed: "origin-component",
-      componentId: boltComponentProgram.programId,
+      componentId: exampleComponentPosition.programId,
     });
     await provider.sendAndConfirm(initializeComponent.transaction);
   });
@@ -248,8 +244,7 @@ describe("bolt", () => {
     const initializeComponent = await InitializeComponent({
       payer: provider.wallet.publicKey,
       entity: entity2Pda,
-      seed: "origin-component",
-      componentId: boltComponentProgram.programId,
+      componentId: exampleComponentPosition.programId,
     });
     await provider.sendAndConfirm(initializeComponent.transaction);
   });
@@ -656,7 +651,7 @@ describe("bolt", () => {
   it("Check invalid component update without CPI", async () => {
     let invalid = false;
     try {
-      await boltComponentProgram.methods
+      await exampleComponentPosition.methods
         .update(Buffer.from(""))
         .accounts({
           boltComponent: componentPositionEntity4Pda,
@@ -665,10 +660,7 @@ describe("bolt", () => {
         })
         .rpc();
     } catch (error) {
-      // console.log("error", error);
-      expect(error.message).to.contain(
-        "bolt_component. Error Code: AccountOwnedByWrongProgram",
-      );
+      expect(error.message).to.contain("Error Code: InvalidCaller");
       invalid = true;
     }
     expect(invalid).to.equal(true);

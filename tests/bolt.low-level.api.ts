@@ -68,9 +68,6 @@ describe("bolt", () => {
 
   const worldProgram = anchor.workspace.World as Program<World>;
 
-  const boltComponentProgram = anchor.workspace
-    .BoltComponent as Program<BoltComponent>;
-
   const exampleComponentPosition = anchor.workspace
     .Position as Program<Position>;
   const exampleComponentVelocity = anchor.workspace
@@ -291,12 +288,11 @@ describe("bolt", () => {
     console.log("Add Entity 5 signature: ", signature);
   });
 
-  it("Initialize Original Component on Entity 1, through the world instance", async () => {
-    const componentId = boltComponentProgram.programId;
+  it("Initialize Component on Entity 1, through the world instance", async () => {
+    const componentId = exampleComponentPosition.programId;
     const componentPda = FindComponentPda({
       componentId,
-      entity: entity1Pda,
-      seed: "origin-component",
+      entity: entity1Pda
     });
     const instruction = await worldProgram.methods
       .initializeComponent()
@@ -316,12 +312,11 @@ describe("bolt", () => {
     );
   });
 
-  it("Initialize Original Component on Entity 2, trough the world instance", async () => {
-    const componentId = boltComponentProgram.programId;
+  it("Initialize Component on Entity 2, trough the world instance", async () => {
+    const componentId = exampleComponentPosition.programId;
     const componentPda = FindComponentPda({
       componentId,
-      entity: entity2Pda,
-      seed: "origin-component",
+      entity: entity2Pda
     });
     const instruction = await worldProgram.methods
       .initializeComponent()
@@ -926,7 +921,7 @@ describe("bolt", () => {
   it("Check invalid component update without CPI", async () => {
     let invalid = false;
     try {
-      await boltComponentProgram.methods
+      await exampleComponentPosition.methods
         .update(Buffer.from(""))
         .accounts({
           boltComponent: componentPositionEntity4Pda,
@@ -935,9 +930,8 @@ describe("bolt", () => {
         })
         .rpc();
     } catch (error) {
-      // console.log("error", error);
       expect(error.message).to.contain(
-        "bolt_component. Error Code: AccountOwnedByWrongProgram",
+        "Error Code: InvalidCaller",
       );
       invalid = true;
     }
