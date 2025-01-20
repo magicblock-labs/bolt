@@ -500,8 +500,10 @@ describe("bolt", () => {
         componentPositionEntity5Pda,
       );
 
+    let keypair = Keypair.generate();
+
     const applySystem = await ApplySystem({
-      authority: provider.wallet.publicKey,
+      authority: keypair.publicKey,
       systemId: exampleSystemFly,
       world: worldPda,
       entities: [
@@ -511,6 +513,9 @@ describe("bolt", () => {
         },
       ],
     });
+    applySystem.transaction.recentBlockhash = (await provider.connection.getLatestBlockhash()).blockhash;
+    applySystem.transaction.feePayer = provider.wallet.publicKey;
+    applySystem.transaction.sign(keypair);
 
     let failed = false;
     try {

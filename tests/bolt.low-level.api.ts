@@ -1,4 +1,4 @@
-import { Keypair, type PublicKey } from "@solana/web3.js";
+import { Keypair, PublicKey } from "@solana/web3.js";
 import { type Position } from "../target/types/position";
 import { type Velocity } from "../target/types/velocity";
 import { type BoltComponent } from "../target/types/bolt_component";
@@ -734,10 +734,12 @@ describe("bolt", () => {
         componentPositionEntity5Pda,
       );
 
+    let keypair = Keypair.generate();
+
     const instruction = await worldProgram.methods
       .apply(SerializeArgs())
       .accounts({
-        authority: provider.wallet.publicKey,
+        authority: keypair.publicKey,
         boltSystem: exampleSystemFly,
         world: worldPda,
         sessionToken: null
@@ -756,13 +758,16 @@ describe("bolt", () => {
       ])
       .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
+    transaction.recentBlockhash = (await provider.connection.getLatestBlockhash()).blockhash;
+    transaction.feePayer = provider.wallet.publicKey;
+    transaction.sign(keypair);
 
     let failed = false;
     try {
-      await provider.sendAndConfirm(transaction);
+      let signature = await provider.sendAndConfirm(transaction);
+      console.log("Apply Fly System on Entity 5 signature: ", signature);
     } catch (error) {
       failed = true;
-      // console.log("error", error);
       expect(error.logs.join("\n")).to.contain("Error Code: InvalidAuthority");
     }
     expect(failed).to.equal(true);

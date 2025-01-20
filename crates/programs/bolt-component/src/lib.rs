@@ -35,10 +35,12 @@ pub mod bolt_component {
         pub bolt_component: Account<'info, Component>,
         #[account()]
         /// CHECK: The authority of the component
-        pub authority: AccountInfo<'info>,
+        pub authority: Signer<'info>,
         #[account(address = anchor_lang::solana_program::sysvar::instructions::id())]
         /// CHECK: The instruction sysvar
         pub instruction_sysvar_account: AccountInfo<'info>,
+        #[account()]
+        pub session_token: Option<UncheckedAccount<'info>>,
     }
 }
 
@@ -87,4 +89,18 @@ pub struct Position {
 #[derive(InitSpace, AnchorSerialize, AnchorDeserialize, Default, Copy, Clone)]
 pub struct BoltMetadata {
     pub authority: Pubkey,
+}
+
+#[cfg(feature = "cpi")]
+pub trait CpiContextBuilder<'info>: ToAccountMetas + ToAccountInfos<'info> + Sized {
+    fn build_cpi_context(self, program: AccountInfo<'info>) -> CpiContext<'info, 'info, 'info, 'info, Self>;
+}
+
+#[cfg(feature = "cpi")]
+impl<'info> CpiContextBuilder<'info> for cpi::accounts::Update<'info> {
+    fn build_cpi_context(mut self, program: AccountInfo<'info>) -> CpiContext<'info, 'info, 'info, 'info, Self> {
+        let cpi_program = program.to_account_info();
+        self.session_token = Some(self.session_token.unwrap_or(program.to_account_info()));
+        CpiContext::new(cpi_program, self)
+    }
 }

@@ -1,5 +1,6 @@
 #![allow(clippy::manual_unwrap_or_default)]
 use anchor_lang::prelude::*;
+use bolt_component::CpiContextBuilder;
 use std::collections::BTreeSet;
 
 #[cfg(not(feature = "no-entrypoint"))]
@@ -320,6 +321,7 @@ pub mod world {
                     component,
                     ctx.accounts.authority.clone(),
                     ctx.accounts.instruction_sysvar_account.clone(),
+                    ctx.accounts.session_token.clone(),
                 ),
                 result,
             )?;
@@ -593,14 +595,16 @@ pub fn build_update_context<'info>(
     bolt_component: AccountInfo<'info>,
     authority: Signer<'info>,
     instruction_sysvar_account: UncheckedAccount<'info>,
+    session_token: Option<UncheckedAccount<'info>>,
 ) -> CpiContext<'info, 'info, 'info, 'info, bolt_component::cpi::accounts::Update<'info>> {
     let authority = authority.to_account_info();
     let instruction_sysvar_account = instruction_sysvar_account.to_account_info();
     let cpi_program = component_program;
-    let cpi_accounts = bolt_component::cpi::accounts::Update {
+    let session_token = session_token.map(|x| x.to_account_info());
+    bolt_component::cpi::accounts::Update {
         bolt_component,
         authority,
         instruction_sysvar_account,
-    };
-    CpiContext::new(cpi_program, cpi_accounts)
+        session_token,
+    }.build_cpi_context(cpi_program)
 }
