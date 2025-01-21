@@ -14,7 +14,7 @@ import {
   RemoveSystem,
   web3,
 } from "../../clients/bolt-sdk/lib";
-import { logPosition, logVelocity, Direction } from "../utils";
+import { Direction } from "../utils";
 import { Framework } from "../main";
 
 describe("Intermediate level API", () => {
@@ -35,12 +35,12 @@ describe("Intermediate level API", () => {
 
   const secondAuthority = Keypair.generate().publicKey;
 
-  it("Initialize Framework", async () => {
+  it("Initialize framework", async () => {
     framework = new Framework();
     await framework.initialize();
   });
 
-  it("InitializeRegistry", async () => {
+  it("Initialize registry", async () => {
     const initializeRegistry = await InitializeRegistry({
       payer: framework.provider.wallet.publicKey,
       connection: framework.provider.connection,
@@ -52,15 +52,12 @@ describe("Intermediate level API", () => {
     }
   });
 
-  it("InitializeNewWorld", async () => {
+  it("Initialize world", async () => {
     const initializeNewWorld = await InitializeNewWorld({
       payer: framework.provider.wallet.publicKey,
       connection: framework.provider.connection,
     });
-    const signature = await framework.provider.sendAndConfirm(
-      initializeNewWorld.transaction,
-    );
-    console.log("InitializeNewWorld signature: ", signature);
+    await framework.provider.sendAndConfirm(initializeNewWorld.transaction);
     worldPda = initializeNewWorld.worldPda; // Saved for later
   });
 
@@ -89,8 +86,7 @@ describe("Intermediate level API", () => {
       world: worldPda,
       connection: framework.provider.connection,
     });
-    const signature = await framework.provider.sendAndConfirm(addAuthority.transaction);
-    console.log(`Add Authority signature: ${signature}`);
+    await framework.provider.sendAndConfirm(addAuthority.transaction);
     const worldAccount = await framework.worldProgram.account.world.fetch(worldPda);
     expect(
       worldAccount.authorities.some((auth) => auth.equals(secondAuthority)),
@@ -104,8 +100,7 @@ describe("Intermediate level API", () => {
       world: worldPda,
       connection: framework.provider.connection,
     });
-    const signature = await framework.provider.sendAndConfirm(addAuthority.transaction);
-    console.log(`Add Authority signature: ${signature}`);
+    await framework.provider.sendAndConfirm(addAuthority.transaction);
     const worldAccount = await framework.worldProgram.account.world.fetch(worldPda);
     expect(
       !worldAccount.authorities.some((auth) => auth.equals(secondAuthority)),
@@ -243,7 +238,6 @@ describe("Intermediate level API", () => {
     const position = await framework.exampleComponentPosition.account.position.fetch(
       componentPositionEntity1Pda,
     );
-    logPosition("Default State: Entity 1", position);
     expect(position.x.toNumber()).to.equal(0);
     expect(position.y.toNumber()).to.equal(0);
     expect(position.z.toNumber()).to.equal(0);
@@ -264,17 +258,15 @@ describe("Intermediate level API", () => {
         direction: Direction.Up,
       },
     });
-    const signature = await framework.provider.sendAndConfirm(
+    await framework.provider.sendAndConfirm(
       applySystem.transaction,
       [],
       { skipPreflight: true },
     );
-    console.log(`Signature: ${signature}`);
 
     const position = await framework.exampleComponentPosition.account.position.fetch(
       componentPositionEntity1Pda,
     );
-    logPosition("Movement System: Entity 1", position);
     expect(position.x.toNumber()).to.equal(0);
     expect(position.y.toNumber()).to.equal(1);
     expect(position.z.toNumber()).to.equal(0);
@@ -300,7 +292,6 @@ describe("Intermediate level API", () => {
     const position = await framework.exampleComponentPosition.account.position.fetch(
       componentPositionEntity1Pda,
     );
-    logPosition("Movement System: Entity 1", position);
     expect(position.x.toNumber()).to.equal(1);
     expect(position.y.toNumber()).to.equal(1);
     expect(position.z.toNumber()).to.equal(0);
@@ -323,7 +314,6 @@ describe("Intermediate level API", () => {
     const position = await framework.exampleComponentPosition.account.position.fetch(
       componentPositionEntity1Pda,
     );
-    logPosition("Fly System: Entity 1", position);
     expect(position.x.toNumber()).to.equal(1);
     expect(position.y.toNumber()).to.equal(1);
     expect(position.z.toNumber()).to.equal(1);
@@ -352,7 +342,6 @@ describe("Intermediate level API", () => {
     const velocity = await framework.exampleComponentVelocity.account.velocity.fetch(
       componentVelocityEntity1Pda,
     );
-    logVelocity("Apply System Velocity: Entity 1", velocity);
     expect(velocity.x.toNumber()).to.equal(10);
     expect(velocity.y.toNumber()).to.equal(0);
     expect(velocity.z.toNumber()).to.equal(0);
@@ -361,7 +350,6 @@ describe("Intermediate level API", () => {
     const position = await framework.exampleComponentPosition.account.position.fetch(
       componentPositionEntity1Pda,
     );
-    logPosition("Apply System Velocity: Entity 1", position);
     expect(position.x.toNumber()).to.greaterThan(1);
     expect(position.y.toNumber()).to.equal(1);
     expect(position.z.toNumber()).to.equal(1);
@@ -399,7 +387,6 @@ describe("Intermediate level API", () => {
     const position = await framework.exampleComponentPosition.account.position.fetch(
       componentPositionEntity1Pda,
     );
-    logPosition("Apply System Velocity: Entity 1", position);
     expect(position.x.toNumber()).to.greaterThan(1);
     expect(position.y.toNumber()).to.equal(1);
     expect(position.z.toNumber()).to.equal(300);
@@ -422,7 +409,6 @@ describe("Intermediate level API", () => {
     const position = await framework.exampleComponentPosition.account.position.fetch(
       componentPositionEntity4Pda,
     );
-    logPosition("Fly System: Entity 4", position);
     expect(position.x.toNumber()).to.equal(0);
     expect(position.y.toNumber()).to.equal(0);
     expect(position.z.toNumber()).to.equal(1);
@@ -456,7 +442,6 @@ describe("Intermediate level API", () => {
       await framework.provider.sendAndConfirm(applySystem.transaction);
     } catch (error) {
       failed = true;
-      // console.log("error", error);
       expect(error.logs.join("\n")).to.contain("Error Code: InvalidAuthority");
     }
     expect(failed).to.equal(true);
@@ -477,12 +462,11 @@ describe("Intermediate level API", () => {
       world: worldPda,
     });
 
-    const signature = await framework.provider.sendAndConfirm(
+    await framework.provider.sendAndConfirm(
       approveSystem.transaction,
       [],
       { skipPreflight: true },
     );
-    console.log(`Whitelist 2 system approval signature: ${signature}`);
 
     // Get World and check permissionless and systems
     const worldAccount = await framework.worldProgram.account.world.fetch(worldPda);
@@ -497,12 +481,11 @@ describe("Intermediate level API", () => {
       world: worldPda,
     });
 
-    const signature = await framework.provider.sendAndConfirm(
+    await framework.provider.sendAndConfirm(
       approveSystem.transaction,
       [],
       { skipPreflight: true },
     );
-    console.log(`Whitelist 2 system approval signature: ${signature}`);
 
     // Get World and check permissionless and systems
     const worldAccount = await framework.worldProgram.account.world.fetch(worldPda);
@@ -532,12 +515,11 @@ describe("Intermediate level API", () => {
       world: worldPda,
     });
 
-    const signature = await framework.provider.sendAndConfirm(
+    await framework.provider.sendAndConfirm(
       approveSystem.transaction,
       [],
       { skipPreflight: true },
     );
-    console.log(`Whitelist 2 system approval signature: ${signature}`);
 
     // Get World and check permissionless and systems
     const worldAccount = await framework.worldProgram.account.world.fetch(worldPda);
@@ -580,7 +562,6 @@ describe("Intermediate level API", () => {
         })
         .rpc();
     } catch (error) {
-      // console.log("error", error);
       expect(error.message).to.contain("Error Code: InvalidCaller");
       invalid = true;
     }
@@ -612,7 +593,7 @@ describe("Intermediate level API", () => {
       componentId: framework.exampleComponentPosition.programId,
     });
 
-    const txSign = await framework.provider.sendAndConfirm(
+    await framework.provider.sendAndConfirm(
       delegateComponent.transaction,
       [],
       { skipPreflight: true, commitment: "confirmed" },

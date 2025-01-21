@@ -13,7 +13,7 @@ import {
   SerializeArgs,
   SessionProgram,
 } from "../../clients/bolt-sdk/lib";
-import { logPosition, logVelocity, Direction } from "../utils";
+import { Direction } from "../utils";
 
 import { Framework } from "../main";
 
@@ -39,12 +39,12 @@ describe("Low level API", () => {
 
   const secondAuthority = Keypair.generate().publicKey;
 
-  it("Initialize the test framework", async () => {
+  it("Initialize framework", async () => {
     framework = new Framework();
     await framework.initialize();
   });
 
-  it("InitializeRegistry", async () => {
+  it("Initialize registry", async () => {
     const registryPda = FindRegistryPda({});
     const instruction = await framework.worldProgram.methods
       .initializeRegistry()
@@ -57,7 +57,7 @@ describe("Low level API", () => {
     await framework.provider.sendAndConfirm(transaction);
   });
 
-  it("InitializeNewWorld", async () => {
+  it("Initialize world", async () => {
     const registryPda = FindRegistryPda({});
     const registry = await framework.worldProgram.account.registry.fetch(registryPda);
     worldId = new BN(registry.worlds);
@@ -71,8 +71,7 @@ describe("Low level API", () => {
       })
       .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
-    const signature = await framework.provider.sendAndConfirm(transaction);
-    console.log("InitializeNewWorld signature: ", signature);
+    await framework.provider.sendAndConfirm(transaction);
   });
 
   it("Add authority", async () => {
@@ -106,8 +105,7 @@ describe("Low level API", () => {
       .instruction();
 
     const transaction = new anchor.web3.Transaction().add(instruction);
-    const signature = await framework.provider.sendAndConfirm(transaction);
-    console.log(`Add Authority signature: ${signature}`);
+    await framework.provider.sendAndConfirm(transaction);
     const worldAccount = await framework.worldProgram.account.world.fetch(worldPda);
     expect(
       worldAccount.authorities.some((auth) => auth.equals(secondAuthority)),
@@ -124,8 +122,7 @@ describe("Low level API", () => {
       })
       .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
-    const signature = await framework.provider.sendAndConfirm(transaction);
-    console.log(`Remove Authority signature: ${signature}`);
+    await framework.provider.sendAndConfirm(transaction);
     const worldAccount = await framework.worldProgram.account.world.fetch(worldPda);
     expect(
       !worldAccount.authorities.some((auth) => auth.equals(secondAuthority)),
@@ -146,8 +143,7 @@ describe("Low level API", () => {
       })
       .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
-    const signature = await framework.provider.sendAndConfirm(transaction);
-    console.log("InitializeNewWorld 2 signature: ", signature);
+    await framework.provider.sendAndConfirm(transaction);
   });
 
   it("Add entity 1", async () => {
@@ -162,8 +158,7 @@ describe("Low level API", () => {
       })
       .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
-    const signature = await framework.provider.sendAndConfirm(transaction);
-    console.log("Add Entity 1 signature: ", signature);
+    await framework.provider.sendAndConfirm(transaction);
   });
 
   it("Add entity 2", async () => {
@@ -178,8 +173,7 @@ describe("Low level API", () => {
       })
       .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
-    const signature = await framework.provider.sendAndConfirm(transaction);
-    console.log("Add Entity 2 signature: ", signature);
+    await framework.provider.sendAndConfirm(transaction);
   });
 
   it("Add entity 3", async () => {
@@ -197,8 +191,7 @@ describe("Low level API", () => {
       })
       .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
-    const signature = await framework.provider.sendAndConfirm(transaction);
-    console.log("Add Entity 3 signature: ", signature);
+    await framework.provider.sendAndConfirm(transaction);
   });
 
   it("Add entity 4 (with seed)", async () => {
@@ -214,8 +207,7 @@ describe("Low level API", () => {
       })
       .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
-    const signature = await framework.provider.sendAndConfirm(transaction);
-    console.log("Add Entity 4 signature: ", signature);
+    await framework.provider.sendAndConfirm(transaction);
   });
 
   it("Add entity 5", async () => {
@@ -230,8 +222,7 @@ describe("Low level API", () => {
       })
       .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
-    const signature = await framework.provider.sendAndConfirm(transaction);
-    console.log("Add Entity 5 signature: ", signature);
+    await framework.provider.sendAndConfirm(transaction);
   });
 
   it("Initialize Component on Entity 1, through the world instance", async () => {
@@ -251,11 +242,7 @@ describe("Low level API", () => {
       })
       .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
-    const signature = await framework.provider.sendAndConfirm(transaction);
-    console.log(
-      "Initialize Original Component on Entity 1 signature: ",
-      signature,
-    );
+    await framework.provider.sendAndConfirm(transaction);
   });
 
   it("Initialize Component on Entity 2, trough the world instance", async () => {
@@ -275,11 +262,7 @@ describe("Low level API", () => {
       })
       .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
-    const signature = await framework.provider.sendAndConfirm(transaction);
-    console.log(
-      "Initialize Original Component on Entity 2 signature: ",
-      signature,
-    );
+    await framework.provider.sendAndConfirm(transaction);
   });
 
   it("Initialize Position Component on Entity 1", async () => {
@@ -299,11 +282,7 @@ describe("Low level API", () => {
       })
       .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
-    const signature = await framework.provider.sendAndConfirm(transaction);
-    console.log(
-      "Initialize Position Component on Entity 1 signature: ",
-      signature,
-    );
+    await framework.provider.sendAndConfirm(transaction);
   });
 
   it("Initialize Velocity Component on Entity 1 (with seed)", async () => {
@@ -324,11 +303,7 @@ describe("Low level API", () => {
       })
       .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
-    const signature = await framework.provider.sendAndConfirm(transaction);
-    console.log(
-      "Initialize Velocity Component on Entity 1 signature: ",
-      signature,
-    );
+    await framework.provider.sendAndConfirm(transaction);
   });
 
   it("Initialize Position Component on Entity 2", async () => {
@@ -348,11 +323,7 @@ describe("Low level API", () => {
       })
       .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
-    const signature = await framework.provider.sendAndConfirm(transaction);
-    console.log(
-      "Initialize Position Component on Entity 2 signature: ",
-      signature,
-    );
+    await framework.provider.sendAndConfirm(transaction);
   });
 
   it("Initialize Position Component on Entity 4", async () => {
@@ -372,11 +343,7 @@ describe("Low level API", () => {
       })
       .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
-    const signature = await framework.provider.sendAndConfirm(transaction);
-    console.log(
-      "Initialize Position Component on Entity 4 signature: ",
-      signature,
-    );
+    await framework.provider.sendAndConfirm(transaction);
   });
 
   it("Initialize Position Component on Entity 5 (with authority)", async () => {
@@ -396,18 +363,13 @@ describe("Low level API", () => {
       })
       .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
-    const signature = await framework.provider.sendAndConfirm(transaction);
-    console.log(
-      "Initialize Position Component on Entity 5 signature: ",
-      signature,
-    );
+    await framework.provider.sendAndConfirm(transaction);
   });
 
   it("Check Position on Entity 1 is default", async () => {
     const position = await framework.exampleComponentPosition.account.position.fetch(
       componentPositionEntity1Pda,
     );
-    logPosition("Default State: Entity 1", position);
     expect(position.x.toNumber()).to.equal(0);
     expect(position.y.toNumber()).to.equal(0);
     expect(position.z.toNumber()).to.equal(0);
@@ -437,16 +399,11 @@ describe("Low level API", () => {
       .instruction();
 
     const transaction = new anchor.web3.Transaction().add(instruction);
-    const signature = await framework.provider.sendAndConfirm(transaction);
-    console.log(
-      "Apply Simple Movement System (Up) on Entity 1 signature: ",
-      signature,
-    );
+    await framework.provider.sendAndConfirm(transaction);
 
     const position = await framework.exampleComponentPosition.account.position.fetch(
       componentPositionEntity1Pda,
     );
-    logPosition("Movement System: Entity 1", position);
     expect(position.x.toNumber()).to.equal(0);
     expect(position.y.toNumber()).to.equal(1);
     expect(position.z.toNumber()).to.equal(0);
@@ -498,16 +455,11 @@ describe("Low level API", () => {
       ])
       .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
-    const signature = await framework.provider.sendAndConfirm(transaction);
-    console.log(
-      "Apply Simple Movement System (Right) on Entity 1 with session token signature: ",
-      signature,
-    );
+    await framework.provider.sendAndConfirm(transaction);
 
     const position = await framework.exampleComponentPosition.account.position.fetch(
       componentPositionEntity1Pda,
     );
-    logPosition("Movement System: Entity 1", position);
     expect(position.x.toNumber()).to.equal(1);
     expect(position.y.toNumber()).to.equal(1);
     expect(position.z.toNumber()).to.equal(0);
@@ -536,13 +488,11 @@ describe("Low level API", () => {
       ])
       .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
-    const signature = await framework.provider.sendAndConfirm(transaction);
-    console.log("Apply Fly System on Entity 1 signature: ", signature);
+    await framework.provider.sendAndConfirm(transaction);
 
     const position = await framework.exampleComponentPosition.account.position.fetch(
       componentPositionEntity1Pda,
     );
-    logPosition("Fly System: Entity 1", position);
     expect(position.x.toNumber()).to.equal(1);
     expect(position.y.toNumber()).to.equal(1);
     expect(position.z.toNumber()).to.equal(1);
@@ -581,13 +531,11 @@ describe("Low level API", () => {
       ])
       .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
-    const signature = await framework.provider.sendAndConfirm(transaction);
-    console.log("Apply System Velocity on Entity 1 signature: ", signature);
+    await framework.provider.sendAndConfirm(transaction);
 
     const velocity = await framework.exampleComponentVelocity.account.velocity.fetch(
       componentVelocityEntity1Pda,
     );
-    logVelocity("Apply System Velocity: Entity 1", velocity);
     expect(velocity.x.toNumber()).to.equal(10);
     expect(velocity.y.toNumber()).to.equal(0);
     expect(velocity.z.toNumber()).to.equal(0);
@@ -596,7 +544,6 @@ describe("Low level API", () => {
     const position = await framework.exampleComponentPosition.account.position.fetch(
       componentPositionEntity1Pda,
     );
-    logPosition("Apply System Velocity: Entity 1", position);
     expect(position.x.toNumber()).to.greaterThan(1);
     expect(position.y.toNumber()).to.equal(1);
     expect(position.z.toNumber()).to.equal(1);
@@ -652,7 +599,6 @@ describe("Low level API", () => {
     const position = await framework.exampleComponentPosition.account.position.fetch(
       componentPositionEntity1Pda,
     );
-    logPosition("Apply System Velocity: Entity 1", position);
     expect(position.x.toNumber()).to.greaterThan(1);
     expect(position.y.toNumber()).to.equal(1);
     expect(position.z.toNumber()).to.equal(300);
@@ -686,7 +632,6 @@ describe("Low level API", () => {
     const position = await framework.exampleComponentPosition.account.position.fetch(
       componentPositionEntity4Pda,
     );
-    logPosition("Fly System: Entity 4", position);
     expect(position.x.toNumber()).to.equal(0);
     expect(position.y.toNumber()).to.equal(0);
     expect(position.z.toNumber()).to.equal(1);
@@ -728,8 +673,7 @@ describe("Low level API", () => {
 
     let failed = false;
     try {
-      let signature = await framework.provider.sendAndConfirm(transaction);
-      console.log("Apply Fly System on Entity 5 signature: ", signature);
+      await framework.provider.sendAndConfirm(transaction);
     } catch (error) {
       failed = true;
       expect(error.logs.join("\n")).to.contain("Error Code: InvalidAuthority");
@@ -755,10 +699,9 @@ describe("Low level API", () => {
       })
       .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
-    const signature = await framework.provider.sendAndConfirm(transaction, [], {
+    await framework.provider.sendAndConfirm(transaction, [], {
       skipPreflight: true,
     });
-    console.log(`Whitelist 2 system approval signature: ${signature}`);
 
     // Get World and check permissionless and systems
     const worldAccount = await framework.worldProgram.account.world.fetch(worldPda);
@@ -776,10 +719,9 @@ describe("Low level API", () => {
       })
       .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
-    const signature = await framework.provider.sendAndConfirm(transaction, [], {
+    await framework.provider.sendAndConfirm(transaction, [], {
       skipPreflight: true,
     });
-    console.log(`Whitelist 2 system approval signature: ${signature}`);
 
     // Get World and check permissionless and systems
     const worldAccount = await framework.worldProgram.account.world.fetch(worldPda);
@@ -823,10 +765,9 @@ describe("Low level API", () => {
       })
       .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
-    const signature = await framework.provider.sendAndConfirm(transaction, [], {
+    await framework.provider.sendAndConfirm(transaction, [], {
       skipPreflight: true,
     });
-    console.log(`Remove System 1 signature: ${signature}`);
 
     // Get World and check permissionless and systems
     const worldAccount = await framework.worldProgram.account.world.fetch(worldPda);
@@ -880,7 +821,6 @@ describe("Low level API", () => {
         })
         .rpc();
     } catch (error) {
-      // console.log("error", error);
       expect(error.message).to.contain("Error Code: InvalidCaller");
       invalid = true;
     }
@@ -915,11 +855,10 @@ describe("Low level API", () => {
     });
     const instruction = delegateComponent.transaction;
     const transaction = new anchor.web3.Transaction().add(instruction);
-    const txSign = await framework.provider.sendAndConfirm(transaction, [], {
+    await framework.provider.sendAndConfirm(transaction, [], {
       skipPreflight: true,
       commitment: "confirmed",
     });
-    console.log(`Delegation signature: ${txSign}`);
     const acc = await framework.provider.connection.getAccountInfo(
       delegateComponent.componentPda,
     );
