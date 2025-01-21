@@ -1,16 +1,9 @@
 import { Keypair, PublicKey } from "@solana/web3.js";
-import { type Position } from "../../target/types/position";
-import { type Velocity } from "../../target/types/velocity";
-import { type SystemSimpleMovement } from "../../target/types/system_simple_movement";
-import { type SystemFly } from "../../target/types/system_fly";
-import { type SystemApplyVelocity } from "../../target/types/system_apply_velocity";
-import { type World } from "../../target/types/world";
 import { expect } from "chai";
 import BN from "bn.js";
 import {
   DELEGATION_PROGRAM_ID,
   DelegateComponent,
-  type Program,
   anchor,
   web3,
   FindRegistryPda,
@@ -22,25 +15,10 @@ import {
 } from "../../clients/bolt-sdk/lib";
 import { logPosition, logVelocity, Direction } from "../utils";
 
+import { Framework } from "../main";
+
 describe("Low level API", () => {
-  const provider = anchor.AnchorProvider.env();
-  anchor.setProvider(provider);
-
-  const worldProgram = anchor.workspace.World as Program<World>;
-
-  const exampleComponentPosition = anchor.workspace
-    .Position as Program<Position>;
-  const exampleComponentVelocity = anchor.workspace
-    .Velocity as Program<Velocity>;
-
-  const exampleSystemSimpleMovement = (
-    anchor.workspace.SystemSimpleMovement as Program<SystemSimpleMovement>
-  ).programId;
-  const exampleSystemFly = (anchor.workspace.SystemFly as Program<SystemFly>)
-    .programId;
-  const exampleSystemApplyVelocity = (
-    anchor.workspace.SystemApplyVelocity as Program<SystemApplyVelocity>
-  ).programId;
+  let framework: Framework;
 
   let sessionSigner: anchor.web3.Keypair;
   let sessionToken: anchor.web3.PublicKey;
@@ -61,89 +39,94 @@ describe("Low level API", () => {
 
   const secondAuthority = Keypair.generate().publicKey;
 
+  it("Initialize the test framework", async () => {
+    framework = new Framework();
+    await framework.initialize();
+  });
+
   it("InitializeRegistry", async () => {
     const registryPda = FindRegistryPda({});
-    const instruction = await worldProgram.methods
+    const instruction = await framework.worldProgram.methods
       .initializeRegistry()
       .accounts({
         registry: registryPda,
-        payer: provider.wallet.publicKey,
+        payer: framework.provider.wallet.publicKey,
       })
       .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
-    await provider.sendAndConfirm(transaction);
+    await framework.provider.sendAndConfirm(transaction);
   });
 
   it("InitializeNewWorld", async () => {
     const registryPda = FindRegistryPda({});
-    const registry = await worldProgram.account.registry.fetch(registryPda);
+    const registry = await framework.worldProgram.account.registry.fetch(registryPda);
     worldId = new BN(registry.worlds);
     worldPda = FindWorldPda({ worldId });
-    const instruction = await worldProgram.methods
+    const instruction = await framework.worldProgram.methods
       .initializeNewWorld()
       .accounts({
-        payer: provider.wallet.publicKey,
+        payer: framework.provider.wallet.publicKey,
         world: worldPda,
         registry: registryPda,
       })
       .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
-    const signature = await provider.sendAndConfirm(transaction);
+    const signature = await framework.provider.sendAndConfirm(transaction);
     console.log("InitializeNewWorld signature: ", signature);
   });
 
   it("Add authority", async () => {
-    const instruction = await worldProgram.methods
+    const instruction = await framework.worldProgram.methods
       .addAuthority(worldId)
       .accounts({
-        authority: provider.wallet.publicKey,
-        newAuthority: provider.wallet.publicKey,
+        authority: framework.provider.wallet.publicKey,
+        newAuthority: framework.provider.wallet.publicKey,
         world: worldPda,
       })
       .instruction();
 
     const transaction = new anchor.web3.Transaction().add(instruction);
-    await provider.sendAndConfirm(transaction, [], { skipPreflight: true });
-    const worldAccount = await worldProgram.account.world.fetch(worldPda);
+    await framework.provider.sendAndConfirm(transaction, [], { skipPreflight: true });
+    const worldAccount = await framework.worldProgram.account.world.fetch(worldPda);
     expect(
       worldAccount.authorities.some((auth) =>
-        auth.equals(provider.wallet.publicKey),
+        auth.equals(framework.provider.wallet.publicKey),
       ),
     );
   });
 
   it("Add a second authority", async () => {
-    const instruction = await worldProgram.methods
+    const instruction = await framework.worldProgram.methods
       .addAuthority(worldId)
       .accounts({
-        authority: provider.wallet.publicKey,
+        authority: framework.provider.wallet.publicKey,
         newAuthority: secondAuthority,
         world: worldPda,
       })
       .instruction();
 
     const transaction = new anchor.web3.Transaction().add(instruction);
-    const signature = await provider.sendAndConfirm(transaction);
+    const signature = await framework.provider.sendAndConfirm(transaction);
     console.log(`Add Authority signature: ${signature}`);
-    const worldAccount = await worldProgram.account.world.fetch(worldPda);
+    const worldAccount = await framework.worldProgram.account.world.fetch(worldPda);
     expect(
       worldAccount.authorities.some((auth) => auth.equals(secondAuthority)),
     );
   });
 
   it("Remove an authority", async () => {
-    const instruction = await worldProgram.methods
+    const instruction = await framework.worldProgram.methods
       .removeAuthority(worldId)
       .accounts({
-        authority: provider.wallet.publicKey,
+        authority: framework.provider.wallet.publicKey,
         authorityToDelete: secondAuthority,
         world: worldPda,
       })
       .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
-    const signature = await provider.sendAndConfirm(transaction);
+    const signature = await framework.provider.sendAndConfirm(transaction);
     console.log(`Remove Authority signature: ${signature}`);
-    const worldAccount = await worldProgram.account.world.fetch(worldPda);
+    const worldAccount = await framework.worldProgram.account.world.fetch(worldPda);
     expect(
       !worldAccount.authorities.some((auth) => auth.equals(secondAuthority)),
     );
@@ -151,124 +134,124 @@ describe("Low level API", () => {
 
   it("InitializeNewWorld 2", async () => {
     const registryPda = FindRegistryPda({});
-    const registry = await worldProgram.account.registry.fetch(registryPda);
+    const registry = await framework.worldProgram.account.registry.fetch(registryPda);
     const worldId = new BN(registry.worlds);
     const worldPda = FindWorldPda({ worldId });
-    const instruction = await worldProgram.methods
+    const instruction = await framework.worldProgram.methods
       .initializeNewWorld()
       .accounts({
-        payer: provider.wallet.publicKey,
+        payer: framework.provider.wallet.publicKey,
         world: worldPda,
         registry: registryPda,
       })
       .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
-    const signature = await provider.sendAndConfirm(transaction);
+    const signature = await framework.provider.sendAndConfirm(transaction);
     console.log("InitializeNewWorld 2 signature: ", signature);
   });
 
   it("Add entity 1", async () => {
-    const world = await worldProgram.account.world.fetch(worldPda);
+    const world = await framework.worldProgram.account.world.fetch(worldPda);
     entity1Pda = FindEntityPda({ worldId: world.id, entityId: world.entities });
-    const instruction = await worldProgram.methods
+    const instruction = await framework.worldProgram.methods
       .addEntity(null)
       .accounts({
-        payer: provider.wallet.publicKey,
+        payer: framework.provider.wallet.publicKey,
         world: worldPda,
         entity: entity1Pda,
       })
       .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
-    const signature = await provider.sendAndConfirm(transaction);
+    const signature = await framework.provider.sendAndConfirm(transaction);
     console.log("Add Entity 1 signature: ", signature);
   });
 
   it("Add entity 2", async () => {
-    const world = await worldProgram.account.world.fetch(worldPda);
+    const world = await framework.worldProgram.account.world.fetch(worldPda);
     entity2Pda = FindEntityPda({ worldId: world.id, entityId: world.entities });
-    const instruction = await worldProgram.methods
+    const instruction = await framework.worldProgram.methods
       .addEntity(null)
       .accounts({
-        payer: provider.wallet.publicKey,
+        payer: framework.provider.wallet.publicKey,
         world: worldPda,
         entity: entity2Pda,
       })
       .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
-    const signature = await provider.sendAndConfirm(transaction);
+    const signature = await framework.provider.sendAndConfirm(transaction);
     console.log("Add Entity 2 signature: ", signature);
   });
 
   it("Add entity 3", async () => {
-    const world = await worldProgram.account.world.fetch(worldPda);
+    const world = await framework.worldProgram.account.world.fetch(worldPda);
     const entity3Pda = FindEntityPda({
       worldId: world.id,
       entityId: world.entities,
     });
-    const instruction = await worldProgram.methods
+    const instruction = await framework.worldProgram.methods
       .addEntity(null)
       .accounts({
-        payer: provider.wallet.publicKey,
+        payer: framework.provider.wallet.publicKey,
         world: worldPda,
         entity: entity3Pda,
       })
       .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
-    const signature = await provider.sendAndConfirm(transaction);
+    const signature = await framework.provider.sendAndConfirm(transaction);
     console.log("Add Entity 3 signature: ", signature);
   });
 
   it("Add entity 4 (with seed)", async () => {
-    const world = await worldProgram.account.world.fetch(worldPda);
+    const world = await framework.worldProgram.account.world.fetch(worldPda);
     const seed = Buffer.from("custom-seed");
     entity4Pda = FindEntityPda({ worldId: world.id, seed });
-    const instruction = await worldProgram.methods
+    const instruction = await framework.worldProgram.methods
       .addEntity(seed)
       .accounts({
-        payer: provider.wallet.publicKey,
+        payer: framework.provider.wallet.publicKey,
         world: worldPda,
         entity: entity4Pda,
       })
       .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
-    const signature = await provider.sendAndConfirm(transaction);
+    const signature = await framework.provider.sendAndConfirm(transaction);
     console.log("Add Entity 4 signature: ", signature);
   });
 
   it("Add entity 5", async () => {
-    const world = await worldProgram.account.world.fetch(worldPda);
+    const world = await framework.worldProgram.account.world.fetch(worldPda);
     entity5Pda = FindEntityPda({ worldId: world.id, entityId: world.entities });
-    const instruction = await worldProgram.methods
+    const instruction = await framework.worldProgram.methods
       .addEntity(null)
       .accounts({
-        payer: provider.wallet.publicKey,
+        payer: framework.provider.wallet.publicKey,
         world: worldPda,
         entity: entity5Pda,
       })
       .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
-    const signature = await provider.sendAndConfirm(transaction);
+    const signature = await framework.provider.sendAndConfirm(transaction);
     console.log("Add Entity 5 signature: ", signature);
   });
 
   it("Initialize Component on Entity 1, through the world instance", async () => {
-    const componentId = exampleComponentPosition.programId;
+    const componentId = framework.exampleComponentPosition.programId;
     const componentPda = FindComponentPda({
       componentId,
       entity: entity1Pda
     });
-    const instruction = await worldProgram.methods
+    const instruction = await framework.worldProgram.methods
       .initializeComponent()
       .accounts({
-        payer: provider.wallet.publicKey,
+        payer: framework.provider.wallet.publicKey,
         entity: entity1Pda,
         data: componentPda,
         componentProgram: componentId,
-        authority: provider.wallet.publicKey,
+        authority: framework.provider.wallet.publicKey,
       })
       .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
-    const signature = await provider.sendAndConfirm(transaction);
+    const signature = await framework.provider.sendAndConfirm(transaction);
     console.log(
       "Initialize Original Component on Entity 1 signature: ",
       signature,
@@ -276,23 +259,23 @@ describe("Low level API", () => {
   });
 
   it("Initialize Component on Entity 2, trough the world instance", async () => {
-    const componentId = exampleComponentPosition.programId;
+    const componentId = framework.exampleComponentPosition.programId;
     const componentPda = FindComponentPda({
       componentId,
       entity: entity2Pda
     });
-    const instruction = await worldProgram.methods
+    const instruction = await framework.worldProgram.methods
       .initializeComponent()
       .accounts({
-        payer: provider.wallet.publicKey,
+        payer: framework.provider.wallet.publicKey,
         entity: entity2Pda,
         data: componentPda,
         componentProgram: componentId,
-        authority: provider.wallet.publicKey,
+        authority: framework.provider.wallet.publicKey,
       })
       .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
-    const signature = await provider.sendAndConfirm(transaction);
+    const signature = await framework.provider.sendAndConfirm(transaction);
     console.log(
       "Initialize Original Component on Entity 2 signature: ",
       signature,
@@ -300,23 +283,23 @@ describe("Low level API", () => {
   });
 
   it("Initialize Position Component on Entity 1", async () => {
-    const componentId = exampleComponentPosition.programId;
+    const componentId = framework.exampleComponentPosition.programId;
     componentPositionEntity1Pda = FindComponentPda({
       componentId,
       entity: entity1Pda,
     });
-    const instruction = await worldProgram.methods
+    const instruction = await framework.worldProgram.methods
       .initializeComponent()
       .accounts({
-        payer: provider.wallet.publicKey,
+        payer: framework.provider.wallet.publicKey,
         entity: entity1Pda,
         data: componentPositionEntity1Pda,
         componentProgram: componentId,
-        authority: worldProgram.programId,
+        authority: framework.worldProgram.programId,
       })
       .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
-    const signature = await provider.sendAndConfirm(transaction);
+    const signature = await framework.provider.sendAndConfirm(transaction);
     console.log(
       "Initialize Position Component on Entity 1 signature: ",
       signature,
@@ -324,24 +307,24 @@ describe("Low level API", () => {
   });
 
   it("Initialize Velocity Component on Entity 1 (with seed)", async () => {
-    const componentId = exampleComponentVelocity.programId;
+    const componentId = framework.exampleComponentVelocity.programId;
     componentVelocityEntity1Pda = FindComponentPda({
       componentId,
       entity: entity1Pda,
       seed: "component-velocity",
     });
-    const instruction = await worldProgram.methods
+    const instruction = await framework.worldProgram.methods
       .initializeComponent()
       .accounts({
-        payer: provider.wallet.publicKey,
+        payer: framework.provider.wallet.publicKey,
         entity: entity1Pda,
         data: componentVelocityEntity1Pda,
         componentProgram: componentId,
-        authority: worldProgram.programId,
+        authority: framework.worldProgram.programId,
       })
       .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
-    const signature = await provider.sendAndConfirm(transaction);
+    const signature = await framework.provider.sendAndConfirm(transaction);
     console.log(
       "Initialize Velocity Component on Entity 1 signature: ",
       signature,
@@ -349,23 +332,23 @@ describe("Low level API", () => {
   });
 
   it("Initialize Position Component on Entity 2", async () => {
-    const componentId = exampleComponentPosition.programId;
+    const componentId = framework.exampleComponentPosition.programId;
     const componentPositionEntity2Pda = FindComponentPda({
       componentId,
       entity: entity2Pda,
     });
-    const instruction = await worldProgram.methods
+    const instruction = await framework.worldProgram.methods
       .initializeComponent()
       .accounts({
-        payer: provider.wallet.publicKey,
+        payer: framework.provider.wallet.publicKey,
         entity: entity2Pda,
         data: componentPositionEntity2Pda,
         componentProgram: componentId,
-        authority: worldProgram.programId,
+        authority: framework.worldProgram.programId,
       })
       .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
-    const signature = await provider.sendAndConfirm(transaction);
+    const signature = await framework.provider.sendAndConfirm(transaction);
     console.log(
       "Initialize Position Component on Entity 2 signature: ",
       signature,
@@ -373,23 +356,23 @@ describe("Low level API", () => {
   });
 
   it("Initialize Position Component on Entity 4", async () => {
-    const componentId = exampleComponentPosition.programId;
+    const componentId = framework.exampleComponentPosition.programId;
     componentPositionEntity4Pda = FindComponentPda({
       componentId,
       entity: entity4Pda,
     });
-    const instruction = await worldProgram.methods
+    const instruction = await framework.worldProgram.methods
       .initializeComponent()
       .accounts({
-        payer: provider.wallet.publicKey,
+        payer: framework.provider.wallet.publicKey,
         entity: entity4Pda,
         data: componentPositionEntity4Pda,
         componentProgram: componentId,
-        authority: worldProgram.programId,
+        authority: framework.worldProgram.programId,
       })
       .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
-    const signature = await provider.sendAndConfirm(transaction);
+    const signature = await framework.provider.sendAndConfirm(transaction);
     console.log(
       "Initialize Position Component on Entity 4 signature: ",
       signature,
@@ -397,23 +380,23 @@ describe("Low level API", () => {
   });
 
   it("Initialize Position Component on Entity 5 (with authority)", async () => {
-    const componentId = exampleComponentPosition.programId;
+    const componentId = framework.exampleComponentPosition.programId;
     componentPositionEntity5Pda = FindComponentPda({
       componentId,
       entity: entity5Pda,
     });
-    const instruction = await worldProgram.methods
+    const instruction = await framework.worldProgram.methods
       .initializeComponent()
       .accounts({
-        payer: provider.wallet.publicKey,
+        payer: framework.provider.wallet.publicKey,
         entity: entity5Pda,
         data: componentPositionEntity5Pda,
         componentProgram: componentId,
-        authority: provider.wallet.publicKey,
+        authority: framework.provider.wallet.publicKey,
       })
       .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
-    const signature = await provider.sendAndConfirm(transaction);
+    const signature = await framework.provider.sendAndConfirm(transaction);
     console.log(
       "Initialize Position Component on Entity 5 signature: ",
       signature,
@@ -421,7 +404,7 @@ describe("Low level API", () => {
   });
 
   it("Check Position on Entity 1 is default", async () => {
-    const position = await exampleComponentPosition.account.position.fetch(
+    const position = await framework.exampleComponentPosition.account.position.fetch(
       componentPositionEntity1Pda,
     );
     logPosition("Default State: Entity 1", position);
@@ -431,17 +414,17 @@ describe("Low level API", () => {
   });
 
   it("Apply Simple Movement System (Up) on Entity 1", async () => {
-    const instruction = await worldProgram.methods
+    const instruction = await framework.worldProgram.methods
       .apply(SerializeArgs({ direction: Direction.Up }))
       .accounts({
-        authority: provider.wallet.publicKey,
-        boltSystem: exampleSystemSimpleMovement,
+        authority: framework.provider.wallet.publicKey,
+        boltSystem: framework.systemSimpleMovement.programId,
         world: worldPda,
         sessionToken: null
       })
       .remainingAccounts([
         {
-          pubkey: exampleComponentPosition.programId,
+          pubkey: framework.exampleComponentPosition.programId,
           isSigner: false,
           isWritable: false,
         },
@@ -454,13 +437,13 @@ describe("Low level API", () => {
       .instruction();
 
     const transaction = new anchor.web3.Transaction().add(instruction);
-    const signature = await provider.sendAndConfirm(transaction);
+    const signature = await framework.provider.sendAndConfirm(transaction);
     console.log(
       "Apply Simple Movement System (Up) on Entity 1 signature: ",
       signature,
     );
 
-    const position = await exampleComponentPosition.account.position.fetch(
+    const position = await framework.exampleComponentPosition.account.position.fetch(
       componentPositionEntity1Pda,
     );
     logPosition("Movement System: Entity 1", position);
@@ -473,19 +456,19 @@ describe("Low level API", () => {
   it("Create Session", async () => {
     sessionSigner = anchor.web3.Keypair.generate();
 
-    const airdrop = await provider.connection.requestAirdrop(
+    const airdrop = await framework.provider.connection.requestAirdrop(
         sessionSigner.publicKey,
         anchor.web3.LAMPORTS_PER_SOL
     );
   
-    await provider.connection.confirmTransaction(airdrop, "confirmed");
+    await framework.provider.connection.confirmTransaction(airdrop, "confirmed");
 
     const keys = await SessionProgram.methods
       .createSession(true, null)
       .accounts({
           sessionSigner: sessionSigner.publicKey,
-          authority: provider.wallet.publicKey,
-          targetProgram: exampleComponentPosition.programId
+          authority: framework.provider.wallet.publicKey,
+          targetProgram: framework.exampleComponentPosition.programId
       })
       .signers([sessionSigner])
       .rpcAndKeys();
@@ -493,17 +476,17 @@ describe("Low level API", () => {
   });
 
   it("Apply Simple Movement System (Right) on Entity 1 with session token", async () => {
-    const instruction = await worldProgram.methods
+    const instruction = await framework.worldProgram.methods
       .apply(SerializeArgs({ direction: Direction.Right }))
       .accounts({
-        authority: provider.wallet.publicKey,
-        boltSystem: exampleSystemSimpleMovement,
+        authority: framework.provider.wallet.publicKey,
+        boltSystem: framework.systemSimpleMovement.programId,
         world: worldPda,
         sessionToken: null
       })
       .remainingAccounts([
         {
-          pubkey: exampleComponentPosition.programId,
+          pubkey: framework.exampleComponentPosition.programId,
           isSigner: false,
           isWritable: false,
         },
@@ -515,13 +498,13 @@ describe("Low level API", () => {
       ])
       .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
-    const signature = await provider.sendAndConfirm(transaction);
+    const signature = await framework.provider.sendAndConfirm(transaction);
     console.log(
       "Apply Simple Movement System (Right) on Entity 1 with session token signature: ",
       signature,
     );
 
-    const position = await exampleComponentPosition.account.position.fetch(
+    const position = await framework.exampleComponentPosition.account.position.fetch(
       componentPositionEntity1Pda,
     );
     logPosition("Movement System: Entity 1", position);
@@ -531,17 +514,17 @@ describe("Low level API", () => {
   });
 
   it("Apply Fly System on Entity 1", async () => {
-    const instruction = await worldProgram.methods
+    const instruction = await framework.worldProgram.methods
       .apply(SerializeArgs())
       .accounts({
-        authority: provider.wallet.publicKey,
-        boltSystem: exampleSystemFly,
+        authority: framework.provider.wallet.publicKey,
+        boltSystem: framework.systemFly.programId,
         world: worldPda,
         sessionToken: null
       })
       .remainingAccounts([
         {
-          pubkey: exampleComponentPosition.programId,
+          pubkey: framework.exampleComponentPosition.programId,
           isSigner: false,
           isWritable: false,
         },
@@ -553,10 +536,10 @@ describe("Low level API", () => {
       ])
       .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
-    const signature = await provider.sendAndConfirm(transaction);
+    const signature = await framework.provider.sendAndConfirm(transaction);
     console.log("Apply Fly System on Entity 1 signature: ", signature);
 
-    const position = await exampleComponentPosition.account.position.fetch(
+    const position = await framework.exampleComponentPosition.account.position.fetch(
       componentPositionEntity1Pda,
     );
     logPosition("Fly System: Entity 1", position);
@@ -566,17 +549,17 @@ describe("Low level API", () => {
   });
 
   it("Apply System Velocity on Entity 1", async () => {
-    const instruction = await worldProgram.methods
+    const instruction = await framework.worldProgram.methods
       .apply(SerializeArgs())
       .accounts({
-        authority: provider.wallet.publicKey,
-        boltSystem: exampleSystemApplyVelocity,
+        authority: framework.provider.wallet.publicKey,
+        boltSystem: framework.systemApplyVelocity.programId,
         world: worldPda,
         sessionToken: null
       })
       .remainingAccounts([
         {
-          pubkey: exampleComponentVelocity.programId,
+          pubkey: framework.exampleComponentVelocity.programId,
           isSigner: false,
           isWritable: false,
         },
@@ -586,7 +569,7 @@ describe("Low level API", () => {
           isWritable: true,
         },
         {
-          pubkey: exampleComponentPosition.programId,
+          pubkey: framework.exampleComponentPosition.programId,
           isSigner: false,
           isWritable: false,
         },
@@ -598,10 +581,10 @@ describe("Low level API", () => {
       ])
       .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
-    const signature = await provider.sendAndConfirm(transaction);
+    const signature = await framework.provider.sendAndConfirm(transaction);
     console.log("Apply System Velocity on Entity 1 signature: ", signature);
 
-    const velocity = await exampleComponentVelocity.account.velocity.fetch(
+    const velocity = await framework.exampleComponentVelocity.account.velocity.fetch(
       componentVelocityEntity1Pda,
     );
     logVelocity("Apply System Velocity: Entity 1", velocity);
@@ -610,7 +593,7 @@ describe("Low level API", () => {
     expect(velocity.z.toNumber()).to.equal(0);
     expect(velocity.lastApplied.toNumber()).to.not.equal(0);
 
-    const position = await exampleComponentPosition.account.position.fetch(
+    const position = await framework.exampleComponentPosition.account.position.fetch(
       componentPositionEntity1Pda,
     );
     logPosition("Apply System Velocity: Entity 1", position);
@@ -620,17 +603,17 @@ describe("Low level API", () => {
   });
 
   it("Apply System Velocity on Entity 1, with Clock external account", async () => {
-    const instruction = await worldProgram.methods
+    const instruction = await framework.worldProgram.methods
       .apply(SerializeArgs())
       .accounts({
-        authority: provider.wallet.publicKey,
-        boltSystem: exampleSystemApplyVelocity,
+        authority: framework.provider.wallet.publicKey,
+        boltSystem: framework.systemApplyVelocity.programId,
         world: worldPda,
         sessionToken: null
       })
       .remainingAccounts([
         {
-          pubkey: exampleComponentVelocity.programId,
+          pubkey: framework.exampleComponentVelocity.programId,
           isSigner: false,
           isWritable: false,
         },
@@ -640,7 +623,7 @@ describe("Low level API", () => {
           isWritable: true,
         },
         {
-          pubkey: exampleComponentPosition.programId,
+          pubkey: framework.exampleComponentPosition.programId,
           isSigner: false,
           isWritable: false,
         },
@@ -650,7 +633,7 @@ describe("Low level API", () => {
           isWritable: true,
         },
         {
-          pubkey: worldProgram.programId, // world program ID is the end of components delimiter
+          pubkey: framework.worldProgram.programId, // world program ID is the end of components delimiter
           isSigner: false,
           isWritable: false,
         },
@@ -664,9 +647,9 @@ describe("Low level API", () => {
       ])
       .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
-    await provider.sendAndConfirm(transaction);
+    await framework.provider.sendAndConfirm(transaction);
 
-    const position = await exampleComponentPosition.account.position.fetch(
+    const position = await framework.exampleComponentPosition.account.position.fetch(
       componentPositionEntity1Pda,
     );
     logPosition("Apply System Velocity: Entity 1", position);
@@ -676,17 +659,17 @@ describe("Low level API", () => {
   });
 
   it("Apply Fly System on Entity 4", async () => {
-    const instruction = await worldProgram.methods
+    const instruction = await framework.worldProgram.methods
       .apply(SerializeArgs())
       .accounts({
-        authority: provider.wallet.publicKey,
-        boltSystem: exampleSystemFly,
+        authority: framework.provider.wallet.publicKey,
+        boltSystem: framework.systemFly.programId,
         world: worldPda,
         sessionToken: null
       })
       .remainingAccounts([
         {
-          pubkey: exampleComponentPosition.programId,
+          pubkey: framework.exampleComponentPosition.programId,
           isSigner: false,
           isWritable: false,
         },
@@ -698,9 +681,9 @@ describe("Low level API", () => {
       ])
       .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
-    await provider.sendAndConfirm(transaction);
+    await framework.provider.sendAndConfirm(transaction);
 
-    const position = await exampleComponentPosition.account.position.fetch(
+    const position = await framework.exampleComponentPosition.account.position.fetch(
       componentPositionEntity4Pda,
     );
     logPosition("Fly System: Entity 4", position);
@@ -711,23 +694,23 @@ describe("Low level API", () => {
 
   it("Apply Fly System on Entity 5 (should fail with wrong authority)", async () => {
     const positionBefore =
-      await exampleComponentPosition.account.position.fetch(
+      await framework.exampleComponentPosition.account.position.fetch(
         componentPositionEntity5Pda,
       );
 
     let keypair = Keypair.generate();
 
-    const instruction = await worldProgram.methods
+    const instruction = await framework.worldProgram.methods
       .apply(SerializeArgs())
       .accounts({
         authority: keypair.publicKey,
-        boltSystem: exampleSystemFly,
+        boltSystem: framework.systemFly.programId,
         world: worldPda,
         sessionToken: null
       })
       .remainingAccounts([
         {
-          pubkey: exampleComponentPosition.programId,
+          pubkey: framework.exampleComponentPosition.programId,
           isSigner: false,
           isWritable: false,
         },
@@ -739,13 +722,13 @@ describe("Low level API", () => {
       ])
       .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
-    transaction.recentBlockhash = (await provider.connection.getLatestBlockhash()).blockhash;
-    transaction.feePayer = provider.wallet.publicKey;
+    transaction.recentBlockhash = (await framework.provider.connection.getLatestBlockhash()).blockhash;
+    transaction.feePayer = framework.provider.wallet.publicKey;
     transaction.sign(keypair);
 
     let failed = false;
     try {
-      let signature = await provider.sendAndConfirm(transaction);
+      let signature = await framework.provider.sendAndConfirm(transaction);
       console.log("Apply Fly System on Entity 5 signature: ", signature);
     } catch (error) {
       failed = true;
@@ -753,7 +736,7 @@ describe("Low level API", () => {
     }
     expect(failed).to.equal(true);
 
-    const positionAfter = await exampleComponentPosition.account.position.fetch(
+    const positionAfter = await framework.exampleComponentPosition.account.position.fetch(
       componentPositionEntity5Pda,
     );
 
@@ -763,59 +746,59 @@ describe("Low level API", () => {
   });
 
   it("Whitelist System", async () => {
-    const instruction = await worldProgram.methods
+    const instruction = await framework.worldProgram.methods
       .approveSystem()
       .accounts({
-        authority: provider.wallet.publicKey,
-        system: exampleSystemFly,
+        authority: framework.provider.wallet.publicKey,
+        system: framework.systemFly.programId,
         world: worldPda,
       })
       .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
-    const signature = await provider.sendAndConfirm(transaction, [], {
+    const signature = await framework.provider.sendAndConfirm(transaction, [], {
       skipPreflight: true,
     });
     console.log(`Whitelist 2 system approval signature: ${signature}`);
 
     // Get World and check permissionless and systems
-    const worldAccount = await worldProgram.account.world.fetch(worldPda);
+    const worldAccount = await framework.worldProgram.account.world.fetch(worldPda);
     expect(worldAccount.permissionless).to.equal(false);
     expect(worldAccount.systems.length).to.be.greaterThan(0);
   });
 
   it("Whitelist System 2", async () => {
-    const instruction = await worldProgram.methods
+    const instruction = await framework.worldProgram.methods
       .approveSystem()
       .accounts({
-        authority: provider.wallet.publicKey,
-        system: exampleSystemApplyVelocity,
+        authority: framework.provider.wallet.publicKey,
+        system: framework.systemApplyVelocity.programId,
         world: worldPda,
       })
       .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
-    const signature = await provider.sendAndConfirm(transaction, [], {
+    const signature = await framework.provider.sendAndConfirm(transaction, [], {
       skipPreflight: true,
     });
     console.log(`Whitelist 2 system approval signature: ${signature}`);
 
     // Get World and check permissionless and systems
-    const worldAccount = await worldProgram.account.world.fetch(worldPda);
+    const worldAccount = await framework.worldProgram.account.world.fetch(worldPda);
     expect(worldAccount.permissionless).to.equal(false);
     expect(worldAccount.systems.length).to.be.greaterThan(0);
   });
 
   it("Apply Fly System on Entity 1", async () => {
-    const instruction = await worldProgram.methods
+    const instruction = await framework.worldProgram.methods
       .apply(SerializeArgs())
       .accounts({
-        authority: provider.wallet.publicKey,
-        boltSystem: exampleSystemFly,
+        authority: framework.provider.wallet.publicKey,
+        boltSystem: framework.systemFly.programId,
         world: worldPda,
         sessionToken: null
       })
       .remainingAccounts([
         {
-          pubkey: exampleComponentPosition.programId,
+          pubkey: framework.exampleComponentPosition.programId,
           isSigner: false,
           isWritable: false,
         },
@@ -827,42 +810,42 @@ describe("Low level API", () => {
       ])
       .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
-    await provider.sendAndConfirm(transaction);
+    await framework.provider.sendAndConfirm(transaction);
   });
 
   it("Remove System 1", async () => {
-    const instruction = await worldProgram.methods
+    const instruction = await framework.worldProgram.methods
       .removeSystem()
       .accounts({
-        authority: provider.wallet.publicKey,
-        system: exampleSystemFly,
+        authority: framework.provider.wallet.publicKey,
+        system: framework.systemFly.programId,
         world: worldPda,
       })
       .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
-    const signature = await provider.sendAndConfirm(transaction, [], {
+    const signature = await framework.provider.sendAndConfirm(transaction, [], {
       skipPreflight: true,
     });
     console.log(`Remove System 1 signature: ${signature}`);
 
     // Get World and check permissionless and systems
-    const worldAccount = await worldProgram.account.world.fetch(worldPda);
+    const worldAccount = await framework.worldProgram.account.world.fetch(worldPda);
     expect(worldAccount.permissionless).to.equal(false);
     expect(worldAccount.systems.length).to.be.greaterThan(0);
   });
 
   it("Apply Invalid Fly System on Entity 1", async () => {
-    const instruction = await worldProgram.methods
+    const instruction = await framework.worldProgram.methods
       .apply(SerializeArgs())
       .accounts({
-        authority: provider.wallet.publicKey,
-        boltSystem: exampleSystemFly,
+        authority: framework.provider.wallet.publicKey,
+        boltSystem: framework.systemFly.programId,
         world: worldPda,
         sessionToken: null
       })
       .remainingAccounts([
         {
-          pubkey: exampleComponentPosition.programId,
+          pubkey: framework.exampleComponentPosition.programId,
           isSigner: false,
           isWritable: false,
         },
@@ -876,7 +859,7 @@ describe("Low level API", () => {
     const transaction = new anchor.web3.Transaction().add(instruction);
     let invalid = false;
     try {
-      await provider.sendAndConfirm(transaction);
+      await framework.provider.sendAndConfirm(transaction);
     } catch (error) {
       expect(error.logs.join(" ")).to.contain("Error Code: SystemNotApproved");
       invalid = true;
@@ -887,13 +870,13 @@ describe("Low level API", () => {
   it("Check invalid component init without CPI", async () => {
     let invalid = false;
     try {
-      await exampleComponentPosition.methods
+      await framework.exampleComponentPosition.methods
         .initialize()
         .accounts({
-          payer: provider.wallet.publicKey,
+          payer: framework.provider.wallet.publicKey,
           data: componentPositionEntity5Pda,
           entity: entity5Pda,
-          authority: provider.wallet.publicKey,
+          authority: framework.provider.wallet.publicKey,
         })
         .rpc();
     } catch (error) {
@@ -907,11 +890,11 @@ describe("Low level API", () => {
   it("Check invalid component update without CPI", async () => {
     let invalid = false;
     try {
-      await exampleComponentPosition.methods
+      await framework.exampleComponentPosition.methods
         .update(Buffer.from(""))
         .accounts({
           boltComponent: componentPositionEntity4Pda,
-          authority: provider.wallet.publicKey,
+          authority: framework.provider.wallet.publicKey,
           sessionToken: null
         })
         .rpc();
@@ -926,18 +909,18 @@ describe("Low level API", () => {
 
   it("Check component delegation", async () => {
     const delegateComponent = await DelegateComponent({
-      payer: provider.wallet.publicKey,
+      payer: framework.provider.wallet.publicKey,
       entity: entity1Pda,
-      componentId: exampleComponentPosition.programId,
+      componentId: framework.exampleComponentPosition.programId,
     });
     const instruction = delegateComponent.transaction;
     const transaction = new anchor.web3.Transaction().add(instruction);
-    const txSign = await provider.sendAndConfirm(transaction, [], {
+    const txSign = await framework.provider.sendAndConfirm(transaction, [], {
       skipPreflight: true,
       commitment: "confirmed",
     });
     console.log(`Delegation signature: ${txSign}`);
-    const acc = await provider.connection.getAccountInfo(
+    const acc = await framework.provider.connection.getAccountInfo(
       delegateComponent.componentPda,
     );
     expect(acc?.owner.toBase58()).to.equal(DELEGATION_PROGRAM_ID.toBase58());
