@@ -606,5 +606,6 @@ pub fn build_update_context<'info>(
         authority,
         instruction_sysvar_account,
         session_token,
-    }.build_cpi_context(cpi_program)
+    }
+    .build_cpi_context(cpi_program)
 }
