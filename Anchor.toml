@@ -39,10 +39,7 @@ members = [
 test = """
 echo "Waiting for 2 seconds..."
 sleep 2
-echo "Running low level API tests..."
-yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/bolt.low-level.api.ts
-echo "Running intermediate level API tests..."
-yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/bolt.intermediate-level.api.ts
+yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/main.ts
 """
 
 [test]
@@ -53,6 +50,11 @@ upgradeable = false
 [[test.genesis]]
 address = "DELeGGvXpWV2fqJUhqcF5ZSYMS4JTLjteaAMARRSaeSh"
 program = "tests/fixtures/delegation.so"
+upgradeable = false
+
+[[test.genesis]]
+address="KeyspM2ssCJbqUhQ4k7sveSiY4WjnYsrXkC8oDbwde5"
+program="tests/fixtures/session_keys.so"
 upgradeable = false
 
 [test.validator]

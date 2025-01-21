@@ -1,11 +1,10 @@
 import { Keypair, PublicKey } from "@solana/web3.js";
-import { type Position } from "../target/types/position";
-import { type Velocity } from "../target/types/velocity";
-import { type BoltComponent } from "../target/types/bolt_component";
-import { type SystemSimpleMovement } from "../target/types/system_simple_movement";
-import { type SystemFly } from "../target/types/system_fly";
-import { type SystemApplyVelocity } from "../target/types/system_apply_velocity";
-import { type World } from "../target/types/world";
+import { type Position } from "../../target/types/position";
+import { type Velocity } from "../../target/types/velocity";
+import { type SystemSimpleMovement } from "../../target/types/system_simple_movement";
+import { type SystemFly } from "../../target/types/system_fly";
+import { type SystemApplyVelocity } from "../../target/types/system_apply_velocity";
+import { type World } from "../../target/types/world";
 import { expect } from "chai";
 import BN from "bn.js";
 import {
@@ -19,50 +18,11 @@ import {
   FindEntityPda,
   FindComponentPda,
   SerializeArgs,
-} from "../clients/bolt-sdk";
+  SessionProgram,
+} from "../../clients/bolt-sdk/lib";
+import { logPosition, logVelocity, Direction } from "../utils";
 
-enum Direction {
-  Left = "Left",
-  Right = "Right",
-  Up = "Up",
-  Down = "Down",
-}
-
-function padCenter(value: string, width: number) {
-  const length = value.length;
-  if (width <= length) {
-    return value;
-  }
-  const padding = (width - length) / 2;
-  const align = width - padding;
-  return value.padStart(align, " ").padEnd(width, " ");
-}
-
-function logPosition(title: string, { x, y, z }: { x: BN; y: BN; z: BN }) {
-  console.log(" +----------------------------------+");
-  console.log(` | ${padCenter(title, 32)} |`);
-  console.log(" +-----------------+----------------+");
-  console.log(` | X Position      | ${String(x).padEnd(14, " ")} |`);
-  console.log(` | Y Position      | ${String(y).padEnd(14, " ")} |`);
-  console.log(` | Z Position      | ${String(z).padEnd(14, " ")} |`);
-  console.log(" +-----------------+----------------+");
-}
-
-function logVelocity(
-  title: string,
-  { x, y, z, lastApplied }: { x: BN; y: BN; z: BN; lastApplied: BN },
-) {
-  console.log(" +----------------------------------+");
-  console.log(` | ${padCenter(title, 32)} |`);
-  console.log(" +-----------------+----------------+");
-  console.log(` | X Velocity      | ${String(x).padEnd(14, " ")} |`);
-  console.log(` | Y Velocity      | ${String(y).padEnd(14, " ")} |`);
-  console.log(` | Z Velocity      | ${String(z).padEnd(14, " ")} |`);
-  console.log(` | Last Applied    | ${String(lastApplied).padEnd(14, " ")} |`);
-  console.log(" +-----------------+----------------+");
-}
-
-describe("bolt", () => {
+describe("Low level API", () => {
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
 
@@ -81,6 +41,9 @@ describe("bolt", () => {
   const exampleSystemApplyVelocity = (
     anchor.workspace.SystemApplyVelocity as Program<SystemApplyVelocity>
   ).programId;
+
+  let sessionSigner: anchor.web3.Keypair;
+  let sessionToken: anchor.web3.PublicKey;
 
   let worldPda: PublicKey;
   let worldId: BN;
@@ -506,7 +469,30 @@ describe("bolt", () => {
     expect(position.z.toNumber()).to.equal(0);
   });
 
-  it("Apply Simple Movement System (Right) on Entity 1", async () => {
+
+  it("Create Session", async () => {
+    sessionSigner = anchor.web3.Keypair.generate();
+
+    const airdrop = await provider.connection.requestAirdrop(
+        sessionSigner.publicKey,
+        anchor.web3.LAMPORTS_PER_SOL
+    );
+  
+    await provider.connection.confirmTransaction(airdrop, "confirmed");
+
+    const keys = await SessionProgram.methods
+      .createSession(true, null)
+      .accounts({
+          sessionSigner: sessionSigner.publicKey,
+          authority: provider.wallet.publicKey,
+          targetProgram: exampleComponentPosition.programId
+      })
+      .signers([sessionSigner])
+      .rpcAndKeys();
+    sessionToken = keys.pubkeys.sessionToken as anchor.web3.PublicKey;
+  });
+
+  it("Apply Simple Movement System (Right) on Entity 1 with session token", async () => {
     const instruction = await worldProgram.methods
       .apply(SerializeArgs({ direction: Direction.Right }))
       .accounts({
@@ -531,7 +517,7 @@ describe("bolt", () => {
     const transaction = new anchor.web3.Transaction().add(instruction);
     const signature = await provider.sendAndConfirm(transaction);
     console.log(
-      "Apply Simple Movement System (Right) on Entity 1 signature: ",
+      "Apply Simple Movement System (Right) on Entity 1 with session token signature: ",
       signature,
     );
 

@@ -1,12 +1,10 @@
 import { Keypair, type PublicKey } from "@solana/web3.js";
-import { type Position } from "../target/types/position";
-import { type Velocity } from "../target/types/velocity";
-import { type BoltComponent } from "../target/types/bolt_component";
-import { type SystemSimpleMovement } from "../target/types/system_simple_movement";
-import { type SystemFly } from "../target/types/system_fly";
-import { type SystemApplyVelocity } from "../target/types/system_apply_velocity";
+import { type Position } from "../../target/types/position";
+import { type Velocity } from "../../target/types/velocity";
+import { type SystemSimpleMovement } from "../../target/types/system_simple_movement";
+import { type SystemFly } from "../../target/types/system_fly";
+import { type SystemApplyVelocity } from "../../target/types/system_apply_velocity";
 import { expect } from "chai";
-import type BN from "bn.js";
 import {
   AddEntity,
   DELEGATION_PROGRAM_ID,
@@ -23,50 +21,10 @@ import {
   anchor,
   web3,
   WORLD_PROGRAM_IDL as World,
-} from "../clients/bolt-sdk";
+} from "../../clients/bolt-sdk/lib";
+import { logPosition, logVelocity, Direction } from "../utils";
 
-enum Direction {
-  Left = "Left",
-  Right = "Right",
-  Up = "Up",
-  Down = "Down",
-}
-
-function padCenter(value: string, width: number) {
-  const length = value.length;
-  if (width <= length) {
-    return value;
-  }
-  const padding = (width - length) / 2;
-  const align = width - padding;
-  return value.padStart(align, " ").padEnd(width, " ");
-}
-
-function logPosition(title: string, { x, y, z }: { x: BN; y: BN; z: BN }) {
-  console.log(" +----------------------------------+");
-  console.log(` | ${padCenter(title, 32)} |`);
-  console.log(" +-----------------+----------------+");
-  console.log(` | X Position      | ${String(x).padEnd(14, " ")} |`);
-  console.log(` | Y Position      | ${String(y).padEnd(14, " ")} |`);
-  console.log(` | Z Position      | ${String(z).padEnd(14, " ")} |`);
-  console.log(" +-----------------+----------------+");
-}
-
-function logVelocity(
-  title: string,
-  { x, y, z, lastApplied }: { x: BN; y: BN; z: BN; lastApplied: BN },
-) {
-  console.log(" +----------------------------------+");
-  console.log(` | ${padCenter(title, 32)} |`);
-  console.log(" +-----------------+----------------+");
-  console.log(` | X Velocity      | ${String(x).padEnd(14, " ")} |`);
-  console.log(` | Y Velocity      | ${String(y).padEnd(14, " ")} |`);
-  console.log(` | Z Velocity      | ${String(z).padEnd(14, " ")} |`);
-  console.log(` | Last Applied    | ${String(lastApplied).padEnd(14, " ")} |`);
-  console.log(" +-----------------+----------------+");
-}
-
-describe("bolt", () => {
+describe("Intermediate level API", () => {
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
 

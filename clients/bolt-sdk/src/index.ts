@@ -2,12 +2,20 @@ import { PublicKey } from "@solana/web3.js";
 import type BN from "bn.js";
 import { PROGRAM_ID as WORLD_PROGRAM_ID } from "./generated";
 import { World as WORLD_PROGRAM_IDL } from "./generated/types";
+import { Program as ProjectSerumProgram } from "@project-serum/anchor";
+import { sessionIdl } from "./generated";
 export * from "./generated/accounts";
 export * from "./generated/instructions";
 export * from "./world/transactions";
 export * from "./delegation/delegate";
 export * from "./delegation/undelegate";
 export { DELEGATION_PROGRAM_ID } from "@magicblock-labs/ephemeral-rollups-sdk";
+
+export const SessionProgram = new ProjectSerumProgram(
+  // @ts-ignore
+  sessionIdl,
+  new PublicKey("KeyspM2ssCJbqUhQ4k7sveSiY4WjnYsrXkC8oDbwde5"),
+);
 
 // Re-export anchor
 import * as anchor from "@coral-xyz/anchor";
