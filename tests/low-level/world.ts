@@ -1,23 +1,28 @@
 import BN from "bn.js";
-import { anchor, FindRegistryPda, FindWorldPda } from "../../clients/bolt-sdk/lib";
+import {
+  anchor,
+  FindRegistryPda,
+  FindWorldPda,
+} from "../../clients/bolt-sdk/lib";
 
 export function world(framework) {
   it("Initialize registry", async () => {
     const registryPda = FindRegistryPda({});
     const instruction = await framework.worldProgram.methods
-        .initializeRegistry()
-        .accounts({
+      .initializeRegistry()
+      .accounts({
         registry: registryPda,
         payer: framework.provider.wallet.publicKey,
-        })
-        .instruction();
+      })
+      .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
     await framework.provider.sendAndConfirm(transaction);
   });
 
   it("Initialize world", async () => {
     const registryPda = FindRegistryPda({});
-    const registry = await framework.worldProgram.account.registry.fetch(registryPda);
+    const registry =
+      await framework.worldProgram.account.registry.fetch(registryPda);
     framework.worldId = new BN(registry.worlds);
     framework.worldPda = FindWorldPda({ worldId: framework.worldId });
     const instruction = await framework.worldProgram.methods
@@ -34,7 +39,8 @@ export function world(framework) {
 
   it("Initialize second world", async () => {
     const registryPda = FindRegistryPda({});
-    const registry = await framework.worldProgram.account.registry.fetch(registryPda);
+    const registry =
+      await framework.worldProgram.account.registry.fetch(registryPda);
     const worldId = new BN(registry.worlds);
     const worldPda = FindWorldPda({ worldId });
     const instruction = await framework.worldProgram.methods

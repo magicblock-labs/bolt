@@ -17,7 +17,10 @@ export function padCenter(value: string, width: number) {
   return value.padStart(align, " ").padEnd(width, " ");
 }
 
-export function logPosition(title: string, { x, y, z }: { x: BN; y: BN; z: BN }) {
+export function logPosition(
+  title: string,
+  { x, y, z }: { x: BN; y: BN; z: BN },
+) {
   console.log(" +----------------------------------+");
   console.log(` | ${padCenter(title, 32)} |`);
   console.log(" +-----------------+----------------+");
@@ -52,53 +55,53 @@ import { Keypair, PublicKey } from "@solana/web3.js";
 import BN from "bn.js";
 
 export class Framework {
-    provider: anchor.AnchorProvider;
-    worldProgram: anchor.Program<World>;
-    exampleComponentPosition: anchor.Program<Position>;
-    exampleComponentVelocity: anchor.Program<Velocity>;
-    systemSimpleMovement: anchor.Program<SystemSimpleMovement>;
-    systemFly: anchor.Program<SystemFly>;
-    systemApplyVelocity: anchor.Program<SystemApplyVelocity>;
+  provider: anchor.AnchorProvider;
+  worldProgram: anchor.Program<World>;
+  exampleComponentPosition: anchor.Program<Position>;
+  exampleComponentVelocity: anchor.Program<Velocity>;
+  systemSimpleMovement: anchor.Program<SystemSimpleMovement>;
+  systemFly: anchor.Program<SystemFly>;
+  systemApplyVelocity: anchor.Program<SystemApplyVelocity>;
 
-    worldPda: PublicKey;
-    worldId: BN;
+  worldPda: PublicKey;
+  worldId: BN;
 
-    secondAuthority: PublicKey;
+  secondAuthority: PublicKey;
 
-    entity1Pda: PublicKey;
-    entity2Pda: PublicKey;
-    entity4Pda: PublicKey;
-    entity5Pda: PublicKey;
+  entity1Pda: PublicKey;
+  entity2Pda: PublicKey;
+  entity4Pda: PublicKey;
+  entity5Pda: PublicKey;
 
-    componentPositionEntity1Pda: PublicKey;
-    componentVelocityEntity1Pda: PublicKey;
+  componentPositionEntity1Pda: PublicKey;
+  componentVelocityEntity1Pda: PublicKey;
 
-    componentPositionEntity4Pda: PublicKey;
-    componentPositionEntity5Pda: PublicKey;
-  
-    sessionSigner: Keypair;
-    sessionToken: PublicKey;
+  componentPositionEntity4Pda: PublicKey;
+  componentPositionEntity5Pda: PublicKey;
 
-    constructor() {
-        this.secondAuthority = Keypair.generate().publicKey;
-        this.sessionSigner = Keypair.generate();
-    }
+  sessionSigner: Keypair;
+  sessionToken: PublicKey;
 
-    async initialize() {
-        this.worldProgram = anchor.workspace.World;
-        this.exampleComponentPosition = anchor.workspace.Position;
-        this.exampleComponentVelocity = anchor.workspace.Velocity;
-        this.systemSimpleMovement = anchor.workspace.SystemSimpleMovement;
-        this.systemFly = anchor.workspace.SystemFly;
-        this.systemApplyVelocity = anchor.workspace.SystemApplyVelocity;
+  constructor() {
+    this.secondAuthority = Keypair.generate().publicKey;
+    this.sessionSigner = Keypair.generate();
+  }
 
-        this.provider = anchor.AnchorProvider.env();
-        anchor.setProvider(this.provider);
-    }
+  async initialize() {
+    this.worldProgram = anchor.workspace.World;
+    this.exampleComponentPosition = anchor.workspace.Position;
+    this.exampleComponentVelocity = anchor.workspace.Velocity;
+    this.systemSimpleMovement = anchor.workspace.SystemSimpleMovement;
+    this.systemFly = anchor.workspace.SystemFly;
+    this.systemApplyVelocity = anchor.workspace.SystemApplyVelocity;
+
+    this.provider = anchor.AnchorProvider.env();
+    anchor.setProvider(this.provider);
+  }
 }
 
 export function initialize(framework) {
-    it("Initialize framework", async () => {
-        await framework.initialize();
-    });    
+  it("Initialize framework", async () => {
+    await framework.initialize();
+  });
 }

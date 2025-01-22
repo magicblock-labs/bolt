@@ -466,7 +466,9 @@ describe("Intermediate level API", () => {
         },
       ],
     });
-    applySystem.transaction.recentBlockhash = (await provider.connection.getLatestBlockhash()).blockhash;
+    applySystem.transaction.recentBlockhash = (
+      await provider.connection.getLatestBlockhash()
+    ).blockhash;
     applySystem.transaction.feePayer = provider.wallet.publicKey;
     applySystem.transaction.sign(keypair);
 
@@ -614,7 +616,7 @@ describe("Intermediate level API", () => {
         .accounts({
           boltComponent: componentPositionEntity4Pda,
           authority: provider.wallet.publicKey,
-          sessionToken: null
+          sessionToken: null,
         })
         .rpc();
     } catch (error) {
