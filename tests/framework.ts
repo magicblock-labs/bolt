@@ -85,9 +85,6 @@ export class Framework {
   constructor() {
     this.secondAuthority = Keypair.generate().publicKey;
     this.sessionSigner = Keypair.generate();
-  }
-
-  async initialize() {
     this.worldProgram = anchor.workspace.World;
     this.exampleComponentPosition = anchor.workspace.Position;
     this.exampleComponentVelocity = anchor.workspace.Velocity;
@@ -98,10 +95,4 @@ export class Framework {
     this.provider = anchor.AnchorProvider.env();
     anchor.setProvider(this.provider);
   }
-}
-
-export function initialize(framework) {
-  it("Initialize framework", async () => {
-    await framework.initialize();
-  });
 }

@@ -1,4 +1,3 @@
-import { Framework } from "../main";
 import {
   anchor,
   DelegateComponent,
@@ -6,8 +5,8 @@ import {
 } from "../../clients/bolt-sdk/lib";
 import { expect } from "chai";
 
-export const delegation = (framework: Framework) => {
-  it("Check component delegation", async () => {
+export function acceleration(framework) {
+  it("Check component delegation to accelerator", async () => {
     const delegateComponent = await DelegateComponent({
       payer: framework.provider.wallet.publicKey,
       entity: framework.entity1Pda,
