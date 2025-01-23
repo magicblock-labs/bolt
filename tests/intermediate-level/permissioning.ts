@@ -9,6 +9,85 @@ import {
 import { Keypair } from "@solana/web3.js";
 
 export function permissioning(framework) {
+  it("Apply Fly System on Entity 5 (should fail with wrong authority)", async () => {
+    const positionBefore =
+      await framework.exampleComponentPosition.account.position.fetch(
+        framework.componentPositionEntity5Pda,
+      );
+
+    let keypair = Keypair.generate();
+
+    const applySystem = await ApplySystem({
+      authority: keypair.publicKey,
+      systemId: framework.systemFly.programId,
+      world: framework.worldPda,
+      entities: [
+        {
+          entity: framework.entity5Pda,
+          components: [
+            { componentId: framework.exampleComponentPosition.programId },
+          ],
+        },
+      ],
+    });
+    applySystem.transaction.recentBlockhash = (
+      await framework.provider.connection.getLatestBlockhash()
+    ).blockhash;
+    applySystem.transaction.feePayer = framework.provider.wallet.publicKey;
+    applySystem.transaction.sign(keypair);
+
+    let failed = false;
+    try {
+      await framework.provider.sendAndConfirm(applySystem.transaction);
+    } catch (error) {
+      failed = true;
+      expect(error.logs.join("\n")).to.contain("Error Code: InvalidAuthority");
+    }
+    expect(failed).to.equal(true);
+
+    const positionAfter =
+      await framework.exampleComponentPosition.account.position.fetch(
+        framework.componentPositionEntity5Pda,
+      );
+
+    expect(positionBefore.x.toNumber()).to.equal(positionAfter.x.toNumber());
+    expect(positionBefore.y.toNumber()).to.equal(positionAfter.y.toNumber());
+    expect(positionBefore.z.toNumber()).to.equal(positionAfter.z.toNumber());
+  });
+
+  it("Apply Fly System on Entity 5 should succeed with correct authority", async () => {
+    const positionBefore =
+      await framework.exampleComponentPosition.account.position.fetch(
+        framework.componentPositionEntity5Pda,
+      );
+
+    const applySystem = await ApplySystem({
+      authority: framework.provider.wallet.publicKey,
+      systemId: framework.systemFly.programId,
+      world: framework.worldPda,
+      entities: [
+        {
+          entity: framework.entity5Pda,
+          components: [
+            { componentId: framework.exampleComponentPosition.programId },
+          ],
+        },
+      ],
+    });
+
+    await framework.provider.sendAndConfirm(applySystem.transaction);
+
+    const positionAfter =
+      await framework.exampleComponentPosition.account.position.fetch(
+        framework.componentPositionEntity5Pda,
+      );
+
+    expect(positionAfter.x.toNumber()).to.equal(positionBefore.x.toNumber());
+    expect(positionAfter.y.toNumber()).to.equal(positionBefore.y.toNumber());
+    expect(positionAfter.z.toNumber()).to.equal(positionBefore.z.toNumber() + 1);
+  });
+
+
   it("Add authority", async () => {
     const addAuthority = await AddAuthority({
       authority: framework.provider.wallet.publicKey,
@@ -63,52 +142,6 @@ export function permissioning(framework) {
         auth.equals(framework.secondAuthority),
       ),
     );
-  });
-
-  it("Apply Fly System on Entity 5 (should fail with wrong authority)", async () => {
-    const positionBefore =
-      await framework.exampleComponentPosition.account.position.fetch(
-        framework.componentPositionEntity5Pda,
-      );
-
-    let keypair = Keypair.generate();
-
-    const applySystem = await ApplySystem({
-      authority: keypair.publicKey,
-      systemId: framework.systemFly.programId,
-      world: framework.worldPda,
-      entities: [
-        {
-          entity: framework.entity5Pda,
-          components: [
-            { componentId: framework.exampleComponentPosition.programId },
-          ],
-        },
-      ],
-    });
-    applySystem.transaction.recentBlockhash = (
-      await framework.provider.connection.getLatestBlockhash()
-    ).blockhash;
-    applySystem.transaction.feePayer = framework.provider.wallet.publicKey;
-    applySystem.transaction.sign(keypair);
-
-    let failed = false;
-    try {
-      await framework.provider.sendAndConfirm(applySystem.transaction);
-    } catch (error) {
-      failed = true;
-      expect(error.logs.join("\n")).to.contain("Error Code: InvalidAuthority");
-    }
-    expect(failed).to.equal(true);
-
-    const positionAfter =
-      await framework.exampleComponentPosition.account.position.fetch(
-        framework.componentPositionEntity5Pda,
-      );
-
-    expect(positionBefore.x.toNumber()).to.equal(positionAfter.x.toNumber());
-    expect(positionBefore.y.toNumber()).to.equal(positionAfter.y.toNumber());
-    expect(positionBefore.z.toNumber()).to.equal(positionAfter.z.toNumber());
   });
 
   it("Whitelist System", async () => {

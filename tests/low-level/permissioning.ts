@@ -58,6 +58,46 @@ export function permissioning(framework) {
     expect(positionBefore.z.toNumber()).to.equal(positionAfter.z.toNumber());
   });
 
+  it("Apply Fly System on Entity 5 should succeed with correct authority", async () => {
+    const positionBefore =
+      await framework.exampleComponentPosition.account.position.fetch(
+        framework.componentPositionEntity5Pda,
+      );
+
+    const instruction = await framework.worldProgram.methods
+      .apply(SerializeArgs())
+      .accounts({
+        authority: framework.provider.wallet.publicKey,
+        boltSystem: framework.systemFly.programId,
+        world: framework.worldPda,
+        sessionToken: null,
+      })
+      .remainingAccounts([
+        {
+          pubkey: framework.exampleComponentPosition.programId,
+          isSigner: false,
+          isWritable: false,
+        },
+        {
+          pubkey: framework.componentPositionEntity5Pda,
+          isSigner: false,
+          isWritable: true,
+        },
+      ])
+      .instruction();
+    const transaction = new anchor.web3.Transaction().add(instruction);
+
+    await framework.provider.sendAndConfirm(transaction);
+    const positionAfter =
+      await framework.exampleComponentPosition.account.position.fetch(
+        framework.componentPositionEntity5Pda,
+      );
+
+    expect(positionAfter.x.toNumber()).to.equal(positionBefore.x.toNumber());
+    expect(positionAfter.y.toNumber()).to.equal(positionBefore.y.toNumber());
+    expect(positionAfter.z.toNumber()).to.equal(positionBefore.z.toNumber() + 1);
+  });
+
   it("Add authority", async () => {
     const instruction = await framework.worldProgram.methods
       .addAuthority(framework.worldId)
