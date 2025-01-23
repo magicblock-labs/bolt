@@ -7,9 +7,19 @@ import { acceleration } from "./acceleration";
 
 describe("Low level API", () => {
   let framework: Framework = new Framework();
-  world(framework);
-  ecs(framework);
-  session(framework);
-  permissioning(framework);
-  acceleration(framework);
+  describe("World", () => {
+    world(framework);
+  });
+  describe("ECS", () => {
+    ecs(framework);
+  });
+  describe("Session", () => {
+    session(framework);
+  });
+  describe("Permissioning", () => {
+    permissioning(framework);
+  });
+  describe("Acceleration", () => {
+    acceleration(framework);
+  });
 });

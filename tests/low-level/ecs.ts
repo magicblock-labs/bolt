@@ -107,40 +107,21 @@ export function ecs(framework) {
     await framework.provider.sendAndConfirm(transaction);
   });
 
-  it("Initialize Component on Entity 1, through the world instance", async () => {
-    const componentId = framework.exampleComponentPosition.programId;
-    const componentPda = FindComponentPda({
+  it("Initialize Velocity Component on Entity 1 (with seed)", async () => {
+    const componentId = framework.exampleComponentVelocity.programId;
+    framework.componentVelocityEntity1Pda = FindComponentPda({
       componentId,
       entity: framework.entity1Pda,
+      seed: "component-velocity",
     });
     const instruction = await framework.worldProgram.methods
       .initializeComponent()
       .accounts({
         payer: framework.provider.wallet.publicKey,
         entity: framework.entity1Pda,
-        data: componentPda,
+        data: framework.componentVelocityEntity1Pda,
         componentProgram: componentId,
-        authority: framework.provider.wallet.publicKey,
-      })
-      .instruction();
-    const transaction = new anchor.web3.Transaction().add(instruction);
-    await framework.provider.sendAndConfirm(transaction);
-  });
-
-  it("Initialize Component on Entity 2, trough the world instance", async () => {
-    const componentId = framework.exampleComponentPosition.programId;
-    const componentPda = FindComponentPda({
-      componentId,
-      entity: framework.entity2Pda,
-    });
-    const instruction = await framework.worldProgram.methods
-      .initializeComponent()
-      .accounts({
-        payer: framework.provider.wallet.publicKey,
-        entity: framework.entity2Pda,
-        data: componentPda,
-        componentProgram: componentId,
-        authority: framework.provider.wallet.publicKey,
+        authority: framework.worldProgram.programId,
       })
       .instruction();
     const transaction = new anchor.web3.Transaction().add(instruction);
@@ -167,30 +148,9 @@ export function ecs(framework) {
     await framework.provider.sendAndConfirm(transaction);
   });
 
-  it("Initialize Velocity Component on Entity 1 (with seed)", async () => {
-    const componentId = framework.exampleComponentVelocity.programId;
-    framework.componentVelocityEntity1Pda = FindComponentPda({
-      componentId,
-      entity: framework.entity1Pda,
-      seed: "component-velocity",
-    });
-    const instruction = await framework.worldProgram.methods
-      .initializeComponent()
-      .accounts({
-        payer: framework.provider.wallet.publicKey,
-        entity: framework.entity1Pda,
-        data: framework.componentVelocityEntity1Pda,
-        componentProgram: componentId,
-        authority: framework.worldProgram.programId,
-      })
-      .instruction();
-    const transaction = new anchor.web3.Transaction().add(instruction);
-    await framework.provider.sendAndConfirm(transaction);
-  });
-
   it("Initialize Position Component on Entity 2", async () => {
     const componentId = framework.exampleComponentPosition.programId;
-    const componentPositionEntity2Pda = FindComponentPda({
+    const componentPda = FindComponentPda({
       componentId,
       entity: framework.entity2Pda,
     });
@@ -199,7 +159,7 @@ export function ecs(framework) {
       .accounts({
         payer: framework.provider.wallet.publicKey,
         entity: framework.entity2Pda,
-        data: componentPositionEntity2Pda,
+        data: componentPda,
         componentProgram: componentId,
         authority: framework.worldProgram.programId,
       })

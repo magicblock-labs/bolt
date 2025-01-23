@@ -58,22 +58,15 @@ export function ecs(framework: Framework) {
     framework.entity5Pda = addEntity.entityPda; // Saved for later
   });
 
-  it("Initialize Original Component on Entity 1, trough the world instance", async () => {
+  it("Initialize Velocity Component on Entity 1 (with seed)", async () => {
     const initializeComponent = await InitializeComponent({
       payer: framework.provider.wallet.publicKey,
       entity: framework.entity1Pda,
-      componentId: framework.exampleComponentPosition.programId,
+      componentId: framework.exampleComponentVelocity.programId,
+      seed: "component-velocity",
     });
     await framework.provider.sendAndConfirm(initializeComponent.transaction);
-  });
-
-  it("Initialize Original Component on Entity 2, trough the world instance", async () => {
-    const initializeComponent = await InitializeComponent({
-      payer: framework.provider.wallet.publicKey,
-      entity: framework.entity2Pda,
-      componentId: framework.exampleComponentPosition.programId,
-    });
-    await framework.provider.sendAndConfirm(initializeComponent.transaction);
+    framework.componentVelocityEntity1Pda = initializeComponent.componentPda; // Saved for later
   });
 
   it("Initialize Position Component on Entity 1", async () => {
@@ -84,17 +77,6 @@ export function ecs(framework: Framework) {
     });
     await framework.provider.sendAndConfirm(initializeComponent.transaction);
     framework.componentPositionEntity1Pda = initializeComponent.componentPda; // Saved for later
-  });
-
-  it("Initialize Velocity Component on Entity 1 (with seed)", async () => {
-    const initializeComponent = await InitializeComponent({
-      payer: framework.provider.wallet.publicKey,
-      entity: framework.entity1Pda,
-      componentId: framework.exampleComponentVelocity.programId,
-      seed: "component-velocity",
-    });
-    await framework.provider.sendAndConfirm(initializeComponent.transaction);
-    framework.componentVelocityEntity1Pda = initializeComponent.componentPda; // Saved for later
   });
 
   it("Initialize Position Component on Entity 2", async () => {
