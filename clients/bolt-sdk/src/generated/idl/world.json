@@ -102,8 +102,11 @@
           "name": "bolt_system"
         },
         {
-          "name": "authority",
+          "name": "payer",
           "signer": true
+        },
+        {
+          "name": "authority"
         },
         {
           "name": "instruction_sysvar_account",

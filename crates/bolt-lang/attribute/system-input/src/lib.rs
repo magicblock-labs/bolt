@@ -76,8 +76,9 @@ pub fn system_input(_attr: TokenStream, item: TokenStream) -> TokenStream {
         #[derive(Accounts)]
         pub struct #name<'info> {
             #(#transformed_fields)*
+            /// CHECK: Authority check
             #[account()]
-            pub authority: Signer<'info>,
+            pub authority: AccountInfo<'info>,
         }
     };
 
@@ -136,8 +137,9 @@ pub fn system_input(_attr: TokenStream, item: TokenStream) -> TokenStream {
 
         #[derive(Accounts)]
         pub struct VariadicBoltComponents<'info> {
+            /// CHECK: Authority check
             #[account()]
-            pub authority: Signer<'info>,
+            pub authority: AccountInfo<'info>,
         }
     };
 

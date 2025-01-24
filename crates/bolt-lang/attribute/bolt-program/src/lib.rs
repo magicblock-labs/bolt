@@ -148,16 +148,19 @@ fn generate_update(component_type: &Type) -> (TokenStream2, TokenStream2) {
         quote! {
             #[automatically_derived]
             pub fn update(ctx: Context<Update>, data: Vec<u8>) -> Result<()> {
-                // TODO: Should we also check if the session token authority can be the World::id?
                 if let Some(session_token) = &ctx.accounts.session_token {
-                    let validity_ctx = bolt_lang::session_keys::ValidityChecker {
-                        session_token: session_token.clone(),
-                        session_signer: ctx.accounts.authority.clone(),
-                        authority: ctx.accounts.bolt_component.bolt_metadata.authority.clone(),
-                        target_program: crate::id(),
-                    };
-                    require!(session_token.validate(validity_ctx)?, bolt_lang::session_keys::SessionError::InvalidToken);
-                    require_eq!(ctx.accounts.bolt_component.bolt_metadata.authority, session_token.authority, bolt_lang::session_keys::SessionError::InvalidToken);
+                    if ctx.accounts.bolt_component.bolt_metadata.authority == World::id() {
+                        require!(Clock::get()?.unix_timestamp < session_token.valid_until, bolt_lang::session_keys::SessionError::InvalidToken);
+                    } else {
+                        let validity_ctx = bolt_lang::session_keys::ValidityChecker {
+                            session_token: session_token.clone(),
+                            session_signer: ctx.accounts.payer.clone(),
+                            authority: ctx.accounts.bolt_component.bolt_metadata.authority.clone(),
+                            target_program: World::id(),
+                        };
+                        require!(session_token.validate(validity_ctx)?, bolt_lang::session_keys::SessionError::InvalidToken);
+                        require_eq!(ctx.accounts.bolt_component.bolt_metadata.authority, session_token.authority, bolt_lang::session_keys::SessionError::InvalidToken);
+                    }
                 } else {
                     require!(ctx.accounts.bolt_component.bolt_metadata.authority == World::id() || (ctx.accounts.bolt_component.bolt_metadata.authority == *ctx.accounts.authority.key && ctx.accounts.authority.is_signer), BoltError::InvalidAuthority);
                 }
@@ -179,7 +182,9 @@ fn generate_update(component_type: &Type) -> (TokenStream2, TokenStream2) {
                 #[account(mut)]
                 pub bolt_component: Account<'info, #component_type>,
                 #[account()]
-                pub authority: Signer<'info>,
+                pub payer: Signer<'info>,
+                #[account()]
+                pub authority: AccountInfo<'info>,
                 #[account(address = anchor_lang::solana_program::sysvar::instructions::id())]
                 pub instruction_sysvar_account: UncheckedAccount<'info>,
                 #[account()]

@@ -13,10 +13,14 @@ export function acceleration(framework) {
         componentId: framework.exampleComponentPosition.programId,
       });
 
-      await framework.provider.sendAndConfirm(delegateComponent.transaction, [], {
-        skipPreflight: true,
-        commitment: "confirmed",
-      });
+      await framework.provider.sendAndConfirm(
+        delegateComponent.transaction,
+        [],
+        {
+          skipPreflight: true,
+          commitment: "confirmed",
+        },
+      );
       const acc = await framework.provider.connection.getAccountInfo(
         delegateComponent.componentPda,
       );

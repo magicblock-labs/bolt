@@ -25,4 +25,4 @@ export function acceleration(framework) {
       expect(acc?.owner.toBase58()).to.equal(DELEGATION_PROGRAM_ID.toBase58());
     });
   });
-};
+}

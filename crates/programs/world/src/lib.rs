@@ -268,7 +268,10 @@ pub mod world {
         ctx: Context<'_, '_, '_, 'info, Apply<'info>>,
         args: Vec<u8>,
     ) -> Result<()> {
-        if !ctx.accounts.authority.is_signer && ctx.accounts.authority.key != &ID {
+        if !ctx.accounts.authority.is_signer
+            && ctx.accounts.authority.key != &ID
+            && ctx.accounts.session_token.is_none()
+        {
             return Err(WorldError::InvalidAuthority.into());
         }
         if !ctx.accounts.world.permissionless
@@ -319,6 +322,7 @@ pub mod world {
                 build_update_context(
                     program,
                     component,
+                    ctx.accounts.payer.clone(),
                     ctx.accounts.authority.clone(),
                     ctx.accounts.instruction_sysvar_account.clone(),
                     ctx.accounts.session_token.clone(),
@@ -334,9 +338,11 @@ pub mod world {
         /// CHECK: bolt system program check
         #[account()]
         pub bolt_system: UncheckedAccount<'info>,
+        #[account()]
+        pub payer: Signer<'info>,
         /// CHECK: authority check
         #[account()]
-        pub authority: Signer<'info>,
+        pub authority: AccountInfo<'info>,
         /// CHECK: instruction sysvar check
         #[account(address = anchor_lang::solana_program::sysvar::instructions::id())]
         pub instruction_sysvar_account: UncheckedAccount<'info>,
@@ -349,9 +355,9 @@ pub mod world {
     impl<'info> Apply<'info> {
         pub fn build(
             &self,
-        ) -> CpiContext<'_, '_, '_, 'info, bolt_system::cpi::accounts::SetData<'info>> {
+        ) -> CpiContext<'_, '_, '_, 'info, bolt_system::cpi::accounts::BoltExecute<'info>> {
             let cpi_program = self.bolt_system.to_account_info();
-            let cpi_accounts = bolt_system::cpi::accounts::SetData {
+            let cpi_accounts = bolt_system::cpi::accounts::BoltExecute {
                 authority: self.authority.to_account_info(),
             };
             CpiContext::new(cpi_program, cpi_accounts)
@@ -593,16 +599,19 @@ impl SystemWhitelist {
 pub fn build_update_context<'info>(
     component_program: AccountInfo<'info>,
     bolt_component: AccountInfo<'info>,
-    authority: Signer<'info>,
+    payer: Signer<'info>,
+    authority: AccountInfo<'info>,
     instruction_sysvar_account: UncheckedAccount<'info>,
     session_token: Option<UncheckedAccount<'info>>,
 ) -> CpiContext<'info, 'info, 'info, 'info, bolt_component::cpi::accounts::Update<'info>> {
     let authority = authority.to_account_info();
+    let payer = payer.to_account_info();
     let instruction_sysvar_account = instruction_sysvar_account.to_account_info();
     let cpi_program = component_program;
     let session_token = session_token.map(|x| x.to_account_info());
     bolt_component::cpi::accounts::Update {
         bolt_component,
+        payer,
         authority,
         instruction_sysvar_account,
         session_token,

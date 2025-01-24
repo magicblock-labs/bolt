@@ -17,10 +17,13 @@ pub mod bolt_component {
     #[derive(Accounts)]
     pub struct Update<'info> {
         #[account(mut)]
+        /// CHECK: The component to update
         pub bolt_component: UncheckedAccount<'info>,
         #[account()]
+        pub payer: Signer<'info>,
+        #[account()]
         /// CHECK: The authority of the component
-        pub authority: Signer<'info>,
+        pub authority: AccountInfo<'info>,
         #[account(address = anchor_lang::solana_program::sysvar::instructions::id())]
         /// CHECK: The instruction sysvar
         pub instruction_sysvar_account: AccountInfo<'info>,
@@ -34,6 +37,7 @@ pub struct Initialize<'info> {
     #[account(mut)]
     pub payer: Signer<'info>,
     #[account(mut)]
+    /// CHECK: The component to initialize
     pub data: UncheckedAccount<'info>,
     #[account()]
     /// CHECK: A generic entity account

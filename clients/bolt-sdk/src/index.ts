@@ -1,9 +1,8 @@
 import { PublicKey } from "@solana/web3.js";
-import type BN from "bn.js";
+import BN from "bn.js";
 import { PROGRAM_ID as WORLD_PROGRAM_ID } from "./generated";
 import { World as WORLD_PROGRAM_IDL } from "./generated/types";
-import { Program as ProjectSerumProgram } from "@project-serum/anchor";
-import { sessionIdl } from "./generated";
+export { BN };
 export * from "./generated/accounts";
 export * from "./generated/instructions";
 export * from "./world/transactions";
@@ -11,14 +10,9 @@ export * from "./delegation/delegate";
 export * from "./delegation/undelegate";
 export { DELEGATION_PROGRAM_ID } from "@magicblock-labs/ephemeral-rollups-sdk";
 
-export const SessionProgram = new ProjectSerumProgram(
-  // @ts-ignore
-  sessionIdl,
-  new PublicKey("KeyspM2ssCJbqUhQ4k7sveSiY4WjnYsrXkC8oDbwde5"),
-);
-
 // Re-export anchor
 import * as anchor from "@coral-xyz/anchor";
+import { SessionProgram, Session } from "./session";
 export { anchor };
 export { Provider, Program, Wallet, web3, workspace } from "@coral-xyz/anchor";
 export { WORLD_PROGRAM_ID, WORLD_PROGRAM_IDL };
@@ -76,6 +70,24 @@ export function FindEntityPda({
   )[0];
 }
 
+export function FindSessionTokenPda({
+  sessionSigner,
+  authority,
+}: {
+  sessionSigner: PublicKey;
+  authority: PublicKey;
+}) {
+  return PublicKey.findProgramAddressSync(
+    [
+      Buffer.from("session_token"),
+      WORLD_PROGRAM_ID.toBytes(),
+      sessionSigner.toBytes(),
+      authority.toBytes(),
+    ],
+    SessionProgram.programId,
+  )[0];
+}
+
 // TODO: seed must be Uint8Array like the other FindPda functions
 export function FindComponentPda({
   componentId,
@@ -107,3 +119,5 @@ export function SerializeArgs(args: any = {}) {
     binaryData.byteLength,
   );
 }
+
+export { SessionProgram, Session };

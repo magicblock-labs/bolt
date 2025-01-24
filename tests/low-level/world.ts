@@ -1,8 +1,8 @@
-import BN from "bn.js";
 import {
   anchor,
   FindRegistryPda,
   FindWorldPda,
+  BN,
 } from "../../clients/bolt-sdk/lib";
 
 export function world(framework) {

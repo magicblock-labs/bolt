@@ -7,4 +7,3 @@ export function permissioning(framework) {
     world(framework);
   });
 }
-

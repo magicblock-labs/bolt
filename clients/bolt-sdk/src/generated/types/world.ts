@@ -81,8 +81,11 @@ export type World = {
           name: "boltSystem";
         },
         {
-          name: "authority";
+          name: "payer";
           signer: true;
+        },
+        {
+          name: "authority";
         },
         {
           name: "instructionSysvarAccount";
