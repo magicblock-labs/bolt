@@ -84,8 +84,8 @@ pub fn create_world(cfg_override: &ConfigOverride) -> Result<()> {
         .send()?;
 
     println!(
-        "New world created {} with signature {}",
-        world_pda, signature
+        "New world created {} with world id {}. Transaction signature {}",
+        world_pda, world_id, signature
     );
 
     Ok(())
