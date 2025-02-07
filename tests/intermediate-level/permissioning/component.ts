@@ -39,7 +39,7 @@ export function component(framework) {
           component,
         );
 
-      let keypair = Keypair.generate();
+      const keypair = Keypair.generate();
 
       const applySystem = await ApplySystem({
         authority: keypair.publicKey,

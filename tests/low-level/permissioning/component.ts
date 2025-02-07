@@ -58,7 +58,7 @@ export function component(framework) {
           component,
         );
 
-      let keypair = Keypair.generate();
+      const keypair = Keypair.generate();
 
       const instruction = await framework.worldProgram.methods
         .apply(SerializeArgs())

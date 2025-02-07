@@ -185,7 +185,7 @@ fn generate_update(component_type: &Type) -> (TokenStream2, TokenStream2) {
                 pub authority: Signer<'info>,
                 #[account(address = anchor_lang::solana_program::sysvar::instructions::id())]
                 pub instruction_sysvar_account: UncheckedAccount<'info>,
-                #[account()]
+                #[account(constraint = session_token.to_account_info().owner == &bolt_lang::session_keys::ID)]
                 pub session_token: Option<Account<'info, bolt_lang::session_keys::SessionToken>>,
             }
         },

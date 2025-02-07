@@ -5,9 +5,7 @@ let _actualInstance: Program | null = null;
 
 function getOrCreateInstance(): Program {
   if (!_actualInstance) {
-    _actualInstance = new Program(
-      sessionIdl as Idl,
-    );
+    _actualInstance = new Program(sessionIdl as Idl);
   }
   return _actualInstance;
 }

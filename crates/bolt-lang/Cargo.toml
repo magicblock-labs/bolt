@@ -34,7 +34,7 @@ bolt-system = { workspace = true }
 session-keys = { workspace = true }
 
 # Delegation
-ephemeral-rollups-sdk = { workspace = true , features = ["anchor"]}
+ephemeral-rollups-sdk = { workspace = true, features = ["anchor"]}
 
 # Other dependencies
 serde = { workspace = true }

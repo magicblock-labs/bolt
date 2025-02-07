@@ -6,7 +6,7 @@ import { permissioning } from "./permissioning";
 import { acceleration } from "./acceleration";
 
 describe("Intermediate level API", () => {
-  let framework: Framework = new Framework();
+  const framework: Framework = new Framework();
   world(framework);
   ecs(framework);
   session(framework);
