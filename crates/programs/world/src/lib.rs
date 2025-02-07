@@ -322,7 +322,6 @@ pub mod world {
                 build_update_context(
                     program,
                     component,
-                    ctx.accounts.payer.clone(),
                     ctx.accounts.authority.clone(),
                     ctx.accounts.instruction_sysvar_account.clone(),
                     ctx.accounts.session_token.clone(),
@@ -338,11 +337,9 @@ pub mod world {
         /// CHECK: bolt system program check
         #[account()]
         pub bolt_system: UncheckedAccount<'info>,
-        #[account()]
-        pub payer: Signer<'info>,
         /// CHECK: authority check
         #[account()]
-        pub authority: AccountInfo<'info>,
+        pub authority: Signer<'info>,
         /// CHECK: instruction sysvar check
         #[account(address = anchor_lang::solana_program::sysvar::instructions::id())]
         pub instruction_sysvar_account: UncheckedAccount<'info>,
@@ -599,19 +596,16 @@ impl SystemWhitelist {
 pub fn build_update_context<'info>(
     component_program: AccountInfo<'info>,
     bolt_component: AccountInfo<'info>,
-    payer: Signer<'info>,
-    authority: AccountInfo<'info>,
+    authority: Signer<'info>,
     instruction_sysvar_account: UncheckedAccount<'info>,
     session_token: Option<UncheckedAccount<'info>>,
 ) -> CpiContext<'info, 'info, 'info, 'info, bolt_component::cpi::accounts::Update<'info>> {
     let authority = authority.to_account_info();
-    let payer = payer.to_account_info();
     let instruction_sysvar_account = instruction_sysvar_account.to_account_info();
     let cpi_program = component_program;
     let session_token = session_token.map(|x| x.to_account_info());
     bolt_component::cpi::accounts::Update {
         bolt_component,
-        payer,
         authority,
         instruction_sysvar_account,
         session_token,

@@ -154,7 +154,7 @@ fn generate_update(component_type: &Type) -> (TokenStream2, TokenStream2) {
                     } else {
                         let validity_ctx = bolt_lang::session_keys::ValidityChecker {
                             session_token: session_token.clone(),
-                            session_signer: ctx.accounts.payer.clone(),
+                            session_signer: ctx.accounts.authority.clone(),
                             authority: ctx.accounts.bolt_component.bolt_metadata.authority.clone(),
                             target_program: World::id(),
                         };
@@ -182,9 +182,7 @@ fn generate_update(component_type: &Type) -> (TokenStream2, TokenStream2) {
                 #[account(mut)]
                 pub bolt_component: Account<'info, #component_type>,
                 #[account()]
-                pub payer: Signer<'info>,
-                #[account()]
-                pub authority: AccountInfo<'info>,
+                pub authority: Signer<'info>,
                 #[account(address = anchor_lang::solana_program::sysvar::instructions::id())]
                 pub instruction_sysvar_account: UncheckedAccount<'info>,
                 #[account()]

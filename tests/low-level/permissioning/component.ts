@@ -84,7 +84,7 @@ export function component(framework) {
       const transaction = new anchor.web3.Transaction().add(instruction);
 
       try {
-        await framework.provider.sendAndConfirm(transaction);
+        await framework.provider.sendAndConfirm(transaction, [keypair]);
         assert.fail(
           "Shouldn't apply fly system on authority test entity with wrong authority",
         );

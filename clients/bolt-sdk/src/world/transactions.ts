@@ -406,10 +406,8 @@ async function createApplySystemInstruction({
   }
 
   let sessionToken = session ? session.token : null;
-  let payer = session ? session.signer.publicKey : authority;
 
   const applyAccounts = {
-    payer,
     authority: authority ?? PROGRAM_ID,
     boltSystem: systemId,
     sessionToken,

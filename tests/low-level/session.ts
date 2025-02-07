@@ -86,8 +86,7 @@ export function session(framework) {
       const instruction = await framework.worldProgram.methods
         .apply(SerializeArgs())
         .accounts({
-          payer: sessionSigner.publicKey,
-          authority: framework.provider.wallet.publicKey,
+          authority: sessionSigner.publicKey,
           boltSystem: framework.systemFly.programId,
           world: framework.worldPda,
           sessionToken,
@@ -173,8 +172,7 @@ export function session(framework) {
       const instruction = await framework.worldProgram.methods
         .apply(SerializeArgs())
         .accounts({
-          payer: sessionSigner.publicKey,
-          authority: framework.provider.wallet.publicKey,
+          authority: sessionSigner.publicKey,
           boltSystem: framework.systemFly.programId,
           world: framework.worldPda,
           sessionToken,

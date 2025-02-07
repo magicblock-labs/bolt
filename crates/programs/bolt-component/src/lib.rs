@@ -20,10 +20,8 @@ pub mod bolt_component {
         /// CHECK: The component to update
         pub bolt_component: UncheckedAccount<'info>,
         #[account()]
-        pub payer: Signer<'info>,
-        #[account()]
         /// CHECK: The authority of the component
-        pub authority: AccountInfo<'info>,
+        pub authority: Signer<'info>,
         #[account(address = anchor_lang::solana_program::sysvar::instructions::id())]
         /// CHECK: The instruction sysvar
         pub instruction_sysvar_account: AccountInfo<'info>,

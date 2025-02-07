@@ -1,4 +1,4 @@
-import { Program } from "@coral-xyz/anchor";
+import { Program, Idl } from "@coral-xyz/anchor";
 import { sessionIdl } from "./generated";
 import { Keypair, PublicKey } from "@solana/web3.js";
 let _actualInstance: Program | null = null;
@@ -6,8 +6,7 @@ let _actualInstance: Program | null = null;
 function getOrCreateInstance(): Program {
   if (!_actualInstance) {
     _actualInstance = new Program(
-      // @ts-ignore
-      sessionIdl,
+      sessionIdl as Idl,
     );
   }
   return _actualInstance;

@@ -59,7 +59,7 @@ export function session(framework) {
         );
 
       const applySystem = await ApplySystem({
-        authority: framework.provider.wallet.publicKey,
+        authority: session.signer.publicKey,
         systemId: framework.systemFly.programId,
         world: framework.worldPda,
         session,
@@ -118,7 +118,7 @@ export function session(framework) {
         );
 
       const applySystem = await ApplySystem({
-        authority: framework.provider.wallet.publicKey,
+        authority: session.signer.publicKey,
         systemId: framework.systemFly.programId,
         world: framework.worldPda,
         session,
