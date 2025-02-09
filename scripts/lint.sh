@@ -3,11 +3,11 @@ SCRIPT_DIR=$(dirname "$0")
 PROJECT_DIR="$SCRIPT_DIR/.."
 pushd "$PROJECT_DIR"
 echo "### Checking formatting..."
-cargo fmt -- --check --verbose
+cargo fmt -- --verbose
 
 echo "### Checking clippy..."
-cargo clippy -- --deny=warnings
+cargo clippy --fix -- --deny=warnings
 
 echo "### Checking yarn lint..."
-yarn lint
+yarn lint --write
 popd

@@ -11,11 +11,16 @@ import {
   SerializeArgs,
   SYSVAR_INSTRUCTIONS_PUBKEY,
   World,
+  SessionProgram,
+  Session,
+  FindSessionTokenPda,
+  WORLD_PROGRAM_ID,
+  BN,
 } from "../index";
-import BN from "bn.js";
 import type web3 from "@solana/web3.js";
 import {
   type Connection,
+  Keypair,
   type PublicKey,
   Transaction,
   type TransactionInstruction,
@@ -44,6 +49,45 @@ export async function InitializeRegistry({
   return {
     instruction,
     transaction,
+  };
+}
+
+export async function CreateSession({
+  sessionSigner,
+  authority,
+  topUp,
+  validity,
+}: {
+  sessionSigner?: Keypair;
+  authority: PublicKey;
+  topUp?: BN;
+  validity?: BN;
+}): Promise<{
+  instruction: TransactionInstruction;
+  transaction: Transaction;
+  session: Session;
+}> {
+  sessionSigner = sessionSigner ?? Keypair.generate();
+  const sessionToken = FindSessionTokenPda({
+    sessionSigner: sessionSigner.publicKey,
+    authority,
+  });
+  const lamports = topUp ?? null;
+  const shouldTopUp = topUp ? true : false;
+  let instruction = await SessionProgram.methods
+    .createSession(shouldTopUp, validity ?? null, lamports)
+    .accounts({
+      sessionSigner: sessionSigner.publicKey,
+      authority,
+      targetProgram: WORLD_PROGRAM_ID,
+      sessionToken,
+    })
+    .instruction();
+  const transaction = new Transaction().add(instruction);
+  return {
+    instruction,
+    transaction,
+    session: new Session(sessionSigner, sessionToken),
   };
 }
 
@@ -337,6 +381,7 @@ interface ApplySystemInstruction {
   systemId: PublicKey;
   entities: ApplySystemEntity[];
   world: PublicKey;
+  session?: Session;
   extraAccounts?: web3.AccountMeta[];
   args?: object;
 }
@@ -345,6 +390,7 @@ async function createApplySystemInstruction({
   systemId,
   entities,
   world,
+  session,
   extraAccounts,
   args,
 }: ApplySystemInstruction): Promise<web3.TransactionInstruction> {
@@ -359,9 +405,12 @@ async function createApplySystemInstruction({
     throw new Error("No components provided");
   }
 
+  let sessionToken = session ? session.token : null;
+
   const applyAccounts = {
     authority: authority ?? PROGRAM_ID,
     boltSystem: systemId,
+    sessionToken,
     world,
   };
 
@@ -435,6 +484,7 @@ export async function ApplySystem({
   world,
   extraAccounts,
   args,
+  session,
 }: {
   authority: PublicKey;
   systemId: PublicKey;
@@ -442,6 +492,7 @@ export async function ApplySystem({
   world: PublicKey;
   extraAccounts?: web3.AccountMeta[];
   args?: object;
+  session?: Session;
 }): Promise<{ instruction: TransactionInstruction; transaction: Transaction }> {
   const instruction = await createApplySystemInstruction({
     authority,
@@ -450,6 +501,7 @@ export async function ApplySystem({
     world,
     extraAccounts,
     args,
+    session,
   });
   const transaction = new Transaction().add(instruction);
   return {

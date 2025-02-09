@@ -148,17 +148,28 @@ fn generate_update(component_type: &Type) -> (TokenStream2, TokenStream2) {
         quote! {
             #[automatically_derived]
             pub fn update(ctx: Context<Update>, data: Vec<u8>) -> Result<()> {
+                if let Some(session_token) = &ctx.accounts.session_token {
+                    if ctx.accounts.bolt_component.bolt_metadata.authority == World::id() {
+                        require!(Clock::get()?.unix_timestamp < session_token.valid_until, bolt_lang::session_keys::SessionError::InvalidToken);
+                    } else {
+                        let validity_ctx = bolt_lang::session_keys::ValidityChecker {
+                            session_token: session_token.clone(),
+                            session_signer: ctx.accounts.authority.clone(),
+                            authority: ctx.accounts.bolt_component.bolt_metadata.authority.clone(),
+                            target_program: World::id(),
+                        };
+                        require!(session_token.validate(validity_ctx)?, bolt_lang::session_keys::SessionError::InvalidToken);
+                        require_eq!(ctx.accounts.bolt_component.bolt_metadata.authority, session_token.authority, bolt_lang::session_keys::SessionError::InvalidToken);
+                    }
+                } else {
+                    require!(ctx.accounts.bolt_component.bolt_metadata.authority == World::id() || (ctx.accounts.bolt_component.bolt_metadata.authority == *ctx.accounts.authority.key && ctx.accounts.authority.is_signer), BoltError::InvalidAuthority);
+                }
+
                 // Check if the instruction is called from the world program
                 let instruction = anchor_lang::solana_program::sysvar::instructions::get_instruction_relative(
                     0, &ctx.accounts.instruction_sysvar_account.to_account_info()
                 ).unwrap();
-                if instruction.program_id != World::id() {
-                    return Err(BoltError::InvalidCaller.into());
-                }
-                // Check if the authority is authorized to modify the data
-                if ctx.accounts.bolt_component.bolt_metadata.authority != World::id() && (ctx.accounts.bolt_component.bolt_metadata.authority != *ctx.accounts.authority.key || !ctx.accounts.authority.is_signer) {
-                    return Err(BoltError::InvalidAuthority.into());
-                }
+                require_eq!(instruction.program_id, World::id(), BoltError::InvalidCaller);
 
                 ctx.accounts.bolt_component.set_inner(<#component_type>::try_from_slice(&data)?);
                 Ok(())
@@ -171,10 +182,11 @@ fn generate_update(component_type: &Type) -> (TokenStream2, TokenStream2) {
                 #[account(mut)]
                 pub bolt_component: Account<'info, #component_type>,
                 #[account()]
-                /// CHECK: The authority of the component
-                pub authority: AccountInfo<'info>,
+                pub authority: Signer<'info>,
                 #[account(address = anchor_lang::solana_program::sysvar::instructions::id())]
                 pub instruction_sysvar_account: UncheckedAccount<'info>,
+                #[account(constraint = session_token.to_account_info().owner == &bolt_lang::session_keys::ID)]
+                pub session_token: Option<Account<'info, bolt_lang::session_keys::SessionToken>>,
             }
         },
     )

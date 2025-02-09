@@ -30,8 +30,11 @@ bolt-attribute-bolt-arguments = { workspace = true }
 world = { workspace = true }
 bolt-system = { workspace = true }
 
+# Session Keys
+session-keys = { workspace = true }
+
 # Delegation
-ephemeral-rollups-sdk = { workspace = true , features = ["anchor"]}
+ephemeral-rollups-sdk = { workspace = true, features = ["anchor"]}
 
 # Other dependencies
 serde = { workspace = true }

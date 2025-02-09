@@ -1,5 +1,6 @@
 #![allow(clippy::manual_unwrap_or_default)]
 use anchor_lang::prelude::*;
+use bolt_component::CpiContextBuilder;
 use std::collections::BTreeSet;
 
 #[cfg(not(feature = "no-entrypoint"))]
@@ -267,7 +268,10 @@ pub mod world {
         ctx: Context<'_, '_, '_, 'info, Apply<'info>>,
         args: Vec<u8>,
     ) -> Result<()> {
-        if !ctx.accounts.authority.is_signer && ctx.accounts.authority.key != &ID {
+        if !ctx.accounts.authority.is_signer
+            && ctx.accounts.authority.key != &ID
+            && ctx.accounts.session_token.is_none()
+        {
             return Err(WorldError::InvalidAuthority.into());
         }
         if !ctx.accounts.world.permissionless
@@ -320,6 +324,7 @@ pub mod world {
                     component,
                     ctx.accounts.authority.clone(),
                     ctx.accounts.instruction_sysvar_account.clone(),
+                    ctx.accounts.session_token.clone(),
                 ),
                 result,
             )?;
@@ -340,15 +345,18 @@ pub mod world {
         pub instruction_sysvar_account: UncheckedAccount<'info>,
         #[account()]
         pub world: Account<'info, World>,
+        #[account()]
+        pub session_token: Option<UncheckedAccount<'info>>,
     }
 
     impl<'info> Apply<'info> {
         pub fn build(
             &self,
-        ) -> CpiContext<'_, '_, '_, 'info, bolt_system::cpi::accounts::SetData<'info>> {
-            let authority = self.authority.to_account_info();
+        ) -> CpiContext<'_, '_, '_, 'info, bolt_system::cpi::accounts::BoltExecute<'info>> {
             let cpi_program = self.bolt_system.to_account_info();
-            let cpi_accounts = bolt_system::cpi::accounts::SetData { authority };
+            let cpi_accounts = bolt_system::cpi::accounts::BoltExecute {
+                authority: self.authority.to_account_info(),
+            };
             CpiContext::new(cpi_program, cpi_accounts)
         }
     }
@@ -590,14 +598,17 @@ pub fn build_update_context<'info>(
     bolt_component: AccountInfo<'info>,
     authority: Signer<'info>,
     instruction_sysvar_account: UncheckedAccount<'info>,
+    session_token: Option<UncheckedAccount<'info>>,
 ) -> CpiContext<'info, 'info, 'info, 'info, bolt_component::cpi::accounts::Update<'info>> {
     let authority = authority.to_account_info();
     let instruction_sysvar_account = instruction_sysvar_account.to_account_info();
     let cpi_program = component_program;
-    let cpi_accounts = bolt_component::cpi::accounts::Update {
+    let session_token = session_token.map(|x| x.to_account_info());
+    bolt_component::cpi::accounts::Update {
         bolt_component,
         authority,
         instruction_sysvar_account,
-    };
-    CpiContext::new(cpi_program, cpi_accounts)
+        session_token,
+    }
+    .build_cpi_context(cpi_program)
 }

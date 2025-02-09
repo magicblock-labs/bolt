@@ -1,6 +1,6 @@
 use proc_macro::TokenStream;
 use proc_macro2::Ident;
-use quote::{quote, ToTokens};
+use quote::{quote, ToTokens, TokenStreamExt};
 use syn::{
     parse_macro_input, parse_quote, visit_mut::VisitMut, Expr, FnArg, GenericArgument, ItemFn,
     ItemMod, ItemStruct, PathArguments, ReturnType, Stmt, Type, TypePath,
@@ -34,9 +34,8 @@ struct Extractor {
 /// }
 /// ```
 #[proc_macro_attribute]
-pub fn system(attr: TokenStream, item: TokenStream) -> TokenStream {
+pub fn system(_attr: TokenStream, item: TokenStream) -> TokenStream {
     let mut ast = parse_macro_input!(item as ItemMod);
-    let _attr = parse_macro_input!(attr as syn::AttributeArgs);
 
     // Extract the number of components from the module
     let mut extractor = Extractor::default();
@@ -153,14 +152,22 @@ impl VisitMut for SystemTransform {
         for item in content.iter_mut() {
             match item {
                 syn::Item::Fn(item_fn) => self.visit_item_fn_mut(item_fn),
-                syn::Item::Struct(item_struct)
+                syn::Item::Struct(item_struct) => {
+                    if let Some(attr) = item_struct
+                        .attrs
+                        .iter_mut()
+                        .find(|attr| attr.path.is_ident("system_input"))
+                    {
+                        attr.tokens.append_all(quote! { (session_key) });
+                    }
                     if item_struct
                         .attrs
                         .iter()
-                        .any(|attr| attr.path.is_ident("extra_accounts")) =>
-                {
-                    extra_accounts_struct_name = Some(&item_struct.ident);
-                    break;
+                        .any(|attr| attr.path.is_ident("extra_accounts"))
+                    {
+                        extra_accounts_struct_name = Some(&item_struct.ident);
+                        break;
+                    }
                 }
                 _ => {}
             }
