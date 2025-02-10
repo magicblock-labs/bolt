@@ -22,8 +22,8 @@ esac
 # Update the version for all crates in the Cargo.toml workspace.dependencies section
 sed "${sedi[@]}" "/\[workspace.dependencies\]/,/\## External crates/s/version = \"=.*\"/version = \"=$version\"/" Cargo.toml
 
-# Update the version in clients/bolt-sdk/package.json
-jq --arg version "$version" '.version = $version' clients/bolt-sdk/package.json > temp.json && mv temp.json clients/bolt-sdk/package.json
+# Update the version in clients/typescript/bolt-sdk/package.json
+jq --arg version "$version" '.version = $version' clients/typescript/bolt-sdk/package.json > temp.json && mv temp.json clients/typescript/bolt-sdk/package.json
 
 # Update the version in crates/bolt-cli/npm-package/package.json.tmpl
 jq --arg version "$version" '.version = $version' crates/bolt-cli/npm-package/package.json.tmpl > temp.json && mv temp.json crates/bolt-cli/npm-package/package.json.tmpl
@@ -40,7 +40,7 @@ git-cliff -c Cliff.toml -o docs/CHANGELOG.md -t $version
 # Check if the any changes have been made to the specified files, if running with --check
 if [[ "$1" == "--check" ]]; then
     files_to_check=(
-        "clients/bolt-sdk/package.json"
+        "clients/typescript/bolt-sdk/package.json"
         "crates/bolt-cli/npm-package/package.json.tmpl"
         "crates/bolt-cli/npm-package/package.json"
         "Cargo.toml"

@@ -6,5 +6,5 @@ node_modules
 dist
 build
 test-ledger
-clients/bolt-sdk/lib
+clients/typescript/bolt-sdk/lib
 cli/src/templates/**/*
