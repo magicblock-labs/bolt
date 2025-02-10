@@ -1,0 +1,5 @@
+is_global = true
+build_property.RootNamespace = Solana.Unity.Bolt
+build_property.ProjectDir = /home/notdanilo/dev/magicblock-labs/bolt/clients/csharp/Solana.Unity.Bolt/
+build_property.EnableComHosting = 
+build_property.EnableGeneratedComInterfaceComImportInterop = 
