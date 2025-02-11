@@ -1,0 +1,29 @@
+<Project DefaultTargets="Build"
+         xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <Product>Solana.Unity.Bolt</Product>
+        <Version>0.1.8</Version>
+        <Copyright>Copyright 2024 &#169; Magicblock</Copyright>
+        <Authors>Magicblock</Authors>
+        <PublisherName>Magicblock</PublisherName>
+        <RepositoryUrl>https://github.com/magicblock-labs/gum-program-library</RepositoryUrl>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <LangVersion>latest</LangVersion>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageIcon>icon.png</PackageIcon>
+        <PackageDescription>Solana.Unity.Bolt is a library to use Gum primitives in Unity</PackageDescription>
+        <PackageTags>solana;gum;unity;sol;net5</PackageTags>
+        <PackageReleaseNotes>https://github.com/magicblock-labs/gum-program-library/releases</PackageReleaseNotes>
+        <RepositoryType>git</RepositoryType>
+    </PropertyGroup>
+
+    <ItemGroup Label="PackageIcon">
+        <None Include="$(MSBuildThisFileDirectory)/assets/icon.png" Pack="true" Visible="false" PackagePath=""/>
+    </ItemGroup>
+
+    <ItemGroup Label="PackageFiles">
+        <None Include="$(MSBuildThisFileDirectory)/README.md" Pack="true" PackagePath=""/>
+        <None Include="$(MSBuildThisFileDirectory)/LICENSE" Pack="true" PackagePath=""/>
+    </ItemGroup>
+
+</Project>
