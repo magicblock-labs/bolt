@@ -6,7 +6,7 @@ import {
   FindComponentProgramDataPda,
   FindEntityPda,
   SerializeArgs,
-} from "../../../clients/typescript/bolt-sdk/lib";
+} from "../../lib";
 import { Direction } from "../framework";
 
 export function ecs(framework) {

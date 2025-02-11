@@ -3,7 +3,7 @@ import {
   AddEntity,
   ApplySystem,
   InitializeComponent,
-} from "../../../clients/typescript/bolt-sdk/lib";
+} from "../../lib";
 import { Direction, Framework } from "../framework";
 import { expect } from "chai";
 

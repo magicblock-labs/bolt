@@ -7,7 +7,7 @@ import {
   SessionProgram,
   FindSessionTokenPda,
   BN,
-} from "../../../clients/typescript/bolt-sdk/lib";
+} from "../../lib";
 import { Keypair } from "@solana/web3.js";
 
 export function session(framework) {

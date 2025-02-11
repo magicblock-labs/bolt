@@ -3,7 +3,7 @@ import {
   FindRegistryPda,
   FindWorldPda,
   BN,
-} from "../../../clients/typescript/bolt-sdk/lib";
+} from "../../lib";
 
 export function world(framework) {
   describe("World", () => {

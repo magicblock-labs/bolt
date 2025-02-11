@@ -1,7 +1,8 @@
 import {
+  anchor,
   DelegateComponent,
   DELEGATION_PROGRAM_ID,
-} from "../../../clients/typescript/bolt-sdk/lib";
+} from "../../lib";
 import { expect } from "chai";
 
 export function acceleration(framework) {
@@ -12,15 +13,12 @@ export function acceleration(framework) {
         entity: framework.entity1Pda,
         componentId: framework.exampleComponentPosition.programId,
       });
-
-      await framework.provider.sendAndConfirm(
-        delegateComponent.transaction,
-        [],
-        {
-          skipPreflight: true,
-          commitment: "confirmed",
-        },
-      );
+      const instruction = delegateComponent.transaction;
+      const transaction = new anchor.web3.Transaction().add(instruction);
+      await framework.provider.sendAndConfirm(transaction, [], {
+        skipPreflight: true,
+        commitment: "confirmed",
+      });
       const acc = await framework.provider.connection.getAccountInfo(
         delegateComponent.componentPda,
       );

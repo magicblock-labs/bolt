@@ -7,7 +7,7 @@ import {
   anchor,
   BN,
   Session,
-} from "../../../clients/typescript/bolt-sdk/lib";
+} from "../../lib";
 import { expect } from "chai";
 
 // TODO: Create the API for it.
