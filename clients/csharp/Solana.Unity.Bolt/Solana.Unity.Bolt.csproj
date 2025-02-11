@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <Description>
+            Solana.Unity.Gum implements functionality to integrate Template project into .Net applications.
+        </Description>
+        <TargetFramework>netstandard2.1</TargetFramework>
+
+        <IsPackable>true</IsPackable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+            <_Parameter1>Solana.Unity.Gum.Test</_Parameter1>
+        </AssemblyAttribute>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.*" />
+        <PackageReference Include="Solana.Unity.Extensions" Version="2.6.0.11" />
+        <PackageReference Include="Solana.Unity.Keystore" Version="2.6.0.11" />
+        <PackageReference Include="Solana.Unity.Programs" Version="2.6.0.11" />
+        <PackageReference Include="Solana.Unity.Rpc" Version="2.6.0.11" />
+        <PackageReference Include="Solana.Unity.Wallet" Version="2.6.0.11" />
+        <PackageReference Include="System.Text.Json" Version="9.0.1" />
+    </ItemGroup>
+
+
+    <ItemGroup>
+      <None Remove="GPL Session Program\" />
+    </ItemGroup>
+    <ItemGroup>
+      <Folder Include="GPL Session Program\" />
+    </ItemGroup>
+    <Import Project="..\SharedBuildProperties.props" />
+</Project>

@@ -40,6 +40,8 @@ test = """
 echo "Waiting for 2 seconds..."
 sleep 2
 yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/typescript/main.ts
+cd clients/csharp
+dotnet test
 """
 
 [test]
