@@ -5,13 +5,13 @@ export enum Direction {
   Down = "Down",
 }
 
-import { anchor, BN } from "../../clients/typescript/bolt-sdk/lib";
-import { type World } from "../../target/types/world";
-import { type Position } from "../../target/types/position";
-import { type Velocity } from "../../target/types/velocity";
-import { type SystemSimpleMovement } from "../../target/types/system_simple_movement";
-import { type SystemFly } from "../../target/types/system_fly";
-import { type SystemApplyVelocity } from "../../target/types/system_apply_velocity";
+import { anchor, BN } from "../lib";
+import { type World } from "../../../../target/types/world";
+import { type Position } from "../../../../target/types/position";
+import { type Velocity } from "../../../../target/types/velocity";
+import { type SystemSimpleMovement } from "../../../../target/types/system_simple_movement";
+import { type SystemFly } from "../../../../target/types/system_fly";
+import { type SystemApplyVelocity } from "../../../../target/types/system_apply_velocity";
 import { Keypair, PublicKey } from "@solana/web3.js";
 
 export class Framework {

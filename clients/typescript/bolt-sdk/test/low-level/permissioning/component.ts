@@ -4,7 +4,7 @@ import {
   FindEntityPda,
   FindComponentPda,
   SerializeArgs,
-} from "../../../../clients/typescript/bolt-sdk/lib";
+} from "../../../lib";
 import { assert, expect } from "chai";
 
 export function component(framework) {

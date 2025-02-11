@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { anchor, SerializeArgs } from "../../../../clients/typescript/bolt-sdk/lib";
+import { anchor, SerializeArgs } from "../../../lib";
 
 export function world(framework) {
   describe("World authority", () => {

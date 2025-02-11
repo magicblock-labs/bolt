@@ -4,7 +4,7 @@ import {
   AddEntity,
   ApplySystem,
   InitializeComponent,
-} from "../../../../clients/typescript/bolt-sdk/lib";
+} from "../../../lib";
 import { Keypair } from "@solana/web3.js";
 
 export function component(framework) {
