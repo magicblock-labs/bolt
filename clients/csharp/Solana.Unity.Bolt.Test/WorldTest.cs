@@ -12,6 +12,7 @@ namespace WorldTest {
         public static async Task Run(Framework framework) {
             await InitializeRegistry(framework);
             await InitializeWorld(framework);
+            await InitializeSecondWorld(framework);
         }
 
         public static async Task InitializeRegistry(Framework framework) {
@@ -45,7 +46,6 @@ namespace WorldTest {
                 SystemProgram = SystemProgram.ProgramIdKey,
                 World = framework.WorldPda,
             };
-
             TransactionInstruction instruction = WorldProgram.InitializeNewWorld(initializeNewWorld);
             await framework.SendAndConfirmInstruction(instruction);
         }

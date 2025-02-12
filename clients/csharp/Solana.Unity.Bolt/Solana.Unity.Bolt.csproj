@@ -24,13 +24,5 @@
         <PackageReference Include="Solana.Unity.Wallet" Version="2.6.0.11" />
         <PackageReference Include="System.Text.Json" Version="9.0.1" />
     </ItemGroup>
-
-
-    <ItemGroup>
-      <None Remove="GPL Session Program\" />
-    </ItemGroup>
-    <ItemGroup>
-      <Folder Include="GPL Session Program\" />
-    </ItemGroup>
     <Import Project="..\SharedBuildProperties.props" />
 </Project>
