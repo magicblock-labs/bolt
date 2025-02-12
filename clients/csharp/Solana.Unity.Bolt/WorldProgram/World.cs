@@ -15,12 +15,13 @@ using World.Errors;
 using World.Accounts;
 using WebSocketSharp;
 using Solana.Unity.Rpc.Models;
+using System.Net.Http.Headers;
+using GplSession.Program;
 
 namespace World
 {
     namespace Program
-    {
-
+    {   
         public partial class WorldProgram
         {
             public static Solana.Unity.Rpc.Models.TransactionInstruction AddEntity(AddEntityAccounts accounts, PublicKey programId = null)
@@ -33,6 +34,18 @@ namespace World
             {
                 programId ??= new(ID);
                 return AddEntity(accounts, System.Text.Encoding.UTF8.GetBytes(extraSeed), programId);
+            }
+
+            public static PublicKey FindSessionTokenPda(PublicKey sessionSigner, PublicKey authority)
+            {
+                PublicKey.TryFindProgramAddress(new[]
+                {
+                    Encoding.UTF8.GetBytes("session_token"),
+                    new PublicKey(WorldProgram.ID).KeyBytes,
+                    sessionSigner.KeyBytes,
+                    authority.KeyBytes
+                }, new PublicKey(GplSessionProgram.ID), out var pda, out _);
+                return pda;
             }
 
             public static PublicKey FindRegistryPda()
