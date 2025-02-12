@@ -11,7 +11,7 @@ members = [
 ]
 
 [workspace.package]
-version = "0.2.0"
+version = "0.2.1"
 authors = ["Magicblock Labs <dev@magicblock.gg>"]
 repository = "https://github.com/magicblock-labs/bolt"
 homepage = "https://www.magicblock.gg/"
@@ -19,19 +19,19 @@ license = "MIT"
 edition = "2021"
 
 [workspace.dependencies]
-bolt-attribute-bolt-program = { path = "crates/bolt-lang/attribute/bolt-program", version = "=0.2.0" }
-bolt-attribute-bolt-delegate = { path = "crates/bolt-lang/attribute/delegate", version = "=0.2.0" }
-bolt-attribute-bolt-component = { path = "crates/bolt-lang/attribute/component", version = "=0.2.0" }
-bolt-attribute-bolt-system = { path = "crates/bolt-lang/attribute/system", version = "=0.2.0"}
-bolt-attribute-bolt-system-input = { path = "crates/bolt-lang/attribute/system-input", version = "=0.2.0" }
-bolt-attribute-bolt-extra-accounts = { path = "crates/bolt-lang/attribute/extra-accounts", version = "=0.2.0" }
-bolt-attribute-bolt-arguments = { path = "crates/bolt-lang/attribute/arguments", version = "=0.2.0" }
-bolt-attribute-bolt-component-deserialize = { path = "crates/bolt-lang/attribute/component-deserialize", version = "=0.2.0" }
-bolt-attribute-bolt-component-id = { path = "crates/bolt-lang/attribute/component-id", version = "=0.2.0" }
-bolt-utils = { path = "crates/bolt-lang/utils", version = "=0.2.0" }
-world = { path = "crates/programs/world", features = ["cpi"], version = "=0.2.0"}
-bolt-system = { path = "crates/programs/bolt-system", features = ["cpi"], version = "=0.2.0"}
-bolt-component = { path = "crates/programs/bolt-component", features = ["cpi"], version = "=0.2.0"}
+bolt-attribute-bolt-program = { path = "crates/bolt-lang/attribute/bolt-program", version = "=0.2.1" }
+bolt-attribute-bolt-delegate = { path = "crates/bolt-lang/attribute/delegate", version = "=0.2.1" }
+bolt-attribute-bolt-component = { path = "crates/bolt-lang/attribute/component", version = "=0.2.1" }
+bolt-attribute-bolt-system = { path = "crates/bolt-lang/attribute/system", version = "=0.2.1"}
+bolt-attribute-bolt-system-input = { path = "crates/bolt-lang/attribute/system-input", version = "=0.2.1" }
+bolt-attribute-bolt-extra-accounts = { path = "crates/bolt-lang/attribute/extra-accounts", version = "=0.2.1" }
+bolt-attribute-bolt-arguments = { path = "crates/bolt-lang/attribute/arguments", version = "=0.2.1" }
+bolt-attribute-bolt-component-deserialize = { path = "crates/bolt-lang/attribute/component-deserialize", version = "=0.2.1" }
+bolt-attribute-bolt-component-id = { path = "crates/bolt-lang/attribute/component-id", version = "=0.2.1" }
+bolt-utils = { path = "crates/bolt-lang/utils", version = "=0.2.1" }
+world = { path = "crates/programs/world", features = ["cpi"], version = "=0.2.1"}
+bolt-system = { path = "crates/programs/bolt-system", features = ["cpi"], version = "=0.2.1"}
+bolt-component = { path = "crates/programs/bolt-component", features = ["cpi"], version = "=0.2.1"}
 
 ## External crates
 session-keys = { version = "=2.0.6", features = ["no-entrypoint"] }

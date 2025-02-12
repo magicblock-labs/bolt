@@ -1,4 +1,12 @@
 
+## [0.2.1] - 2025-02-12
+
+### ✨️ Features
+ - Session keys (#126)
+ - `bolt world` now prints world id (#127)
+ - Variable components number (#124)
+ - Adding low and intermediate api-levels (#120)
+
 ## [0.2.0] - 2025-01-05
 
 
