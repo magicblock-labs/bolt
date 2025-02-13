@@ -46,6 +46,7 @@ solana-client = { version = "=1.16" }
 solana-security-txt = "1.1.1"
 tuple-conv = "1.0.1"
 syn = { version = "1.0.60", features = ["full"] }
+ligen-ir = { version = "=0.1.18" }
 quote = "1.0"
 proc-macro2 = "1.0"
 serde = { version = "1.0", features = ["derive"] }

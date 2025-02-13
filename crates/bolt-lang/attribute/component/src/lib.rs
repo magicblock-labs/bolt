@@ -53,7 +53,8 @@ pub fn component(attr: TokenStream, item: TokenStream) -> TokenStream {
     add_bolt_metadata(&mut input);
 
     let name = &input.ident;
-    let component_name = syn::Ident::new(&name.to_string().to_lowercase(), input.ident.span());
+    let component_name = ligen_ir::Identifier::new(name.to_string()).to_snake_case();
+    let component_name = syn::Ident::new(&component_name.to_string(), input.ident.span());
 
     let bolt_program = if delegate_set {
         quote! {
