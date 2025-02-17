@@ -383,7 +383,7 @@ interface ApplySystemInstruction {
   world: PublicKey;
   session?: Session;
   extraAccounts?: web3.AccountMeta[];
-  args?: object;
+  args?: any;
 }
 async function createApplySystemInstruction({
   authority,
@@ -491,7 +491,7 @@ export async function ApplySystem({
   entities: ApplySystemEntity[];
   world: PublicKey;
   extraAccounts?: web3.AccountMeta[];
-  args?: object;
+  args?: any;
   session?: Session;
 }): Promise<{ instruction: TransactionInstruction; transaction: Transaction }> {
   const instruction = await createApplySystemInstruction({
