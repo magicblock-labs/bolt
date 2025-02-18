@@ -85,7 +85,7 @@ jobs:
         run: yarn lint
 
   test:
-    needs: [clippy-lint, yarn-lint]
+    needs: [yarn-lint]
     runs-on: ubuntu-latest
 
     steps:
