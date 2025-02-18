@@ -1,9 +1,4 @@
-import {
-  anchor,
-  FindRegistryPda,
-  FindWorldPda,
-  BN,
-} from "../../lib";
+import { anchor, FindRegistryPda, FindWorldPda, BN } from "../../lib";
 
 export function world(framework) {
   describe("World", () => {

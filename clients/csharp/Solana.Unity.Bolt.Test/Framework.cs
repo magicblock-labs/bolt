@@ -76,7 +76,10 @@ namespace Solana.Unity.Bolt.Test
             if (signers == null) {
                 signers = new List<Account> { Wallet.Account };
             }
-            var blockhash = (await Client.GetLatestBlockHashAsync()).Result.Value.Blockhash;
+            var blockHashResponse = await Client.GetLatestBlockHashAsync();
+            if (!blockHashResponse.WasSuccessful || blockHashResponse.Result?.Value?.Blockhash == null)
+                throw new Exception("Failed to get latest blockhash");
+            var blockhash = blockHashResponse.Result.Value.Blockhash;
             var transaction = new TransactionBuilder()
                 .SetFeePayer(payer ?? Wallet.Account.PublicKey)
                 .SetRecentBlockHash(blockhash)
