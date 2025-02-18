@@ -160,7 +160,7 @@ namespace World
 
             public static byte[] SerializeArgs(object args)
             {
-                return System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(args);
+                return System.Text.Encoding.UTF8.GetBytes(Newtonsoft.Json.JsonConvert.SerializeObject(args));
             }
 
             public static Solana.Unity.Rpc.Models.TransactionInstruction ApplySystem(

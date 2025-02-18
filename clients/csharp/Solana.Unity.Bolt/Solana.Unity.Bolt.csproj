@@ -22,7 +22,6 @@
         <PackageReference Include="Solana.Unity.Programs" Version="2.6.0.11" />
         <PackageReference Include="Solana.Unity.Rpc" Version="2.6.0.11" />
         <PackageReference Include="Solana.Unity.Wallet" Version="2.6.0.11" />
-        <PackageReference Include="System.Text.Json" Version="9.0.1" />
     </ItemGroup>
     <Import Project="..\SharedBuildProperties.props" />
 </Project>
