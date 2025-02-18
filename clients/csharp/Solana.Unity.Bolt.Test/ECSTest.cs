@@ -85,11 +85,11 @@ namespace ECSTest {
         }
 
         public static async Task InitializeComponentVelocityOnEntity1WithSeed(Framework framework) {
-            framework.ComponentPositionEntity1Pda = WorldProgram.FindComponentPda(framework.ExampleComponentVelocity, framework.Entity1Pda, "component-velocity");
+            framework.ComponentVelocityEntity1Pda = WorldProgram.FindComponentPda(framework.ExampleComponentVelocity, framework.Entity1Pda, "component-velocity");
             var initializeComponent = new InitializeComponentAccounts() {
                 Payer = framework.Wallet.Account.PublicKey,
                 Entity = framework.Entity1Pda,
-                Data = framework.ComponentPositionEntity1Pda,
+                Data = framework.ComponentVelocityEntity1Pda,
                 ComponentProgram = framework.ExampleComponentVelocity,
                 Authority = new PublicKey(WorldProgram.ID),
                 SystemProgram = SystemProgram.ProgramIdKey,

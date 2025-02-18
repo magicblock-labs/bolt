@@ -93,6 +93,6 @@ jobs:
           bolt build
           cd clients/typescript/bolt-sdk
           yarn install && yarn build
-          cd ../..
+          cd ../../..
           bolt test
 

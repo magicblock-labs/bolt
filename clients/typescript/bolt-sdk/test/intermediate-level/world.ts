@@ -1,7 +1,4 @@
-import {
-  InitializeNewWorld,
-  InitializeRegistry,
-} from "../../lib";
+import { InitializeNewWorld, InitializeRegistry } from "../../lib";
 
 export function world(framework) {
   describe("World", () => {

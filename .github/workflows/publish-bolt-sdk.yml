@@ -161,7 +161,7 @@ jobs:
         run: |
           cd clients/typescript/bolt-sdk
           yarn install && yarn build
-          cd ../..
+          cd ../../..
 
       - name: run tests
         run: |

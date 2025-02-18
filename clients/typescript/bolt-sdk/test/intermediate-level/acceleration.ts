@@ -1,7 +1,4 @@
-import {
-  DelegateComponent,
-  DELEGATION_PROGRAM_ID,
-} from "../../lib";
+import { DelegateComponent, DELEGATION_PROGRAM_ID } from "../../lib";
 import { expect } from "chai";
 
 export function acceleration(framework) {
