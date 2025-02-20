@@ -30,43 +30,25 @@ namespace SessionTest {
         }
         
         public static async Task AddEntity(Framework framework) {
-            var accountInfo = await framework.GetAccountInfo(framework.WorldPda);
-            var data = Convert.FromBase64String(accountInfo.Data[0]);
-            var world = World.Accounts.World.Deserialize(data);
-            framework.SessionEntityPda = WorldProgram.FindEntityPda(world.Id, world.Entities);
-            var addEntity = new AddEntityAccounts() {
-                Payer = framework.SessionSigner.Account.PublicKey,
-                Entity = framework.SessionEntityPda,
-                World = framework.WorldPda
-            };
-            var instruction = WorldProgram.AddEntity(addEntity);
-            await framework.SendAndConfirmInstruction(instruction, new List<Account> { framework.SessionSigner.Account }, framework.SessionSigner.Account.PublicKey);
+            var addEntity = await Bolt.World.AddEntity(framework.Client, framework.WorldPda, framework.SessionSigner.Account.PublicKey);
+            framework.SessionEntityPda = addEntity.Pda;
+            await framework.SendAndConfirmInstruction(addEntity.Instruction, new List<Account> { framework.SessionSigner.Account }, framework.SessionSigner.Account.PublicKey);
         }
 
         public static async Task InitializePositionComponent(Framework framework) {
-            var componentId = framework.ExampleComponentPosition;
-            framework.SessionComponentPositionPda = WorldProgram.FindComponentPda(
-                componentProgramId: componentId,
-                entity: framework.SessionEntityPda
-            );
-            var instruction = WorldProgram.InitializeComponent(new InitializeComponentAccounts() {
-                Payer = framework.SessionSigner.Account.PublicKey,
-                Entity = framework.SessionEntityPda,
-                Data = framework.SessionComponentPositionPda,
-                ComponentProgram = componentId,
-                Authority = new PublicKey(WorldProgram.ID),
-            });
-            await framework.SendAndConfirmInstruction(instruction, new List<Account> { framework.SessionSigner.Account }, framework.SessionSigner.Account.PublicKey);
+            var initializeComponent = await Bolt.World.InitializeComponent(framework.SessionSigner.Account.PublicKey, framework.SessionEntityPda, framework.ExampleComponentPosition);
+            framework.SessionComponentPositionPda = initializeComponent.Pda;
+            await framework.SendAndConfirmInstruction(initializeComponent.Instruction, new List<Account> { framework.SessionSigner.Account }, framework.SessionSigner.Account.PublicKey);
         }
 
         public static async Task ApplyFlySystemOnComponentUsingSessionToken(Framework framework) {
-            var instruction = WorldProgram.ApplySystem(
+            var instruction = Bolt.World.ApplySystem(
                 framework.WorldPda,
                 framework.SystemSimpleMovement,
-                new WorldProgram.EntityType[] {
-                    new WorldProgram.EntityType(framework.SessionEntityPda, new PublicKey[] { framework.ExampleComponentPosition })
+                new Bolt.World.EntityType[] {
+                    new Bolt.World.EntityType(framework.SessionEntityPda, new PublicKey[] { framework.ExampleComponentPosition })
                 },
-                WorldProgram.SerializeArgs(new { direction = "Right" }),
+                new { direction = "Right" },
                 framework.SessionSigner.Account.PublicKey,
                 framework.SessionToken
             );

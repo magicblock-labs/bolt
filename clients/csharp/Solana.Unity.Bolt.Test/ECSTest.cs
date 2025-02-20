@@ -25,123 +25,50 @@ namespace ECSTest {
         }
 
         public static async Task AddEntity1(Framework framework) {
-            var accountInfo = await framework.GetAccountInfo(framework.WorldPda);
-            var data = Convert.FromBase64String(accountInfo.Data[0]);
-            var world = World.Accounts.World.Deserialize(data);
-            framework.Entity1Pda = WorldProgram.FindEntityPda(world.Id, world.Entities);
-            var addEntity = new AddEntityAccounts() {
-                Payer = framework.Wallet.Account.PublicKey,
-                Entity = framework.Entity1Pda,
-                World = framework.WorldPda,
-                SystemProgram = SystemProgram.ProgramIdKey,
-            };
-            var instruction = WorldProgram.AddEntity(addEntity);
-            await framework.SendAndConfirmInstruction(instruction);
+            var addEntity = await Bolt.World.AddEntity(framework.Client, framework.WorldPda, framework.Wallet.Account.PublicKey);
+            framework.Entity1Pda = addEntity.Pda;
+            await framework.SendAndConfirmInstruction(addEntity.Instruction);
         }
         
         public static async Task AddEntity2(Framework framework) {
-            var accountInfo = await framework.GetAccountInfo(framework.WorldPda);
-            var data = Convert.FromBase64String(accountInfo.Data[0]);
-            var world = World.Accounts.World.Deserialize(data);
-            framework.Entity2Pda = WorldProgram.FindEntityPda(world.Id, world.Entities);
-            var addEntity = new AddEntityAccounts() {
-                Payer = framework.Wallet.Account.PublicKey,
-                Entity = framework.Entity2Pda,
-                World = framework.WorldPda,
-                SystemProgram = SystemProgram.ProgramIdKey,
-            };
-            var instruction = WorldProgram.AddEntity(addEntity);
-            await framework.SendAndConfirmInstruction(instruction);
+            var addEntity = await Bolt.World.AddEntity(framework.Client, framework.WorldPda, framework.Wallet.Account.PublicKey);
+            framework.Entity2Pda = addEntity.Pda;
+            await framework.SendAndConfirmInstruction(addEntity.Instruction);
         }
 
         public static async Task AddEntity3(Framework framework) {
-            var accountInfo = await framework.GetAccountInfo(framework.WorldPda);
-            var data = Convert.FromBase64String(accountInfo.Data[0]);
-            var world = World.Accounts.World.Deserialize(data);
-            var Entity3Pda = WorldProgram.FindEntityPda(world.Id, world.Entities);
-            var addEntity = new AddEntityAccounts() {
-                Payer = framework.Wallet.Account.PublicKey,
-                Entity = Entity3Pda,
-                World = framework.WorldPda,
-                SystemProgram = SystemProgram.ProgramIdKey,
-            };
-            var instruction = WorldProgram.AddEntity(addEntity);
-            await framework.SendAndConfirmInstruction(instruction);
+            var addEntity = await Bolt.World.AddEntity(framework.Client, framework.WorldPda, framework.Wallet.Account.PublicKey);
+            await framework.SendAndConfirmInstruction(addEntity.Instruction);
         }
 
         public static async Task AddEntity4WithSeed(Framework framework) {
-            var accountInfo = await framework.GetAccountInfo(framework.WorldPda);
-            var data = Convert.FromBase64String(accountInfo.Data[0]);
-            var world = World.Accounts.World.Deserialize(data);
-            framework.Entity4Pda = WorldProgram.FindEntityPda(world.Id, "custom-seed");
-            var addEntity = new AddEntityAccounts() {
-                Payer = framework.Wallet.Account.PublicKey,
-                Entity = framework.Entity4Pda,
-                World = framework.WorldPda,
-                SystemProgram = SystemProgram.ProgramIdKey,
-            };
-            var instruction = WorldProgram.AddEntity(addEntity, "custom-seed");
-            await framework.SendAndConfirmInstruction(instruction);
+            var addEntity = await Bolt.World.AddEntity(framework.Client, framework.WorldPda, framework.Wallet.Account.PublicKey, "custom-seed");
+            framework.Entity4Pda = addEntity.Pda;
+            await framework.SendAndConfirmInstruction(addEntity.Instruction);
         }
 
         public static async Task InitializeComponentVelocityOnEntity1WithSeed(Framework framework) {
-            framework.ComponentVelocityEntity1Pda = WorldProgram.FindComponentPda(framework.ExampleComponentVelocity, framework.Entity1Pda, "component-velocity");
-            var initializeComponent = new InitializeComponentAccounts() {
-                Payer = framework.Wallet.Account.PublicKey,
-                Entity = framework.Entity1Pda,
-                Data = framework.ComponentVelocityEntity1Pda,
-                ComponentProgram = framework.ExampleComponentVelocity,
-                Authority = new PublicKey(WorldProgram.ID),
-                SystemProgram = SystemProgram.ProgramIdKey,
-                InstructionSysvarAccount = SysVars.InstructionAccount,
-            };
-            var instruction = WorldProgram.InitializeComponent(initializeComponent);
-            await framework.SendAndConfirmInstruction(instruction);
+            var initializeComponent = await Bolt.World.InitializeComponent(framework.Wallet.Account.PublicKey, framework.Entity1Pda, framework.ExampleComponentVelocity, "component-velocity");
+            framework.ComponentVelocityEntity1Pda = initializeComponent.Pda;
+            await framework.SendAndConfirmInstruction(initializeComponent.Instruction);
         }
 
         public static async Task InitializePositionComponentOnEntity1(Framework framework) {
-            framework.ComponentPositionEntity1Pda = WorldProgram.FindComponentPda(framework.ExampleComponentPosition, framework.Entity1Pda);
-            var initializeComponent = new InitializeComponentAccounts() {
-                Payer = framework.Wallet.Account.PublicKey,
-                Entity = framework.Entity1Pda,
-                Data = framework.ComponentPositionEntity1Pda,
-                ComponentProgram = framework.ExampleComponentPosition,
-                Authority = new PublicKey(WorldProgram.ID),
-                SystemProgram = SystemProgram.ProgramIdKey,
-                InstructionSysvarAccount = SysVars.InstructionAccount,
-            };
-            var instruction = WorldProgram.InitializeComponent(initializeComponent);
-            await framework.SendAndConfirmInstruction(instruction);
+            var initializeComponent = await Bolt.World.InitializeComponent(framework.Wallet.Account.PublicKey, framework.Entity1Pda, framework.ExampleComponentPosition);
+            framework.ComponentPositionEntity1Pda = initializeComponent.Pda;
+            await framework.SendAndConfirmInstruction(initializeComponent.Instruction);
         }
 
         public static async Task InitializePositionComponentOnEntity2(Framework framework) {
-            framework.ComponentPositionEntity2Pda = WorldProgram.FindComponentPda(framework.ExampleComponentPosition, framework.Entity2Pda);
-            var initializeComponent = new InitializeComponentAccounts() {
-                Payer = framework.Wallet.Account.PublicKey,
-                Entity = framework.Entity2Pda,
-                Data = framework.ComponentPositionEntity2Pda,
-                ComponentProgram = framework.ExampleComponentPosition,
-                Authority = new PublicKey(WorldProgram.ID),
-                SystemProgram = SystemProgram.ProgramIdKey,
-                InstructionSysvarAccount = SysVars.InstructionAccount,
-            };
-            var instruction = WorldProgram.InitializeComponent(initializeComponent);
-            await framework.SendAndConfirmInstruction(instruction);
+            var initializeComponent = await Bolt.World.InitializeComponent(framework.Wallet.Account.PublicKey, framework.Entity2Pda, framework.ExampleComponentPosition);
+            framework.ComponentPositionEntity2Pda = initializeComponent.Pda;
+            await framework.SendAndConfirmInstruction(initializeComponent.Instruction);
         }
 
         public static async Task InitializePositionComponentOnEntity4(Framework framework) {
-            framework.ComponentPositionEntity4Pda = WorldProgram.FindComponentPda(framework.ExampleComponentPosition, framework.Entity4Pda);
-            var initializeComponent = new InitializeComponentAccounts() {
-                Payer = framework.Wallet.Account.PublicKey,
-                Entity = framework.Entity4Pda,
-                Data = framework.ComponentPositionEntity4Pda,
-                ComponentProgram = framework.ExampleComponentPosition,
-                Authority = new PublicKey(WorldProgram.ID),
-                SystemProgram = SystemProgram.ProgramIdKey,
-                InstructionSysvarAccount = SysVars.InstructionAccount,
-            };
-            var instruction = WorldProgram.InitializeComponent(initializeComponent);
-            await framework.SendAndConfirmInstruction(instruction);
+            var initializeComponent = await Bolt.World.InitializeComponent(framework.Wallet.Account.PublicKey, framework.Entity4Pda, framework.ExampleComponentPosition);
+            framework.ComponentPositionEntity4Pda = initializeComponent.Pda;
+            await framework.SendAndConfirmInstruction(initializeComponent.Instruction);
         }
 
         public static async Task CheckPositionOnEntity1IsDefault(Framework framework) {
@@ -161,7 +88,7 @@ namespace ECSTest {
                 SessionToken = null,
                 World = framework.WorldPda,
             };
-            var instruction = WorldProgram.Apply(apply, WorldProgram.SerializeArgs(new { direction = "Up" }));
+            var instruction = WorldProgram.Apply(apply, Bolt.World.SerializeArgs(new { direction = "Up" }));
             instruction.Keys.Add(AccountMeta.ReadOnly(framework.ExampleComponentPosition, false));
             instruction.Keys.Add(AccountMeta.Writable(framework.ComponentPositionEntity1Pda, false));
             await framework.SendAndConfirmInstruction(instruction);
@@ -175,13 +102,13 @@ namespace ECSTest {
         }
 
         public static async Task ApplySimpleMovementSystemRightOnEntity1(Framework framework) {
-            var instruction = WorldProgram.ApplySystem(
+            var instruction = Bolt.World.ApplySystem(
                 framework.WorldPda,
                 framework.SystemSimpleMovement,
-                new WorldProgram.EntityType[] {
-                    new WorldProgram.EntityType(framework.Entity1Pda, new PublicKey[] { framework.ExampleComponentPosition })
+                new Bolt.World.EntityType[] {
+                    new Bolt.World.EntityType(framework.Entity1Pda, new PublicKey[] { framework.ExampleComponentPosition })
                 },
-                WorldProgram.SerializeArgs(new { direction = "Right" }),
+                new { direction = "Right" },
                 framework.Wallet.Account.PublicKey
             );
             await framework.SendAndConfirmInstruction(instruction);

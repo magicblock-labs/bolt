@@ -2,26 +2,15 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using Solana.Unity.Programs.Abstract;
-using Solana.Unity.Programs.Utilities;
 using Solana.Unity.Programs;
-using Solana.Unity.Rpc;
-using Solana.Unity.Rpc.Core.Sockets;
-using Solana.Unity.Rpc.Types;
 using Solana.Unity.Wallet;
-using World.Program;
-using World.Errors;
-using World.Accounts;
-using WebSocketSharp;
 using Solana.Unity.Rpc.Models;
-using System.Net.Http.Headers;
 using GplSession.Program;
 
 namespace World
 {
     namespace Program
-    {   
+    {
         public partial class WorldProgram
         {
             public static Solana.Unity.Rpc.Models.TransactionInstruction AddEntity(AddEntityAccounts accounts, PublicKey programId = null)
@@ -99,14 +88,29 @@ namespace World
             }
 
             public static PublicKey FindComponentPda(
+                PublicKey componentProgramId,
+                PublicKey entity
+            ) {
+                return FindComponentPda(componentProgramId, entity, "");
+            }
+
+            public static PublicKey FindComponentPda(
+                PublicKey componentProgramId,
+                PublicKey entity,
+                string seed
+            ) {
+                return FindComponentPda(componentProgramId, entity, System.Text.Encoding.UTF8.GetBytes(seed));
+            }
+
+            public static PublicKey FindComponentPda(
                 PublicKey componentProgramId, 
                 PublicKey entity, 
-                string componentId = "")
+                byte[] seed)
 
             {
                 PublicKey.TryFindProgramAddress(new[]
                 {
-                    Encoding.UTF8.GetBytes(componentId), entity.KeyBytes
+                    seed, entity.KeyBytes
                 }, componentProgramId, out var pda, out _);
                 return pda;
             }
@@ -114,6 +118,7 @@ namespace World
             /// <summary>
             /// Convenience bundle for defining an entity and the associated components.
             /// </summary>
+            [Obsolete("Use Bolt.World.EntityType instead.")]
             public class EntityType{
                 public PublicKey[] Components { get; set; }
                 public string[] Seeds { get; set; }
@@ -158,11 +163,7 @@ namespace World
                 }
             }
 
-            public static byte[] SerializeArgs(object args)
-            {
-                return System.Text.Encoding.UTF8.GetBytes(Newtonsoft.Json.JsonConvert.SerializeObject(args));
-            }
-
+            [Obsolete("Use Bolt.World.ApplySystem instead.")]
             public static Solana.Unity.Rpc.Models.TransactionInstruction ApplySystem(
                 PublicKey world,
                 PublicKey system, 
