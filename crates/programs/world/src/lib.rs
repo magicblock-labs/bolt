@@ -671,7 +671,7 @@ pub fn build_update_context<'info>(
     bolt_component::cpi::accounts::Update {
         bolt_component,
         authority,
-        instruction_sysvar_account
+        instruction_sysvar_account,
     }
     .build_cpi_context(cpi_program)
 }
