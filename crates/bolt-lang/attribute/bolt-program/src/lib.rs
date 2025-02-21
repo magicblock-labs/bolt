@@ -44,20 +44,30 @@ pub fn bolt_program(args: TokenStream, input: TokenStream) -> TokenStream {
 fn modify_component_module(mut module: ItemMod, component_type: &Type) -> ItemMod {
     let (initialize_fn, initialize_struct) = generate_initialize(component_type);
     //let (apply_fn, apply_struct, apply_impl, update_fn, update_struct) = generate_instructions(component_type);
-    let (update_fn, update_with_session_fn, update_struct, update_with_session_struct) = generate_update(component_type);
+    let (update_fn, update_with_session_fn, update_struct, update_with_session_struct) =
+        generate_update(component_type);
 
     module.content = module.content.map(|(brace, mut items)| {
         items.extend(
-            vec![initialize_fn, initialize_struct, update_fn, update_struct, update_with_session_fn, update_with_session_struct]
-                .into_iter()
-                .map(|item| syn::parse2(item).unwrap())
-                .collect::<Vec<_>>(),
+            vec![
+                initialize_fn,
+                initialize_struct,
+                update_fn,
+                update_struct,
+                update_with_session_fn,
+                update_with_session_struct,
+            ]
+            .into_iter()
+            .map(|item| syn::parse2(item).unwrap())
+            .collect::<Vec<_>>(),
         );
 
         let modified_items = items
             .into_iter()
             .map(|item| match item {
-                syn::Item::Struct(mut struct_item) if struct_item.ident == "Apply" || struct_item.ident == "ApplyWithSession" => {
+                syn::Item::Struct(mut struct_item)
+                    if struct_item.ident == "Apply" || struct_item.ident == "ApplyWithSession" =>
+                {
                     modify_apply_struct(&mut struct_item);
                     syn::Item::Struct(struct_item)
                 }
@@ -113,7 +123,7 @@ fn generate_initialize(component_type: &Type) -> (TokenStream2, TokenStream2) {
             pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
                 let instruction = anchor_lang::solana_program::sysvar::instructions::get_instruction_relative(
                     0, &ctx.accounts.instruction_sysvar_account.to_account_info()
-                ).unwrap();
+                ).map_err(|_| BoltError::InvalidCaller)?;
                 if instruction.program_id != World::id() {
                     return Err(BoltError::InvalidCaller.into());
                 }
@@ -143,7 +153,9 @@ fn generate_initialize(component_type: &Type) -> (TokenStream2, TokenStream2) {
 }
 
 /// Generates the instructions and related structs to inject in the component.
-fn generate_update(component_type: &Type) -> (TokenStream2, TokenStream2, TokenStream2, TokenStream2) {
+fn generate_update(
+    component_type: &Type,
+) -> (TokenStream2, TokenStream2, TokenStream2, TokenStream2) {
     (
         quote! {
             #[automatically_derived]
@@ -153,7 +165,7 @@ fn generate_update(component_type: &Type) -> (TokenStream2, TokenStream2, TokenS
                 // Check if the instruction is called from the world program
                 let instruction = anchor_lang::solana_program::sysvar::instructions::get_instruction_relative(
                     0, &ctx.accounts.instruction_sysvar_account.to_account_info()
-                ).unwrap();
+                ).map_err(|_| BoltError::InvalidCaller)?;
                 require_eq!(instruction.program_id, World::id(), BoltError::InvalidCaller);
 
                 ctx.accounts.bolt_component.set_inner(<#component_type>::try_from_slice(&data)?);
@@ -179,7 +191,7 @@ fn generate_update(component_type: &Type) -> (TokenStream2, TokenStream2, TokenS
                 // Check if the instruction is called from the world program
                 let instruction = anchor_lang::solana_program::sysvar::instructions::get_instruction_relative(
                     0, &ctx.accounts.instruction_sysvar_account.to_account_info()
-                ).unwrap();
+                ).map_err(|_| BoltError::InvalidCaller)?;
                 require_eq!(instruction.program_id, World::id(), BoltError::InvalidCaller);
 
                 ctx.accounts.bolt_component.set_inner(<#component_type>::try_from_slice(&data)?);
@@ -211,7 +223,7 @@ fn generate_update(component_type: &Type) -> (TokenStream2, TokenStream2, TokenS
                 #[account(constraint = session_token.to_account_info().owner == &bolt_lang::session_keys::ID)]
                 pub session_token: Account<'info, bolt_lang::session_keys::SessionToken>,
             }
-        }
+        },
     )
 }
 
