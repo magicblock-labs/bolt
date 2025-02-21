@@ -8,7 +8,7 @@ export type World = {
   address: "WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n";
   metadata: {
     name: "world";
-    version: "0.2.0";
+    version: "0.2.1";
     spec: "0.1.0";
     description: "Bolt World program";
     repository: "https://github.com/magicblock-labs/bolt";
@@ -91,9 +91,34 @@ export type World = {
         {
           name: "world";
         },
+      ];
+      args: [
+        {
+          name: "args";
+          type: "bytes";
+        },
+      ];
+    },
+    {
+      name: "applyWithSession";
+      discriminator: [213, 69, 29, 230, 142, 107, 134, 103];
+      accounts: [
+        {
+          name: "boltSystem";
+        },
+        {
+          name: "authority";
+          signer: true;
+        },
+        {
+          name: "instructionSysvarAccount";
+          address: "Sysvar1nstructions1111111111111111111111111";
+        },
+        {
+          name: "world";
+        },
         {
           name: "sessionToken";
-          optional: true;
         },
       ];
       args: [
