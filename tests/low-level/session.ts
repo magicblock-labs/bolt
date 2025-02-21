@@ -84,7 +84,7 @@ export function session(framework) {
         );
 
       const instruction = await framework.worldProgram.methods
-        .apply(SerializeArgs())
+        .applyWithSession(SerializeArgs())
         .accounts({
           authority: sessionSigner.publicKey,
           boltSystem: framework.systemFly.programId,
@@ -170,7 +170,7 @@ export function session(framework) {
         );
 
       const instruction = await framework.worldProgram.methods
-        .apply(SerializeArgs())
+        .applyWithSession(SerializeArgs())
         .accounts({
           authority: sessionSigner.publicKey,
           boltSystem: framework.systemFly.programId,

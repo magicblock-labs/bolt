@@ -91,9 +91,34 @@ export type World = {
         {
           name: "world";
         },
+      ];
+      args: [
+        {
+          name: "args";
+          type: "bytes";
+        },
+      ];
+    },
+    {
+      name: "applyWithSession";
+      discriminator: [213, 69, 29, 230, 142, 107, 134, 103];
+      accounts: [
+        {
+          name: "boltSystem";
+        },
+        {
+          name: "authority";
+          signer: true;
+        },
+        {
+          name: "instructionSysvarAccount";
+          address: "Sysvar1nstructions1111111111111111111111111";
+        },
+        {
+          name: "world";
+        },
         {
           name: "sessionToken";
-          optional: true;
         },
       ];
       args: [

@@ -111,10 +111,44 @@
         },
         {
           "name": "world"
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": "bytes"
+        }
+      ]
+    },
+    {
+      "name": "apply_with_session",
+      "discriminator": [
+        213,
+        69,
+        29,
+        230,
+        142,
+        107,
+        134,
+        103
+      ],
+      "accounts": [
+        {
+          "name": "bolt_system"
         },
         {
-          "name": "session_token",
-          "optional": true
+          "name": "authority",
+          "signer": true
+        },
+        {
+          "name": "instruction_sysvar_account",
+          "address": "Sysvar1nstructions1111111111111111111111111"
+        },
+        {
+          "name": "world"
+        },
+        {
+          "name": "session_token"
         }
       ],
       "args": [
