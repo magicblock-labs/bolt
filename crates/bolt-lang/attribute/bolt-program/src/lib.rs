@@ -223,7 +223,7 @@ fn generate_update(
                 #[account(constraint = session_token.to_account_info().owner == &bolt_lang::session_keys::ID)]
                 pub session_token: Account<'info, bolt_lang::session_keys::SessionToken>,
             }
-        },
+        }
     )
 }
 

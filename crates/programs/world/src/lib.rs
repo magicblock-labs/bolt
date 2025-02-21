@@ -358,6 +358,7 @@ pub mod world {
         pub instruction_sysvar_account: UncheckedAccount<'info>,
         #[account()]
         pub world: Account<'info, World>,
+        /// CHECK: session token check
         #[account()]
         /// CHECK: The session token
         pub session_token: UncheckedAccount<'info>,
@@ -670,7 +671,7 @@ pub fn build_update_context<'info>(
     bolt_component::cpi::accounts::Update {
         bolt_component,
         authority,
-        instruction_sysvar_account,
+        instruction_sysvar_account
     }
     .build_cpi_context(cpi_program)
 }
