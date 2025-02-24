@@ -1,11 +1,25 @@
 
-## [0.2.1] - 2025-02-12
+## [0.2.2] - 2025-02-24
 
 ### ✨️ Features
+ - Adding DestroyComponent function (#143)
+ - Separating apply and apply_with_session (#141)
+
+
+### 🐛 Bug Fixes
+
+## [0.2.1] - 2025-02-17
+
+### ✨️ Features
+ - TypeScript ApplySystem now takes any JSON serializable as input (#135)
  - Session keys (#126)
  - `bolt world` now prints world id (#127)
  - Variable components number (#124)
  - Adding low and intermediate api-levels (#120)
+
+
+### 🐛 Bug Fixes
+ - Fixing component naming convention to snake_case (#133)
 
 ## [0.2.0] - 2025-01-05
 
