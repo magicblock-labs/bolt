@@ -91,8 +91,8 @@ jobs:
           cargo install --path crates/bolt-cli --force --locked
           yarn install
           bolt build
-          cd clients/typescript/bolt-sdk
+          cd clients/typescript
           yarn install && yarn build
-          cd ../../..
+          cd ../..
           bolt test
 

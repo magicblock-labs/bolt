@@ -159,9 +159,9 @@ jobs:
 
       - name: Generate lib
         run: |
-          cd clients/typescript/bolt-sdk
+          cd clients/typescript
           yarn install && yarn build
-          cd ../../..
+          cd ../..
 
       - name: run tests
         run: |
@@ -174,8 +174,8 @@ jobs:
           npm install
           echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
           npm set //registry.npmjs.org/:_authToken ${{ secrets.NPM_TOKEN }}
-          cd clients/typescript/bolt-sdk/ && npm run build && npm run lint:fix && cd ../../../ && npm run lint:fix
-          cd clients/typescript/bolt-sdk/
+          cd clients/typescript && npm run build && npm run lint:fix && cd ../.. && npm run lint:fix
+          cd clients/typescript
           if [ "${DRY_RUN}" = "true" ]; then
             echo "Running npm publish in dry-run mode"
             npm publish --access public --dry-run

@@ -5,8 +5,8 @@
 target
 **/*.rs.bk
 node_modules
-clients/typescript/bolt-sdk/node_modules
-clients/typescript/bolt-sdk/yarn-error.log
+clients/typescript/node_modules
+clients/typescript/yarn-error.log
 .yarn
 **/test-ledger
 

@@ -149,9 +149,9 @@ jobs:
 
       - name: Generate lib
         run: |
-          cd clients/typescript/bolt-sdk
+          cd clients/typescript
           yarn install && yarn build
-          cd ../../..
+          cd ../..
 
       - name: run tests
         run: |
