@@ -1,3 +1,4 @@
+#pragma warning disable CS1591
 
 using Solana.Unity.Rpc;
 using Solana.Unity.Rpc.Models;

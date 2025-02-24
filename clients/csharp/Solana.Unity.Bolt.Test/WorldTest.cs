@@ -27,7 +27,7 @@ namespace WorldTest {
             TransactionInstruction instruction = WorldProgram.InitializeRegistry(initializeRegistry);
             try {
                 await framework.SendAndConfirmInstruction(instruction);
-            } catch (Exception e) {
+            } catch (Exception) {
                 // We ignore this error because it happens when the registry already exists
             }
 

@@ -85,7 +85,6 @@ namespace ECSTest {
                 Authority = framework.Wallet.Account.PublicKey,
                 BoltSystem = framework.SystemSimpleMovement,
                 InstructionSysvarAccount = SysVars.InstructionAccount,
-                SessionToken = null,
                 World = framework.WorldPda,
             };
             var instruction = WorldProgram.Apply(apply, Bolt.World.SerializeArgs(new { direction = "Up" }));

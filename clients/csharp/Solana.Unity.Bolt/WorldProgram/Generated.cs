@@ -1,3 +1,5 @@
+#pragma warning disable CS1591
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -277,6 +279,16 @@ namespace World
 
             public PublicKey InstructionSysvarAccount { get; set; } = new PublicKey("Sysvar1nstructions1111111111111111111111111");
             public PublicKey World { get; set; }
+        }
+
+        public class ApplyWithSessionAccounts
+        {
+            public PublicKey BoltSystem { get; set; }
+
+            public PublicKey Authority { get; set; }
+
+            public PublicKey InstructionSysvarAccount { get; set; } = new PublicKey("Sysvar1nstructions1111111111111111111111111");
+            public PublicKey World { get; set; }
 
             public PublicKey SessionToken { get; set; }
         }
@@ -289,6 +301,24 @@ namespace World
 
             public PublicKey System { get; set; }
 
+            public PublicKey SystemProgram { get; set; } = new PublicKey("11111111111111111111111111111111");
+        }
+
+        public class DestroyComponentAccounts
+        {
+            public PublicKey Authority { get; set; }
+
+            public PublicKey Receiver { get; set; }
+
+            public PublicKey ComponentProgram { get; set; }
+
+            public PublicKey ComponentProgramData { get; set; }
+
+            public PublicKey Entity { get; set; }
+
+            public PublicKey Component { get; set; }
+
+            public PublicKey InstructionSysvarAccount { get; set; } = new PublicKey("Sysvar1nstructions1111111111111111111111111");
             public PublicKey SystemProgram { get; set; } = new PublicKey("11111111111111111111111111111111");
         }
 
@@ -402,10 +432,28 @@ namespace World
             {
                 programId ??= new(ID);
                 List<Solana.Unity.Rpc.Models.AccountMeta> keys = new()
-                {Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.BoltSystem, false), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.Authority, true), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.InstructionSysvarAccount, false), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.World, false), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.SessionToken == null ? programId : accounts.SessionToken, false)};
+                {Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.BoltSystem, false), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.Authority, true), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.InstructionSysvarAccount, false), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.World, false)};
                 byte[] _data = new byte[1200];
                 int offset = 0;
                 _data.WriteU64(16258613031726085112UL, offset);
+                offset += 8;
+                _data.WriteS32(args.Length, offset);
+                offset += 4;
+                _data.WriteSpan(args, offset);
+                offset += args.Length;
+                byte[] resultData = new byte[offset];
+                Array.Copy(_data, resultData, offset);
+                return new Solana.Unity.Rpc.Models.TransactionInstruction{Keys = keys, ProgramId = programId.KeyBytes, Data = resultData};
+            }
+
+            public static Solana.Unity.Rpc.Models.TransactionInstruction ApplyWithSession(ApplyWithSessionAccounts accounts, byte[] args, PublicKey programId = null)
+            {
+                programId ??= new(ID);
+                List<Solana.Unity.Rpc.Models.AccountMeta> keys = new()
+                {Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.BoltSystem, false), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.Authority, true), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.InstructionSysvarAccount, false), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.World, false), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.SessionToken, false)};
+                byte[] _data = new byte[1200];
+                int offset = 0;
+                _data.WriteU64(7459768094276011477UL, offset);
                 offset += 8;
                 _data.WriteS32(args.Length, offset);
                 offset += 4;
@@ -424,6 +472,20 @@ namespace World
                 byte[] _data = new byte[1200];
                 int offset = 0;
                 _data.WriteU64(8777308090533520754UL, offset);
+                offset += 8;
+                byte[] resultData = new byte[offset];
+                Array.Copy(_data, resultData, offset);
+                return new Solana.Unity.Rpc.Models.TransactionInstruction{Keys = keys, ProgramId = programId.KeyBytes, Data = resultData};
+            }
+
+            public static Solana.Unity.Rpc.Models.TransactionInstruction DestroyComponent(DestroyComponentAccounts accounts, PublicKey programId = null)
+            {
+                programId ??= new(ID);
+                List<Solana.Unity.Rpc.Models.AccountMeta> keys = new()
+                {Solana.Unity.Rpc.Models.AccountMeta.Writable(accounts.Authority, true), Solana.Unity.Rpc.Models.AccountMeta.Writable(accounts.Receiver, false), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.ComponentProgram, false), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.ComponentProgramData, false), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.Entity, false), Solana.Unity.Rpc.Models.AccountMeta.Writable(accounts.Component, false), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.InstructionSysvarAccount, false), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.SystemProgram, false)};
+                byte[] _data = new byte[1200];
+                int offset = 0;
+                _data.WriteU64(5321952129328727336UL, offset);
                 offset += 8;
                 byte[] resultData = new byte[offset];
                 Array.Copy(_data, resultData, offset);

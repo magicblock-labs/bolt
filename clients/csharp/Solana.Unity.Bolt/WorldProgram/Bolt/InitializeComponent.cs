@@ -1,3 +1,5 @@
+#pragma warning disable CS1591
+
 using Solana.Unity.Rpc.Models;
 using Solana.Unity.Wallet;
 using System.Threading.Tasks;

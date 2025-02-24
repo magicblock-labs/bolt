@@ -1,3 +1,5 @@
+#pragma warning disable CS1591
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -189,14 +191,23 @@ namespace World
                     throw new ArgumentException("Component IDs and PDAs must be the same length");
                 }
 
-                var apply = new ApplyAccounts() {
-                    BoltSystem = system,
-                    Authority = authority,
-                    InstructionSysvarAccount = SysVars.InstructionAccount,
-                    World = world,
-                    SessionToken = sessionToken,
-                };
-                var instruction = Apply(apply, args, programId);
+                Solana.Unity.Rpc.Models.TransactionInstruction instruction;
+                if (sessionToken != null) {
+                    var apply = new ApplyWithSessionAccounts() {
+                        BoltSystem = system,
+                        Authority = authority,
+                        World = world,
+                        SessionToken = sessionToken,
+                    };
+                    instruction = ApplyWithSession(apply, args, programId);
+                } else {
+                    var apply = new ApplyAccounts() {
+                        BoltSystem = system,
+                        Authority = authority,
+                        World = world,
+                    };
+                    instruction = Apply(apply, args, programId);
+                }
                 for (int i = 0; i < componentIds.Count; i++) {
                     instruction.Keys.Add(AccountMeta.ReadOnly(componentIds[i], false));
                     instruction.Keys.Add(AccountMeta.Writable(componentPdas[i], false));
