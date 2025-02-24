@@ -359,6 +359,7 @@ pub mod world {
         #[account()]
         pub world: Account<'info, World>,
         #[account()]
+        /// CHECK: The session token
         pub session_token: UncheckedAccount<'info>,
     }
 

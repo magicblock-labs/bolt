@@ -43,6 +43,7 @@ pub mod bolt_component {
         /// CHECK: The instruction sysvar
         pub instruction_sysvar_account: AccountInfo<'info>,
         #[account()]
+        /// CHECK: The session token
         pub session_token: UncheckedAccount<'info>,
     }
 }
