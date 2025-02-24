@@ -208,3 +208,34 @@ jobs:
           fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  publish-csharp-client:
+    name: Publish C# Client
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Run C# Build Script
+        run: |
+          cd clients/csharp
+          chmod +x build.sh
+          ./build.sh
+        shell: bash
+
+      - name: Verify Build Output
+        run: |
+          if [ ! -f "clients/csharp/Solana.Unity.Bolt/bin/Release/netstandard2.1/Solana.Unity.Bolt.dll" ]; then
+            echo "Error: DLL file not found!"
+            exit 1
+          fi
+
+      - name: Publish C# DLL to GitHub Release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: clients/csharp/Solana.Unity.Bolt/bin/Release/netstandard2.1/Solana.Unity.Bolt.dll
+          overwrite: true
+          tag: "v${{ env.RELEASE_VERSION }}"
+          release_name: "v${{ env.RELEASE_VERSION }}"
+          asset_name: "Solana.Unity.Bolt.dll"
