@@ -363,7 +363,6 @@ pub mod world {
         pub instruction_sysvar_account: UncheckedAccount<'info>,
         #[account()]
         pub world: Account<'info, World>,
-        /// CHECK: session token check
         #[account()]
         /// CHECK: The session token
         pub session_token: UncheckedAccount<'info>,
@@ -598,7 +597,6 @@ impl<'info> DestroyComponent<'info> {
         CpiContext::new(cpi_program, cpi_accounts)
     }
 }
-
 
 #[account]
 #[derive(InitSpace, Default, Copy)]

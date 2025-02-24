@@ -46,7 +46,6 @@ pub mod bolt_component {
         #[account(address = anchor_lang::solana_program::sysvar::instructions::id())]
         /// CHECK: The instruction sysvar
         pub instruction_sysvar_account: AccountInfo<'info>,
-        /// CHECK: session token check
         #[account()]
         /// CHECK: The session token
         pub session_token: UncheckedAccount<'info>,

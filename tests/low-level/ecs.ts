@@ -186,7 +186,7 @@ export function ecs(framework) {
         .accounts({
           authority: framework.provider.wallet.publicKey,
           boltSystem: framework.systemSimpleMovement.programId,
-          world: framework.worldPda
+          world: framework.worldPda,
         })
         .remainingAccounts([
           {
@@ -220,7 +220,7 @@ export function ecs(framework) {
         .accounts({
           authority: framework.provider.wallet.publicKey,
           boltSystem: framework.systemSimpleMovement.programId,
-          world: framework.worldPda
+          world: framework.worldPda,
         })
         .remainingAccounts([
           {
@@ -253,7 +253,7 @@ export function ecs(framework) {
         .accounts({
           authority: framework.provider.wallet.publicKey,
           boltSystem: framework.systemFly.programId,
-          world: framework.worldPda
+          world: framework.worldPda,
         })
         .remainingAccounts([
           {
@@ -286,7 +286,7 @@ export function ecs(framework) {
         .accounts({
           authority: framework.provider.wallet.publicKey,
           boltSystem: framework.systemApplyVelocity.programId,
-          world: framework.worldPda
+          world: framework.worldPda,
         })
         .remainingAccounts([
           {

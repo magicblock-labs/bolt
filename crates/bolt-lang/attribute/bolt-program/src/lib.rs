@@ -146,7 +146,7 @@ fn generate_destroy(component_type: &Type) -> (TokenStream2, TokenStream2) {
                 if ctx.accounts.authority.key != &ctx.accounts.component.bolt_metadata.authority && ctx.accounts.authority.key != &upgrade_authority {
                     return Err(BoltError::InvalidAuthority.into());
                 }
-        
+
                 let instruction = anchor_lang::solana_program::sysvar::instructions::get_instruction_relative(
                     0, &ctx.accounts.instruction_sysvar_account.to_account_info()
                 ).map_err(|_| BoltError::InvalidCaller)?;
