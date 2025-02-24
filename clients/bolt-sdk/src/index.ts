@@ -88,6 +88,17 @@ export function FindSessionTokenPda({
   )[0];
 }
 
+export function FindComponentProgramDataPda({
+  programId,
+}: {
+  programId: PublicKey;
+}) {
+  return PublicKey.findProgramAddressSync(
+    [programId.toBuffer()],
+    new PublicKey("BPFLoaderUpgradeab1e11111111111111111111111"),
+  )[0];
+}
+
 // TODO: seed must be Uint8Array like the other FindPda functions
 export function FindComponentPda({
   componentId,

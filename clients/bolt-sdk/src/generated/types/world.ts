@@ -152,6 +152,43 @@ export type World = {
       args: [];
     },
     {
+      name: "destroyComponent";
+      discriminator: [40, 197, 69, 196, 67, 95, 219, 73];
+      accounts: [
+        {
+          name: "authority";
+          writable: true;
+          signer: true;
+        },
+        {
+          name: "receiver";
+          writable: true;
+        },
+        {
+          name: "componentProgram";
+        },
+        {
+          name: "componentProgramData";
+        },
+        {
+          name: "entity";
+        },
+        {
+          name: "component";
+          writable: true;
+        },
+        {
+          name: "instructionSysvarAccount";
+          address: "Sysvar1nstructions1111111111111111111111111";
+        },
+        {
+          name: "systemProgram";
+          address: "11111111111111111111111111111111";
+        },
+      ];
+      args: [];
+    },
+    {
       name: "initializeComponent";
       discriminator: [36, 143, 233, 113, 12, 234, 61, 30];
       accounts: [

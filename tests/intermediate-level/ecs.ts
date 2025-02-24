@@ -3,6 +3,7 @@ import {
   AddEntity,
   ApplySystem,
   InitializeComponent,
+  DestroyComponent,
 } from "../../clients/bolt-sdk/lib";
 import { Direction, Framework } from "../framework";
 import { expect } from "chai";
@@ -281,6 +282,28 @@ export function ecs(framework: Framework) {
       expect(position.x.toNumber()).to.equal(0);
       expect(position.y.toNumber()).to.equal(0);
       expect(position.z.toNumber()).to.equal(1);
+    });
+
+    it("Destroy Velocity Component on Entity 1", async () => {
+      const keypair = web3.Keypair.generate();
+
+      let componentBalance = await framework.provider.connection.getBalance(
+        framework.componentVelocityEntity1Pda,
+      );
+
+      const destroyComponent = await DestroyComponent({
+        authority: framework.provider.wallet.publicKey,
+        entity: framework.entity1Pda,
+        componentId: framework.exampleComponentVelocity.programId,
+        receiver: keypair.publicKey,
+        seed: "component-velocity",
+      });
+      await framework.provider.sendAndConfirm(destroyComponent.transaction);
+
+      const balance = await framework.provider.connection.getBalance(
+        keypair.publicKey,
+      );
+      expect(balance).to.equal(componentBalance);
     });
   });
 }

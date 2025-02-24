@@ -266,9 +266,6 @@ pub mod world {
     }
 
     pub fn destroy_component(ctx: Context<DestroyComponent>) -> Result<()> {
-        if !ctx.accounts.authority.is_signer && ctx.accounts.authority.key != &ID {
-            return Err(WorldError::InvalidAuthority.into());
-        }
         bolt_component::cpi::destroy(ctx.accounts.build())?;
         Ok(())
     }
@@ -564,9 +561,16 @@ impl<'info> InitializeComponent<'info> {
 #[derive(Accounts)]
 pub struct DestroyComponent<'info> {
     #[account(mut)]
-    pub receiver: Signer<'info>,
+    pub authority: Signer<'info>,
+    #[account(mut)]
+    /// CHECK: receiver check
+    pub receiver: AccountInfo<'info>,
     /// CHECK: component program check
     pub component_program: AccountInfo<'info>,
+    /// CHECK: component program data check
+    pub component_program_data: AccountInfo<'info>,
+    #[account()]
+    pub entity: Account<'info, Entity>,
     #[account(mut)]
     /// CHECK: component data check
     pub component: UncheckedAccount<'info>,
@@ -583,8 +587,11 @@ impl<'info> DestroyComponent<'info> {
         let cpi_program = self.component_program.to_account_info();
 
         let cpi_accounts = bolt_component::cpi::accounts::Destroy {
+            authority: self.authority.to_account_info(),
             receiver: self.receiver.to_account_info(),
+            entity: self.entity.to_account_info(),
             component: self.component.to_account_info(),
+            component_program_data: self.component_program_data.to_account_info(),
             instruction_sysvar_account: self.instruction_sysvar_account.to_account_info(),
             system_program: self.system_program.to_account_info(),
         };

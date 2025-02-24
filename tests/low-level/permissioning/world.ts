@@ -121,7 +121,6 @@ export function world(framework) {
           authority: framework.provider.wallet.publicKey,
           boltSystem: framework.systemFly.programId,
           world: framework.worldPda,
-          sessionToken: null,
         })
         .remainingAccounts([
           {
@@ -169,7 +168,6 @@ export function world(framework) {
           authority: framework.provider.wallet.publicKey,
           boltSystem: framework.systemFly.programId,
           world: framework.worldPda,
-          sessionToken: null,
         })
         .remainingAccounts([
           {
@@ -224,7 +222,6 @@ export function world(framework) {
           .accounts({
             boltComponent: framework.componentPositionEntity4Pda,
             authority: framework.provider.wallet.publicKey,
-            sessionToken: null,
           })
           .rpc();
       } catch (error) {
