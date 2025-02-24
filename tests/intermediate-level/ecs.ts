@@ -56,6 +56,7 @@ export function ecs(framework: Framework) {
         entity: framework.entity1Pda,
         componentId: framework.exampleComponentVelocity.programId,
         seed: "component-velocity",
+        authority: framework.provider.wallet.publicKey,
       });
       await framework.provider.sendAndConfirm(initializeComponent.transaction);
       framework.componentVelocityEntity1Pda = initializeComponent.componentPda; // Saved for later

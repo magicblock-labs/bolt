@@ -103,7 +103,7 @@ export function ecs(framework) {
           entity: framework.entity1Pda,
           data: framework.componentVelocityEntity1Pda,
           componentProgram: componentId,
-          authority: framework.worldProgram.programId,
+          authority: framework.provider.wallet.publicKey,
         })
         .instruction();
       const transaction = new anchor.web3.Transaction().add(instruction);
