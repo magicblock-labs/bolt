@@ -405,15 +405,6 @@ async function createApplySystemInstruction({
     throw new Error("No components provided");
   }
 
-  let sessionToken = session ? session.token : null;
-
-  const applyAccounts = {
-    authority: authority ?? PROGRAM_ID,
-    boltSystem: systemId,
-    sessionToken,
-    world,
-  };
-
   let remainingAccounts: web3.AccountMeta[] = [];
   let components: { id: PublicKey; pda: PublicKey }[] = [];
   for (const entity of entities) {
@@ -452,11 +443,28 @@ async function createApplySystemInstruction({
       remainingAccounts.push(account);
     }
   }
-  return program.methods
-    .apply(SerializeArgs(args))
-    .accounts(applyAccounts)
-    .remainingAccounts(remainingAccounts)
-    .instruction();
+
+  if (session)
+    return program.methods
+      .applyWithSession(SerializeArgs(args))
+      .accounts({
+        authority: authority ?? PROGRAM_ID,
+        boltSystem: systemId,
+        sessionToken: session.token,
+        world,
+      })
+      .remainingAccounts(remainingAccounts)
+      .instruction();
+  else
+    return program.methods
+      .apply(SerializeArgs(args))
+      .accounts({
+        authority: authority ?? PROGRAM_ID,
+        boltSystem: systemId,
+        world,
+      })
+      .remainingAccounts(remainingAccounts)
+      .instruction();
 }
 
 interface ApplySystemEntity {

@@ -14,6 +14,10 @@ pub mod bolt_component {
         Ok(())
     }
 
+    pub fn update_with_session(_ctx: Context<UpdateWithSession>, _data: Vec<u8>) -> Result<()> {
+        Ok(())
+    }
+
     #[derive(Accounts)]
     pub struct Update<'info> {
         #[account(mut)]
@@ -25,8 +29,21 @@ pub mod bolt_component {
         #[account(address = anchor_lang::solana_program::sysvar::instructions::id())]
         /// CHECK: The instruction sysvar
         pub instruction_sysvar_account: AccountInfo<'info>,
+    }
+
+    #[derive(Accounts)]
+    pub struct UpdateWithSession<'info> {
+        #[account(mut)]
+        /// CHECK: The component to update
+        pub bolt_component: UncheckedAccount<'info>,
         #[account()]
-        pub session_token: Option<UncheckedAccount<'info>>,
+        /// CHECK: The authority of the component
+        pub authority: Signer<'info>,
+        #[account(address = anchor_lang::solana_program::sysvar::instructions::id())]
+        /// CHECK: The instruction sysvar
+        pub instruction_sysvar_account: AccountInfo<'info>,
+        #[account()]
+        pub session_token: UncheckedAccount<'info>,
     }
 }
 
@@ -65,11 +82,21 @@ pub trait CpiContextBuilder<'info>: ToAccountMetas + ToAccountInfos<'info> + Siz
 #[cfg(feature = "cpi")]
 impl<'info> CpiContextBuilder<'info> for cpi::accounts::Update<'info> {
     fn build_cpi_context(
-        mut self,
+        self,
         program: AccountInfo<'info>,
     ) -> CpiContext<'info, 'info, 'info, 'info, Self> {
         let cpi_program = program.to_account_info();
-        self.session_token = Some(self.session_token.unwrap_or(program.to_account_info()));
+        CpiContext::new(cpi_program, self)
+    }
+}
+
+#[cfg(feature = "cpi")]
+impl<'info> CpiContextBuilder<'info> for cpi::accounts::UpdateWithSession<'info> {
+    fn build_cpi_context(
+        self,
+        program: AccountInfo<'info>,
+    ) -> CpiContext<'info, 'info, 'info, 'info, Self> {
+        let cpi_program = program.to_account_info();
         CpiContext::new(cpi_program, self)
     }
 }
