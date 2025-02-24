@@ -1092,6 +1092,7 @@ version = "0.2.1"
 dependencies = [
  "ahash 0.8.11",
  "anchor-lang",
+ "bincode",
  "bolt-attribute-bolt-arguments 0.2.1",
  "bolt-attribute-bolt-component 0.2.1",
  "bolt-attribute-bolt-component-deserialize 0.2.1",
@@ -1106,6 +1107,7 @@ dependencies = [
  "serde",
  "serde_json",
  "session-keys",
+ "solana-program",
  "world 0.2.1",
 ]
 

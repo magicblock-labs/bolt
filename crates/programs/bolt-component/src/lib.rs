@@ -10,6 +10,10 @@ pub mod bolt_component {
         Ok(())
     }
 
+    pub fn destroy(_ctx: Context<Destroy>) -> Result<()> {
+        Ok(())
+    }
+
     pub fn update(_ctx: Context<Update>, _data: Vec<u8>) -> Result<()> {
         Ok(())
     }
@@ -61,6 +65,28 @@ pub struct Initialize<'info> {
     #[account()]
     /// CHECK: The authority of the component
     pub authority: AccountInfo<'info>,
+    #[account(address = anchor_lang::solana_program::sysvar::instructions::id())]
+    /// CHECK: The instruction sysvar
+    pub instruction_sysvar_account: AccountInfo<'info>,
+    pub system_program: Program<'info, System>,
+}
+
+#[derive(Accounts)]
+pub struct Destroy<'info> {
+    #[account()]
+    pub authority: Signer<'info>,
+    #[account(mut)]
+    /// CHECK: The receiver of the component
+    pub receiver: AccountInfo<'info>,
+    #[account()]
+    /// CHECK: The entity to destroy the component on
+    pub entity: AccountInfo<'info>,
+    #[account(mut)]
+    /// CHECK: The component to destroy
+    pub component: UncheckedAccount<'info>,
+    #[account()]
+    /// CHECK: The component program data
+    pub component_program_data: AccountInfo<'info>,
     #[account(address = anchor_lang::solana_program::sysvar::instructions::id())]
     /// CHECK: The instruction sysvar
     pub instruction_sysvar_account: AccountInfo<'info>,

@@ -16,6 +16,7 @@ import {
   FindSessionTokenPda,
   WORLD_PROGRAM_ID,
   BN,
+  FindComponentProgramDataPda,
 } from "../index";
 import type web3 from "@solana/web3.js";
 import {
@@ -326,6 +327,56 @@ export async function AddEntity({
     instruction,
     transaction,
     entityPda,
+  };
+}
+
+/**
+ * Create the transaction to Destroy a component
+ * @param authority
+ * @param component
+ * @param world
+ * @param connection
+ * @constructor
+ */
+export async function DestroyComponent({
+  authority,
+  entity,
+  componentId,
+  receiver,
+  seed,
+}: {
+  authority: PublicKey;
+  entity: PublicKey;
+  componentId: PublicKey;
+  receiver: PublicKey;
+  seed?: string;
+}): Promise<{
+  instruction: TransactionInstruction;
+  transaction: Transaction;
+}> {
+  const program = new Program(
+    worldIdl as Idl,
+  ) as unknown as Program<WorldProgram>;
+  const componentProgramData = FindComponentProgramDataPda({
+    programId: componentId,
+  });
+  const componentProgram = componentId;
+  const component = FindComponentPda({ componentId, entity, seed });
+  const instruction = await program.methods
+    .destroyComponent()
+    .accounts({
+      authority,
+      component,
+      entity,
+      componentProgram,
+      componentProgramData,
+      receiver,
+    })
+    .instruction();
+  const transaction = new Transaction().add(instruction);
+  return {
+    instruction,
+    transaction,
   };
 }
 

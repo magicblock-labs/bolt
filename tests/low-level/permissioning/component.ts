@@ -66,7 +66,6 @@ export function component(framework) {
           authority: keypair.publicKey,
           boltSystem: framework.systemFly.programId,
           world: framework.worldPda,
-          sessionToken: null,
         })
         .remainingAccounts([
           {
@@ -116,7 +115,6 @@ export function component(framework) {
           authority: framework.provider.wallet.publicKey,
           boltSystem: framework.systemFly.programId,
           world: framework.worldPda,
-          sessionToken: null,
         })
         .remainingAccounts([
           {

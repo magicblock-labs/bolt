@@ -43,6 +43,7 @@ pub fn bolt_program(args: TokenStream, input: TokenStream) -> TokenStream {
 /// Modifies the component module and adds the necessary functions and structs.
 fn modify_component_module(mut module: ItemMod, component_type: &Type) -> ItemMod {
     let (initialize_fn, initialize_struct) = generate_initialize(component_type);
+    let (destroy_fn, destroy_struct) = generate_destroy(component_type);
     //let (apply_fn, apply_struct, apply_impl, update_fn, update_struct) = generate_instructions(component_type);
     let (update_fn, update_with_session_fn, update_struct, update_with_session_struct) =
         generate_update(component_type);
@@ -56,6 +57,8 @@ fn modify_component_module(mut module: ItemMod, component_type: &Type) -> ItemMo
                 update_struct,
                 update_with_session_fn,
                 update_with_session_struct,
+                destroy_fn,
+                destroy_struct,
             ]
             .into_iter()
             .map(|item| syn::parse2(item).unwrap())
@@ -113,6 +116,66 @@ fn create_check_attribute() -> Attribute {
     parse_quote! {
         #[doc = "CHECK: This program can modify the data of the component"]
     }
+}
+
+/// Generates the destroy function and struct.
+fn generate_destroy(component_type: &Type) -> (TokenStream2, TokenStream2) {
+    (
+        quote! {
+            #[automatically_derived]
+            pub fn destroy(ctx: Context<Destroy>) -> Result<()> {
+                let program_data_address =
+                    Pubkey::find_program_address(&[crate::id().as_ref()], &bolt_lang::prelude::solana_program::bpf_loader_upgradeable::id()).0;
+
+                if !program_data_address.eq(ctx.accounts.component_program_data.key) {
+                    return Err(BoltError::InvalidAuthority.into());
+                }
+
+                let program_account_data = ctx.accounts.component_program_data.try_borrow_data()?;
+                let upgrade_authority = if let bolt_lang::prelude::solana_program::bpf_loader_upgradeable::UpgradeableLoaderState::ProgramData {
+                    upgrade_authority_address,
+                    ..
+                } =
+                    bolt_lang::prelude::bincode::deserialize(&program_account_data).map_err(|_| BoltError::InvalidAuthority)?
+                {
+                    Ok(upgrade_authority_address)
+                } else {
+                    Err(anchor_lang::error::Error::from(BoltError::InvalidAuthority))
+                }?.ok_or_else(|| BoltError::InvalidAuthority)?;
+
+                if ctx.accounts.authority.key != &ctx.accounts.component.bolt_metadata.authority && ctx.accounts.authority.key != &upgrade_authority {
+                    return Err(BoltError::InvalidAuthority.into());
+                }
+
+                let instruction = anchor_lang::solana_program::sysvar::instructions::get_instruction_relative(
+                    0, &ctx.accounts.instruction_sysvar_account.to_account_info()
+                ).map_err(|_| BoltError::InvalidCaller)?;
+                if instruction.program_id != World::id() {
+                    return Err(BoltError::InvalidCaller.into());
+                }
+                Ok(())
+            }
+        },
+        quote! {
+            #[automatically_derived]
+            #[derive(Accounts)]
+            pub struct Destroy<'info> {
+                #[account()]
+                pub authority: Signer<'info>,
+                #[account(mut)]
+                pub receiver: AccountInfo<'info>,
+                #[account()]
+                pub entity: Account<'info, Entity>,
+                #[account(mut, close = receiver, seeds = [<#component_type>::seed(), entity.key().as_ref()], bump)]
+                pub component: Account<'info, #component_type>,
+                #[account()]
+                pub component_program_data: AccountInfo<'info>,
+                #[account(address = anchor_lang::solana_program::sysvar::instructions::id())]
+                pub instruction_sysvar_account: AccountInfo<'info>,
+                pub system_program: Program<'info, System>,
+            }
+        },
+    )
 }
 
 /// Generates the initialize function and struct.

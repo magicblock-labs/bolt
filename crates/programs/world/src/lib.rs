@@ -265,6 +265,11 @@ pub mod world {
         Ok(())
     }
 
+    pub fn destroy_component(ctx: Context<DestroyComponent>) -> Result<()> {
+        bolt_component::cpi::destroy(ctx.accounts.build())?;
+        Ok(())
+    }
+
     pub fn apply<'info>(
         ctx: Context<'_, '_, '_, 'info, Apply<'info>>,
         args: Vec<u8>,
@@ -545,6 +550,47 @@ impl<'info> InitializeComponent<'info> {
             data: self.data.to_account_info(),
             entity: self.entity.to_account_info(),
             authority: self.authority.to_account_info(),
+            instruction_sysvar_account: self.instruction_sysvar_account.to_account_info(),
+            system_program: self.system_program.to_account_info(),
+        };
+        CpiContext::new(cpi_program, cpi_accounts)
+    }
+}
+
+#[derive(Accounts)]
+pub struct DestroyComponent<'info> {
+    #[account(mut)]
+    pub authority: Signer<'info>,
+    #[account(mut)]
+    /// CHECK: receiver check
+    pub receiver: AccountInfo<'info>,
+    /// CHECK: component program check
+    pub component_program: AccountInfo<'info>,
+    /// CHECK: component program data check
+    pub component_program_data: AccountInfo<'info>,
+    #[account()]
+    pub entity: Account<'info, Entity>,
+    #[account(mut)]
+    /// CHECK: component data check
+    pub component: UncheckedAccount<'info>,
+    #[account(address = anchor_lang::solana_program::sysvar::instructions::id())]
+    /// CHECK: instruction sysvar check
+    pub instruction_sysvar_account: UncheckedAccount<'info>,
+    pub system_program: Program<'info, System>,
+}
+
+impl<'info> DestroyComponent<'info> {
+    pub fn build(
+        &self,
+    ) -> CpiContext<'_, '_, '_, 'info, bolt_component::cpi::accounts::Destroy<'info>> {
+        let cpi_program = self.component_program.to_account_info();
+
+        let cpi_accounts = bolt_component::cpi::accounts::Destroy {
+            authority: self.authority.to_account_info(),
+            receiver: self.receiver.to_account_info(),
+            entity: self.entity.to_account_info(),
+            component: self.component.to_account_info(),
+            component_program_data: self.component_program_data.to_account_info(),
             instruction_sysvar_account: self.instruction_sysvar_account.to_account_info(),
             system_program: self.system_program.to_account_info(),
         };

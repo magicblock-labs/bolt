@@ -3,6 +3,7 @@ import {
   anchor,
   web3,
   FindComponentPda,
+  FindComponentProgramDataPda,
   FindEntityPda,
   SerializeArgs,
 } from "../../clients/bolt-sdk/lib";
@@ -102,7 +103,7 @@ export function ecs(framework) {
           entity: framework.entity1Pda,
           data: framework.componentVelocityEntity1Pda,
           componentProgram: componentId,
-          authority: framework.worldProgram.programId,
+          authority: framework.provider.wallet.publicKey,
         })
         .instruction();
       const transaction = new anchor.web3.Transaction().add(instruction);
@@ -186,7 +187,6 @@ export function ecs(framework) {
           authority: framework.provider.wallet.publicKey,
           boltSystem: framework.systemSimpleMovement.programId,
           world: framework.worldPda,
-          sessionToken: null,
         })
         .remainingAccounts([
           {
@@ -221,7 +221,6 @@ export function ecs(framework) {
           authority: framework.provider.wallet.publicKey,
           boltSystem: framework.systemSimpleMovement.programId,
           world: framework.worldPda,
-          sessionToken: null,
         })
         .remainingAccounts([
           {
@@ -255,7 +254,6 @@ export function ecs(framework) {
           authority: framework.provider.wallet.publicKey,
           boltSystem: framework.systemFly.programId,
           world: framework.worldPda,
-          sessionToken: null,
         })
         .remainingAccounts([
           {
@@ -289,7 +287,6 @@ export function ecs(framework) {
           authority: framework.provider.wallet.publicKey,
           boltSystem: framework.systemApplyVelocity.programId,
           world: framework.worldPda,
-          sessionToken: null,
         })
         .remainingAccounts([
           {
@@ -342,7 +339,6 @@ export function ecs(framework) {
           authority: framework.provider.wallet.publicKey,
           boltSystem: framework.systemApplyVelocity.programId,
           world: framework.worldPda,
-          sessionToken: null,
         })
         .remainingAccounts([
           {
@@ -398,7 +394,6 @@ export function ecs(framework) {
           authority: framework.provider.wallet.publicKey,
           boltSystem: framework.systemFly.programId,
           world: framework.worldPda,
-          sessionToken: null,
         })
         .remainingAccounts([
           {
@@ -423,6 +418,37 @@ export function ecs(framework) {
       expect(position.x.toNumber()).to.equal(0);
       expect(position.y.toNumber()).to.equal(0);
       expect(position.z.toNumber()).to.equal(1);
+    });
+
+    it("Destroy Velocity Component on Entity 1", async () => {
+      const keypair = web3.Keypair.generate();
+
+      let componentBalance = await framework.provider.connection.getBalance(
+        framework.componentVelocityEntity1Pda,
+      );
+
+      const componentProgramData = FindComponentProgramDataPda({
+        programId: framework.exampleComponentVelocity.programId,
+      });
+
+      const instruction = await framework.worldProgram.methods
+        .destroyComponent()
+        .accounts({
+          authority: framework.provider.wallet.publicKey,
+          componentProgram: framework.exampleComponentVelocity.programId,
+          entity: framework.entity1Pda,
+          component: framework.componentVelocityEntity1Pda,
+          componentProgramData: componentProgramData,
+          receiver: keypair.publicKey,
+        })
+        .instruction();
+      const transaction = new anchor.web3.Transaction().add(instruction);
+      await framework.provider.sendAndConfirm(transaction);
+
+      const balance = await framework.provider.connection.getBalance(
+        keypair.publicKey,
+      );
+      expect(balance).to.equal(componentBalance);
     });
   });
 }
