@@ -24,4 +24,4 @@ custom-heap = []
 custom-panic = []
 
 [dependencies]
-bolt-lang = { path = "../../crates/bolt-lang" }
+bolt-lang.workspace = true

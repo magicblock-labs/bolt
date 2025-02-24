@@ -24,7 +24,7 @@ custom-heap = []
 custom-panic = []
 
 [dependencies]
-anchor-spl = { workspace = true, features = ["metadata"]}
-bolt-lang = { path = "../../crates/bolt-lang" }
+bolt-lang.workspace = true
+mpl-token-metadata.workspace = true
 velocity = { path = "../component-velocity", features = ["cpi"]}
 position = { path = "../component-position", features = ["cpi"]}

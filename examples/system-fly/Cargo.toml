@@ -24,7 +24,7 @@ custom-heap = []
 custom-panic = []
 
 [dependencies]
-bolt-lang = { path = "../../crates/bolt-lang" }
+bolt-lang.workspace = true
 position = { path = "../component-position", features = ["cpi"]}
 
 
