@@ -89,6 +89,14 @@ namespace World
                 return FindEntityPda(worldId, System.Text.Encoding.UTF8.GetBytes(seed));
             }
 
+            public static PublicKey FindComponentProgramDataPda(PublicKey componentProgramId)
+            {
+                PublicKey.TryFindProgramAddress(new[]
+                {
+                    componentProgramId.KeyBytes,
+                }, new PublicKey("BPFLoaderUpgradeab1e11111111111111111111111"), out var pda, out _);
+                return pda;
+            }
             public static PublicKey FindComponentPda(
                 PublicKey componentProgramId,
                 PublicKey entity

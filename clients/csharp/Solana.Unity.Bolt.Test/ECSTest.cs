@@ -1,11 +1,13 @@
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Solana.Unity.Bolt.Test;
-using Solana.Unity.Programs;
 using Solana.Unity.Rpc.Models;
 using Solana.Unity.Wallet;
+using Solana.Unity.Bolt;
+using Solana.Unity.Rpc;
 using System;
 using System.Threading.Tasks;
+using Solana.Unity.Wallet.Bip39;
 using World.Program;
 
 namespace ECSTest {
@@ -84,7 +86,6 @@ namespace ECSTest {
             var apply = new ApplyAccounts() {
                 Authority = framework.Wallet.Account.PublicKey,
                 BoltSystem = framework.SystemSimpleMovement,
-                InstructionSysvarAccount = SysVars.InstructionAccount,
                 World = framework.WorldPda,
             };
             var instruction = WorldProgram.Apply(apply, Bolt.World.SerializeArgs(new { direction = "Up" }));
@@ -118,6 +119,18 @@ namespace ECSTest {
             Assert.AreEqual(1, position.X);
             Assert.AreEqual(1, position.Y);
             Assert.AreEqual(0, position.Z);
+        }
+
+        public static async Task DestroyVelocityComponentOnEntity1(Framework framework) {
+            var receiver = new Wallet(new Mnemonic(WordList.English, WordCount.Twelve));
+
+            var componentBalance = await framework.Client.GetBalanceAsync(framework.ComponentVelocityEntity1Pda);
+
+            var destroyComponent = await Bolt.World.DestroyComponent(framework.Wallet.Account.PublicKey, receiver.Account.PublicKey, framework.Entity1Pda, framework.ExampleComponentVelocity);
+            await framework.SendAndConfirmInstruction(destroyComponent.Instruction);
+
+            var receiverBalance = await framework.Client.GetBalanceAsync(receiver.Account.PublicKey);
+            Assert.AreEqual(componentBalance, receiverBalance);
         }
    }
 }
