@@ -19,6 +19,8 @@ license = "MIT"
 edition = "2021"
 
 [workspace.dependencies]
+bolt-types = { path = "crates/types", version = "=0.2.1" }
+bolt-lang = { path = "crates/bolt-lang", version = "=0.2.1" }
 bolt-attribute-bolt-program = { path = "crates/bolt-lang/attribute/bolt-program", version = "=0.2.1" }
 bolt-attribute-bolt-delegate = { path = "crates/bolt-lang/attribute/delegate", version = "=0.2.1" }
 bolt-attribute-bolt-component = { path = "crates/bolt-lang/attribute/component", version = "=0.2.1" }
@@ -34,15 +36,15 @@ bolt-system = { path = "crates/programs/bolt-system", features = ["cpi"], versio
 bolt-component = { path = "crates/programs/bolt-component", features = ["cpi"], version = "=0.2.1"}
 
 ## External crates
-session-keys = { version = "=2.0.6", features = ["no-entrypoint"] }
-anchor-lang = { version = "=0.30.1", features = ["init-if-needed"] }
-anchor-cli = { version = "=0.30.1" }
-anchor-client = { version = "=0.30.1" }
-anchor-syn = { version = "=0.30.1" }
-anchor-spl = { version = "=0.30.1" }
+session-keys       = { version = "=2.0.6", features = ["no-entrypoint"] }
+anchor-lang        = { version = "=0.30.1", features = ["init-if-needed"] }
+anchor-cli         = { version = "=0.30.1" }
+anchor-client      = { version = "=0.30.1" }
+anchor-syn         = { version = "=0.30.1" }
 anchor-lang-idl = { version = "=0.1.1" }
-solana-program = { version = "=1.18" }
-solana-client = { version = "=1.16" }
+solana-program  = { version = "=1.18.26" }
+solana-client   = { version = "=1.18.26" }
+mpl-token-metadata = { version = "=4.1.2" }
 solana-security-txt = "1.1.1"
 tuple-conv = "1.0.1"
 syn = { version = "1.0.60", features = ["full"] }
