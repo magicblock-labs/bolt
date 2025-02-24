@@ -12,7 +12,11 @@ export function world(framework) {
         })
         .instruction();
       const transaction = new anchor.web3.Transaction().add(instruction);
-      await framework.provider.sendAndConfirm(transaction);
+      try {
+        await framework.provider.sendAndConfirm(transaction);
+      } catch (e) {
+        // The registry might already exist
+      }
     });
 
     it("Initialize world", async () => {

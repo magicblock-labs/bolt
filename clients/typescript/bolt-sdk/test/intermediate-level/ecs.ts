@@ -1,4 +1,4 @@
-import { web3, AddEntity, ApplySystem, InitializeComponent } from "../../lib";
+import { web3, AddEntity, ApplySystem, InitializeComponent, DestroyComponent } from "../../lib";
 import { Direction, Framework } from "../framework";
 import { expect } from "chai";
 
