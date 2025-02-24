@@ -149,7 +149,7 @@ jobs:
 
       - name: Generate lib
         run: |
-          cd clients/bolt-sdk
+          cd clients/typescript
           yarn install && yarn build
           cd ../..
 

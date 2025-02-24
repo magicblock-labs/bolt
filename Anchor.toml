@@ -39,7 +39,9 @@ members = [
 test = """
 echo "Waiting for 2 seconds..."
 sleep 2
-yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/main.ts
+yarn run ts-mocha -p ./tsconfig.json -t 1000000 clients/typescript/test/main.ts
+cd clients/csharp
+dotnet test
 """
 
 [test]
