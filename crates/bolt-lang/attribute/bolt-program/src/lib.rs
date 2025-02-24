@@ -43,6 +43,7 @@ pub fn bolt_program(args: TokenStream, input: TokenStream) -> TokenStream {
 /// Modifies the component module and adds the necessary functions and structs.
 fn modify_component_module(mut module: ItemMod, component_type: &Type) -> ItemMod {
     let (initialize_fn, initialize_struct) = generate_initialize(component_type);
+    let (destroy_fn, destroy_struct) = generate_destroy(component_type);
     //let (apply_fn, apply_struct, apply_impl, update_fn, update_struct) = generate_instructions(component_type);
     let (update_fn, update_with_session_fn, update_struct, update_with_session_struct) =
         generate_update(component_type);
@@ -113,6 +114,36 @@ fn create_check_attribute() -> Attribute {
     parse_quote! {
         #[doc = "CHECK: This program can modify the data of the component"]
     }
+}
+
+/// Generates the destroy function and struct.
+fn generate_destroy(component_type: &Type) -> (TokenStream2, TokenStream2) {
+    (
+        quote! {
+            #[automatically_derived]
+            pub fn destroy(ctx: Context<Destroy>) -> Result<()> {
+                let instruction = anchor_lang::solana_program::sysvar::instructions::get_instruction_relative(
+                    0, &ctx.accounts.instruction_sysvar_account.to_account_info()
+                ).map_err(|_| BoltError::InvalidCaller)?;
+                if instruction.program_id != World::id() {
+                    return Err(BoltError::InvalidCaller.into());
+                }
+                Ok(())
+            }
+        },
+        quote! {
+            #[automatically_derived]
+            pub struct Destroy<'info> {
+                #[account(mut)]
+                pub receiver: Signer<'info>,
+                #[account(mut, close = receiver)]
+                pub component: Account<'info, #component_type>,
+                #[account(address = anchor_lang::solana_program::sysvar::instructions::id())]
+                pub instruction_sysvar_account: AccountInfo<'info>,
+                pub system_program: Program<'info, System>,
+            }
+        },
+    )
 }
 
 /// Generates the initialize function and struct.

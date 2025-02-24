@@ -265,6 +265,14 @@ pub mod world {
         Ok(())
     }
 
+    pub fn destroy_component(ctx: Context<DestroyComponent>) -> Result<()> {
+        if !ctx.accounts.authority.is_signer && ctx.accounts.authority.key != &ID {
+            return Err(WorldError::InvalidAuthority.into());
+        }
+        bolt_component::cpi::destroy(ctx.accounts.build())?;
+        Ok(())
+    }
+
     pub fn apply<'info>(
         ctx: Context<'_, '_, '_, 'info, Apply<'info>>,
         args: Vec<u8>,
@@ -552,6 +560,38 @@ impl<'info> InitializeComponent<'info> {
         CpiContext::new(cpi_program, cpi_accounts)
     }
 }
+
+#[derive(Accounts)]
+pub struct DestroyComponent<'info> {
+    #[account(mut)]
+    pub receiver: Signer<'info>,
+    /// CHECK: component program check
+    pub component_program: AccountInfo<'info>,
+    #[account(mut)]
+    /// CHECK: component data check
+    pub component: UncheckedAccount<'info>,
+    #[account(address = anchor_lang::solana_program::sysvar::instructions::id())]
+    /// CHECK: instruction sysvar check
+    pub instruction_sysvar_account: UncheckedAccount<'info>,
+    pub system_program: Program<'info, System>,
+}
+
+impl<'info> DestroyComponent<'info> {
+    pub fn build(
+        &self,
+    ) -> CpiContext<'_, '_, '_, 'info, bolt_component::cpi::accounts::Destroy<'info>> {
+        let cpi_program = self.component_program.to_account_info();
+
+        let cpi_accounts = bolt_component::cpi::accounts::Destroy {
+            receiver: self.receiver.to_account_info(),
+            component: self.component.to_account_info(),
+            instruction_sysvar_account: self.instruction_sysvar_account.to_account_info(),
+            system_program: self.system_program.to_account_info(),
+        };
+        CpiContext::new(cpi_program, cpi_accounts)
+    }
+}
+
 
 #[account]
 #[derive(InitSpace, Default, Copy)]
