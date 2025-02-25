@@ -17,13 +17,14 @@ namespace ECSTest {
             await AddEntity2(framework);
             await AddEntity3(framework);
             await AddEntity4WithSeed(framework);
-            await InitializeComponentVelocityOnEntity1WithSeed(framework);
+            await InitializeVelocityComponentOnEntity1WithSeed(framework);
             await InitializePositionComponentOnEntity1(framework);
             await InitializePositionComponentOnEntity2(framework);
             await InitializePositionComponentOnEntity4(framework);
             await CheckPositionOnEntity1IsDefault(framework);
             await ApplySimpleMovementSystemUpOnEntity1(framework);
             await ApplySimpleMovementSystemRightOnEntity1(framework);
+            await DestroyVelocityComponentOnEntity1(framework);
         }
 
         public static async Task AddEntity1(Framework framework) {
@@ -49,8 +50,8 @@ namespace ECSTest {
             await framework.SendAndConfirmInstruction(addEntity.Instruction);
         }
 
-        public static async Task InitializeComponentVelocityOnEntity1WithSeed(Framework framework) {
-            var initializeComponent = await Bolt.World.InitializeComponent(framework.Wallet.Account.PublicKey, framework.Entity1Pda, framework.ExampleComponentVelocity, "component-velocity");
+        public static async Task InitializeVelocityComponentOnEntity1WithSeed(Framework framework) {
+            var initializeComponent = await Bolt.World.InitializeComponent(framework.Wallet.Account.PublicKey, framework.Entity1Pda, framework.ExampleComponentVelocity, "component-velocity", framework.Wallet.Account.PublicKey);
             framework.ComponentVelocityEntity1Pda = initializeComponent.Pda;
             await framework.SendAndConfirmInstruction(initializeComponent.Instruction);
         }
@@ -126,11 +127,11 @@ namespace ECSTest {
 
             var componentBalance = await framework.Client.GetBalanceAsync(framework.ComponentVelocityEntity1Pda);
 
-            var destroyComponent = await Bolt.World.DestroyComponent(framework.Wallet.Account.PublicKey, receiver.Account.PublicKey, framework.Entity1Pda, framework.ExampleComponentVelocity);
+            var destroyComponent = await Bolt.World.DestroyComponent(framework.Wallet.Account.PublicKey, receiver.Account.PublicKey, framework.Entity1Pda, framework.ExampleComponentVelocity, "component-velocity");
             await framework.SendAndConfirmInstruction(destroyComponent.Instruction);
 
             var receiverBalance = await framework.Client.GetBalanceAsync(receiver.Account.PublicKey);
-            Assert.AreEqual(componentBalance, receiverBalance);
+            Assert.AreEqual(componentBalance.Result.Value, receiverBalance.Result.Value);
         }
    }
 }
