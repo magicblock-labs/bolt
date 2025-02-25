@@ -12,28 +12,28 @@ namespace Bolt {
             public TransactionInstruction Instruction { get; set; }
         }
 
-                public static async Task<InitializeComponentInstruction> InitializeComponent(PublicKey payer, PublicKey entity, PublicKey componentId, byte[] seed) {
+        public static async Task<InitializeComponentInstruction> InitializeComponent(PublicKey payer, PublicKey entity, PublicKey componentId, byte[] seed, PublicKey authority = null) {
             var componentPda = WorldProgram.FindComponentPda(componentId, entity, seed);
-            return await InitializeComponent(payer, entity, componentId, componentPda);
+            return await InitializeComponent(payer, entity, componentId, componentPda, authority);
         }
 
-        public static async Task<InitializeComponentInstruction> InitializeComponent(PublicKey payer, PublicKey entity, PublicKey componentId, string seed) {
+        public static async Task<InitializeComponentInstruction> InitializeComponent(PublicKey payer, PublicKey entity, PublicKey componentId, string seed, PublicKey authority = null) {
             var componentPda = WorldProgram.FindComponentPda(componentId, entity, seed);
-            return await InitializeComponent(payer, entity, componentId, componentPda);
+            return await InitializeComponent(payer, entity, componentId, componentPda, authority);
         }
 
-        public static async Task<InitializeComponentInstruction> InitializeComponent(PublicKey payer, PublicKey entity, PublicKey componentId) {
+        public static async Task<InitializeComponentInstruction> InitializeComponent(PublicKey payer, PublicKey entity, PublicKey componentId, PublicKey authority = null) {
             var componentPda = WorldProgram.FindComponentPda(componentId, entity);
-            return await InitializeComponent(payer, entity, componentId, componentPda);
+            return await InitializeComponent(payer, entity, componentId, componentPda, authority);
         }
 
-        public static async Task<InitializeComponentInstruction> InitializeComponent(PublicKey payer, PublicKey entity, PublicKey componentId, PublicKey componentPda) {
+        public static async Task<InitializeComponentInstruction> InitializeComponent(PublicKey payer, PublicKey entity, PublicKey componentId, PublicKey componentPda, PublicKey authority = null) {
             var initializeComponent = new InitializeComponentAccounts() {
                 Payer = payer,
                 Entity = entity,
                 Data = componentPda,
                 ComponentProgram = componentId,
-                Authority = new PublicKey(WorldProgram.ID)
+                Authority = authority ?? new PublicKey(WorldProgram.ID)
             };
             var instruction = WorldProgram.InitializeComponent(initializeComponent);
             return new InitializeComponentInstruction() {
