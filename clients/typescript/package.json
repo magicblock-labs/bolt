@@ -31,7 +31,7 @@
   "main": "lib/index.js",
   "scripts": {
     "clean": "rimraf lib",
-    "build": "cp ../../../target/types/world.ts src/generated/types/world.ts && cp ../../../target/idl/world.json src/generated/idl/world.json && npm run clean && tsc && npm run lint:fix",
+    "build": "cp ../../target/types/world.ts src/generated/types/world.ts && cp ../../target/idl/world.json src/generated/idl/world.json && npm run clean && tsc && npm run lint:fix",
     "build:docs": "typedoc && typedoc --plugin typedoc-plugin-markdown --out docs-mk",
     "dev": "tsc --watch",
     "start": "tsc",
