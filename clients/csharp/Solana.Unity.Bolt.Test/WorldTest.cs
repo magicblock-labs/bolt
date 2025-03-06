@@ -10,9 +10,15 @@ using World.Program;
 namespace WorldTest {
     public class Test {
         public static async Task Run(Framework framework) {
-            await InitializeRegistry(framework);
-            await InitializeWorld(framework);
-            await InitializeSecondWorld(framework);
+            await Profiler.Run("InitializeRegistry", async () => {
+                await InitializeRegistry(framework);
+            });
+            await Profiler.Run("InitializeWorld", async () => {
+                await InitializeWorld(framework);
+            });
+            await Profiler.Run("InitializeSecondWorld", async () => {
+                await InitializeSecondWorld(framework);
+            });
         }
 
         public static async Task InitializeRegistry(Framework framework) {

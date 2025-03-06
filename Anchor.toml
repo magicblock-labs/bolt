@@ -37,11 +37,11 @@ members = [
 
 [scripts]
 test = """
-echo "Waiting for 2 seconds..."
-sleep 2
+echo "Waiting for 5 seconds..."
+sleep 5
 yarn run ts-mocha -p ./tsconfig.json -t 1000000 clients/typescript/test/main.ts
-cd clients/csharp
-dotnet test
+cd clients/csharp/Solana.Unity.Bolt.Test
+dotnet run --configuration Release
 """
 
 [test]

@@ -1,35 +1,18 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <TargetFramework>net8.0</TargetFramework>
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
 
-        <IsPackable>false</IsPackable>
-    </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Solana.Unity.Programs" Version="2.6.1.3" />
+    <PackageReference Include="Solana.Unity.Rpc" Version="2.6.1.3" />
+    <PackageReference Include="Solana.Unity.Wallet" Version="2.6.1.3" />
+    <ProjectReference Include="..\Solana.Unity.Bolt\Solana.Unity.Bolt.csproj" />
+    
+  </ItemGroup>
 
-    <ItemGroup>
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.7.1" />
-        <PackageReference Include="Moq" Version="4.16.1" />
-        <PackageReference Include="MSTest.TestAdapter" Version="2.1.1" />
-        <PackageReference Include="MSTest.TestFramework" Version="2.1.1" />
-        <PackageReference Include="coverlet.collector" Version="1.3.0" />
-        <PackageReference Include="coverlet.msbuild" Version="3.0.3">
-            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-            <PrivateAssets>all</PrivateAssets>
-        </PackageReference>
-        <PackageReference Include="Solana.Unity.Programs" Version="2.6.1.3" />
-        <PackageReference Include="Solana.Unity.Rpc" Version="2.6.1.3" />
-        <PackageReference Include="Solana.Unity.Wallet" Version="2.6.1.3" />
-        <PackageReference Include="System.Text.Json" Version="9.0.1" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <ProjectReference Include="..\Solana.Unity.Bolt\Solana.Unity.Bolt.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <None Remove="TestResults\" />
-    </ItemGroup>
-    <ItemGroup>
-      <Folder Include="TestResults\" />
-    </ItemGroup>
 </Project>

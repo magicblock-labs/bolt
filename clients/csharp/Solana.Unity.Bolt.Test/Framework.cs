@@ -1,4 +1,9 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+#pragma warning disable CS8600
+#pragma warning disable CS8604
+#pragma warning disable CS8618
+#pragma warning disable CS8603
+#pragma warning disable CS8625
+
 using Solana.Unity.Wallet;
 using Solana.Unity.Bolt;
 using Solana.Unity.Rpc;
@@ -11,6 +16,8 @@ using Solana.Unity.Programs;
 using Solana.Unity.Rpc.Builders;
 using System.Threading.Tasks.Dataflow;
 using System.Collections.Generic;
+using System.Diagnostics;
+using Solana.Unity.Rpc.Types;
 
 namespace Solana.Unity.Bolt.Test
 {
@@ -36,14 +43,12 @@ namespace Solana.Unity.Bolt.Test
         public PublicKey Entity1Pda { get; set; }
         public PublicKey Entity2Pda { get; set; }
         public PublicKey Entity4Pda { get; set; }
-
         public PublicKey ExampleComponentPosition { get; set; }
         public PublicKey ExampleComponentVelocity { get; set; }
         public PublicKey ComponentPositionEntity1Pda { get; set; }
         public PublicKey ComponentVelocityEntity1Pda { get; set; }
         public PublicKey ComponentPositionEntity2Pda { get; set; }
         public PublicKey ComponentPositionEntity4Pda { get; set; }
-
         public PublicKey SystemSimpleMovement { get; set; }
 
         public PublicKey SessionToken { get; set; }
@@ -63,20 +68,22 @@ namespace Solana.Unity.Bolt.Test
 
         public async Task Initialize()
         {
-            var result = await Client.RequestAirdropAsync(Wallet.Account.PublicKey, 2000000000);
-            if (!result.WasSuccessful)
-            {
-                throw new Exception(result.Reason);
-            }
-            await Client.ConfirmTransaction(result.Result);
+            await Profiler.Run("RequestAirdrop", async () => {
+                var result = await Client.RequestAirdropAsync(Wallet.Account.PublicKey, 2000000000);
+                if (!result.WasSuccessful)
+                {
+                    throw new Exception(result.Reason);
+                }
+                await Client.ConfirmTransaction(result.Result, Commitment.Processed);
+            });
         }
 
-        public async Task<string> SendAndConfirmInstruction(TransactionInstruction instruction, List<Account> signers = null, PublicKey payer = null)
+        public async Task<string> SendAndConfirmInstruction(TransactionInstruction instruction, List<Account>? signers = null, PublicKey? payer = null)
         {
             if (signers == null) {
                 signers = new List<Account> { Wallet.Account };
             }
-            var blockHashResponse = await Client.GetLatestBlockHashAsync();
+            var blockHashResponse = await Client.GetLatestBlockHashAsync(Commitment.Processed);
             if (!blockHashResponse.WasSuccessful || blockHashResponse.Result?.Value?.Blockhash == null)
                 throw new Exception("Failed to get latest blockhash");
             var blockhash = blockHashResponse.Result.Value.Blockhash;
@@ -86,8 +93,9 @@ namespace Solana.Unity.Bolt.Test
                 .AddInstruction(instruction)
                 .Build(signers);
 
-            var signature = await Client.SendAndConfirmTransactionAsync(transaction);
-            if (signature.WasSuccessful)
+            var signature = await Client.SendTransactionAsync(transaction, true, Commitment.Processed);
+            var confirmed = await Client.ConfirmTransaction(signature.Result, Commitment.Processed);
+            if (signature.WasSuccessful && confirmed)
             {
                 return signature.Result;
             }
@@ -101,7 +109,7 @@ namespace Solana.Unity.Bolt.Test
 
         public async Task<AccountInfo> GetAccountInfo(PublicKey publicKey)
         {
-            var accountInfo = await Client.GetAccountInfoAsync(publicKey);
+            var accountInfo = await Client.GetAccountInfoAsync(publicKey, Commitment.Processed);
             if (accountInfo.WasSuccessful)
             {
                 return accountInfo.Result.Value;

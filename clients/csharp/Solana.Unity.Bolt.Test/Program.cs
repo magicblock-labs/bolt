@@ -1,18 +1,14 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿
+using System;
 using System.Threading.Tasks;
 
 namespace Solana.Unity.Bolt.Test
 {
-    
-
-    [TestClass]
-    [DoNotParallelize]
-    public class WorldClientTests
+    class Program
     {
-
-        [TestMethod]
-        public async Task Main()
+        static async Task Main(string[] args)
         {
+            Console.WriteLine("Running C# tests...");
             var framework = new Framework();
             await framework.Initialize();
             await WorldTest.Test.Run(framework);
