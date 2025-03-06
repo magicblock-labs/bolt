@@ -2,6 +2,7 @@
 
 using Solana.Unity.Rpc;
 using Solana.Unity.Rpc.Models;
+using Solana.Unity.Rpc.Types;
 using Solana.Unity.Wallet;
 using System.Text;
 using System.Threading.Tasks;
@@ -31,8 +32,8 @@ namespace Bolt {
             };
         }
 
-        public static async Task<AddEntityInstruction> AddEntity(IRpcClient client, PublicKey world, PublicKey payer, string seed) {
-            var worldData = await GetWorld(client, world);
+        public static async Task<AddEntityInstruction> AddEntity(IRpcClient client, PublicKey world, PublicKey payer, string seed, Commitment commitment = Commitment.Finalized) {
+            var worldData = await GetWorld(client, world, commitment);
             return await AddEntity(world, payer, seed, worldData.Id);
         }
 
@@ -45,8 +46,8 @@ namespace Bolt {
             return await AddEntity(world, payer, entityPda, seed);
         }
 
-        public static async Task<AddEntityInstruction> AddEntity(IRpcClient client, PublicKey world, PublicKey payer) {
-            var worldData = await GetWorld(client, world);
+        public static async Task<AddEntityInstruction> AddEntity(IRpcClient client, PublicKey world, PublicKey payer, Commitment commitment = Commitment.Finalized) {
+            var worldData = await GetWorld(client, world, commitment);
             var entityPda = WorldProgram.FindEntityPda(worldData.Id, worldData.Entities);
             return await AddEntity(world, payer, entityPda);
         }

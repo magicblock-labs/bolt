@@ -1,6 +1,7 @@
 #pragma warning disable CS1591
 
 using Solana.Unity.Rpc;
+using Solana.Unity.Rpc.Types;
 using Solana.Unity.Wallet;
 using System;
 using System.Threading.Tasks;
@@ -8,8 +9,8 @@ using WorldNamespace = World;
 
 namespace Bolt {
     public partial class World {
-        public static async Task<WorldNamespace.Accounts.World> GetWorld(IRpcClient client, PublicKey world) {
-            var Response = await client.GetAccountInfoAsync(world.ToString());
+        public static async Task<WorldNamespace.Accounts.World> GetWorld(IRpcClient client, PublicKey world, Commitment commitment = Commitment.Finalized) {
+            var Response = await client.GetAccountInfoAsync(world.ToString(), commitment);
             if (!Response.WasSuccessful)
             {
                 throw new Exception(string.Join("\n", Response.ErrorData.Logs));

@@ -1,5 +1,3 @@
-
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Solana.Unity.Bolt.Test;
 using Solana.Unity.Rpc.Models;
 using Solana.Unity.Wallet;
@@ -9,43 +7,68 @@ using System;
 using System.Threading.Tasks;
 using Solana.Unity.Wallet.Bip39;
 using World.Program;
-
+using System.Diagnostics;
+using Solana.Unity.Rpc.Types;
 namespace ECSTest {
     public class Test {
         public static async Task Run(Framework framework) {
-            await AddEntity1(framework);
-            await AddEntity2(framework);
-            await AddEntity3(framework);
-            await AddEntity4WithSeed(framework);
-            await InitializeVelocityComponentOnEntity1WithSeed(framework);
-            await InitializePositionComponentOnEntity1(framework);
-            await InitializePositionComponentOnEntity2(framework);
-            await InitializePositionComponentOnEntity4(framework);
-            await CheckPositionOnEntity1IsDefault(framework);
-            await ApplySimpleMovementSystemUpOnEntity1(framework);
-            await ApplySimpleMovementSystemRightOnEntity1(framework);
-            await DestroyVelocityComponentOnEntity1(framework);
+            await Profiler.Run("AddEntity1", async () => {
+                await AddEntity1(framework);
+            });
+            await Profiler.Run("AddEntity2", async () => {
+                await AddEntity2(framework);
+            });
+            await Profiler.Run("AddEntity3", async () => {
+                await AddEntity3(framework);
+            });
+            await Profiler.Run("AddEntity4WithSeed", async () => {
+                await AddEntity4WithSeed(framework);
+            });
+            await Profiler.Run("InitializeVelocityComponentOnEntity1WithSeed", async () => {
+                await InitializeVelocityComponentOnEntity1WithSeed(framework);
+            });
+            await Profiler.Run("InitializePositionComponentOnEntity1", async () => {
+                await InitializePositionComponentOnEntity1(framework);
+            });
+            await Profiler.Run("InitializePositionComponentOnEntity2", async () => {
+                await InitializePositionComponentOnEntity2(framework);
+            });
+            await Profiler.Run("InitializePositionComponentOnEntity4", async () => {
+                await InitializePositionComponentOnEntity4(framework);
+            });
+            await Profiler.Run("CheckPositionOnEntity1IsDefault", async () => {
+                await CheckPositionOnEntity1IsDefault(framework);
+            });
+            await Profiler.Run("ApplySimpleMovementSystemUpOnEntity1", async () => {
+                await ApplySimpleMovementSystemUpOnEntity1(framework);
+            });
+            await Profiler.Run("ApplySimpleMovementSystemRightOnEntity1", async () => {
+                await ApplySimpleMovementSystemRightOnEntity1(framework);
+            });
+            await Profiler.Run("DestroyVelocityComponentOnEntity1", async () => {
+                await DestroyVelocityComponentOnEntity1(framework);
+            });
         }
 
         public static async Task AddEntity1(Framework framework) {
-            var addEntity = await Bolt.World.AddEntity(framework.Client, framework.WorldPda, framework.Wallet.Account.PublicKey);
+            var addEntity = await Bolt.World.AddEntity(framework.Client, framework.WorldPda, framework.Wallet.Account.PublicKey, Commitment.Processed);
             framework.Entity1Pda = addEntity.Pda;
             await framework.SendAndConfirmInstruction(addEntity.Instruction);
         }
         
         public static async Task AddEntity2(Framework framework) {
-            var addEntity = await Bolt.World.AddEntity(framework.Client, framework.WorldPda, framework.Wallet.Account.PublicKey);
+            var addEntity = await Bolt.World.AddEntity(framework.Client, framework.WorldPda, framework.Wallet.Account.PublicKey, Commitment.Processed);
             framework.Entity2Pda = addEntity.Pda;
             await framework.SendAndConfirmInstruction(addEntity.Instruction);
         }
 
         public static async Task AddEntity3(Framework framework) {
-            var addEntity = await Bolt.World.AddEntity(framework.Client, framework.WorldPda, framework.Wallet.Account.PublicKey);
+            var addEntity = await Bolt.World.AddEntity(framework.Client, framework.WorldPda, framework.Wallet.Account.PublicKey, Commitment.Processed);
             await framework.SendAndConfirmInstruction(addEntity.Instruction);
         }
 
         public static async Task AddEntity4WithSeed(Framework framework) {
-            var addEntity = await Bolt.World.AddEntity(framework.Client, framework.WorldPda, framework.Wallet.Account.PublicKey, "custom-seed");
+            var addEntity = await Bolt.World.AddEntity(framework.Client, framework.WorldPda, framework.Wallet.Account.PublicKey, "custom-seed", Commitment.Processed);
             framework.Entity4Pda = addEntity.Pda;
             await framework.SendAndConfirmInstruction(addEntity.Instruction);
         }
@@ -78,9 +101,9 @@ namespace ECSTest {
             var accountInfo = await framework.GetAccountInfo(framework.ComponentPositionEntity1Pda);
             var data = Convert.FromBase64String(accountInfo.Data[0]);
             var position = Position.Accounts.Position.Deserialize(data);
-            Assert.AreEqual(0, position.X);
-            Assert.AreEqual(0, position.Y);
-            Assert.AreEqual(0, position.Z);
+            Debug.Assert(0 == position.X, "X is not equal to 0");
+            Debug.Assert(0 == position.Y, "Y is not equal to 0");
+            Debug.Assert(0 == position.Z, "Z is not equal to 0");
         }
 
         public static async Task ApplySimpleMovementSystemUpOnEntity1(Framework framework) {
@@ -97,9 +120,9 @@ namespace ECSTest {
             var accountInfo = await framework.GetAccountInfo(framework.ComponentPositionEntity1Pda);
             var data = Convert.FromBase64String(accountInfo.Data[0]);
             var position = Position.Accounts.Position.Deserialize(data);
-            Assert.AreEqual(0, position.X);
-            Assert.AreEqual(1, position.Y);
-            Assert.AreEqual(0, position.Z);
+            Debug.Assert(0 == position.X, "X is not equal to 0");
+            Debug.Assert(1 == position.Y, "Y is not equal to 1");
+            Debug.Assert(0 == position.Z, "Z is not equal to 0");
         }
 
         public static async Task ApplySimpleMovementSystemRightOnEntity1(Framework framework) {
@@ -117,9 +140,9 @@ namespace ECSTest {
             var accountInfo = await framework.GetAccountInfo(framework.ComponentPositionEntity1Pda);
             var data = Convert.FromBase64String(accountInfo.Data[0]);
             var position = Position.Accounts.Position.Deserialize(data);
-            Assert.AreEqual(1, position.X);
-            Assert.AreEqual(1, position.Y);
-            Assert.AreEqual(0, position.Z);
+            Debug.Assert(1 == position.X, "X is not equal to 1");
+            Debug.Assert(1 == position.Y, "Y is not equal to 1");
+            Debug.Assert(0 == position.Z, "Z is not equal to 0");
         }
 
         public static async Task DestroyVelocityComponentOnEntity1(Framework framework) {
@@ -131,7 +154,7 @@ namespace ECSTest {
             await framework.SendAndConfirmInstruction(destroyComponent.Instruction);
 
             var receiverBalance = await framework.Client.GetBalanceAsync(receiver.Account.PublicKey);
-            Assert.AreEqual(componentBalance.Result.Value, receiverBalance.Result.Value);
+            Debug.Assert(componentBalance.Result.Value == receiverBalance.Result.Value, "Component balance is not equal to receiver balance");
         }
    }
 }

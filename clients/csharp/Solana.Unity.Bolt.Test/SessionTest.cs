@@ -1,5 +1,4 @@
 using GplSession.Program;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Solana.Unity.Bolt.Test;
 using Solana.Unity.Programs;
 using Solana.Unity.Wallet;
@@ -7,6 +6,8 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using World.Program;
+using System.Diagnostics;
+using Solana.Unity.Rpc.Types;
 
 namespace SessionTest {
     public class Test {
@@ -30,7 +31,7 @@ namespace SessionTest {
         }
         
         public static async Task AddEntity(Framework framework) {
-            var addEntity = await Bolt.World.AddEntity(framework.Client, framework.WorldPda, framework.SessionSigner.Account.PublicKey);
+            var addEntity = await Bolt.World.AddEntity(framework.Client, framework.WorldPda, framework.SessionSigner.Account.PublicKey, Commitment.Processed);
             framework.SessionEntityPda = addEntity.Pda;
             await framework.SendAndConfirmInstruction(addEntity.Instruction, new List<Account> { framework.SessionSigner.Account }, framework.SessionSigner.Account.PublicKey);
         }
@@ -55,9 +56,9 @@ namespace SessionTest {
             var accountInfo = await framework.GetAccountInfo(framework.SessionComponentPositionPda);
             var data = Convert.FromBase64String(accountInfo.Data[0]);
             var position = Position.Accounts.Position.Deserialize(data);
-            Assert.AreEqual(1, position.X);
-            Assert.AreEqual(0, position.Y);
-            Assert.AreEqual(0, position.Z);
+            Debug.Assert(1 == position.X, "X is not equal to 1");
+            Debug.Assert(0 == position.Y, "Y is not equal to 0");
+            Debug.Assert(0 == position.Z, "Z is not equal to 0");
         }
    }
 }
