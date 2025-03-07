@@ -13,6 +13,7 @@ namespace Solana.Unity.Bolt.Test
             await WorldTest.Test.Run(framework);
             await ECSTest.Test.Run(framework);
             await SessionTest.Test.Run(framework);
+            await AccelerationTest.Test.Run(framework);
         }
     }
 }
