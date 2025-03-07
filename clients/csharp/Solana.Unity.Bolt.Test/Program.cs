@@ -8,7 +8,6 @@ namespace Solana.Unity.Bolt.Test
     {
         static async Task Main(string[] args)
         {
-            Console.WriteLine("Running C# tests...");
             var framework = new Framework();
             await framework.Initialize();
             await WorldTest.Test.Run(framework);

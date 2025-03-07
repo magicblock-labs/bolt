@@ -1,13 +1,11 @@
 #!/bin/bash
 
-pkill -f ephemeral-validator
-
 # Function to clean up on exit
 cleanup() {
-    echo "Stopping ephemeral validator..."
-    pkill -f ephemeral-validator
-    echo "Cleanup done!"
+    pkill -f ephemeral-validator || true
 }
+
+cleanup
 
 # Trap Ctrl-C (SIGINT) and call cleanup function
 trap cleanup EXIT
