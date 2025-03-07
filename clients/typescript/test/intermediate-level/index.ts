@@ -10,6 +10,6 @@ describe("Intermediate level API", () => {
   world(framework);
   ecs(framework);
   session(framework);
-  permissioning(framework);
   acceleration(framework);
+  permissioning(framework);
 });
