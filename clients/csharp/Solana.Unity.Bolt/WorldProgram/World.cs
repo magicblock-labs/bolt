@@ -125,6 +125,27 @@ namespace World
                 return pda;
             }
 
+            public static readonly PublicKey DelegationProgram = new("DELeGGvXpWV2fqJUhqcF5ZSYMS4JTLjteaAMARRSaeSh");
+
+            public static PublicKey FindDelegationProgramPda(string seed, PublicKey account)
+            {
+                PublicKey.TryFindProgramAddress(new[]
+                {
+                    Encoding.UTF8.GetBytes(seed), account.KeyBytes
+                }, DelegationProgram, out var pda, out _);
+                return pda;
+            }
+
+            public static PublicKey FindBufferPda(PublicKey account, PublicKey owner)
+            {
+                PublicKey.TryFindProgramAddress(new[]
+                {
+                    Encoding.UTF8.GetBytes("buffer"), account.KeyBytes
+                }, owner, out var pda, out _);
+                return pda;
+            }
+
+
             /// <summary>
             /// Convenience bundle for defining an entity and the associated components.
             /// </summary>

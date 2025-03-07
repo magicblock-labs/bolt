@@ -6,16 +6,17 @@ export enum Direction {
 }
 
 import { anchor, BN } from "../lib";
-import { type World } from "../../../../target/types/world";
-import { type Position } from "../../../../target/types/position";
-import { type Velocity } from "../../../../target/types/velocity";
-import { type SystemSimpleMovement } from "../../../../target/types/system_simple_movement";
-import { type SystemFly } from "../../../../target/types/system_fly";
-import { type SystemApplyVelocity } from "../../../../target/types/system_apply_velocity";
-import { Keypair, PublicKey } from "@solana/web3.js";
+import { type World } from "../../../target/types/world";
+import { type Position } from "../../../target/types/position";
+import { type Velocity } from "../../../target/types/velocity";
+import { type SystemSimpleMovement } from "../../../target/types/system_simple_movement";
+import { type SystemFly } from "../../../target/types/system_fly";
+import { type SystemApplyVelocity } from "../../../target/types/system_apply_velocity";
+import { Connection, Keypair, PublicKey } from "@solana/web3.js";
 
 export class Framework {
   provider: anchor.AnchorProvider;
+  acceleratorProvider: anchor.AnchorProvider;
   worldProgram: anchor.Program<World>;
   exampleComponentPosition: anchor.Program<Position>;
   exampleComponentVelocity: anchor.Program<Velocity>;
@@ -31,7 +32,9 @@ export class Framework {
   entity1Pda: PublicKey;
   entity2Pda: PublicKey;
   entity4Pda: PublicKey;
+  acceleratedEntityPda: PublicKey;
 
+  acceleratedComponentPositionPda: PublicKey;
   componentPositionEntity1Pda: PublicKey;
   componentVelocityEntity1Pda: PublicKey;
 
@@ -46,7 +49,12 @@ export class Framework {
     this.systemFly = anchor.workspace.SystemFly;
     this.systemApplyVelocity = anchor.workspace.SystemApplyVelocity;
 
-    this.provider = anchor.AnchorProvider.env();
+    this.provider = anchor.AnchorProvider.local();
     anchor.setProvider(this.provider);
+
+    this.acceleratorProvider = new anchor.AnchorProvider(
+      new Connection("http://localhost:7799", "processed"),
+      anchor.Wallet.local(),
+    );
   }
 }
