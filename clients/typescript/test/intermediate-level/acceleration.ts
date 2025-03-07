@@ -1,4 +1,10 @@
-import { AddEntity, ApplySystem, DelegateComponent, DELEGATION_PROGRAM_ID, InitializeComponent } from "../../lib";
+import {
+  AddEntity,
+  ApplySystem,
+  DelegateComponent,
+  DELEGATION_PROGRAM_ID,
+  InitializeComponent,
+} from "../../lib";
 import { expect } from "chai";
 import { Direction } from "../framework";
 import { convertIdlToCamelCase } from "@coral-xyz/anchor/dist/cjs/idl";
@@ -17,7 +23,9 @@ export function acceleration(framework: Framework) {
 
       framework.acceleratedEntityPda = createAcceleratedEntity.entityPda;
 
-      await framework.provider.sendAndConfirm(createAcceleratedEntity.transaction);
+      await framework.provider.sendAndConfirm(
+        createAcceleratedEntity.transaction,
+      );
     });
 
     it("Create accelerated component position", async () => {
@@ -27,9 +35,12 @@ export function acceleration(framework: Framework) {
         componentId: framework.exampleComponentPosition.programId,
       });
 
-      framework.acceleratedComponentPositionPda = createAcceleratedComponentPosition.componentPda;
+      framework.acceleratedComponentPositionPda =
+        createAcceleratedComponentPosition.componentPda;
 
-      await framework.provider.sendAndConfirm(createAcceleratedComponentPosition.transaction);
+      await framework.provider.sendAndConfirm(
+        createAcceleratedComponentPosition.transaction,
+      );
     });
 
     it("Check component delegation to accelerator", async () => {
@@ -72,12 +83,16 @@ export function acceleration(framework: Framework) {
           },
         });
 
-        await framework.acceleratorProvider.sendAndConfirm(applySystem.transaction, [], {
-          skipPreflight: true,
-          commitment: "processed",
-        });
+        await framework.acceleratorProvider.sendAndConfirm(
+          applySystem.transaction,
+          [],
+          {
+            skipPreflight: true,
+            commitment: "processed",
+          },
+        );
         // Wait for 50ms
-        await new Promise(resolve => setTimeout(resolve, 50));
+        await new Promise((resolve) => setTimeout(resolve, 50));
       }
     });
   });

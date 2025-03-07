@@ -53,10 +53,7 @@ export class Framework {
     anchor.setProvider(this.provider);
 
     this.acceleratorProvider = new anchor.AnchorProvider(
-      new Connection(
-        "http://localhost:7799",
-        "processed",
-      ),
+      new Connection("http://localhost:7799", "processed"),
       anchor.Wallet.local(),
     );
   }
