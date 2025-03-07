@@ -1,4 +1,5 @@
 #pragma warning disable CS1591
+#pragma warning disable CS0618
 
 using Solana.Unity.Wallet;
 using System;
