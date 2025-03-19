@@ -1,9 +1,14 @@
+mod commands;
+mod ephemeral_validator;
+
 mod component;
 mod instructions;
 mod rust_template;
 mod system;
 mod templates;
 mod workspace;
+
+pub use ephemeral_validator::EphemeralValidator;
 
 use crate::component::new_component;
 use crate::instructions::{
@@ -111,7 +116,7 @@ pub struct Opts {
     pub command: BoltCommand,
 }
 
-pub fn entry(opts: Opts) -> Result<()> {
+pub async fn entry(opts: Opts) -> Result<()> {
     match opts.command {
         BoltCommand::Anchor(command) => match command {
             anchor_cli::Command::Init {
@@ -134,6 +139,10 @@ pub fn entry(opts: Opts) -> Result<()> {
                 test_template,
                 force,
             ),
+            anchor_cli::Command::Test {
+                skip_local_validator,
+                ..
+            } => commands::test(opts.cfg_override, command, skip_local_validator).await,
             anchor_cli::Command::Build {
                 idl,
                 no_idl,

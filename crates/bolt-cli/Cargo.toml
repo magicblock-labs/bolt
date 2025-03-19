@@ -27,3 +27,7 @@ heck = { workspace = true }
 clap = { workspace = true }
 syn = { workspace = true, features = ["full", "extra-traits"] }
 world = { workspace = true }
+which = { workspace = true }
+tokio = { workspace = true }
+sysinfo = { workspace = true }
+bytemuck_derive = { workspace = true }

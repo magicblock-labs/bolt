@@ -1,4 +1,5 @@
 #pragma warning disable CS1591
+#pragma warning disable CS1998
 
 using Solana.Unity.Rpc.Models;
 using Solana.Unity.Wallet;
