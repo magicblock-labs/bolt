@@ -4,7 +4,11 @@ use anyhow::Result;
 use crate::EphemeralValidator;
 
 #[allow(clippy::too_many_arguments)]
-pub async fn test(cfg_override: ConfigOverride, command: anchor_cli::Command, skip_local_validator: bool) -> Result<()> {
+pub async fn test(
+    cfg_override: ConfigOverride,
+    command: anchor_cli::Command,
+    skip_local_validator: bool,
+) -> Result<()> {
     let anchor = tokio::spawn(async move {
         let opts = anchor_cli::Opts {
             cfg_override,

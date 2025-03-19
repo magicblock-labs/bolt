@@ -139,12 +139,10 @@ pub async fn entry(opts: Opts) -> Result<()> {
                 test_template,
                 force,
             ),
-            anchor_cli::Command::Test { skip_local_validator, .. } => commands::test(
-                opts.cfg_override,
-                command,
+            anchor_cli::Command::Test {
                 skip_local_validator,
-            )
-            .await,
+                ..
+            } => commands::test(opts.cfg_override, command, skip_local_validator).await,
             anchor_cli::Command::Build {
                 idl,
                 no_idl,

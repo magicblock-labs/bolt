@@ -30,3 +30,4 @@ world = { workspace = true }
 which = { workspace = true }
 tokio = { workspace = true }
 sysinfo = { workspace = true }
+bytemuck_derive = { workspace = true }
