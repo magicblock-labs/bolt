@@ -34,13 +34,17 @@ impl EphemeralValidator {
         Self::wait_for_basenet().await?;
         Self::cleanup()?;
         let temp_file = std::env::temp_dir().join("ephemeral-validator.toml");
-        std::fs::write(&temp_file, include_str!("templates/ephemeral-validator.toml")).expect("Failed to write ephemeral validator config");
+        std::fs::write(
+            &temp_file,
+            include_str!("templates/ephemeral-validator.toml"),
+        )
+        .expect("Failed to write ephemeral validator config");
         tokio::process::Command::new("ephemeral-validator")
             .arg(temp_file)
             .spawn()
             .expect("Failed to start ephemeral validator");
         println!("Ephemeral validator started");
-        
+
         Ok(Self)
     }
 
@@ -48,10 +52,16 @@ impl EphemeralValidator {
         let mut system = sysinfo::System::new_all();
         system.refresh_processes(sysinfo::ProcessesToUpdate::All, true);
         let processes = system.processes();
-        for (_, process) in processes {
-            if let Some(name) = process.exe().and_then(|path| path.file_name()).and_then(|name| name.to_str()) {
+        for process in processes.values() {
+            if let Some(name) = process
+                .exe()
+                .and_then(|path| path.file_name())
+                .and_then(|name| name.to_str())
+            {
                 if name == "ephemeral-validator" {
-                    process.kill_with(sysinfo::Signal::Term).expect("Failed to kill ephemeral validator");
+                    process
+                        .kill_with(sysinfo::Signal::Term)
+                        .expect("Failed to kill ephemeral validator");
                 }
             }
         }
