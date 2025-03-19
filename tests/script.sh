@@ -1,20 +1,6 @@
 #!/bin/bash
 
-# Function to clean up on exit
-cleanup() {
-    pkill -f ephemeral-validator || true
-}
-
-cleanup
-
-# Trap Ctrl-C (SIGINT) and call cleanup function
-trap cleanup EXIT
-
-echo "Waiting for 5 seconds..."
-sleep 5
-
-echo "Starting ephemeral validator..."
-yarn run ephemeral-validator tests/ephem-localnet.toml &
+set -euo pipefail
 
 echo "Waiting for 5 seconds..."
 sleep 5
@@ -27,6 +13,3 @@ cd clients/csharp/Solana.Unity.Bolt.Test
 dotnet run --configuration Release
 
 echo "Tests completed."
-
-# Explicit cleanup in case script reaches the end
-cleanup
