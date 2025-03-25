@@ -47,6 +47,10 @@ jobs:
           echo "$HOME/.local/share/solana/install/active_release/bin" >> $GITHUB_PATH
           solana --version
 
+      - name: Install Ephemeral Validator
+        run: |
+          npm install --global @magicblock-labs/ephemeral-validator
+
   test:
     needs: setup
     runs-on: ubuntu-latest
