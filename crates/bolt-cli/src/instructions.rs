@@ -34,7 +34,7 @@ fn parse_pubkey(input: &str, error_message: &str) -> Result<Pubkey> {
         .map_err(|_| anyhow!(error_message.to_string()))
 }
 
-pub fn create_registry(cfg_override: &ConfigOverride) -> Result<()> {
+pub async fn create_registry(cfg_override: &ConfigOverride) -> Result<()> {
     let (client, payer) = setup_client(cfg_override)?;
     let program = client.program(ID)?;
 
@@ -49,7 +49,8 @@ pub fn create_registry(cfg_override: &ConfigOverride) -> Result<()> {
         })
         .args(instruction::InitializeRegistry {})
         .signer(&payer)
-        .send()?;
+        .send()
+        .await?;
 
     println!(
         "New registry {} created with signature {}",
@@ -59,13 +60,13 @@ pub fn create_registry(cfg_override: &ConfigOverride) -> Result<()> {
     Ok(())
 }
 
-pub fn create_world(cfg_override: &ConfigOverride) -> Result<()> {
+pub async fn create_world(cfg_override: &ConfigOverride) -> Result<()> {
     let (client, payer) = setup_client(cfg_override)?;
     let program = client.program(ID)?;
 
     let (registry_pda, _) = Pubkey::find_program_address(&[Registry::seed()], &ID);
 
-    let registry_account: Registry = program.account(registry_pda)?;
+    let registry_account: Registry = program.account(registry_pda).await?;
     let world_id = registry_account.worlds;
 
     let (world_pda, _) =
@@ -81,7 +82,8 @@ pub fn create_world(cfg_override: &ConfigOverride) -> Result<()> {
         })
         .args(instruction::InitializeNewWorld {})
         .signer(&payer)
-        .send()?;
+        .send()
+        .await?;
 
     println!(
         "New world created {} with world id {}. Transaction signature {}",
@@ -91,7 +93,7 @@ pub fn create_world(cfg_override: &ConfigOverride) -> Result<()> {
     Ok(())
 }
 
-pub fn authorize(
+pub async fn authorize(
     cfg_override: &ConfigOverride,
     world: String,
     new_authority: String,
@@ -102,7 +104,7 @@ pub fn authorize(
     let (client, payer) = setup_client(cfg_override)?;
     let program = client.program(ID)?;
 
-    let world_account = program.account::<World>(world_pubkey)?;
+    let world_account = program.account::<World>(world_pubkey).await?;
     let world_id = world_account.id;
     let signature = program
         .request()
@@ -114,7 +116,8 @@ pub fn authorize(
         })
         .args(instruction::AddAuthority { world_id })
         .signer(&payer)
-        .send()?;
+        .send()
+        .await?;
 
     println!(
         "Authority {} added to world {} with signature {}",
@@ -124,7 +127,7 @@ pub fn authorize(
     Ok(())
 }
 
-pub fn deauthorize(
+pub async fn deauthorize(
     cfg_override: &ConfigOverride,
     world: String,
     authority_to_delete: String,
@@ -136,7 +139,7 @@ pub fn deauthorize(
     let (client, payer) = setup_client(cfg_override)?;
     let program = client.program(ID)?;
 
-    let world_account = program.account::<World>(world_pubkey)?;
+    let world_account = program.account::<World>(world_pubkey).await?;
     let world_id = world_account.id;
     let signature = program
         .request()
@@ -151,7 +154,8 @@ pub fn deauthorize(
         .send_with_spinner_and_config(RpcSendTransactionConfig {
             skip_preflight: true,
             ..RpcSendTransactionConfig::default()
-        })?;
+        })
+        .await?;
 
     println!(
         "Authority {} removed from world {} with signature {}",
@@ -161,7 +165,7 @@ pub fn deauthorize(
     Ok(())
 }
 
-pub fn approve_system(
+pub async fn approve_system(
     cfg_override: &ConfigOverride,
     world: String,
     system_to_approve: String,
@@ -182,7 +186,8 @@ pub fn approve_system(
         })
         .args(instruction::ApproveSystem {})
         .signer(&payer)
-        .send()?;
+        .send()
+        .await?;
 
     println!(
         "System {} approved for world {} with signature {}",
@@ -192,7 +197,7 @@ pub fn approve_system(
     Ok(())
 }
 
-pub fn remove_system(
+pub async fn remove_system(
     cfg_override: &ConfigOverride,
     world: String,
     system_to_remove: String,
@@ -213,7 +218,8 @@ pub fn remove_system(
         })
         .args(instruction::RemoveSystem {})
         .signer(&payer)
-        .send()?;
+        .send()
+        .await?;
 
     println!(
         "System {} removed from world {} with signature {}",
