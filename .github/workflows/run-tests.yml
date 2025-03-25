@@ -46,6 +46,7 @@ jobs:
           export PATH="$HOME/.local/share/solana/install/active_release/bin:$PATH"
           echo "$HOME/.local/share/solana/install/active_release/bin" >> $GITHUB_PATH
           solana --version
+
   test:
     needs: setup
     runs-on: ubuntu-latest
