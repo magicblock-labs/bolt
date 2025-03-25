@@ -191,11 +191,14 @@ pub async fn entry(opts: Opts) -> Result<()> {
         BoltCommand::Authorize(command) => {
             authorize(&opts.cfg_override, command.world, command.new_authority).await
         }
-        BoltCommand::Deauthorize(command) => deauthorize(
-            &opts.cfg_override,
-            command.world,
-            command.authority_to_remove,
-        ).await,
+        BoltCommand::Deauthorize(command) => {
+            deauthorize(
+                &opts.cfg_override,
+                command.world,
+                command.authority_to_remove,
+            )
+            .await
+        }
         BoltCommand::ApproveSystem(command) => {
             approve_system(&opts.cfg_override, command.world, command.system_to_approve).await
         }
