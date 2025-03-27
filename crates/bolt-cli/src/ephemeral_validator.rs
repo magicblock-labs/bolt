@@ -13,6 +13,7 @@ impl EphemeralValidator {
             loop {
                 let status = std::process::Command::new("solana")
                     .arg("balance")
+                    .args(&["-u", "localhost"])
                     .stdout(Stdio::null())
                     .stderr(Stdio::null())
                     .status()
