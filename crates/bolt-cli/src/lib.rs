@@ -186,21 +186,24 @@ pub async fn entry(opts: Opts) -> Result<()> {
         },
         BoltCommand::Component(command) => new_component(&opts.cfg_override, command.name),
         BoltCommand::System(command) => new_system(&opts.cfg_override, command.name),
-        BoltCommand::Registry(_command) => create_registry(&opts.cfg_override),
-        BoltCommand::World(_command) => create_world(&opts.cfg_override),
+        BoltCommand::Registry(_command) => create_registry(&opts.cfg_override).await,
+        BoltCommand::World(_command) => create_world(&opts.cfg_override).await,
         BoltCommand::Authorize(command) => {
-            authorize(&opts.cfg_override, command.world, command.new_authority)
+            authorize(&opts.cfg_override, command.world, command.new_authority).await
         }
-        BoltCommand::Deauthorize(command) => deauthorize(
-            &opts.cfg_override,
-            command.world,
-            command.authority_to_remove,
-        ),
+        BoltCommand::Deauthorize(command) => {
+            deauthorize(
+                &opts.cfg_override,
+                command.world,
+                command.authority_to_remove,
+            )
+            .await
+        }
         BoltCommand::ApproveSystem(command) => {
-            approve_system(&opts.cfg_override, command.world, command.system_to_approve)
+            approve_system(&opts.cfg_override, command.world, command.system_to_approve).await
         }
         BoltCommand::RemoveSystem(command) => {
-            remove_system(&opts.cfg_override, command.world, command.system_to_remove)
+            remove_system(&opts.cfg_override, command.world, command.system_to_remove).await
         }
     }
 }

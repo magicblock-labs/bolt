@@ -39,7 +39,7 @@ bolt-component = { path = "crates/programs/bolt-component", features = ["cpi"], 
 session-keys       = { version = "=2.0.6", features = ["no-entrypoint"] }
 anchor-lang        = { version = "=0.30.1", features = ["init-if-needed"] }
 anchor-cli         = { version = "=0.30.1" }
-anchor-client      = { version = "=0.30.1" }
+anchor-client      = { version = "=0.30.1", features = ["async"] }
 anchor-syn         = { version = "=0.30.1" }
 anchor-lang-idl = { version = "=0.1.1" }
 solana-program  = { version = "=1.18.26" }
