@@ -23,43 +23,43 @@ jobs:
           - {
             NAME: linux-x64-glibc,
             OS: ubuntu-latest,
-            TOOLCHAIN: stable,
+            TOOLCHAIN: 1.81.0,
             TARGET: x86_64-unknown-linux-gnu,
           }
           - {
             NAME: linux-x86-glibc,
             OS: ubuntu-latest,
-            TOOLCHAIN: stable,
+            TOOLCHAIN: 1.81.0,
             TARGET: i686-unknown-linux-gnu,
           }
           - {
             NAME: linux-arm64-glibc,
             OS: ubuntu-latest,
-            TOOLCHAIN: stable,
+            TOOLCHAIN: 1.81.0,
             TARGET: aarch64-unknown-linux-gnu,
           }
           - {
             NAME: win32-x64-msvc,
             OS: windows-latest,
-            TOOLCHAIN: stable,
+            TOOLCHAIN: 1.81.0,
             TARGET: x86_64-pc-windows-msvc,
           }
           - {
             NAME: win32-x86-msvc,
             OS: windows-latest,
-            TOOLCHAIN: stable,
+            TOOLCHAIN: 1.81.0,
             TARGET: i686-pc-windows-msvc,
           }
           - {
             NAME: darwin-x64,
             OS: macos-latest,
-            TOOLCHAIN: stable,
+            TOOLCHAIN: 1.81.0,
             TARGET: x86_64-apple-darwin,
           }
           - {
             NAME: darwin-arm64,
             OS: macos-latest,
-            TOOLCHAIN: stable,
+            TOOLCHAIN: 1.81.0,
             TARGET: aarch64-apple-darwin,
           }
     steps:
@@ -85,7 +85,7 @@ jobs:
           fi
 
       - name: Install Rust toolchain
-        uses: actions-rs/toolchain@v1
+        uses: actions-rs/toFolchain@v1
         with:
           toolchain: ${{ matrix.build.TOOLCHAIN }}
           target: ${{ matrix.build.TARGET }}
