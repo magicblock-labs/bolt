@@ -27,7 +27,7 @@ pub fn component_type(idl: &Idl, component_id: &str) -> Result<String> {
         .accounts
         .iter()
         .filter(|a| a.name.to_lowercase() != "Entity")
-        .last();
+        .next_back();
     let component_account =
         component_account.ok_or_else(|| anyhow::anyhow!("Component account not found in IDL"))?;
 
