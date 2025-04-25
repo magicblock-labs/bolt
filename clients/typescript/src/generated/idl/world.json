@@ -2,7 +2,7 @@
   "address": "WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n",
   "metadata": {
     "name": "world",
-    "version": "0.2.1",
+    "version": "0.2.2",
     "spec": "0.1.0",
     "description": "Bolt World program",
     "repository": "https://github.com/magicblock-labs/bolt"
@@ -31,7 +31,25 @@
         },
         {
           "name": "world",
-          "writable": true
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  119,
+                  111,
+                  114,
+                  108,
+                  100
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "world_id"
+              }
+            ]
+          }
         },
         {
           "name": "system_program",
@@ -298,7 +316,26 @@
         },
         {
           "name": "world",
-          "writable": true
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  119,
+                  111,
+                  114,
+                  108,
+                  100
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "registry.worlds",
+                "account": "Registry"
+              }
+            ]
+          }
         },
         {
           "name": "registry",
@@ -326,7 +363,24 @@
       "accounts": [
         {
           "name": "registry",
-          "writable": true
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  103,
+                  105,
+                  115,
+                  116,
+                  114,
+                  121
+                ]
+              }
+            ]
+          }
         },
         {
           "name": "payer",
@@ -363,7 +417,25 @@
         },
         {
           "name": "world",
-          "writable": true
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  119,
+                  111,
+                  114,
+                  108,
+                  100
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "world_id"
+              }
+            ]
+          }
         },
         {
           "name": "system_program",
