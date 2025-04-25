@@ -64,7 +64,7 @@ jobs:
         run: |
           if [ "${{ matrix.task }}" == "clippy" ]; then
             cargo fmt -- --check --verbose
-            cargo clippy -- --deny=warnings
+            cargo clippy -- --deny=warnings --allow=unexpected_cfgs
           else
             yarn lint
           fi

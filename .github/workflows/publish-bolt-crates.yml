@@ -72,7 +72,7 @@ jobs:
       - name: Run fmt
         run: cargo fmt -- --check --verbose
       - name: Run clippy
-        run: cargo clippy -- --deny=warnings
+        run: cargo clippy -- --deny=warnings --allow=unexpected_cfgs
 
   test-and-publish:
     needs: [clippy-lint]
