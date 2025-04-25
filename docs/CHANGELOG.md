@@ -1,12 +1,14 @@
 
-## [0.2.2] - 2025-02-24
+## [0.2.3] - 2025-04-25
 
 ### ✨️ Features
+ - Updating Bolt client for C# (#129)
  - Adding DestroyComponent function (#143)
  - Separating apply and apply_with_session (#141)
 
 
 ### 🐛 Bug Fixes
+ - Fixing async cli commands (#159)
 
 ## [0.2.1] - 2025-02-17
 
