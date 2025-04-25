@@ -507,7 +507,7 @@ pub struct AddEntity<'info> {
     pub payer: Signer<'info>,
     #[account(init, payer = payer, space = World::size(), seeds = [Entity::seed(), &world.id.to_be_bytes(),
     &match extra_seed {
-        Some(ref seed) => [0; 8],
+        Some(ref _seed) => [0; 8],
         None => world.entities.to_be_bytes()
     },
     match extra_seed {

@@ -70,7 +70,7 @@ pub fn component_deserialize(_attr: TokenStream, item: TokenStream) -> TokenStre
 
         #[automatically_derived]
         impl anchor_lang::Discriminator for #name {
-            const DISCRIMINATOR: [u8; 8] = [0; 8];
+            const DISCRIMINATOR: &'static [u8] = &[1, 1, 1, 1, 1, 1, 1, 1];
         }
 
         #owner_definition

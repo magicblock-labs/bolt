@@ -48,7 +48,7 @@ pub async fn create_registry(cfg_override: &ConfigOverride) -> Result<()> {
             system_program: system_program::ID,
         })
         .args(instruction::InitializeRegistry {})
-        .signer(&payer)
+        .signer(payer)
         .send()
         .await?;
 
@@ -81,7 +81,7 @@ pub async fn create_world(cfg_override: &ConfigOverride) -> Result<()> {
             system_program: system_program::ID,
         })
         .args(instruction::InitializeNewWorld {})
-        .signer(&payer)
+        .signer(payer)
         .send()
         .await?;
 
@@ -115,7 +115,7 @@ pub async fn authorize(
             world: world_pubkey,
         })
         .args(instruction::AddAuthority { world_id })
-        .signer(&payer)
+        .signer(payer)
         .send()
         .await?;
 
@@ -150,7 +150,7 @@ pub async fn deauthorize(
             world: world_pubkey,
         })
         .args(instruction::RemoveAuthority { world_id })
-        .signer(&payer)
+        .signer(payer)
         .send_with_spinner_and_config(RpcSendTransactionConfig {
             skip_preflight: true,
             ..RpcSendTransactionConfig::default()
@@ -185,7 +185,7 @@ pub async fn approve_system(
             system_program: system_program::ID,
         })
         .args(instruction::ApproveSystem {})
-        .signer(&payer)
+        .signer(payer)
         .send()
         .await?;
 
@@ -217,7 +217,7 @@ pub async fn remove_system(
             system_program: system_program::ID,
         })
         .args(instruction::RemoveSystem {})
-        .signer(&payer)
+        .signer(payer)
         .send()
         .await?;
 
