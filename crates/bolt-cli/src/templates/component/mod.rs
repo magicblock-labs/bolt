@@ -21,7 +21,6 @@ pub fn create_component_template_simple(name: &str, program_path: &Path) -> File
 }
 
 /// Automatic generation of crates from the components idl
-
 pub fn component_type(idl: &Idl, component_id: &str) -> Result<String> {
     let component_account = idl
         .accounts
