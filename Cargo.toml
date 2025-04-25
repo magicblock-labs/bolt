@@ -36,17 +36,16 @@ bolt-system = { path = "crates/programs/bolt-system", features = ["cpi"], versio
 bolt-component = { path = "crates/programs/bolt-component", features = ["cpi"], version = "=0.2.2"}
 
 ## External crates
-# session-keys       = { version = "=2.0.6", features = ["no-entrypoint"] }
-session-keys       = { path = "../session-keys/programs/gpl_session", features = ["no-entrypoint"] }
-anchor-lang        = { version = "=0.31.1", features = ["init-if-needed"] }
-anchor-cli         = { version = "=0.31.1" }
-anchor-client      = { version = "=0.31.1", features = ["async"] }
-anchor-syn         = { version = "=0.31.1" }
-anchor-lang-idl = { version = "=0.1.2" }
-solana-program  = { version = "=2.0.25" }
-solana-client   = { version = "=2.0.25" }
-mpl-token-metadata = { version = "=5.1.0" }
-solana-security-txt = "1.1.1"
+session-keys       = { version = ">=2.0.7", features = ["no-entrypoint"] }
+anchor-lang        = { version = ">=0.31.1", features = ["init-if-needed"] }
+anchor-cli         = { version = ">=0.31.1" }
+anchor-client      = { version = ">=0.31.1", features = ["async"] }
+anchor-syn         = { version = ">=0.31.1" }
+anchor-lang-idl = { version = ">=0.1.2" }
+solana-program  = { version = ">=2.0.25" }
+solana-client   = { version = ">=2.0.25" }
+mpl-token-metadata = { version = ">=5.1.0" }
+solana-security-txt = ">=1.1.1"
 tuple-conv = "1.0.1"
 syn = { version = "1.0.60", features = ["full"] }
 ligen-ir = "=0.1.18"
@@ -58,7 +57,7 @@ anyhow = "1.0.32"
 heck = "0.5.0"
 clap = { version = "4.2.4", features = ["derive"] }
 ahash = "=0.8.11"
-ephemeral-rollups-sdk = { path = "../ephemeral-rollups-sdk/rust/sdk" }
+ephemeral-rollups-sdk = "0.2.5"
 bincode = "=1.3.3"
 which = "7.0.2"
 tokio = { version = "1", features = ["full"] }

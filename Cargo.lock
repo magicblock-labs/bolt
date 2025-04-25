@@ -1783,6 +1783,8 @@ dependencies = [
 [[package]]
 name = "ephemeral-rollups-sdk"
 version = "0.2.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1567ae90eac4338ad3d87228bd357b540142af5edbc333c73f06c74cd2bf336f"
 dependencies = [
  "anchor-lang",
  "borsh 0.10.4",
@@ -1795,6 +1797,8 @@ dependencies = [
 [[package]]
 name = "ephemeral-rollups-sdk-attribute-commit"
 version = "0.2.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "75518f8c7369c8d704c24b79c9b6338a100531e448966ded8adc33010fb23276"
 dependencies = [
  "quote",
  "syn 1.0.109",
@@ -1803,6 +1807,8 @@ dependencies = [
 [[package]]
 name = "ephemeral-rollups-sdk-attribute-delegate"
 version = "0.2.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b881281f72fe6fa8fb13b1a5402f809c09358a1032eca1a78d9987bfc99040ec"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1812,6 +1818,8 @@ dependencies = [
 [[package]]
 name = "ephemeral-rollups-sdk-attribute-ephemeral"
 version = "0.2.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a121fb704f5a9ca695a6ef1869ccd65a2f5e1df9756ee0047a7583322517a71d"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -3928,7 +3936,9 @@ dependencies = [
 
 [[package]]
 name = "session-keys"
-version = "2.0.6"
+version = "2.0.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "70265739dbb91e1eb99b220365c15c0f9bfb8ea60ab575f7302a32d5efb1dd5a"
 dependencies = [
  "anchor-lang",
  "session-keys-macros",
@@ -3938,6 +3948,8 @@ dependencies = [
 [[package]]
 name = "session-keys-macros"
 version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6349e5cb01c08d3b3efad6cad6c63d622b703603812258ba6741cbc2c62ca39d"
 dependencies = [
  "session-keys-macros-attribute",
 ]
@@ -3945,6 +3957,8 @@ dependencies = [
 [[package]]
 name = "session-keys-macros-attribute"
 version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e07d122114bc5388a5440d62374b5b752f6013e270d100b479bb1b650d375d11"
 dependencies = [
  "proc-macro2",
  "quote",
