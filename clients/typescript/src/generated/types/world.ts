@@ -8,7 +8,7 @@ export type World = {
   address: "WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n";
   metadata: {
     name: "world";
-    version: "0.2.1";
+    version: "0.2.2";
     spec: "0.1.0";
     description: "Bolt World program";
     repository: "https://github.com/magicblock-labs/bolt";
@@ -29,6 +29,18 @@ export type World = {
         {
           name: "world";
           writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: "const";
+                value: [119, 111, 114, 108, 100];
+              },
+              {
+                kind: "arg";
+                path: "worldId";
+              },
+            ];
+          };
         },
         {
           name: "systemProgram";
@@ -233,6 +245,19 @@ export type World = {
         {
           name: "world";
           writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: "const";
+                value: [119, 111, 114, 108, 100];
+              },
+              {
+                kind: "account";
+                path: "registry.worlds";
+                account: "registry";
+              },
+            ];
+          };
         },
         {
           name: "registry";
@@ -252,6 +277,14 @@ export type World = {
         {
           name: "registry";
           writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: "const";
+                value: [114, 101, 103, 105, 115, 116, 114, 121];
+              },
+            ];
+          };
         },
         {
           name: "payer";
@@ -280,6 +313,18 @@ export type World = {
         {
           name: "world";
           writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: "const";
+                value: [119, 111, 114, 108, 100];
+              },
+              {
+                kind: "arg";
+                path: "worldId";
+              },
+            ];
+          };
         },
         {
           name: "systemProgram";

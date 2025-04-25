@@ -157,7 +157,7 @@ export async function AddAuthority({
   const worldId = new BN(worldInstance.id);
   const instruction = await program.methods
     .addAuthority(worldId)
-    .accounts({
+    .accountsPartial({
       authority,
       newAuthority,
       world,
@@ -199,7 +199,7 @@ export async function RemoveAuthority({
   const worldId = new BN(worldInstance.id);
   const instruction = await program.methods
     .removeAuthority(worldId)
-    .accounts({
+    .accountsPartial({
       authority,
       authorityToDelete,
       world,
