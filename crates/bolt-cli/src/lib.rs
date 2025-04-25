@@ -128,6 +128,7 @@ pub async fn entry(opts: Opts) -> Result<()> {
                 template,
                 test_template,
                 force,
+                ..
             } => init(
                 &opts.cfg_override,
                 name,

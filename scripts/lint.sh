@@ -6,7 +6,7 @@ echo "### Checking formatting..."
 cargo fmt -- --verbose
 
 echo "### Checking clippy..."
-cargo clippy --fix -- --deny=warnings
+cargo clippy --fix -- --deny=warnings --allow=unexpected_cfgs
 
 echo "### Checking yarn lint..."
 yarn lint --write

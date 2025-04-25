@@ -21,13 +21,12 @@ pub fn create_component_template_simple(name: &str, program_path: &Path) -> File
 }
 
 /// Automatic generation of crates from the components idl
-
 pub fn component_type(idl: &Idl, component_id: &str) -> Result<String> {
     let component_account = idl
         .accounts
         .iter()
         .filter(|a| a.name.to_lowercase() != "Entity")
-        .last();
+        .next_back();
     let component_account =
         component_account.ok_or_else(|| anyhow::anyhow!("Component account not found in IDL"))?;
 

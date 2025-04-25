@@ -21,9 +21,10 @@ namespace AccelerationTest {
             await Profiler.Run("DelegateComponent", async () => {
                 await DelegateComponent(framework);
             });
-            await Profiler.Run("ApplySimpleMovementSystemOnAccelerator 10", async () => {
-                await ApplySimpleMovementSystemOnAccelerator(framework);
-            });
+            // TODO: Re-enable this test when ephemeral-validator is properly installed on the CI.
+            // await Profiler.Run("ApplySimpleMovementSystemOnAccelerator 10", async () => {
+            //     await ApplySimpleMovementSystemOnAccelerator(framework);
+            // });
         }
 
         public static async Task AddAccelerationEntity(Framework framework) {
@@ -43,20 +44,19 @@ namespace AccelerationTest {
             await framework.SendAndConfirmInstruction(delegateComponent.Instruction);
         }
 
-        // TODO: Re-enable this test when ephemeral-validator is properly installed on the CI.
-        // public static async Task ApplySimpleMovementSystemOnAccelerator(Framework framework) {
-        //     for (int i = 0; i < 10; i++) {
-        //         var apply = new ApplyAccounts() {
-        //             Authority = framework.Wallet.Account.PublicKey,
-        //             BoltSystem = framework.SystemSimpleMovement,
-        //             World = framework.WorldPda,
-        //         };
-        //         var instruction = WorldProgram.Apply(apply, Bolt.World.SerializeArgs(new { direction = "Up" }));
-        //         instruction.Keys.Add(AccountMeta.ReadOnly(framework.ExampleComponentPosition, false));
-        //         instruction.Keys.Add(AccountMeta.Writable(framework.AccelerationComponentPositionPda, false));
-        //         await framework.SendAndConfirmInstruction(framework.AcceleratorClient, instruction);
-        //         await Task.Delay(50);
-        //     }
-        // }
+        public static async Task ApplySimpleMovementSystemOnAccelerator(Framework framework) {
+            for (int i = 0; i < 10; i++) {
+                var apply = new ApplyAccounts() {
+                    Authority = framework.Wallet.Account.PublicKey,
+                    BoltSystem = framework.SystemSimpleMovement,
+                    World = framework.WorldPda,
+                };
+                var instruction = WorldProgram.Apply(apply, Bolt.World.SerializeArgs(new { direction = "Up" }));
+                instruction.Keys.Add(AccountMeta.ReadOnly(framework.ExampleComponentPosition, false));
+                instruction.Keys.Add(AccountMeta.Writable(framework.AccelerationComponentPositionPda, false));
+                await framework.SendAndConfirmInstruction(framework.AcceleratorClient, instruction);
+                await Task.Delay(50);
+            }
+        }
    }
 }

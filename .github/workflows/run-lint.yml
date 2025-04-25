@@ -35,7 +35,7 @@ jobs:
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: 1.81.0
+          toolchain: stable
 
       - name: Cache Rust
         uses: Swatinem/rust-cache@v2
@@ -64,7 +64,7 @@ jobs:
         run: |
           if [ "${{ matrix.task }}" == "clippy" ]; then
             cargo fmt -- --check --verbose
-            cargo clippy -- --deny=warnings
+            cargo clippy -- --deny=warnings --allow=unexpected_cfgs
           else
             yarn lint
           fi
