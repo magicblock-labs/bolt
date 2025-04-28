@@ -183,7 +183,7 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
   publish-wrapper-npm-package:
     name: Publish wrapper NPM packages
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     needs: publish-npm-binaries
     steps:
       - name: Checkout
