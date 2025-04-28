@@ -51,6 +51,11 @@ jobs:
         with:
           toolchain: stable
 
+      - name: Install Rust nightly
+        uses: dtolnay/rust-toolchain@nightly
+        with:
+          toolchain: nightly
+
       - name: Cache rust
         uses: Swatinem/rust-cache@v2
 
@@ -170,23 +175,22 @@ jobs:
             NO_VERIFY_FLAG="--no-verify"
           fi      
 
-          cargo publish $DRY_RUN_FLAG --manifest-path=crates/bolt-lang/utils/Cargo.toml --token $CRATES_TOKEN $NO_VERIFY_FLAG
-          cargo publish $DRY_RUN_FLAG --manifest-path=crates/bolt-lang/attribute/component/Cargo.toml --token $CRATES_TOKEN $NO_VERIFY_FLAG
-          cargo publish $DRY_RUN_FLAG --manifest-path=crates/bolt-lang/attribute/component-deserialize/Cargo.toml --token $CRATES_TOKEN $NO_VERIFY_FLAG
-          cargo publish $DRY_RUN_FLAG --manifest-path=crates/bolt-lang/attribute/component-id/Cargo.toml --token $CRATES_TOKEN $NO_VERIFY_FLAG
-          cargo publish $DRY_RUN_FLAG --manifest-path=crates/bolt-lang/attribute/system/Cargo.toml --token $CRATES_TOKEN $NO_VERIFY_FLAG
-          cargo publish $DRY_RUN_FLAG --manifest-path=crates/bolt-lang/attribute/system-input/Cargo.toml --token $CRATES_TOKEN $NO_VERIFY_FLAG
-          cargo publish $DRY_RUN_FLAG --manifest-path=crates/bolt-lang/attribute/extra-accounts/Cargo.toml --token $CRATES_TOKEN $NO_VERIFY_FLAG
-          cargo publish $DRY_RUN_FLAG --manifest-path=crates/bolt-lang/attribute/arguments/Cargo.toml --token $CRATES_TOKEN $NO_VERIFY_FLAG
-          cargo publish $DRY_RUN_FLAG --manifest-path=crates/bolt-lang/attribute/bolt-program/Cargo.toml --token $CRATES_TOKEN $NO_VERIFY_FLAG
-          cargo publish $DRY_RUN_FLAG --manifest-path=crates/bolt-lang/attribute/delegate/Cargo.toml --token $CRATES_TOKEN $NO_VERIFY_FLAG
-          cargo publish $DRY_RUN_FLAG --manifest-path=crates/programs/bolt-system/Cargo.toml --token $CRATES_TOKEN $NO_VERIFY_FLAG
-          cargo publish $DRY_RUN_FLAG --manifest-path=crates/programs/bolt-component/Cargo.toml --token $CRATES_TOKEN $NO_VERIFY_FLAG
-          cargo publish $DRY_RUN_FLAG --manifest-path=crates/programs/world/Cargo.toml --token $CRATES_TOKEN $NO_VERIFY_FLAG
-          cargo publish $DRY_RUN_FLAG --manifest-path=crates/bolt-lang/Cargo.toml --token $CRATES_TOKEN $NO_VERIFY_FLAG
-          if [ "${DRY_RUN}" != "true" ]; then
-            cargo publish --manifest-path=crates/bolt-cli/Cargo.toml --token $CRATES_TOKEN
-          fi
+          cargo +nightly publish -Zpackage-workspace $DRY_RUN_FLAG $NO_VERIFY_FLAG --token $CRATES_TOKEN \
+            -p world \
+            -p bolt-cli \
+            -p bolt-lang \
+            -p bolt-utils \
+            -p bolt-system \
+            -p bolt-component \
+            -p bolt-attribute-bolt-arguments \
+            -p bolt-attribute-bolt-component \
+            -p bolt-attribute-bolt-component-deserialize \
+            -p bolt-attribute-bolt-component-id \
+            -p bolt-attribute-bolt-delegate \
+            -p bolt-attribute-bolt-extra-accounts \
+            -p bolt-attribute-bolt-program \
+            -p bolt-attribute-bolt-system \
+            -p bolt-attribute-bolt-system-input
         env:
           CRATES_TOKEN: ${{ secrets.CRATES_TOKEN }}
           DRY_RUN: ${{ env.DRY_RUN }}
