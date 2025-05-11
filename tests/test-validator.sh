@@ -22,14 +22,19 @@ solana-test-validator --reset \
 VALIDATOR_PID=$!
 
 cleanup() {
+  if ps -p $VALIDATOR_PID > /dev/null; then
     kill $VALIDATOR_PID
     wait $VALIDATOR_PID 2>/dev/null || true
+  fi
 }
 trap cleanup EXIT
 
 sleep 3
 
-solana airdrop -u http://localhost:8899 100000 ./tests/fixtures/provider.json
+if ! solana airdrop -u http://localhost:8899 100000 ./tests/fixtures/provider.json; then
+  echo "Error: Failed to airdrop SOL to provider account"
+  exit 1
+fi
 
 anchor test --skip-build --skip-deploy --skip-local-validator
 
