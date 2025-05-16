@@ -1,0 +1,11 @@
+[package]
+name = "bolt-cpi-interface"
+version = {workspace = true}
+edition = {workspace = true}
+
+[lib]
+crate-type = ["rlib"]
+
+[dependencies]
+pinocchio = {workspace = true}
+pinocchio-pubkey = {workspace = true}

@@ -1,0 +1,13 @@
+[package]
+name = "bolt-world"
+version = {workspace = true}
+edition = {workspace = true}
+
+[lib]
+crate-type = ["cdylib", "lib"]
+
+[dependencies]
+bolt-cpi-interface = {workspace = true}
+pinocchio = {workspace = true}
+pinocchio-pubkey = {workspace = true}
+pinocchio-system = {workspace = true}

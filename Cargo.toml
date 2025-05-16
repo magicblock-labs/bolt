@@ -6,6 +6,7 @@ members = [
     "crates/programs/bolt-component",
     "crates/programs/bolt-system",
     "crates/programs/world",
+    "crates/pinocchio/*",
     "crates/types",
     "examples/*",
 ]
@@ -63,6 +64,10 @@ which = "7.0.2"
 tokio = { version = "1", features = ["full"] }
 sysinfo = "0.33.1"
 bytemuck_derive = "=1.8.1"
+pinocchio = "0.8.2"
+pinocchio-pubkey = "0.2.4"
+pinocchio-system = "0.2.3"
+bolt-cpi-interface = { path = "crates/pinocchio/cpi-interface"}
 
 
 [profile.release]
