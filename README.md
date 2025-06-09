@@ -31,6 +31,13 @@ With Bolt, you can create games that live forever on the blockchain. These games
 | `@magicblock-labs/bolt-sdk` | TypeScript client for Anchor programs                                            | [![npm](https://img.shields.io/npm/v/@magicblock-labs/bolt-sdk.svg?color=blue)](https://www.npmjs.com/package/@magicblock-labs/bolt-sdk)         | [![Docs](https://img.shields.io/badge/docs-tutorials-blue)](https://book.boltengine.gg/getting_started/world_program.html#typescript-sdk-installation)     |
 | `@magicblock-labs/ephemeral-validator` | MagicBlock's extremely fast Solana compatible validator | [![npm](https://img.shields.io/npm/v/@magicblock-labs/ephemeral-validator.svg?color=blue)](https://www.npmjs.com/package/@magicblock-labs/ephemeral-validator) | [![Docs](https://img.shields.io/badge/docs-tutorials-blue)](https://book.boltengine.gg/getting_started/ephemeral_validator.html) |
 
+## ⚡️ Requirements
+
+Make sure to have the latest nightly toolchain, which is required to generate IDLs.
+```bash
+rustup update nightly
+```
+
 ## ⚡️ Installing the bolt-cli
 
 ```bash
