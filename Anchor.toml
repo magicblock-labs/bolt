@@ -65,3 +65,15 @@ filename = "tests/fixtures/commit_record.json"
 [[test.validator.account]]
 address = "7nQvHcfEqtFmY2q6hiQbidu8BCNdqegnEFfH7HkByFn5"
 filename = "tests/fixtures/committed_state.json"
+
+[[test.validator.account]]
+address = "mAGicPQYBMvcYveUZA5F5UNNwyHvfYh5xkLS2Fr1mev"
+filename = "tests/fixtures/magic_context.json"
+
+[[test.validator.account]]
+address = "EpJnX7ueXk7fKojBymqmVuCuwyhDQsYcLVL1XMsBbvDX"
+filename = "tests/fixtures/vault1.json"
+
+[[test.validator.account]]
+address = "7JrkjmZPprHwtuvtuGTXp9hwfGYFAQLnLeFM52kqAgXg"
+filename = "tests/fixtures/vault2.json"
