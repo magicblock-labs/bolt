@@ -12,8 +12,8 @@
   <p>
     <a href="https://book.boltengine.gg"><img alt="Tutorials" src="https://img.shields.io/badge/docs-tutorials-blueviolet" /></a>
     <a href="https://github.com/magicblock-labs/bolt/issues"><img alt="Issues" src="https://img.shields.io/github/issues/magicblock-labs/bolt?color=blueviolet" />
-    <a href="https://github.com/magicblock-labs/bolt/pulls?q=is%3Aopen+is%3Apr"><img alt="Pull Requests" src="https://img.shields.io/github/issues-pr/magicblock-labs/bolt?color=blueviolet" />
 </a>
+    <a href="https://github.com/magicblock-labs/bolt/pulls?q=is%3Aopen+is%3Apr"><img alt="Pull Requests" src="https://img.shields.io/github/issues-pr/magicblock-labs/bolt?color=blueviolet" />
     <a href="https://discord.com/invite/MBkdC3gxcv"><img alt="Discord Chat" src="https://img.shields.io/discord/943797222162726962?color=blueviolet" /></a>
     <a href="https://opensource.org/licenses/MIT"><img alt="License" src="https://img.shields.io/github/license/magicblock-labs/bolt?color=blueviolet" /></a>
   </p>
