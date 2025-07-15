@@ -26,4 +26,4 @@ custom-panic = []
 [dependencies]
 serde.workspace = true
 bolt-lang.workspace = true
-bolt-types = { version = "0.2.2", path = "../../crates/types" }
+bolt-types = { version = "0.2.3", path = "../../crates/types" }
