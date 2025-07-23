@@ -1,14 +1,23 @@
 
-## [0.2.3] - 2025-04-25
+## [0.2.4] - 2025-07-23
+
+### 📚 Documentation
+ - Adding latest nightly Rust toolchain as a requirement (#181)
+
+## [0.2.3] - 2025-04-28
 
 ### ✨️ Features
  - Updating Bolt client for C# (#129)
- - Adding DestroyComponent function (#143)
- - Separating apply and apply_with_session (#141)
 
 
 ### 🐛 Bug Fixes
  - Fixing async cli commands (#159)
+
+## [0.2.2] - 2025-02-24
+
+### ✨️ Features
+ - Adding DestroyComponent function (#143)
+ - Separating apply and apply_with_session (#141)
 
 ## [0.2.1] - 2025-02-17
 
