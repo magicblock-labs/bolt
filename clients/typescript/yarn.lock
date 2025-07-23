@@ -82,7 +82,7 @@
     bs58 "^5.0.0"
     debug "^4.3.4"
 
-"@metaplex-foundation/beet@^0.7.1", "@metaplex-foundation/beet@^0.7.2", "@metaplex-foundation/beet@>=0.1.0":
+"@metaplex-foundation/beet@>=0.1.0", "@metaplex-foundation/beet@^0.7.1", "@metaplex-foundation/beet@^0.7.2":
   version "0.7.2"
   resolved "https://registry.npmjs.org/@metaplex-foundation/beet/-/beet-0.7.2.tgz"
   integrity sha512-K+g3WhyFxKPc0xIvcIjNyV1eaTVJTiuaHZpig7Xx0MuYRMoJLLvhLTnUXhFdR5Tu2l2QSyKwfyXDgZlzhULqFg==
@@ -126,7 +126,7 @@
   dependencies:
     "@noble/hashes" "1.7.1"
 
-"@noble/hashes@^1.3.1", "@noble/hashes@^1.4.0", "@noble/hashes@1.7.1":
+"@noble/hashes@1.7.1", "@noble/hashes@^1.3.1", "@noble/hashes@^1.4.0":
   version "1.7.1"
   resolved "https://registry.npmjs.org/@noble/hashes/-/hashes-1.7.1.tgz"
   integrity sha512-B8XBPsn4vT/KJAGqDzbwztd+6Yte3P4V7iafm24bxgDe/mlRuK6xmWPuCNrKt2vDafZ8MfJLlchDG/vYafQEjQ==
@@ -201,6 +201,14 @@
   integrity sha512-bd/YFLW+URhBzMXurx7lWByOu+xzU9+kb3RboOteXYDfW+tr+JZa99OyNmPINEGB/ahzKrEuc8rcv4gnpJmxTw==
   dependencies:
     "@types/node" "*"
+
+JSONStream@^1.3.5:
+  version "1.3.5"
+  resolved "https://registry.npmjs.org/JSONStream/-/JSONStream-1.3.5.tgz"
+  integrity sha512-E+iruNOY8VV9s4JEbe1aNEm6MiszPRr/UfcHMz0TQh1BXSxHK+ASV1R6W4HpjBhSeS+54PIsAMCBmwD06LLsqQ==
+  dependencies:
+    jsonparse "^1.2.0"
+    through ">=2.2.7 <3"
 
 agentkeepalive@^4.5.0:
   version "4.6.0"
@@ -340,7 +348,7 @@ buffer-layout@^1.2.0, buffer-layout@^1.2.2:
   resolved "https://registry.npmjs.org/buffer-layout/-/buffer-layout-1.2.2.tgz"
   integrity sha512-kWSuLN694+KTk8SrYvCqwP2WcgQjoRCiF5b4QDvkkz8EmgD+aWAIceGFKMIAdmF/pH+vpgNV3d3kAKorcdAmWA==
 
-buffer@^6.0.3, buffer@~6.0.3, buffer@6.0.3:
+buffer@6.0.3, buffer@^6.0.3, buffer@~6.0.3:
   version "6.0.3"
   resolved "https://registry.npmjs.org/buffer/-/buffer-6.0.3.tgz"
   integrity sha512-FTiCpNxtwiZZHEZbcbTIcZjERVICn9yq/pDFkTl95/AxzD1naBctN7YO68riM/gLSDY7sdrMby8hofADYuuqOA==
@@ -758,13 +766,13 @@ jayson@^4.1.1:
     "@types/connect" "^3.4.33"
     "@types/node" "^12.12.54"
     "@types/ws" "^7.4.4"
+    JSONStream "^1.3.5"
     commander "^2.20.3"
     delay "^5.0.0"
     es6-promisify "^5.0.0"
     eyes "^0.1.8"
     isomorphic-ws "^4.0.1"
     json-stringify-safe "^5.0.1"
-    JSONStream "^1.3.5"
     uuid "^8.3.2"
     ws "^7.5.10"
 
@@ -787,14 +795,6 @@ jsonparse@^1.2.0:
   version "1.3.1"
   resolved "https://registry.npmjs.org/jsonparse/-/jsonparse-1.3.1.tgz"
   integrity sha512-POQXvpdL69+CluYsillJ7SUhKvytYjW9vG/GKpnf+xP8UWgYEM/RaMzHHofbALDiKbbP1W8UEYmgGl39WkPZsg==
-
-JSONStream@^1.3.5:
-  version "1.3.5"
-  resolved "https://registry.npmjs.org/JSONStream/-/JSONStream-1.3.5.tgz"
-  integrity sha512-E+iruNOY8VV9s4JEbe1aNEm6MiszPRr/UfcHMz0TQh1BXSxHK+ASV1R6W4HpjBhSeS+54PIsAMCBmwD06LLsqQ==
-  dependencies:
-    jsonparse "^1.2.0"
-    through ">=2.2.7 <3"
 
 loglevel@^1.9.2:
   version "1.9.2"
@@ -1147,7 +1147,7 @@ typedoc-plugin-markdown@^3.17.1:
   dependencies:
     handlebars "^4.7.7"
 
-typedoc@^0.25.4, typedoc@>=0.24.0:
+typedoc@^0.25.4:
   version "0.25.13"
   resolved "https://registry.npmjs.org/typedoc/-/typedoc-0.25.13.tgz"
   integrity sha512-pQqiwiJ+Z4pigfOnnysObszLiU3mVLWAExSPf+Mu06G/qsc3wzbuM56SZQvONhHLncLUhYzOVkjFFpFfL5AzhQ==
@@ -1157,7 +1157,7 @@ typedoc@^0.25.4, typedoc@>=0.24.0:
     minimatch "^9.0.3"
     shiki "^0.14.7"
 
-typescript@^4.5.5, "typescript@4.6.x || 4.7.x || 4.8.x || 4.9.x || 5.0.x || 5.1.x || 5.2.x || 5.3.x || 5.4.x":
+typescript@^4.5.5:
   version "4.9.5"
   resolved "https://registry.npmjs.org/typescript/-/typescript-4.9.5.tgz"
   integrity sha512-1FXk9E2Hm+QzZQ7z+McJiHL4NW1F2EzMu9Nq9i3zAaGqibafqYwCVU6WyWAuyQRRzOlxou8xZSyXLEN8oKj24g==
@@ -1167,7 +1167,7 @@ uglify-js@^3.1.4:
   resolved "https://registry.npmjs.org/uglify-js/-/uglify-js-3.19.3.tgz"
   integrity sha512-v3Xu+yuwBXisp6QYTcH4UbH+xYJXqnq2m/LtQVWKWzYc1iehYnLixoQDN9FH6/j9/oybfd6W9Ghwkl8+UMKTKQ==
 
-utf-8-validate@^5.0.2, utf-8-validate@>=5.0.2:
+utf-8-validate@^5.0.2:
   version "5.0.10"
   resolved "https://registry.npmjs.org/utf-8-validate/-/utf-8-validate-5.0.10.tgz"
   integrity sha512-Z6czzLq4u8fPOyx7TU6X3dvUZVvoJmxSQ+IcrlmagKhilxlhZgxPK6C5Jqbkw1IDUmFTM+cz9QDnnLTwDz/2gQ==
@@ -1255,7 +1255,7 @@ wrap-ansi@^8.1.0:
     string-width "^5.0.1"
     strip-ansi "^7.0.1"
 
-ws@*, ws@^7.5.10:
+ws@^7.5.10:
   version "7.5.10"
   resolved "https://registry.npmjs.org/ws/-/ws-7.5.10.tgz"
   integrity sha512-+dbF1tHwZpXcbOJdVOkzLDxZP1ailvSxM6ZweXTegylPny803bFhA+vqBYw4s31NSAk4S2Qz+AKXK9a4wkdjcQ==

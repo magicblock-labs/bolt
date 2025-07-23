@@ -13,7 +13,7 @@ proc-macro = true
 
 [dependencies]
 syn = { workspace = true }
-ligen-ir = { workspace = true }
 bolt-utils = { workspace = true }
+heck = { workspace = true }
 quote = { workspace = true }
 proc-macro2 = { workspace = true }

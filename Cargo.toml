@@ -11,7 +11,7 @@ members = [
 ]
 
 [workspace.package]
-version = "0.2.3"
+version = "0.2.4"
 authors = ["Magicblock Labs <dev@magicblock.gg>"]
 repository = "https://github.com/magicblock-labs/bolt"
 homepage = "https://www.magicblock.gg/"
@@ -19,51 +19,49 @@ license = "MIT"
 edition = "2021"
 
 [workspace.dependencies]
-bolt-types = { path = "crates/types", version = "=0.2.3" }
-bolt-lang = { path = "crates/bolt-lang", version = "=0.2.3" }
-bolt-attribute-bolt-program = { path = "crates/bolt-lang/attribute/bolt-program", version = "=0.2.3" }
-bolt-attribute-bolt-delegate = { path = "crates/bolt-lang/attribute/delegate", version = "=0.2.3" }
-bolt-attribute-bolt-component = { path = "crates/bolt-lang/attribute/component", version = "=0.2.3" }
-bolt-attribute-bolt-system = { path = "crates/bolt-lang/attribute/system", version = "=0.2.3"}
-bolt-attribute-bolt-system-input = { path = "crates/bolt-lang/attribute/system-input", version = "=0.2.3" }
-bolt-attribute-bolt-extra-accounts = { path = "crates/bolt-lang/attribute/extra-accounts", version = "=0.2.3" }
-bolt-attribute-bolt-arguments = { path = "crates/bolt-lang/attribute/arguments", version = "=0.2.3" }
-bolt-attribute-bolt-component-deserialize = { path = "crates/bolt-lang/attribute/component-deserialize", version = "=0.2.3" }
-bolt-attribute-bolt-component-id = { path = "crates/bolt-lang/attribute/component-id", version = "=0.2.3" }
-bolt-utils = { path = "crates/bolt-lang/utils", version = "=0.2.3" }
-world = { path = "crates/programs/world", features = ["cpi"], version = "=0.2.3"}
-bolt-system = { path = "crates/programs/bolt-system", features = ["cpi"], version = "=0.2.3"}
-bolt-component = { path = "crates/programs/bolt-component", features = ["cpi"], version = "=0.2.3"}
+bolt-types = { path = "crates/types", version = "=0.2.4" }
+bolt-lang = { path = "crates/bolt-lang", version = "=0.2.4" }
+bolt-attribute-bolt-program = { path = "crates/bolt-lang/attribute/bolt-program", version = "=0.2.4" }
+bolt-attribute-bolt-delegate = { path = "crates/bolt-lang/attribute/delegate", version = "=0.2.4" }
+bolt-attribute-bolt-component = { path = "crates/bolt-lang/attribute/component", version = "=0.2.4" }
+bolt-attribute-bolt-system = { path = "crates/bolt-lang/attribute/system", version = "=0.2.4"}
+bolt-attribute-bolt-system-input = { path = "crates/bolt-lang/attribute/system-input", version = "=0.2.4" }
+bolt-attribute-bolt-extra-accounts = { path = "crates/bolt-lang/attribute/extra-accounts", version = "=0.2.4" }
+bolt-attribute-bolt-arguments = { path = "crates/bolt-lang/attribute/arguments", version = "=0.2.4" }
+bolt-attribute-bolt-component-deserialize = { path = "crates/bolt-lang/attribute/component-deserialize", version = "=0.2.4" }
+bolt-attribute-bolt-component-id = { path = "crates/bolt-lang/attribute/component-id", version = "=0.2.4" }
+bolt-utils = { path = "crates/bolt-lang/utils", version = "=0.2.4" }
+world = { path = "crates/programs/world", features = ["cpi"], version = "=0.2.4"}
+bolt-system = { path = "crates/programs/bolt-system", features = ["cpi"], version = "=0.2.4"}
+bolt-component = { path = "crates/programs/bolt-component", features = ["cpi"], version = "=0.2.4"}
 
 ## External crates
-session-keys       = { version = ">=2.0.7", features = ["no-entrypoint"] }
-anchor-lang        = { version = ">=0.31.1", features = ["init-if-needed"] }
-anchor-cli         = { version = ">=0.31.1" }
-anchor-client      = { version = ">=0.31.1", features = ["async"] }
-anchor-syn         = { version = ">=0.31.1" }
-anchor-lang-idl = { version = ">=0.1.2" }
-solana-program  = { version = ">=2.0.25" }
-solana-client   = { version = ">=2.0.25" }
-mpl-token-metadata = { version = ">=5.1.0" }
-solana-security-txt = ">=1.1.1"
+session-keys       = { version = "^2", features = ["no-entrypoint"] }
+anchor-lang        = { version = "^0", features = ["init-if-needed"] }
+anchor-cli         = { version = "^0" }
+anchor-client      = { version = "^0", features = ["async"] }
+anchor-syn         = { version = "^0" }
+anchor-lang-idl = { version = "^0" }
+solana-program  = { version = "^2" }
+zeroize = "^1.7"
+mpl-token-metadata = { version = "^5" }
+solana-security-txt = "^1"
 tuple-conv = "1.0.1"
 syn = { version = "1.0.60", features = ["full"] }
-ligen-ir = "=0.1.18"
 quote = "1.0"
-proc-macro2 = "=1.0.95"
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
-anyhow = "1.0.32"
+proc-macro2 = "^1"
+serde = { version = "^1", features = ["derive"] }
+serde_json = "^1"
+anyhow = "^1"
 heck = "0.5.0"
 clap = { version = "4.2.4", features = ["derive"] }
 ahash = "=0.8.11"
-ephemeral-rollups-sdk = "0.2.6"
-bincode = "=1.3.3"
-which = "7.0.2"
-tokio = { version = "1", features = ["full"] }
-sysinfo = "0.33.1"
-bytemuck_derive = "=1.8.1"
-
+ephemeral-rollups-sdk = "^0"
+bincode = "^1"
+which = "^7"
+tokio = { version = "^1", features = ["full"] }
+sysinfo = "^0"
+bytemuck_derive = "^1"
 
 [profile.release]
 overflow-checks = true

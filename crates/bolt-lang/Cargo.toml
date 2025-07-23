@@ -42,3 +42,9 @@ serde_json.workspace = true
 ahash.workspace = true
 solana-program.workspace = true
 bincode.workspace = true
+zeroize.workspace = true
+
+[dependencies.getrandom]
+version = "^0"
+default-features = false
+features = ["dummy"]
