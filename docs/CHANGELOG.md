@@ -1,14 +1,23 @@
 
-## [0.2.3] - 2025-04-25
+## [0.2.4] - 2025-07-23
+
+### 📚 Documentation
+ - Adding latest nightly Rust toolchain as a requirement (#181)
+
+## [0.2.3] - 2025-04-28
 
 ### ✨️ Features
  - Updating Bolt client for C# (#129)
- - Adding DestroyComponent function (#143)
- - Separating apply and apply_with_session (#141)
 
 
 ### 🐛 Bug Fixes
  - Fixing async cli commands (#159)
+
+## [0.2.2] - 2025-02-24
+
+### ✨️ Features
+ - Adding DestroyComponent function (#143)
+ - Separating apply and apply_with_session (#141)
 
 ## [0.2.1] - 2025-02-17
 
@@ -142,7 +151,7 @@ Make the CI run `yarn build` before testing
  - Upgrade to latest anchor version, supporting the new IDL s… (#33)
  - Propagate signing authority to the systems (#31)
  - Macro to define and access extra accounts  (#26)
-Inject extra account init fn with th system macro, to generate a correct idl wich contains also the extra accounts
+Inject extra account init fn with th system macro, to generate a correct idl which contains also the extra accounts
 
 ## [0.1.1] - 2024-03-09
 

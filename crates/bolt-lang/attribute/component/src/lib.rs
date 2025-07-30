@@ -7,6 +7,7 @@ use syn::{
 };
 
 use bolt_utils::add_bolt_metadata;
+use heck::ToSnakeCase;
 
 /// This Component attribute is used to automatically generate the seed and size functions
 ///
@@ -53,8 +54,9 @@ pub fn component(attr: TokenStream, item: TokenStream) -> TokenStream {
     add_bolt_metadata(&mut input);
 
     let name = &input.ident;
-    let component_name = ligen_ir::Identifier::new(name.to_string()).to_snake_case();
-    let component_name = syn::Ident::new(&component_name.to_string(), input.ident.span());
+
+    let snake_case_name = name.to_string().to_snake_case();
+    let component_name = syn::Ident::new(&snake_case_name, input.ident.span());
 
     let bolt_program = if delegate_set {
         quote! {
