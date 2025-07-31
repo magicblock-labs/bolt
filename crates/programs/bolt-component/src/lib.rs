@@ -95,7 +95,9 @@ pub struct BoltMetadata {
 }
 
 #[cfg(feature = "cpi")]
-pub trait CpiContextBuilder<'a, 'b, 'c, 'info>: ToAccountMetas + ToAccountInfos<'info> + Sized {
+pub trait CpiContextBuilder<'a, 'b, 'c, 'info>:
+    ToAccountMetas + ToAccountInfos<'info> + Sized
+{
     fn build_cpi_context(
         self,
         program: AccountInfo<'info>,
@@ -116,7 +118,9 @@ impl<'a, 'b, 'c, 'info> CpiContextBuilder<'a, 'b, 'c, 'info> for cpi::accounts::
 }
 
 #[cfg(feature = "cpi")]
-impl<'a, 'b, 'c, 'info> CpiContextBuilder<'a, 'b, 'c, 'info> for cpi::accounts::UpdateWithSession<'info> {
+impl<'a, 'b, 'c, 'info> CpiContextBuilder<'a, 'b, 'c, 'info>
+    for cpi::accounts::UpdateWithSession<'info>
+{
     fn build_cpi_context(
         self,
         program: AccountInfo<'info>,

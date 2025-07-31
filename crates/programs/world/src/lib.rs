@@ -742,8 +742,7 @@ pub fn build_update_context_with_session<'a, 'b, 'c, 'info>(
     cpi_auth: UncheckedAccount<'info>,
     session_token: UncheckedAccount<'info>,
     signer_seeds: &'a [&'b [&'c [u8]]],
-) -> CpiContext<'a, 'b, 'c, 'info, bolt_component::cpi::accounts::UpdateWithSession<'info>>
-{
+) -> CpiContext<'a, 'b, 'c, 'info, bolt_component::cpi::accounts::UpdateWithSession<'info>> {
     let authority = authority.to_account_info();
     let cpi_auth = cpi_auth.to_account_info();
     let cpi_program = component_program;
