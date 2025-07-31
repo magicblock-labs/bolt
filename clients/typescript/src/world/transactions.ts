@@ -18,7 +18,7 @@ import {
   BN,
   FindComponentProgramDataPda,
 } from "../index";
-import type web3 from "@solana/web3.js";
+import web3 from "@solana/web3.js";
 import {
   type Connection,
   Keypair,
@@ -33,6 +33,10 @@ import {
   worldIdl,
 } from "../generated";
 import { type Idl, Program } from "@coral-xyz/anchor";
+
+export const CPI_AUTH_ADDRESS = new web3.PublicKey(
+  "B2f2y3QTBv346wE6nWKor72AUhUvFF6mPk7TWCF2QVhi",
+);
 
 export async function InitializeRegistry({
   payer,
@@ -371,6 +375,7 @@ export async function DestroyComponent({
       componentProgram,
       componentProgramData,
       receiver,
+      cpiAuth: CPI_AUTH_ADDRESS,
     })
     .instruction();
   const transaction = new Transaction().add(instruction);
@@ -416,7 +421,6 @@ export async function InitializeComponent({
     data: componentPda,
     componentProgram: componentId,
     authority: authority ?? PROGRAM_ID,
-    instructionSysvarAccount: SYSVAR_INSTRUCTIONS_PUBKEY,
     anchorRemainingAccounts,
   });
   const transaction = new Transaction().add(instruction);
@@ -503,6 +507,7 @@ async function createApplySystemInstruction({
         boltSystem: systemId,
         sessionToken: session.token,
         world,
+        cpiAuth: CPI_AUTH_ADDRESS,
       })
       .remainingAccounts(remainingAccounts)
       .instruction();
@@ -513,6 +518,7 @@ async function createApplySystemInstruction({
         authority: authority ?? PROGRAM_ID,
         boltSystem: systemId,
         world,
+        cpiAuth: CPI_AUTH_ADDRESS,
       })
       .remainingAccounts(remainingAccounts)
       .instruction();

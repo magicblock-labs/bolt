@@ -24,28 +24,26 @@ pub mod bolt_component {
 
     #[derive(Accounts)]
     pub struct Update<'info> {
+        #[account()]
+        pub cpi_auth: Signer<'info>,
         #[account(mut)]
         /// CHECK: The component to update
         pub bolt_component: UncheckedAccount<'info>,
         #[account()]
         /// CHECK: The authority of the component
         pub authority: Signer<'info>,
-        #[account(address = anchor_lang::solana_program::sysvar::instructions::id())]
-        /// CHECK: The instruction sysvar
-        pub instruction_sysvar_account: AccountInfo<'info>,
     }
 
     #[derive(Accounts)]
     pub struct UpdateWithSession<'info> {
+        #[account()]
+        pub cpi_auth: Signer<'info>,
         #[account(mut)]
         /// CHECK: The component to update
         pub bolt_component: UncheckedAccount<'info>,
         #[account()]
         /// CHECK: The authority of the component
         pub authority: Signer<'info>,
-        #[account(address = anchor_lang::solana_program::sysvar::instructions::id())]
-        /// CHECK: The instruction sysvar
-        pub instruction_sysvar_account: AccountInfo<'info>,
         #[account()]
         /// CHECK: The session token
         pub session_token: UncheckedAccount<'info>,
@@ -54,6 +52,8 @@ pub mod bolt_component {
 
 #[derive(Accounts)]
 pub struct Initialize<'info> {
+    #[account()]
+    pub cpi_auth: Signer<'info>,
     #[account(mut)]
     pub payer: Signer<'info>,
     #[account(mut)]
@@ -65,14 +65,13 @@ pub struct Initialize<'info> {
     #[account()]
     /// CHECK: The authority of the component
     pub authority: AccountInfo<'info>,
-    #[account(address = anchor_lang::solana_program::sysvar::instructions::id())]
-    /// CHECK: The instruction sysvar
-    pub instruction_sysvar_account: AccountInfo<'info>,
     pub system_program: Program<'info, System>,
 }
 
 #[derive(Accounts)]
 pub struct Destroy<'info> {
+    #[account()]
+    pub cpi_auth: Signer<'info>,
     #[account()]
     pub authority: Signer<'info>,
     #[account(mut)]
@@ -87,9 +86,6 @@ pub struct Destroy<'info> {
     #[account()]
     /// CHECK: The component program data
     pub component_program_data: AccountInfo<'info>,
-    #[account(address = anchor_lang::solana_program::sysvar::instructions::id())]
-    /// CHECK: The instruction sysvar
-    pub instruction_sysvar_account: AccountInfo<'info>,
     pub system_program: Program<'info, System>,
 }
 
@@ -99,31 +95,34 @@ pub struct BoltMetadata {
 }
 
 #[cfg(feature = "cpi")]
-pub trait CpiContextBuilder<'info>: ToAccountMetas + ToAccountInfos<'info> + Sized {
+pub trait CpiContextBuilder<'a, 'b, 'c, 'info>: ToAccountMetas + ToAccountInfos<'info> + Sized {
     fn build_cpi_context(
         self,
         program: AccountInfo<'info>,
-    ) -> CpiContext<'info, 'info, 'info, 'info, Self>;
+        signer_seeds: &'a [&'b [&'c [u8]]],
+    ) -> CpiContext<'a, 'b, 'c, 'info, Self>;
 }
 
 #[cfg(feature = "cpi")]
-impl<'info> CpiContextBuilder<'info> for cpi::accounts::Update<'info> {
+impl<'a, 'b, 'c, 'info> CpiContextBuilder<'a, 'b, 'c, 'info> for cpi::accounts::Update<'info> {
     fn build_cpi_context(
         self,
         program: AccountInfo<'info>,
-    ) -> CpiContext<'info, 'info, 'info, 'info, Self> {
+        signer_seeds: &'a [&'b [&'c [u8]]],
+    ) -> CpiContext<'a, 'b, 'c, 'info, Self> {
         let cpi_program = program.to_account_info();
-        CpiContext::new(cpi_program, self)
+        CpiContext::new_with_signer(cpi_program, self, signer_seeds)
     }
 }
 
 #[cfg(feature = "cpi")]
-impl<'info> CpiContextBuilder<'info> for cpi::accounts::UpdateWithSession<'info> {
+impl<'a, 'b, 'c, 'info> CpiContextBuilder<'a, 'b, 'c, 'info> for cpi::accounts::UpdateWithSession<'info> {
     fn build_cpi_context(
         self,
         program: AccountInfo<'info>,
-    ) -> CpiContext<'info, 'info, 'info, 'info, Self> {
+        signer_seeds: &'a [&'b [&'c [u8]]],
+    ) -> CpiContext<'a, 'b, 'c, 'info, Self> {
         let cpi_program = program.to_account_info();
-        CpiContext::new(cpi_program, self)
+        CpiContext::new_with_signer(cpi_program, self, signer_seeds)
     }
 }
