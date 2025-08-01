@@ -8,7 +8,7 @@ export type World = {
   address: "WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n";
   metadata: {
     name: "world";
-    version: "0.2.3";
+    version: "0.2.4";
     spec: "0.1.0";
     description: "Bolt World program";
     repository: "https://github.com/magicblock-labs/bolt";
@@ -97,8 +97,7 @@ export type World = {
           signer: true;
         },
         {
-          name: "instructionSysvarAccount";
-          address: "Sysvar1nstructions1111111111111111111111111";
+          name: "cpiAuth";
         },
         {
           name: "world";
@@ -123,8 +122,7 @@ export type World = {
           signer: true;
         },
         {
-          name: "instructionSysvarAccount";
-          address: "Sysvar1nstructions1111111111111111111111111";
+          name: "cpiAuth";
         },
         {
           name: "world";
@@ -190,8 +188,7 @@ export type World = {
           writable: true;
         },
         {
-          name: "instructionSysvarAccount";
-          address: "Sysvar1nstructions1111111111111111111111111";
+          name: "cpiAuth";
         },
         {
           name: "systemProgram";
@@ -223,8 +220,7 @@ export type World = {
           name: "authority";
         },
         {
-          name: "instructionSysvarAccount";
-          address: "Sysvar1nstructions1111111111111111111111111";
+          name: "cpiAuth";
         },
         {
           name: "systemProgram";
