@@ -1,6 +1,5 @@
 #![allow(clippy::manual_unwrap_or_default)]
-use anchor_lang::prelude::*;
-use bolt_component::CpiContextBuilder;
+use anchor_lang::{prelude::*, system_program};
 use error::WorldError;
 use std::collections::BTreeSet;
 
@@ -274,31 +273,25 @@ pub mod world {
         ctx: Context<'_, '_, '_, 'info, Apply<'info>>,
         args: Vec<u8>,
     ) -> Result<()> {
-        let (pairs, results) = apply_impl(
+        apply_impl(
+            &ctx.accounts.buffer,
             &ctx.accounts.authority,
             &ctx.accounts.world,
             &ctx.accounts.bolt_system,
+            &ctx.accounts.cpi_auth,
             ctx.accounts.build(),
             args,
+            &ctx.accounts.system_program,
             ctx.remaining_accounts.to_vec(),
         )?;
-        for ((program, component), result) in pairs.into_iter().zip(results.into_iter()) {
-            bolt_component::cpi::update(
-                build_update_context(
-                    program,
-                    component,
-                    ctx.accounts.authority.clone(),
-                    ctx.accounts.cpi_auth.clone(),
-                    &[World::cpi_auth_seeds().as_slice()],
-                ),
-                result,
-            )?;
-        }
         Ok(())
     }
 
     #[derive(Accounts)]
     pub struct Apply<'info> {
+        /// CHECK: buffer data check
+        #[account(mut)]
+        pub buffer: AccountInfo<'info>,
         /// CHECK: bolt system program check
         #[account()]
         pub bolt_system: UncheckedAccount<'info>,
@@ -310,6 +303,7 @@ pub mod world {
         pub cpi_auth: UncheckedAccount<'info>,
         #[account()]
         pub world: Account<'info, World>,
+        pub system_program: Program<'info, System>,
     }
 
     impl<'info> Apply<'info> {
@@ -328,32 +322,25 @@ pub mod world {
         ctx: Context<'_, '_, '_, 'info, ApplyWithSession<'info>>,
         args: Vec<u8>,
     ) -> Result<()> {
-        let (pairs, results) = apply_impl(
+        apply_impl(
+            &ctx.accounts.buffer,
             &ctx.accounts.authority,
             &ctx.accounts.world,
             &ctx.accounts.bolt_system,
+            &ctx.accounts.cpi_auth,
             ctx.accounts.build(),
             args,
+            &ctx.accounts.system_program,
             ctx.remaining_accounts.to_vec(),
         )?;
-        for ((program, component), result) in pairs.into_iter().zip(results.into_iter()) {
-            bolt_component::cpi::update_with_session(
-                build_update_context_with_session(
-                    program,
-                    component,
-                    ctx.accounts.authority.clone(),
-                    ctx.accounts.cpi_auth.clone(),
-                    ctx.accounts.session_token.clone(),
-                    &[World::cpi_auth_seeds().as_slice()],
-                ),
-                result,
-            )?;
-        }
         Ok(())
     }
 
     #[derive(Accounts)]
     pub struct ApplyWithSession<'info> {
+        /// CHECK: buffer data check
+        #[account(mut)]
+        pub buffer: AccountInfo<'info>,
         /// CHECK: bolt system program check
         #[account()]
         pub bolt_system: UncheckedAccount<'info>,
@@ -368,6 +355,7 @@ pub mod world {
         #[account()]
         /// CHECK: The session token
         pub session_token: UncheckedAccount<'info>,
+        pub system_program: Program<'info, System>,
     }
 
     impl<'info> ApplyWithSession<'info> {
@@ -385,13 +373,16 @@ pub mod world {
 
 #[allow(clippy::type_complexity)]
 fn apply_impl<'info>(
+    buffer: &AccountInfo<'info>,
     authority: &Signer<'info>,
     world: &Account<'info, World>,
     bolt_system: &UncheckedAccount<'info>,
+    cpi_auth: &UncheckedAccount<'info>,
     cpi_context: CpiContext<'_, '_, '_, 'info, bolt_system::cpi::accounts::BoltExecute<'info>>,
     args: Vec<u8>,
+    system_program: &Program<'info, System>,
     mut remaining_accounts: Vec<AccountInfo<'info>>,
-) -> Result<(Vec<(AccountInfo<'info>, AccountInfo<'info>)>, Vec<Vec<u8>>)> {
+) -> Result<()> {
     if !authority.is_signer && authority.key != &ID {
         return Err(WorldError::InvalidAuthority.into());
     }
@@ -422,16 +413,102 @@ fn apply_impl<'info>(
     components_accounts.append(&mut remaining_accounts);
     let remaining_accounts = components_accounts;
 
-    let results = bolt_system::cpi::bolt_execute(
+    let size = 0;
+    let lamports = Rent::get()?.minimum_balance(size);
+    system_program::create_account(
+        CpiContext::new_with_signer(
+            system_program.to_account_info(),
+            system_program::CreateAccount {
+                from: authority.to_account_info(),
+                to: buffer.to_account_info(),
+            },
+            &[World::buffer_seeds().as_slice()],
+        ),
+        lamports,
+        size as u64,
+        &ID,
+    )?;
+
+    for (program, component) in &pairs {
+        buffer.realloc(component.data_len(), false)?;
+        {
+            let mut data = buffer.try_borrow_mut_data()?;
+            data.copy_from_slice(component.try_borrow_data()?.as_ref());
+        }
+
+        bolt_component::cpi::set_owner(
+            CpiContext::new_with_signer(
+                program.to_account_info(),
+                bolt_component::cpi::accounts::SetOwner {
+                    cpi_auth: cpi_auth.to_account_info(),
+                    component: component.to_account_info(),
+                },
+                &[World::cpi_auth_seeds().as_slice()],
+            ),
+            *bolt_system.key,
+        )?;
+
+        bolt_system::cpi::set_data(
+            CpiContext::new_with_signer(
+                bolt_system.to_account_info(),
+                bolt_system::cpi::accounts::SetData {
+                    cpi_auth: cpi_auth.to_account_info(),
+                    buffer: buffer.to_account_info(),
+                    component: component.to_account_info(),
+                },
+                &[World::cpi_auth_seeds().as_slice()],
+            ),
+        )?;
+    }
+
+    msg!("Executing bolt system");
+
+    bolt_system::cpi::bolt_execute(
         cpi_context.with_remaining_accounts(remaining_accounts),
         args,
-    )?
-    .get();
+    )?;
 
-    if results.len() != pairs.len() {
-        return Err(WorldError::InvalidSystemOutput.into());
+    msg!("Executed bolt system");
+
+    for (program, component) in &pairs {
+        buffer.realloc(component.data_len(), false)?;
+        {
+            let mut data = buffer.try_borrow_mut_data()?;
+            data.copy_from_slice(component.try_borrow_data()?.as_ref());
+        }
+        
+        bolt_system::cpi::set_owner(
+            CpiContext::new_with_signer(
+                bolt_system.to_account_info(),
+                bolt_system::cpi::accounts::SetOwner {
+                    cpi_auth: cpi_auth.to_account_info(),
+                    component: component.to_account_info(),
+                },
+                &[World::cpi_auth_seeds().as_slice()],
+            ),
+            program.key(),
+        )?;
+        
+        if *component.owner != program.key() {
+            return Err(WorldError::InvalidComponentOwner.into());
+        }
+
+        bolt_component::cpi::set_data(
+            CpiContext::new_with_signer(
+                program.to_account_info(),
+                bolt_component::cpi::accounts::SetData {
+                    cpi_auth: cpi_auth.to_account_info(),
+                    buffer: buffer.to_account_info(),
+                    component: component.to_account_info(),
+                },
+                &[World::cpi_auth_seeds().as_slice()],
+            ),
+        )?;
     }
-    Ok((pairs, results))
+
+    buffer.realloc(0, false)?;
+
+    Ok(())
 }
 
 #[derive(Accounts)]
@@ -680,6 +757,10 @@ impl World {
         Pubkey::find_program_address(&[World::seed(), &self.id.to_be_bytes()], &crate::ID)
     }
 
+    pub fn buffer_seeds() -> [&'static [u8]; 2] {
+        [b"buffer", &[255]] // 251 is the pre-computed bump for buffer.
+    }
+
     pub fn cpi_auth_seeds() -> [&'static [u8]; 2] {
         [b"cpi_auth", &[251]] // 251 is the pre-computed bump for cpi_auth.
     }
@@ -715,43 +796,43 @@ impl SystemWhitelist {
     }
 }
 
-/// Builds the context for updating a component.
-pub fn build_update_context<'a, 'b, 'c, 'info>(
-    component_program: AccountInfo<'info>,
-    bolt_component: AccountInfo<'info>,
-    authority: Signer<'info>,
-    cpi_auth: UncheckedAccount<'info>,
-    signer_seeds: &'a [&'b [&'c [u8]]],
-) -> CpiContext<'a, 'b, 'c, 'info, bolt_component::cpi::accounts::Update<'info>> {
-    let authority = authority.to_account_info();
-    let cpi_auth = cpi_auth.to_account_info();
-    let cpi_program = component_program;
-    bolt_component::cpi::accounts::Update {
-        bolt_component,
-        authority,
-        cpi_auth,
-    }
-    .build_cpi_context(cpi_program, signer_seeds)
-}
+// /// Builds the context for updating a component.
+// pub fn build_update_context<'a, 'b, 'c, 'info>(
+//     component_program: AccountInfo<'info>,
+//     bolt_component: AccountInfo<'info>,
+//     authority: Signer<'info>,
+//     cpi_auth: UncheckedAccount<'info>,
+//     signer_seeds: &'a [&'b [&'c [u8]]],
+// ) -> CpiContext<'a, 'b, 'c, 'info, bolt_component::cpi::accounts::Update<'info>> {
+//     let authority = authority.to_account_info();
+//     let cpi_auth = cpi_auth.to_account_info();
+//     let cpi_program = component_program;
+//     bolt_component::cpi::accounts::Update {
+//         bolt_component,
+//         authority,
+//         cpi_auth,
+//     }
+//     .build_cpi_context(cpi_program, signer_seeds)
+// }
 
-/// Builds the context for updating a component.
-pub fn build_update_context_with_session<'a, 'b, 'c, 'info>(
-    component_program: AccountInfo<'info>,
-    bolt_component: AccountInfo<'info>,
-    authority: Signer<'info>,
-    cpi_auth: UncheckedAccount<'info>,
-    session_token: UncheckedAccount<'info>,
-    signer_seeds: &'a [&'b [&'c [u8]]],
-) -> CpiContext<'a, 'b, 'c, 'info, bolt_component::cpi::accounts::UpdateWithSession<'info>> {
-    let authority = authority.to_account_info();
-    let cpi_auth = cpi_auth.to_account_info();
-    let cpi_program = component_program;
-    let session_token = session_token.to_account_info();
-    bolt_component::cpi::accounts::UpdateWithSession {
-        bolt_component,
-        authority,
-        cpi_auth,
-        session_token,
-    }
-    .build_cpi_context(cpi_program, signer_seeds)
-}
+// /// Builds the context for updating a component.
+// pub fn build_update_context_with_session<'a, 'b, 'c, 'info>(
+//     component_program: AccountInfo<'info>,
+//     bolt_component: AccountInfo<'info>,
+//     authority: Signer<'info>,
+//     cpi_auth: UncheckedAccount<'info>,
+//     session_token: UncheckedAccount<'info>,
+//     signer_seeds: &'a [&'b [&'c [u8]]],
+// ) -> CpiContext<'a, 'b, 'c, 'info, bolt_component::cpi::accounts::UpdateWithSession<'info>> {
+//     let authority = authority.to_account_info();
+//     let cpi_auth = cpi_auth.to_account_info();
+//     let cpi_program = component_program;
+//     let session_token = session_token.to_account_info();
+//     bolt_component::cpi::accounts::UpdateWithSession {
+//         bolt_component,
+//         authority,
+//         cpi_auth,
+//         session_token,
+//     }
+//     .build_cpi_context(cpi_program, signer_seeds)
+// }
