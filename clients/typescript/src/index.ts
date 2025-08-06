@@ -1,4 +1,4 @@
-import { PublicKey } from "@solana/web3.js";
+import { Keypair, PublicKey } from "@solana/web3.js";
 import BN from "bn.js";
 import { PROGRAM_ID as WORLD_PROGRAM_ID } from "./generated";
 import { World as WORLD_PROGRAM_IDL } from "./generated/types";
@@ -96,6 +96,13 @@ export function FindComponentProgramDataPda({
   return PublicKey.findProgramAddressSync(
     [programId.toBuffer()],
     new PublicKey("BPFLoaderUpgradeab1e11111111111111111111111"),
+  )[0];
+}
+
+export function FindBufferPda() {
+  return PublicKey.findProgramAddressSync(
+    [Buffer.from("buffer")], // TODO: Everyone will share the same buffer. We need to optimize this to derive a different buffer for each user or transaction.
+    WORLD_PROGRAM_ID,
   )[0];
 }
 
