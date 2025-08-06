@@ -117,6 +117,10 @@
       ],
       "accounts": [
         {
+          "name": "buffer",
+          "writable": true
+        },
+        {
           "name": "bolt_system"
         },
         {
@@ -128,6 +132,10 @@
         },
         {
           "name": "world"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
         }
       ],
       "args": [
@@ -151,6 +159,10 @@
       ],
       "accounts": [
         {
+          "name": "buffer",
+          "writable": true
+        },
+        {
           "name": "bolt_system"
         },
         {
@@ -165,6 +177,10 @@
         },
         {
           "name": "session_token"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
         }
       ],
       "args": [
@@ -549,6 +565,11 @@
       "code": 6005,
       "name": "SystemNotApproved",
       "msg": "The system is not approved in this world instance"
+    },
+    {
+      "code": 6006,
+      "name": "InvalidComponentOwner",
+      "msg": "The component owner does not match the program"
     }
   ],
   "types": [

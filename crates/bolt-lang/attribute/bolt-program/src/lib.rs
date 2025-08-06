@@ -34,9 +34,7 @@ pub fn bolt_program(args: TokenStream, input: TokenStream) -> TokenStream {
         extract_type_name(&args).expect("Expected a component type in macro arguments");
     let modified = modify_component_module(ast, &component_type);
     let additional_macro: Attribute = parse_quote! { #[program] };
-    let cpi_checker = generate_cpi_checker();
     TokenStream::from(quote! {
-        #cpi_checker
         #additional_macro
         #modified
     })
@@ -48,7 +46,8 @@ fn modify_component_module(mut module: ItemMod, component_type: &Type) -> ItemMo
     let (destroy_fn, destroy_struct) = generate_destroy(component_type);
     let (update_fn, update_with_session_fn, update_struct, update_with_session_struct) =
         generate_update(component_type);
-
+    let set_owner = bolt_utils::instructions::generate_set_owner();
+    let set_data = bolt_utils::instructions::generate_set_data();
     module.content = module.content.map(|(brace, mut items)| {
         items.extend(
             vec![
@@ -60,6 +59,10 @@ fn modify_component_module(mut module: ItemMod, component_type: &Type) -> ItemMo
                 update_with_session_struct,
                 destroy_fn,
                 destroy_struct,
+                set_owner.function,
+                set_owner.accounts,
+                set_data.function,
+                set_data.accounts,
             ]
             .into_iter()
             .map(|item| syn::parse2(item).unwrap())
@@ -119,18 +122,6 @@ fn create_check_attribute() -> Attribute {
     }
 }
 
-/// Generates the CPI checker function.
-fn generate_cpi_checker() -> TokenStream2 {
-    quote! {
-        fn cpi_checker<'info>(cpi_auth: &AccountInfo<'info>) -> Result<()> {
-            if !cpi_auth.is_signer || cpi_auth.key != &bolt_lang::world::World::cpi_auth_address() {
-                return Err(BoltError::InvalidCaller.into());
-            }
-            Ok(())
-        }
-    }
-}
-
 /// Generates the destroy function and struct.
 fn generate_destroy(component_type: &Type) -> (TokenStream2, TokenStream2) {
     (
@@ -160,7 +151,7 @@ fn generate_destroy(component_type: &Type) -> (TokenStream2, TokenStream2) {
                     return Err(BoltError::InvalidAuthority.into());
                 }
 
-                cpi_checker(&ctx.accounts.cpi_auth.to_account_info())?;
+                bolt_lang::cpi::checker(&ctx.accounts.cpi_auth.to_account_info())?;
 
                 Ok(())
             }
@@ -193,7 +184,7 @@ fn generate_initialize(component_type: &Type) -> (TokenStream2, TokenStream2) {
         quote! {
             #[automatically_derived]
             pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
-                cpi_checker(&ctx.accounts.cpi_auth.to_account_info())?;
+                bolt_lang::cpi::checker(&ctx.accounts.cpi_auth.to_account_info())?;
                 ctx.accounts.data.set_inner(<#component_type>::default());
                 ctx.accounts.data.bolt_metadata.authority = *ctx.accounts.authority.key;
                 Ok(())
@@ -219,6 +210,7 @@ fn generate_initialize(component_type: &Type) -> (TokenStream2, TokenStream2) {
     )
 }
 
+// TODO: Remove this. We are directly writing to the account.
 /// Generates the instructions and related structs to inject in the component.
 fn generate_update(
     component_type: &Type,
@@ -229,7 +221,7 @@ fn generate_update(
             pub fn update(ctx: Context<Update>, data: Vec<u8>) -> Result<()> {
                 require!(ctx.accounts.bolt_component.bolt_metadata.authority == World::id() || (ctx.accounts.bolt_component.bolt_metadata.authority == *ctx.accounts.authority.key && ctx.accounts.authority.is_signer), BoltError::InvalidAuthority);
 
-                cpi_checker(&ctx.accounts.cpi_auth.to_account_info())?;
+                bolt_lang::cpi::checker(&ctx.accounts.cpi_auth.to_account_info())?;
 
                 ctx.accounts.bolt_component.set_inner(<#component_type>::try_from_slice(&data)?);
                 Ok(())
@@ -251,7 +243,7 @@ fn generate_update(
                     require_eq!(ctx.accounts.bolt_component.bolt_metadata.authority, ctx.accounts.session_token.authority, bolt_lang::session_keys::SessionError::InvalidToken);
                 }
 
-                cpi_checker(&ctx.accounts.cpi_auth.to_account_info())?;
+                bolt_lang::cpi::checker(&ctx.accounts.cpi_auth.to_account_info())?;
 
                 ctx.accounts.bolt_component.set_inner(<#component_type>::try_from_slice(&data)?);
                 Ok(())

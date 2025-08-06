@@ -6,12 +6,12 @@
  */
 
 import { PublicKey } from "@solana/web3.js";
-import { type World as WorldProgram } from "./types/world";
 import idl from "./idl/world.json";
 import gpl_session from "./idl/gpl_session.json";
 export * from "./accounts";
 export * from "./errors";
 export * from "./instructions";
+export * from "./types";
 
 /**
  * Program address
@@ -28,7 +28,5 @@ export const PROGRAM_ADDRESS = "WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n";
  * @category generated
  */
 export const PROGRAM_ID = new PublicKey(PROGRAM_ADDRESS);
-
-export default WorldProgram;
 export { idl as worldIdl };
 export { gpl_session as sessionIdl };

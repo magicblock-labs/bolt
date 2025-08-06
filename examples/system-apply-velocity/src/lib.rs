@@ -7,7 +7,7 @@ declare_id!("6LHhFVwif6N9Po3jHtSmMVtPjF6zRfL3xMosSzcrQAS8");
 #[system]
 pub mod system_apply_velocity {
 
-    pub fn execute(ctx: Context<Components>, _args: Vec<u8>) -> Result<Components> {
+    pub fn execute(ctx: Context<Components>, _args: Vec<u8>) -> Result<()> {
         ctx.accounts.velocity.x = 10;
         let mut clock = Clock::get()?;
         if let Ok(clock_account_info) = ctx.sysvar_clock() {
@@ -21,7 +21,7 @@ pub mod system_apply_velocity {
         msg!("Remaining accounts len: {}", ctx.remaining_accounts.len());
         msg!("Remaining accounts: {:?}", ctx.remaining_accounts);
         msg!("Authority: {}", ctx.accounts.authority.key);
-        Ok(ctx.accounts)
+        Ok(())
     }
 
     #[system_input]
