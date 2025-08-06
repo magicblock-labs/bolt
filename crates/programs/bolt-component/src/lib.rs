@@ -14,39 +14,12 @@ pub mod bolt_component {
         Ok(())
     }
 
-    pub fn update(_ctx: Context<Update>, _data: Vec<u8>) -> Result<()> {
+    pub fn set_owner(_ctx: Context<SetOwner>, _owner: Pubkey) -> Result<()> {
         Ok(())
     }
 
-    pub fn update_with_session(_ctx: Context<UpdateWithSession>, _data: Vec<u8>) -> Result<()> {
+    pub fn set_data(_ctx: Context<SetData>) -> Result<()> {
         Ok(())
-    }
-
-    #[derive(Accounts)]
-    pub struct Update<'info> {
-        #[account()]
-        pub cpi_auth: Signer<'info>,
-        #[account(mut)]
-        /// CHECK: The component to update
-        pub bolt_component: UncheckedAccount<'info>,
-        #[account()]
-        /// CHECK: The authority of the component
-        pub authority: Signer<'info>,
-    }
-
-    #[derive(Accounts)]
-    pub struct UpdateWithSession<'info> {
-        #[account()]
-        pub cpi_auth: Signer<'info>,
-        #[account(mut)]
-        /// CHECK: The component to update
-        pub bolt_component: UncheckedAccount<'info>,
-        #[account()]
-        /// CHECK: The authority of the component
-        pub authority: Signer<'info>,
-        #[account()]
-        /// CHECK: The session token
-        pub session_token: UncheckedAccount<'info>,
     }
 }
 
@@ -89,6 +62,27 @@ pub struct Destroy<'info> {
     pub system_program: Program<'info, System>,
 }
 
+#[derive(Accounts)]
+pub struct SetOwner<'info> {
+    #[account()]
+    pub cpi_auth: Signer<'info>,
+    #[account(mut)]
+    /// CHECK: The component to set the owner on
+    pub component: UncheckedAccount<'info>,
+}
+
+#[derive(Accounts, Clone)]
+pub struct SetData<'info> {
+    #[account()]
+    pub cpi_auth: Signer<'info>,
+    /// CHECK: buffer data check
+    #[account()]
+    pub buffer: UncheckedAccount<'info>,
+    /// CHECK: component data check
+    #[account(mut)]
+    pub component: UncheckedAccount<'info>,
+}
+
 #[derive(InitSpace, AnchorSerialize, AnchorDeserialize, Default, Copy, Clone)]
 pub struct BoltMetadata {
     pub authority: Pubkey,
@@ -105,28 +99,28 @@ pub trait CpiContextBuilder<'a, 'b, 'c, 'info>:
     ) -> CpiContext<'a, 'b, 'c, 'info, Self>;
 }
 
-#[cfg(feature = "cpi")]
-impl<'a, 'b, 'c, 'info> CpiContextBuilder<'a, 'b, 'c, 'info> for cpi::accounts::Update<'info> {
-    fn build_cpi_context(
-        self,
-        program: AccountInfo<'info>,
-        signer_seeds: &'a [&'b [&'c [u8]]],
-    ) -> CpiContext<'a, 'b, 'c, 'info, Self> {
-        let cpi_program = program.to_account_info();
-        CpiContext::new_with_signer(cpi_program, self, signer_seeds)
-    }
-}
+// #[cfg(feature = "cpi")]
+// impl<'a, 'b, 'c, 'info> CpiContextBuilder<'a, 'b, 'c, 'info> for cpi::accounts::Update<'info> {
+//     fn build_cpi_context(
+//         self,
+//         program: AccountInfo<'info>,
+//         signer_seeds: &'a [&'b [&'c [u8]]],
+//     ) -> CpiContext<'a, 'b, 'c, 'info, Self> {
+//         let cpi_program = program.to_account_info();
+//         CpiContext::new_with_signer(cpi_program, self, signer_seeds)
+//     }
+// }
 
-#[cfg(feature = "cpi")]
-impl<'a, 'b, 'c, 'info> CpiContextBuilder<'a, 'b, 'c, 'info>
-    for cpi::accounts::UpdateWithSession<'info>
-{
-    fn build_cpi_context(
-        self,
-        program: AccountInfo<'info>,
-        signer_seeds: &'a [&'b [&'c [u8]]],
-    ) -> CpiContext<'a, 'b, 'c, 'info, Self> {
-        let cpi_program = program.to_account_info();
-        CpiContext::new_with_signer(cpi_program, self, signer_seeds)
-    }
-}
+// #[cfg(feature = "cpi")]
+// impl<'a, 'b, 'c, 'info> CpiContextBuilder<'a, 'b, 'c, 'info>
+//     for cpi::accounts::UpdateWithSession<'info>
+// {
+//     fn build_cpi_context(
+//         self,
+//         program: AccountInfo<'info>,
+//         signer_seeds: &'a [&'b [&'c [u8]]],
+//     ) -> CpiContext<'a, 'b, 'c, 'info, Self> {
+//         let cpi_program = program.to_account_info();
+//         CpiContext::new_with_signer(cpi_program, self, signer_seeds)
+//     }
+// }

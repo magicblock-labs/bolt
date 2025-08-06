@@ -7,7 +7,13 @@ pub use anchor_lang::{
     AccountDeserialize, AccountSerialize, AnchorDeserialize, AnchorSerialize, Bumps, Result,
 };
 
+pub mod instructions;
+pub use instructions::*;
+
+pub mod cpi;
+pub mod account;
 pub use session_keys;
+pub use account::BoltAccount;
 
 pub use bolt_attribute_bolt_arguments::arguments;
 pub use bolt_attribute_bolt_component::component;

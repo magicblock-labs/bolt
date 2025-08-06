@@ -17,6 +17,7 @@ import {
   WORLD_PROGRAM_ID,
   BN,
   FindComponentProgramDataPda,
+  FindBufferPda,
 } from "../index";
 import web3 from "@solana/web3.js";
 import {
@@ -503,6 +504,7 @@ async function createApplySystemInstruction({
     return program.methods
       .applyWithSession(SerializeArgs(args))
       .accounts({
+        buffer: FindBufferPda(),
         authority: authority ?? PROGRAM_ID,
         boltSystem: systemId,
         sessionToken: session.token,
@@ -515,6 +517,7 @@ async function createApplySystemInstruction({
     return program.methods
       .apply(SerializeArgs(args))
       .accounts({
+        buffer: FindBufferPda(),
         authority: authority ?? PROGRAM_ID,
         boltSystem: systemId,
         world,

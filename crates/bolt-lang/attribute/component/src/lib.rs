@@ -6,7 +6,7 @@ use syn::{
     NestedMeta,
 };
 
-use bolt_utils::add_bolt_metadata;
+use bolt_utils::metadata::add_bolt_metadata;
 use heck::ToSnakeCase;
 
 /// This Component attribute is used to automatically generate the seed and size functions

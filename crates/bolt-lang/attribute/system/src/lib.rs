@@ -3,7 +3,7 @@ use proc_macro2::Ident;
 use quote::{quote, ToTokens, TokenStreamExt};
 use syn::{
     parse_macro_input, parse_quote, visit_mut::VisitMut, Expr, FnArg, GenericArgument, ItemFn,
-    ItemMod, ItemStruct, PathArguments, ReturnType, Stmt, Type, TypePath,
+    ItemMod, ItemStruct, PathArguments, Stmt, Type,
 };
 
 #[derive(Default)]
@@ -46,6 +46,8 @@ pub fn system(_attr: TokenStream, item: TokenStream) -> TokenStream {
         if let Some((_, ref mut items)) = ast.content {
             items.insert(0, syn::Item::Use(use_super));
             SystemTransform::add_variadic_execute_function(items);
+            SystemTransform::add_set_data_function(items);
+            SystemTransform::add_set_owner_function(items);
         }
 
         let mut transform = SystemTransform;
@@ -123,17 +125,6 @@ impl VisitMut for SystemTransform {
     // Modify the return type of the system function to Result<Vec<u8>,*>
     fn visit_item_fn_mut(&mut self, item_fn: &mut ItemFn) {
         if item_fn.sig.ident == "execute" {
-            // Modify the return type to Result<Vec<u8>> if necessary
-            if let ReturnType::Type(_, type_box) = &item_fn.sig.output {
-                if let Type::Path(type_path) = &**type_box {
-                    if !Self::check_is_result_vec_u8(type_path) {
-                        item_fn.sig.output = parse_quote! { -> Result<Vec<Vec<u8>>> };
-                        // Modify the return statement inside the function body
-                        let block = &mut item_fn.block;
-                        self.visit_stmts_mut(&mut block.stmts);
-                    }
-                }
-            }
             // If second argument is not Vec<u8>, modify it to be so and use parse_args
             Self::modify_args(item_fn);
         }
@@ -188,40 +179,28 @@ impl VisitMut for SystemTransform {
 impl SystemTransform {
     fn add_variadic_execute_function(content: &mut Vec<syn::Item>) {
         content.push(syn::parse2(quote! {
-            pub fn bolt_execute<'info>(ctx: Context<'_, '_, 'info, 'info, VariadicBoltComponents<'info>>, args: Vec<u8>) -> Result<Vec<Vec<u8>>> {
+            pub fn bolt_execute<'info>(ctx: Context<'_, '_, 'info, 'info, VariadicBoltComponents<'info>>, args: Vec<u8>) -> Result<()> {
                 let mut components = Components::try_from(&ctx)?;
                 let bumps = ComponentsBumps {};
                 let context = Context::new(ctx.program_id, &mut components, ctx.remaining_accounts, bumps);
-                execute(context, args)
+                execute(context, args)?;
+                components.exit(&crate::id())?;
+                Ok(())
             }
         }).unwrap());
     }
 
-    // Helper function to check if a type is `Vec<u8>` or `(Vec<u8>, Vec<u8>, ...)`
-    fn check_is_result_vec_u8(ty: &TypePath) -> bool {
-        if let Some(segment) = ty.path.segments.last() {
-            if segment.ident == "Result" {
-                if let PathArguments::AngleBracketed(args) = &segment.arguments {
-                    if let Some(GenericArgument::Type(Type::Tuple(tuple))) = args.args.first() {
-                        return tuple.elems.iter().all(|elem| {
-                            if let Type::Path(type_path) = elem {
-                                if let Some(segment) = type_path.path.segments.first() {
-                                    return segment.ident == "Vec" && Self::is_u8_vec(segment);
-                                }
-                            }
-                            false
-                        });
-                    } else if let Some(GenericArgument::Type(Type::Path(type_path))) =
-                        args.args.first()
-                    {
-                        if let Some(segment) = type_path.path.segments.first() {
-                            return segment.ident == "Vec" && Self::is_u8_vec(segment);
-                        }
-                    }
-                }
-            }
-        }
-        false
+
+    fn add_set_data_function(content: &mut Vec<syn::Item>) {
+        let set_data = bolt_utils::instructions::generate_set_data();
+        content.push(syn::parse2(set_data.function).unwrap());
+        content.push(syn::parse2(set_data.accounts).unwrap());
+    }
+
+    fn add_set_owner_function(content: &mut Vec<syn::Item>) {
+        let set_owner = bolt_utils::instructions::generate_set_owner();
+        content.push(syn::parse2(set_owner.function).unwrap());
+        content.push(syn::parse2(set_owner.accounts).unwrap());
     }
 
     // Helper function to check if a type is Vec<u8>

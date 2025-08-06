@@ -90,6 +90,10 @@ export type World = {
       discriminator: [248, 243, 145, 24, 105, 50, 162, 225];
       accounts: [
         {
+          name: "buffer";
+          writable: true;
+        },
+        {
           name: "boltSystem";
         },
         {
@@ -101,6 +105,10 @@ export type World = {
         },
         {
           name: "world";
+        },
+        {
+          name: "systemProgram";
+          address: "11111111111111111111111111111111";
         },
       ];
       args: [
@@ -114,6 +122,10 @@ export type World = {
       name: "applyWithSession";
       discriminator: [213, 69, 29, 230, 142, 107, 134, 103];
       accounts: [
+        {
+          name: "buffer";
+          writable: true;
+        },
         {
           name: "boltSystem";
         },
@@ -129,6 +141,10 @@ export type World = {
         },
         {
           name: "sessionToken";
+        },
+        {
+          name: "systemProgram";
+          address: "11111111111111111111111111111111";
         },
       ];
       args: [
@@ -402,6 +418,11 @@ export type World = {
       code: 6005;
       name: "systemNotApproved";
       msg: "The system is not approved in this world instance";
+    },
+    {
+      code: 6006;
+      name: "invalidComponentOwner";
+      msg: "The component owner does not match the program";
     },
   ];
   types: [
