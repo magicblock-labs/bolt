@@ -14,4 +14,6 @@ pub enum WorldError {
     AuthorityNotFound,
     #[msg("The system is not approved in this world instance")]
     SystemNotApproved,
+    #[msg("The component owner does not match the program")]
+    InvalidComponentOwner,
 }

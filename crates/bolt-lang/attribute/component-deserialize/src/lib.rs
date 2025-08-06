@@ -1,4 +1,4 @@
-use bolt_utils::add_bolt_metadata;
+use bolt_utils::metadata::add_bolt_metadata;
 use proc_macro::TokenStream;
 use quote::quote;
 use syn::{parse_macro_input, Attribute, DeriveInput};
