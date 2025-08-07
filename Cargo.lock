@@ -924,6 +924,7 @@ dependencies = [
 name = "bolt-types"
 version = "0.2.4"
 dependencies = [
+ "anchor-lang",
  "bolt-lang",
 ]
 

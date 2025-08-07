@@ -43,11 +43,16 @@ impl<'info, T: anchor_lang::ToAccountMetas, const P0: u128, const P1: u128> anch
     }
 }
 
-impl<'info, T: anchor_lang::AccountsExit<'info>, const P0: u128, const P1: u128> anchor_lang::AccountsExit<'info>
+impl<'info, T: anchor_lang::ToAccountInfos<'info> + anchor_lang::ToAccountInfo<'info> + anchor_lang::AccountSerialize + anchor_lang::AccountsExit<'info>, const P0: u128, const P1: u128> anchor_lang::AccountsExit<'info>
     for BoltAccount<T, P0, P1>
 {
-    fn exit(&self, program_id: &Pubkey) -> Result<()> {
-        self.0.exit(program_id)
+    fn exit(&self, _program_id: &Pubkey) -> Result<()> {
+        let info = self.0.to_account_info();
+        let mut data = info.try_borrow_mut_data()?;
+        let dst: &mut [u8] = &mut data;
+        let mut writer = crate::bpf_writer::BpfWriter::new(dst);
+        self.0.try_serialize(&mut writer)?;
+        Ok(())
     }
 }
 

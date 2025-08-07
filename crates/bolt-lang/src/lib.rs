@@ -2,12 +2,14 @@ pub mod prelude;
 
 pub use anchor_lang;
 pub use anchor_lang::error::ErrorCode::AccountDidNotDeserialize as AccountDidNotDeserializeErrorCode;
+pub use anchor_lang::error::ErrorCode::AccountDidNotSerialize as AccountDidNotSerializeErrorCode;
 pub use anchor_lang::prelude::*;
 pub use anchor_lang::{
     AccountDeserialize, AccountSerialize, AnchorDeserialize, AnchorSerialize, Bumps, Result,
 };
 
 pub mod instructions;
+pub mod bpf_writer;
 pub use instructions::*;
 
 pub mod cpi;

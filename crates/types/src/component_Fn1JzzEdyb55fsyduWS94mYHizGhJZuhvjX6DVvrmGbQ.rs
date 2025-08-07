@@ -6,5 +6,3 @@ pub struct ComponentFn1JzzEdyb55fsyduWS94mYHizGhJZuhvjX6DVvrmGbQ {
     pub y: i64,
     pub z: i64,
 }
-
-pub use ComponentFn1JzzEdyb55fsyduWS94mYHizGhJZuhvjX6DVvrmGbQ as Position;

@@ -38,13 +38,15 @@ pub fn component_type(idl: &Idl, component_id: &str) -> Result<String> {
         Some(ty) => ty,
         None => return Err(anyhow::anyhow!("Component type not found in IDL")),
     };
+
+    let component_name = component_account.name.to_upper_camel_case();
+    println!("Component name: {}", component_name);
     let component_code = component_to_rust_code(type_def, component_id);
     let types_code = component_types_to_rust_code(&idl.types, &component_account.name);
     Ok(format!(
         r#"use bolt_lang::*;
 
 #[component_deserialize]
-#[derive(Clone, Copy)]
 {}
 
 {}

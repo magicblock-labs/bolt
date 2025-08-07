@@ -1,6 +1,6 @@
 [package]
 name = "bolt-types"
-version.workspace = true
+version = "0.2.4"
 description = "Autogenerate types for the bolt language"
 edition = "2021"
 
@@ -10,3 +10,4 @@ name = "bolt_types"
 
 [dependencies]
 bolt-lang.workspace = true
+anchor-lang.workspace = true
