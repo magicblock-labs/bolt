@@ -63,7 +63,13 @@ pub fn component_deserialize(_attr: TokenStream, item: TokenStream) -> TokenStre
 
         #[automatically_derived]
         impl bolt_lang::AccountSerialize for #name {
-            fn try_serialize<W>(&self, _writer: &mut W) -> Result<()> {
+            fn try_serialize<W: std::io::Write>(&self, writer: &mut W) -> Result<()> {
+                if writer.write_all(Self::DISCRIMINATOR).is_err() {
+                    return Err(bolt_lang::AccountDidNotSerializeErrorCode.into());
+                }
+                if bolt_lang::AnchorSerialize::serialize(self, writer).is_err() {
+                    return Err(bolt_lang::AccountDidNotSerializeErrorCode.into());
+                }
                 Ok(())
             }
         }

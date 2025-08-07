@@ -1,4 +1,4 @@
-import { Keypair, PublicKey } from "@solana/web3.js";
+import { PublicKey } from "@solana/web3.js";
 import BN from "bn.js";
 import { PROGRAM_ID as WORLD_PROGRAM_ID } from "./generated";
 import { World as WORLD_PROGRAM_IDL } from "./generated/types";
