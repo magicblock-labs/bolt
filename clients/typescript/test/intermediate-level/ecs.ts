@@ -253,14 +253,6 @@ export function ecs(framework: Framework) {
         applySystem.transaction,
       );
 
-      let transactionResponse: any;
-      do {
-        transactionResponse =
-          await framework.provider.connection.getTransaction(signature, {
-            commitment: "confirmed",
-          });
-      } while (transactionResponse?.meta?.logMessages === undefined);
-
       const position =
         await framework.exampleComponentPosition.account.position.fetch(
           framework.componentPositionEntity1Pda,
