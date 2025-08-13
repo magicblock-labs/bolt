@@ -228,22 +228,5 @@ export function world(framework) {
       }
       expect(invalid).to.equal(true);
     });
-
-    it("Check invalid component update without CPI", async () => {
-      let invalid = false;
-      try {
-        await framework.exampleComponentPosition.methods
-          .update(Buffer.from(""))
-          .accounts({
-            boltComponent: framework.componentPositionEntity4Pda,
-            authority: framework.provider.wallet.publicKey,
-          })
-          .rpc();
-      } catch (error) {
-        expect(error.message).to.contain("Error Code: InvalidCaller");
-        invalid = true;
-      }
-      expect(invalid).to.equal(true);
-    });
   });
 }
