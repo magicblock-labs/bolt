@@ -98,29 +98,3 @@ pub trait CpiContextBuilder<'a, 'b, 'c, 'info>:
         signer_seeds: &'a [&'b [&'c [u8]]],
     ) -> CpiContext<'a, 'b, 'c, 'info, Self>;
 }
-
-// #[cfg(feature = "cpi")]
-// impl<'a, 'b, 'c, 'info> CpiContextBuilder<'a, 'b, 'c, 'info> for cpi::accounts::Update<'info> {
-//     fn build_cpi_context(
-//         self,
-//         program: AccountInfo<'info>,
-//         signer_seeds: &'a [&'b [&'c [u8]]],
-//     ) -> CpiContext<'a, 'b, 'c, 'info, Self> {
-//         let cpi_program = program.to_account_info();
-//         CpiContext::new_with_signer(cpi_program, self, signer_seeds)
-//     }
-// }
-
-// #[cfg(feature = "cpi")]
-// impl<'a, 'b, 'c, 'info> CpiContextBuilder<'a, 'b, 'c, 'info>
-//     for cpi::accounts::UpdateWithSession<'info>
-// {
-//     fn build_cpi_context(
-//         self,
-//         program: AccountInfo<'info>,
-//         signer_seeds: &'a [&'b [&'c [u8]]],
-//     ) -> CpiContext<'a, 'b, 'c, 'info, Self> {
-//         let cpi_program = program.to_account_info();
-//         CpiContext::new_with_signer(cpi_program, self, signer_seeds)
-//     }
-// }

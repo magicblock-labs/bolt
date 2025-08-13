@@ -27,7 +27,7 @@ import {
   Transaction,
   type TransactionInstruction,
 } from "@solana/web3.js";
-import type WorldProgram from "../generated";
+import type { World as WorldProgram } from "../generated/types/world";
 import {
   createInitializeRegistryInstruction,
   PROGRAM_ID,
@@ -155,9 +155,7 @@ export async function AddAuthority({
   instruction: TransactionInstruction;
   transaction: Transaction;
 }> {
-  const program = new Program(
-    worldIdl as Idl,
-  ) as unknown as Program<WorldProgram>;
+  const program = new Program(worldIdl as Idl) as unknown as Program;
   const worldInstance = await World.fromAccountAddress(connection, world);
   const worldId = new BN(worldInstance.id);
   const instruction = await program.methods
@@ -197,9 +195,7 @@ export async function RemoveAuthority({
   instruction: TransactionInstruction;
   transaction: Transaction;
 }> {
-  const program = new Program(
-    worldIdl as Idl,
-  ) as unknown as Program<WorldProgram>;
+  const program = new Program(worldIdl as Idl) as unknown as Program;
   const worldInstance = await World.fromAccountAddress(connection, world);
   const worldId = new BN(worldInstance.id);
   const instruction = await program.methods
@@ -236,9 +232,7 @@ export async function ApproveSystem({
   instruction: TransactionInstruction;
   transaction: Transaction;
 }> {
-  const program = new Program(
-    worldIdl as Idl,
-  ) as unknown as Program<WorldProgram>;
+  const program = new Program(worldIdl as Idl) as unknown as Program;
   const instruction = await program.methods
     .approveSystem()
     .accounts({
@@ -273,9 +267,7 @@ export async function RemoveSystem({
   instruction: TransactionInstruction;
   transaction: Transaction;
 }> {
-  const program = new Program(
-    worldIdl as Idl,
-  ) as unknown as Program<WorldProgram>;
+  const program = new Program(worldIdl as Idl) as unknown as Program;
   const instruction = await program.methods
     .removeSystem()
     .accounts({
@@ -359,9 +351,7 @@ export async function DestroyComponent({
   instruction: TransactionInstruction;
   transaction: Transaction;
 }> {
-  const program = new Program(
-    worldIdl as Idl,
-  ) as unknown as Program<WorldProgram>;
+  const program = new Program(worldIdl as Idl) as unknown as Program;
   const componentProgramData = FindComponentProgramDataPda({
     programId: componentId,
   });
@@ -450,9 +440,7 @@ async function createApplySystemInstruction({
   extraAccounts,
   args,
 }: ApplySystemInstruction): Promise<web3.TransactionInstruction> {
-  const program = new Program(
-    worldIdl as Idl,
-  ) as unknown as Program<WorldProgram>;
+  const program = new Program(worldIdl as Idl) as unknown as Program;
   let componentCount = 0;
   entities.forEach(function (entity) {
     componentCount += entity.components.length;

@@ -14,11 +14,6 @@ pub mod system_simple_movement {
         };
         ctx.accounts.position.x += dx;
         ctx.accounts.position.y += dy;
-        msg!("Position: {:?}", ctx.accounts.position.to_account_info().try_borrow_data()?);
-        ctx.accounts.position.exit(&crate::id())?;
-        msg!("Position: {:?}", ctx.accounts.position.to_account_info().try_borrow_data()?);
-        panic!();
-        use std::io::Write;
         Ok(())
     }
 

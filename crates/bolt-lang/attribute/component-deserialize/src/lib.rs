@@ -3,6 +3,9 @@ use proc_macro::TokenStream;
 use quote::quote;
 use syn::{parse_macro_input, Attribute, DeriveInput};
 
+// For computing Anchor discriminator at compile time
+use sha2::{Digest, Sha256};
+
 /// This macro is used to defined a struct as a BOLT component and automatically implements the
 /// `ComponentDeserialize` and `AccountDeserialize` traits for the struct.
 ///
@@ -14,7 +17,7 @@ use syn::{parse_macro_input, Attribute, DeriveInput};
 /// }
 /// ```
 #[proc_macro_attribute]
-pub fn component_deserialize(_attr: TokenStream, item: TokenStream) -> TokenStream {
+pub fn component_deserialize(attr: TokenStream, item: TokenStream) -> TokenStream {
     let mut input = parse_macro_input!(item as DeriveInput);
 
     // Add the AnchorDeserialize and AnchorSerialize derives to the struct
@@ -38,6 +41,38 @@ pub fn component_deserialize(_attr: TokenStream, item: TokenStream) -> TokenStre
             }
         };
     }
+    // Determine which struct name to use for Anchor discriminator calculation.
+    // If the attribute is written as #[component_deserialize(Position)], then use "Position".
+    // Otherwise, fall back to the actual type name (which may be Component<Pubkey> style).
+    let discriminator_type_name: String = if !attr.is_empty() {
+        // Parse the attribute as a path and use its last segment as the name
+        if let Ok(path) = syn::parse::<syn::Path>(attr.clone()) {
+            path.segments
+                .last()
+                .map(|seg| seg.ident.to_string())
+                .unwrap_or_else(|| name.to_string())
+        } else {
+            name.to_string()
+        }
+    } else {
+        name.to_string()
+    };
+
+    // Compute Anchor discriminator: first 8 bytes of sha256(b"account:" + type_name)
+    let mut hasher = Sha256::new();
+    hasher.update(b"account:");
+    hasher.update(discriminator_type_name.as_bytes());
+    let digest = hasher.finalize();
+    let discriminator_bytes: [u8; 8] = {
+        let mut arr = [0u8; 8];
+        arr.copy_from_slice(&digest[..8]);
+        arr
+    };
+    let discriminator_tokens = discriminator_bytes
+        .iter()
+        .map(|b| quote! { #b })
+        .collect::<Vec<_>>();
+
     let expanded = quote! {
         #input
 
@@ -76,7 +111,9 @@ pub fn component_deserialize(_attr: TokenStream, item: TokenStream) -> TokenStre
 
         #[automatically_derived]
         impl anchor_lang::Discriminator for #name {
-            const DISCRIMINATOR: &'static [u8] = &[1, 1, 1, 1, 1, 1, 1, 1];
+            const DISCRIMINATOR: &'static [u8] = &[
+                #(#discriminator_tokens),*
+            ];
         }
 
         #owner_definition

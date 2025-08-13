@@ -282,6 +282,7 @@ pub mod world {
             ctx.accounts.build(),
             args,
             &ctx.accounts.system_program,
+            None,
             ctx.remaining_accounts.to_vec(),
         )?;
         Ok(())
@@ -331,6 +332,7 @@ pub mod world {
             ctx.accounts.build(),
             args,
             &ctx.accounts.system_program,
+            Some(&ctx.accounts.session_token),
             ctx.remaining_accounts.to_vec(),
         )?;
         Ok(())
@@ -352,9 +354,8 @@ pub mod world {
         pub cpi_auth: UncheckedAccount<'info>,
         #[account()]
         pub world: Account<'info, World>,
-        #[account()]
-        /// CHECK: The session token
-        pub session_token: UncheckedAccount<'info>,
+        #[account(constraint = session_token.to_account_info().owner == &session_keys::ID)]
+        pub session_token: Account<'info, session_keys::SessionToken>,
         pub system_program: Program<'info, System>,
     }
 
@@ -381,6 +382,7 @@ fn apply_impl<'info>(
     cpi_context: CpiContext<'_, '_, '_, 'info, bolt_system::cpi::accounts::BoltExecute<'info>>,
     args: Vec<u8>,
     system_program: &Program<'info, System>,
+    session_token: Option<&Account<'info, session_keys::SessionToken>>,
     mut remaining_accounts: Vec<AccountInfo<'info>>,
 ) -> Result<()> {
     if !authority.is_signer && authority.key != &ID {
@@ -405,6 +407,37 @@ fn apply_impl<'info>(
         pairs.push((program, component));
     }
 
+    // Authority check against component metadata (partial deserialize)
+    for (_, component) in &pairs {
+        let data_ref = component.try_borrow_data()?;
+        // Expect at least Anchor discriminator (8) + BoltMetadata (32)
+        if data_ref.len() < 8 + 32 {
+            return Err(WorldError::InvalidAuthority.into());
+        }
+        // BoltMetadata.authority is the last 32 bytes of the serialized component
+        let start = 8; // Skip the discriminator
+        let mut key_bytes = [0u8; 32];
+        key_bytes.copy_from_slice(&data_ref[start..start+32]);
+        let component_authority = Pubkey::new_from_array(key_bytes);
+
+        if let Some(session_token) = session_token {
+            if component_authority == ID {
+                require!(Clock::get()?.unix_timestamp < session_token.valid_until, session_keys::SessionError::InvalidToken);
+            } else {
+                let validity_ctx = session_keys::ValidityChecker {
+                    session_token: session_token.clone(),
+                    session_signer: authority.clone(),
+                    authority: component_authority.clone(),
+                    target_program: ID,
+                };
+                require!(session_token.validate(validity_ctx)?, session_keys::SessionError::InvalidToken);
+                require_eq!(component_authority, session_token.authority, session_keys::SessionError::InvalidToken);
+            }
+        } else {
+            require!(component_authority == ID || (component_authority == *authority.key && authority.is_signer), WorldError::InvalidAuthority);
+        }
+    }
+
     let mut components_accounts = pairs
         .iter()
         .map(|(_, component)| component)
@@ -413,21 +446,25 @@ fn apply_impl<'info>(
     components_accounts.append(&mut remaining_accounts);
     let remaining_accounts = components_accounts;
 
-    let size = 0;
-    let lamports = Rent::get()?.minimum_balance(size);
-    system_program::create_account(
-        CpiContext::new_with_signer(
-            system_program.to_account_info(),
-            system_program::CreateAccount {
-                from: authority.to_account_info(),
-                to: buffer.to_account_info(),
-            },
-            &[World::buffer_seeds().as_slice()],
-        ),
-        lamports,
-        size as u64,
-        &ID,
-    )?;
+    // Create the buffer account only if it does not already exist.
+    // Subsequent applies reuse the same PDA and only reallocate its data.
+    if buffer.lamports() == 0 {
+        let size = 0;
+        let lamports = Rent::get()?.minimum_balance(size);
+        system_program::create_account(
+            CpiContext::new_with_signer(
+                system_program.to_account_info(),
+                system_program::CreateAccount {
+                    from: authority.to_account_info(),
+                    to: buffer.to_account_info(),
+                },
+                &[World::buffer_seeds().as_slice()],
+            ),
+            lamports,
+            size as u64,
+            &ID,
+        )?;
+    }
 
     for (program, component) in &pairs {
         buffer.realloc(component.data_len(), false)?;
@@ -461,14 +498,10 @@ fn apply_impl<'info>(
         )?;
     }
 
-    msg!("Executing bolt system");
-
     bolt_system::cpi::bolt_execute(
         cpi_context.with_remaining_accounts(remaining_accounts),
         args,
     )?;
-
-    msg!("Executed bolt system");
 
     for (program, component) in &pairs {
         buffer.realloc(component.data_len(), false)?;

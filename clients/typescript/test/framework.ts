@@ -12,7 +12,7 @@ import { type Velocity } from "../../../target/types/velocity";
 import { type SystemSimpleMovement } from "../../../target/types/system_simple_movement";
 import { type SystemFly } from "../../../target/types/system_fly";
 import { type SystemApplyVelocity } from "../../../target/types/system_apply_velocity";
-import { Connection, Keypair, PublicKey } from "@solana/web3.js";
+import { Connection, Keypair, PublicKey, Transaction } from "@solana/web3.js";
 
 export class Framework {
   provider: anchor.AnchorProvider;
@@ -56,5 +56,9 @@ export class Framework {
       new Connection("http://localhost:7799", "processed"),
       anchor.Wallet.local(),
     );
+  }
+
+  async sendAndConfirm(transaction: Transaction) {
+    return this.provider.sendAndConfirm(transaction);
   }
 }

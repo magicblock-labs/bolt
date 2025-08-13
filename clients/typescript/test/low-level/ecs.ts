@@ -222,9 +222,6 @@ export function ecs(framework) {
       expect(position.z.toNumber()).to.equal(0);
     });
 
-    // FIXME: Remove this.
-    return;
-
     it("Apply Simple Movement System (Right) on Entity 1", async () => {
       const instruction = await framework.worldProgram.methods
         .apply(SerializeArgs({ direction: Direction.Right }))

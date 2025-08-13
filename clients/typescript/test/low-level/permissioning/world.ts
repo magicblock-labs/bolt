@@ -1,5 +1,10 @@
 import { expect } from "chai";
-import { anchor, CPI_AUTH_ADDRESS, SerializeArgs } from "../../../lib";
+import {
+  anchor,
+  CPI_AUTH_ADDRESS,
+  FindBufferPda,
+  SerializeArgs,
+} from "../../../lib";
 
 export function world(framework) {
   describe("World authority", () => {
@@ -124,6 +129,7 @@ export function world(framework) {
       const instruction = await framework.worldProgram.methods
         .apply(SerializeArgs())
         .accounts({
+          buffer: FindBufferPda(),
           authority: framework.provider.wallet.publicKey,
           boltSystem: framework.systemFly.programId,
           world: framework.worldPda,
@@ -172,6 +178,7 @@ export function world(framework) {
       const instruction = await framework.worldProgram.methods
         .apply(SerializeArgs())
         .accounts({
+          buffer: FindBufferPda(),
           authority: framework.provider.wallet.publicKey,
           boltSystem: framework.systemFly.programId,
           world: framework.worldPda,

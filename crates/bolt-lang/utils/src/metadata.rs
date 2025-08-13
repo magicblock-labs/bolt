@@ -16,7 +16,7 @@ pub fn add_bolt_metadata(input: &mut DeriveInput) {
     };
     if let syn::Data::Struct(ref mut data) = input.data {
         if let syn::Fields::Named(ref mut fields) = data.fields {
-            fields.named.push(authority_field);
+            fields.named.insert(0, authority_field);
         }
     }
 }

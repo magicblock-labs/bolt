@@ -5,6 +5,7 @@ import {
   FindComponentPda,
   SerializeArgs,
   CPI_AUTH_ADDRESS,
+  FindBufferPda,
 } from "../../../lib";
 import { assert, expect } from "chai";
 
@@ -65,6 +66,7 @@ export function component(framework) {
       const instruction = await framework.worldProgram.methods
         .apply(SerializeArgs())
         .accounts({
+          buffer: FindBufferPda(),
           authority: keypair.publicKey,
           boltSystem: framework.systemFly.programId,
           world: framework.worldPda,
@@ -115,6 +117,7 @@ export function component(framework) {
       const instruction = await framework.worldProgram.methods
         .apply(SerializeArgs())
         .accounts({
+          buffer: FindBufferPda(),
           authority: framework.provider.wallet.publicKey,
           boltSystem: framework.systemFly.programId,
           world: framework.worldPda,
