@@ -1,8 +1,8 @@
 import { expect } from "chai";
 import {
   anchor,
-  CPI_AUTH_ADDRESS,
   FindBufferPda,
+  FindCpiAuthPda,
   SerializeArgs,
 } from "../../../lib";
 
@@ -129,11 +129,11 @@ export function world(framework) {
       const instruction = await framework.worldProgram.methods
         .apply(SerializeArgs())
         .accounts({
-          buffer: FindBufferPda(),
+          buffer: FindBufferPda(framework.provider.wallet.publicKey),
           authority: framework.provider.wallet.publicKey,
           boltSystem: framework.systemFly.programId,
           world: framework.worldPda,
-          cpiAuth: CPI_AUTH_ADDRESS,
+          cpiAuth: FindCpiAuthPda(),
         })
         .remainingAccounts([
           {
@@ -178,11 +178,11 @@ export function world(framework) {
       const instruction = await framework.worldProgram.methods
         .apply(SerializeArgs())
         .accounts({
-          buffer: FindBufferPda(),
+          buffer: FindBufferPda(framework.provider.wallet.publicKey),
           authority: framework.provider.wallet.publicKey,
           boltSystem: framework.systemFly.programId,
           world: framework.worldPda,
-          cpiAuth: CPI_AUTH_ADDRESS,
+          cpiAuth: FindCpiAuthPda(),
         })
         .remainingAccounts([
           {
