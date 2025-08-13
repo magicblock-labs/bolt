@@ -106,16 +106,10 @@ export function world(framework) {
           world: framework.worldPda,
         })
         .instruction();
-      let transaction = new anchor.web3.Transaction().add(instruction);
-      let signature = await framework.provider.sendAndConfirm(transaction, [], {
+      const transaction = new anchor.web3.Transaction().add(instruction);
+      await framework.provider.sendAndConfirm(transaction, [], {
         skipPreflight: true,
       });
-
-      let transactionResponse =
-        await framework.provider.connection.getTransaction(signature, {
-          commitment: "confirmed",
-        });
-      console.log(transactionResponse.meta?.logMessages); // Reference CU is 29222
 
       // Get World and check permissionless and systems
       const worldAccount = await framework.worldProgram.account.world.fetch(
