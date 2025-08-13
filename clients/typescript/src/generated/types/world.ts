@@ -98,6 +98,7 @@ export type World = {
         },
         {
           name: "authority";
+          writable: true;
           signer: true;
         },
         {
@@ -131,6 +132,7 @@ export type World = {
         },
         {
           name: "authority";
+          writable: true;
           signer: true;
         },
         {
@@ -384,6 +386,10 @@ export type World = {
       discriminator: [47, 174, 110, 246, 184, 182, 252, 218];
     },
     {
+      name: "sessionToken";
+      discriminator: [233, 4, 115, 14, 46, 21, 1, 15];
+    },
+    {
       name: "world";
       discriminator: [145, 45, 170, 174, 122, 32, 155, 124];
     },
@@ -446,6 +452,30 @@ export type World = {
           {
             name: "worlds";
             type: "u64";
+          },
+        ];
+      };
+    },
+    {
+      name: "sessionToken";
+      type: {
+        kind: "struct";
+        fields: [
+          {
+            name: "authority";
+            type: "pubkey";
+          },
+          {
+            name: "targetProgram";
+            type: "pubkey";
+          },
+          {
+            name: "sessionSigner";
+            type: "pubkey";
+          },
+          {
+            name: "validUntil";
+            type: "i64";
           },
         ];
       };
