@@ -8,6 +8,6 @@ describe("Low level API", () => {
   const framework: Framework = new Framework();
   world(framework);
   ecs(framework);
-  // session(framework);
-  // permissioning(framework);
+  session(framework);
+  permissioning(framework);
 });

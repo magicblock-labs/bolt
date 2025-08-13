@@ -11,7 +11,8 @@ import gpl_session from "./idl/gpl_session.json";
 export * from "./accounts";
 export * from "./errors";
 export * from "./instructions";
-export * from "./types";
+// Re-export the IDL type under a distinct name to avoid name collisions with account types
+export type { World as WorldIdl } from "./types";
 
 /**
  * Program address

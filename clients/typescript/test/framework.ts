@@ -70,7 +70,6 @@ export class Framework {
     );
   }
 
-
   consume(line: string): number {
     let consumed = line.split(" consumed ")[1].split(" of ")[0];
     return parseInt(consumed);
@@ -94,38 +93,4 @@ export class Framework {
     console.log(`Total CPI Consumed: ${total}`);
     console.log(`Number of Instructions: ${numberOfInstructions}`);
     console.log(`World Report: ${worldReport}`);
-  }
 }
-
-// example input
-// [
-//   'Program WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n invoke [1]',
-//   'Program log: Instruction: Apply',
-//   'Program A3kNNSgmkTNA5V1qtnrbtNeqKrYHNxUMCTkqTDaQzE97 invoke [2]',
-//   'Program log: Instruction: BoltExecute',
-//   'Program A3kNNSgmkTNA5V1qtnrbtNeqKrYHNxUMCTkqTDaQzE97 consumed 3679 of 191671 compute units',
-//   'Program return: A3kNNSgmkTNA5V1qtnrbtNeqKrYHNxUMCTkqTDaQzE97 BQAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAei0UnvLCu8bsxLLo92w4UVq1z4LrLIGvtTpkos13GLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB6LRSe8sK7xuzEsuj3bDhRWrXPgussga+1OmSizXcYtAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHotFJ7ywrvG7MSy6PdsOFFatc+C6yyBr7U6ZKLNdxi0AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAei0UnvLCu8bsxLLo92w4UVq1z4LrLIGvtTpkos13GLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB6LRSe8sK7xuzEsuj3bDhRWrXPgussga+1OmSizXcYs=',
-//   'Program A3kNNSgmkTNA5V1qtnrbtNeqKrYHNxUMCTkqTDaQzE97 success',
-//   'Program FJjiJoz799Q6NqYffXbsFFj1pBmwsQZgcoizCfWvM5HX invoke [2]',
-//   'Program log: Instruction: Update',
-//   'Program FJjiJoz799Q6NqYffXbsFFj1pBmwsQZgcoizCfWvM5HX consumed 4732 of 183865 compute units',
-//   'Program FJjiJoz799Q6NqYffXbsFFj1pBmwsQZgcoizCfWvM5HX success',
-//   'Program FJjiJoz799Q6NqYffXbsFFj1pBmwsQZgcoizCfWvM5HX invoke [2]',
-//   'Program log: Instruction: Update',
-//   'Program FJjiJoz799Q6NqYffXbsFFj1pBmwsQZgcoizCfWvM5HX consumed 4732 of 176143 compute units',
-//   'Program FJjiJoz799Q6NqYffXbsFFj1pBmwsQZgcoizCfWvM5HX success',
-//   'Program FJjiJoz799Q6NqYffXbsFFj1pBmwsQZgcoizCfWvM5HX invoke [2]',
-//   'Program log: Instruction: Update',
-//   'Program FJjiJoz799Q6NqYffXbsFFj1pBmwsQZgcoizCfWvM5HX consumed 4732 of 168421 compute units',
-//   'Program FJjiJoz799Q6NqYffXbsFFj1pBmwsQZgcoizCfWvM5HX success',
-//   'Program FJjiJoz799Q6NqYffXbsFFj1pBmwsQZgcoizCfWvM5HX invoke [2]',
-//   'Program log: Instruction: Update',
-//   'Program FJjiJoz799Q6NqYffXbsFFj1pBmwsQZgcoizCfWvM5HX consumed 4732 of 160699 compute units',
-//   'Program FJjiJoz799Q6NqYffXbsFFj1pBmwsQZgcoizCfWvM5HX success',
-//   'Program FJjiJoz799Q6NqYffXbsFFj1pBmwsQZgcoizCfWvM5HX invoke [2]',
-//   'Program log: Instruction: Update',
-//   'Program FJjiJoz799Q6NqYffXbsFFj1pBmwsQZgcoizCfWvM5HX consumed 4732 of 152977 compute units',
-//   'Program FJjiJoz799Q6NqYffXbsFFj1pBmwsQZgcoizCfWvM5HX success',
-//   'Program WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n consumed 52251 of 200000 compute units',
-//   'Program WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n success'
-// ]
