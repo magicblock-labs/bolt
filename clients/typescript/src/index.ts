@@ -99,9 +99,16 @@ export function FindComponentProgramDataPda({
   )[0];
 }
 
-export function FindBufferPda() {
+export function FindBufferPda(owner: PublicKey) {
   return PublicKey.findProgramAddressSync(
-    [Buffer.from("buffer")], // TODO: Everyone will share the same buffer. We need to optimize this to derive a different buffer for each user or transaction.
+    [Buffer.from("buffer"), owner.toBuffer()],
+    WORLD_PROGRAM_ID,
+  )[0];
+}
+
+export function FindCpiAuthPda() {
+  return PublicKey.findProgramAddressSync(
+    [Buffer.from("cpi_auth")],
     WORLD_PROGRAM_ID,
   )[0];
 }

@@ -125,6 +125,7 @@
         },
         {
           "name": "authority",
+          "writable": true,
           "signer": true
         },
         {
@@ -167,6 +168,7 @@
         },
         {
           "name": "authority",
+          "writable": true,
           "signer": true
         },
         {
@@ -522,6 +524,19 @@
       ]
     },
     {
+      "name": "SessionToken",
+      "discriminator": [
+        233,
+        4,
+        115,
+        14,
+        46,
+        21,
+        1,
+        15
+      ]
+    },
+    {
       "name": "World",
       "discriminator": [
         145,
@@ -593,6 +608,30 @@
           {
             "name": "worlds",
             "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "SessionToken",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "target_program",
+            "type": "pubkey"
+          },
+          {
+            "name": "session_signer",
+            "type": "pubkey"
+          },
+          {
+            "name": "valid_until",
+            "type": "i64"
           }
         ]
       }
