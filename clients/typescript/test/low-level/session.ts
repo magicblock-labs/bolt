@@ -8,6 +8,7 @@ import {
   FindSessionTokenPda,
   BN,
   CPI_AUTH_ADDRESS,
+  FindBufferPda,
 } from "../../lib";
 import { Keypair } from "@solana/web3.js";
 
@@ -90,6 +91,7 @@ export function session(framework) {
       const instruction = await framework.worldProgram.methods
         .applyWithSession(SerializeArgs())
         .accounts({
+          buffer: FindBufferPda(),
           authority: sessionSigner.publicKey,
           boltSystem: framework.systemFly.programId,
           world: framework.worldPda,
@@ -179,6 +181,7 @@ export function session(framework) {
       const instruction = await framework.worldProgram.methods
         .applyWithSession(SerializeArgs())
         .accounts({
+          buffer: FindBufferPda(),
           authority: sessionSigner.publicKey,
           boltSystem: framework.systemFly.programId,
           world: framework.worldPda,

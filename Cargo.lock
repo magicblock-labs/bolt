@@ -799,6 +799,7 @@ dependencies = [
  "bolt-utils",
  "proc-macro2",
  "quote",
+ "sha2 0.10.8",
  "syn 1.0.109",
 ]
 
@@ -7088,6 +7089,7 @@ dependencies = [
  "anchor-lang",
  "bolt-component",
  "bolt-system",
+ "session-keys",
  "solana-security-txt",
  "tuple-conv",
 ]

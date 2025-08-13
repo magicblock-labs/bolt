@@ -46,12 +46,14 @@ pub fn component_type(idl: &Idl, component_id: &str) -> Result<String> {
     Ok(format!(
         r#"use bolt_lang::*;
 
-#[component_deserialize]
-{}
+#[component_deserialize({component_name})]
+{component_code}
 
-{}
+{types_code}
 "#,
-        component_code, types_code
+        component_name = component_account.name,
+        component_code = component_code,
+        types_code = types_code
     ))
 }
 
@@ -162,8 +164,9 @@ fn component_type_to_rust_code(component_type: &IdlTypeDef) -> String {
     };
     if let IdlTypeDefTy::Struct { fields } = &component_type.ty {
         code += &format!(
-            "#[component_deserialize]\n#[derive(Clone, Copy)]\npub struct {}{} {{\n",
-            component_type.name, generics
+            "#[component_deserialize({name})]\n#[derive(Clone, Copy)]\npub struct {name}{generics} {{\n",
+            name = component_type.name,
+            generics = generics
         );
         code += &*component_fields_to_rust_code(fields);
         code += "}\n\n";
