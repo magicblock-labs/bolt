@@ -91,5 +91,4 @@ export class Framework {
     console.log(`Total CPI Consumed: ${total}`);
     console.log(`Number of Instructions: ${numberOfInstructions}`);
     console.log(`World Report: ${worldReport}`);
-  }
 }
