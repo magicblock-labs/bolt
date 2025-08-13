@@ -44,8 +44,6 @@ pub fn bolt_program(args: TokenStream, input: TokenStream) -> TokenStream {
 fn modify_component_module(mut module: ItemMod, component_type: &Type) -> ItemMod {
     let (initialize_fn, initialize_struct) = generate_initialize(component_type);
     let (destroy_fn, destroy_struct) = generate_destroy(component_type);
-    let (update_fn, update_with_session_fn, update_struct, update_with_session_struct) =
-        generate_update(component_type);
     let set_owner = bolt_utils::instructions::generate_set_owner();
     let set_data = bolt_utils::instructions::generate_set_data();
     module.content = module.content.map(|(brace, mut items)| {
@@ -53,10 +51,6 @@ fn modify_component_module(mut module: ItemMod, component_type: &Type) -> ItemMo
             vec![
                 initialize_fn,
                 initialize_struct,
-                update_fn,
-                update_struct,
-                update_with_session_fn,
-                update_with_session_struct,
                 destroy_fn,
                 destroy_struct,
                 set_owner.function,
@@ -205,74 +199,6 @@ fn generate_initialize(component_type: &Type) -> (TokenStream2, TokenStream2) {
                 #[account()]
                 pub authority: AccountInfo<'info>,
                 pub system_program: Program<'info, System>,
-            }
-        },
-    )
-}
-
-// TODO: Remove this. We are directly writing to the account.
-/// Generates the instructions and related structs to inject in the component.
-fn generate_update(
-    component_type: &Type,
-) -> (TokenStream2, TokenStream2, TokenStream2, TokenStream2) {
-    (
-        quote! {
-            #[automatically_derived]
-            pub fn update(ctx: Context<Update>, data: Vec<u8>) -> Result<()> {
-                require!(ctx.accounts.bolt_component.bolt_metadata.authority == World::id() || (ctx.accounts.bolt_component.bolt_metadata.authority == *ctx.accounts.authority.key && ctx.accounts.authority.is_signer), BoltError::InvalidAuthority);
-
-                bolt_lang::cpi::checker(&ctx.accounts.cpi_auth.to_account_info())?;
-
-                ctx.accounts.bolt_component.set_inner(<#component_type>::try_from_slice(&data)?);
-                Ok(())
-            }
-        },
-        quote! {
-            #[automatically_derived]
-            pub fn update_with_session(ctx: Context<UpdateWithSession>, data: Vec<u8>) -> Result<()> {
-                if ctx.accounts.bolt_component.bolt_metadata.authority == World::id() {
-                    require!(Clock::get()?.unix_timestamp < ctx.accounts.session_token.valid_until, bolt_lang::session_keys::SessionError::InvalidToken);
-                } else {
-                    let validity_ctx = bolt_lang::session_keys::ValidityChecker {
-                        session_token: ctx.accounts.session_token.clone(),
-                        session_signer: ctx.accounts.authority.clone(),
-                        authority: ctx.accounts.bolt_component.bolt_metadata.authority.clone(),
-                        target_program: World::id(),
-                    };
-                    require!(ctx.accounts.session_token.validate(validity_ctx)?, bolt_lang::session_keys::SessionError::InvalidToken);
-                    require_eq!(ctx.accounts.bolt_component.bolt_metadata.authority, ctx.accounts.session_token.authority, bolt_lang::session_keys::SessionError::InvalidToken);
-                }
-
-                bolt_lang::cpi::checker(&ctx.accounts.cpi_auth.to_account_info())?;
-
-                ctx.accounts.bolt_component.set_inner(<#component_type>::try_from_slice(&data)?);
-                Ok(())
-            }
-        },
-        quote! {
-            #[automatically_derived]
-            #[derive(Accounts)]
-            pub struct Update<'info> {
-                #[account()]
-                pub cpi_auth: Signer<'info>,
-                #[account(mut)]
-                pub bolt_component: Account<'info, #component_type>,
-                #[account()]
-                pub authority: Signer<'info>,
-            }
-        },
-        quote! {
-            #[automatically_derived]
-            #[derive(Accounts)]
-            pub struct UpdateWithSession<'info> {
-                #[account()]
-                pub cpi_auth: Signer<'info>,
-                #[account(mut)]
-                pub bolt_component: Account<'info, #component_type>,
-                #[account()]
-                pub authority: Signer<'info>,
-                #[account(constraint = session_token.to_account_info().owner == &bolt_lang::session_keys::ID)]
-                pub session_token: Account<'info, bolt_lang::session_keys::SessionToken>,
             }
         },
     )

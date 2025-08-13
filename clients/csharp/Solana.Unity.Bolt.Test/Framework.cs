@@ -96,7 +96,7 @@ namespace Solana.Unity.Bolt.Test
                 .AddInstruction(instruction)
                 .Build(signers);
 
-            var signature = await client.SendTransactionAsync(transaction, true, Commitment.Processed);
+            var signature = await client.SendTransactionAsync(transaction, false, Commitment.Processed);
             var confirmed = await client.ConfirmTransaction(signature.Result, Commitment.Processed);
             if (signature.WasSuccessful && confirmed)
             {
@@ -107,6 +107,7 @@ namespace Solana.Unity.Bolt.Test
             if (signature.ErrorData != null) {
                 errorMessage += "\n" + string.Join("\n", signature.ErrorData.Logs);
             }
+            Console.WriteLine(errorMessage);
             throw new Exception(errorMessage);
         }
 
