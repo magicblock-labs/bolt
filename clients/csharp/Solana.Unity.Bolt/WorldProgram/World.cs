@@ -15,6 +15,8 @@ namespace World
     {
         public partial class WorldProgram
         {
+            public static readonly PublicKey CPI_AUTH_ADDRESS = new("B2f2y3QTBv346wE6nWKor72AUhUvFF6mPk7TWCF2QVhi");
+
             public static Solana.Unity.Rpc.Models.TransactionInstruction AddEntity(AddEntityAccounts accounts, PublicKey programId = null)
             {
                 programId ??= new(ID);
@@ -25,6 +27,14 @@ namespace World
             {
                 programId ??= new(ID);
                 return AddEntity(accounts, System.Text.Encoding.UTF8.GetBytes(extraSeed), programId);
+            }
+
+            public static PublicKey FindBufferPda() {
+                PublicKey.TryFindProgramAddress(new[]
+                {
+                    Encoding.UTF8.GetBytes("buffer"),
+                }, new PublicKey(ID), out var pda, out _);
+                return pda;
             }
 
             public static PublicKey FindSessionTokenPda(PublicKey sessionSigner, PublicKey authority)
@@ -223,6 +233,8 @@ namespace World
                 Solana.Unity.Rpc.Models.TransactionInstruction instruction;
                 if (sessionToken != null) {
                     var apply = new ApplyWithSessionAccounts() {
+                        CpiAuth = CPI_AUTH_ADDRESS,
+                        Buffer = FindBufferPda(),
                         BoltSystem = system,
                         Authority = authority,
                         World = world,
@@ -231,6 +243,8 @@ namespace World
                     instruction = ApplyWithSession(apply, args, programId);
                 } else {
                     var apply = new ApplyAccounts() {
+                        CpiAuth = CPI_AUTH_ADDRESS,
+                        Buffer = FindBufferPda(),
                         BoltSystem = system,
                         Authority = authority,
                         World = world,

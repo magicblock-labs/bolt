@@ -30,6 +30,7 @@ namespace Bolt {
 
         public static async Task<InitializeComponentInstruction> InitializeComponent(PublicKey payer, PublicKey entity, PublicKey componentId, PublicKey componentPda, PublicKey authority = null) {
             var initializeComponent = new InitializeComponentAccounts() {
+                CpiAuth = WorldProgram.CPI_AUTH_ADDRESS,
                 Payer = payer,
                 Entity = entity,
                 Data = componentPda,
