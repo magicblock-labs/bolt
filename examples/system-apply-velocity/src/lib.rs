@@ -16,11 +16,6 @@ pub mod system_apply_velocity {
         }
         ctx.accounts.velocity.last_applied = clock.unix_timestamp;
         ctx.accounts.position.x += 10 * (ctx.accounts.velocity.x + 2) + 3;
-        msg!("last applied: {}", ctx.accounts.velocity.last_applied);
-        msg!("Position: {}", ctx.accounts.position.x);
-        msg!("Remaining accounts len: {}", ctx.remaining_accounts.len());
-        msg!("Remaining accounts: {:?}", ctx.remaining_accounts);
-        msg!("Authority: {}", ctx.accounts.authority.key);
         Ok(ctx.accounts)
     }
 
