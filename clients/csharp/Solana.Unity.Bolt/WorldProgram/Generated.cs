@@ -72,6 +72,42 @@ namespace World
             }
         }
 
+        public partial class SessionToken
+        {
+            public static ulong ACCOUNT_DISCRIMINATOR => 1081168673100727529UL;
+            public static ReadOnlySpan<byte> ACCOUNT_DISCRIMINATOR_BYTES => new byte[]{233, 4, 115, 14, 46, 21, 1, 15};
+            public static string ACCOUNT_DISCRIMINATOR_B58 => "fyZWTdUu1pS";
+            public PublicKey Authority { get; set; }
+
+            public PublicKey TargetProgram { get; set; }
+
+            public PublicKey SessionSigner { get; set; }
+
+            public long ValidUntil { get; set; }
+
+            public static SessionToken Deserialize(ReadOnlySpan<byte> _data)
+            {
+                int offset = 0;
+                ulong accountHashValue = _data.GetU64(offset);
+                offset += 8;
+                if (accountHashValue != ACCOUNT_DISCRIMINATOR)
+                {
+                    return null;
+                }
+
+                SessionToken result = new SessionToken();
+                result.Authority = _data.GetPubKey(offset);
+                offset += 32;
+                result.TargetProgram = _data.GetPubKey(offset);
+                offset += 32;
+                result.SessionSigner = _data.GetPubKey(offset);
+                offset += 32;
+                result.ValidUntil = _data.GetS64(offset);
+                offset += 8;
+                return result;
+            }
+        }
+
         public partial class World
         {
             public static ulong ACCOUNT_DISCRIMINATOR => 8978805993381703057UL;
@@ -131,7 +167,8 @@ namespace World
             WorldAccountMismatch = 6002U,
             TooManyAuthorities = 6003U,
             AuthorityNotFound = 6004U,
-            SystemNotApproved = 6005U
+            SystemNotApproved = 6005U,
+            InvalidComponentOwner = 6006U
         }
     }
 
@@ -167,6 +204,17 @@ namespace World
             return new Solana.Unity.Programs.Models.ProgramAccountsResultWrapper<List<Registry>>(res, resultingAccounts);
         }
 
+        public async Task<Solana.Unity.Programs.Models.ProgramAccountsResultWrapper<List<SessionToken>>> GetSessionTokensAsync(string programAddress = WorldProgram.ID, Commitment commitment = Commitment.Confirmed)
+        {
+            var list = new List<Solana.Unity.Rpc.Models.MemCmp>{new Solana.Unity.Rpc.Models.MemCmp{Bytes = SessionToken.ACCOUNT_DISCRIMINATOR_B58, Offset = 0}};
+            var res = await RpcClient.GetProgramAccountsAsync(programAddress, commitment, memCmpList: list);
+            if (!res.WasSuccessful || !(res.Result?.Count > 0))
+                return new Solana.Unity.Programs.Models.ProgramAccountsResultWrapper<List<SessionToken>>(res);
+            List<SessionToken> resultingAccounts = new List<SessionToken>(res.Result.Count);
+            resultingAccounts.AddRange(res.Result.Select(result => SessionToken.Deserialize(Convert.FromBase64String(result.Account.Data[0]))));
+            return new Solana.Unity.Programs.Models.ProgramAccountsResultWrapper<List<SessionToken>>(res, resultingAccounts);
+        }
+
         public async Task<Solana.Unity.Programs.Models.ProgramAccountsResultWrapper<List<World.Accounts.World>>> GetWorldsAsync(string programAddress = WorldProgram.ID, Commitment commitment = Commitment.Confirmed)
         {
             var list = new List<Solana.Unity.Rpc.Models.MemCmp>{new Solana.Unity.Rpc.Models.MemCmp{Bytes = World.Accounts.World.ACCOUNT_DISCRIMINATOR_B58, Offset = 0}};
@@ -194,6 +242,15 @@ namespace World
                 return new Solana.Unity.Programs.Models.AccountResultWrapper<Registry>(res);
             var resultingAccount = Registry.Deserialize(Convert.FromBase64String(res.Result.Value.Data[0]));
             return new Solana.Unity.Programs.Models.AccountResultWrapper<Registry>(res, resultingAccount);
+        }
+
+        public async Task<Solana.Unity.Programs.Models.AccountResultWrapper<SessionToken>> GetSessionTokenAsync(string accountAddress, Commitment commitment = Commitment.Finalized)
+        {
+            var res = await RpcClient.GetAccountInfoAsync(accountAddress, commitment);
+            if (!res.WasSuccessful)
+                return new Solana.Unity.Programs.Models.AccountResultWrapper<SessionToken>(res);
+            var resultingAccount = SessionToken.Deserialize(Convert.FromBase64String(res.Result.Value.Data[0]));
+            return new Solana.Unity.Programs.Models.AccountResultWrapper<SessionToken>(res, resultingAccount);
         }
 
         public async Task<Solana.Unity.Programs.Models.AccountResultWrapper<World.Accounts.World>> GetWorldAsync(string accountAddress, Commitment commitment = Commitment.Finalized)
@@ -229,6 +286,18 @@ namespace World
             return res;
         }
 
+        public async Task<SubscriptionState> SubscribeSessionTokenAsync(string accountAddress, Action<SubscriptionState, Solana.Unity.Rpc.Messages.ResponseValue<Solana.Unity.Rpc.Models.AccountInfo>, SessionToken> callback, Commitment commitment = Commitment.Finalized)
+        {
+            SubscriptionState res = await StreamingRpcClient.SubscribeAccountInfoAsync(accountAddress, (s, e) =>
+            {
+                SessionToken parsingResult = null;
+                if (e.Value?.Data?.Count > 0)
+                    parsingResult = SessionToken.Deserialize(Convert.FromBase64String(e.Value.Data[0]));
+                callback(s, e, parsingResult);
+            }, commitment);
+            return res;
+        }
+
         public async Task<SubscriptionState> SubscribeWorldAsync(string accountAddress, Action<SubscriptionState, Solana.Unity.Rpc.Messages.ResponseValue<Solana.Unity.Rpc.Models.AccountInfo>, World.Accounts.World> callback, Commitment commitment = Commitment.Finalized)
         {
             SubscriptionState res = await StreamingRpcClient.SubscribeAccountInfoAsync(accountAddress, (s, e) =>
@@ -243,7 +312,7 @@ namespace World
 
         protected override Dictionary<uint, ProgramError<WorldErrorKind>> BuildErrorsDictionary()
         {
-            return new Dictionary<uint, ProgramError<WorldErrorKind>>{{6000U, new ProgramError<WorldErrorKind>(WorldErrorKind.InvalidAuthority, "Invalid authority for instruction")}, {6001U, new ProgramError<WorldErrorKind>(WorldErrorKind.InvalidSystemOutput, "Invalid system output")}, {6002U, new ProgramError<WorldErrorKind>(WorldErrorKind.WorldAccountMismatch, "The provided world account does not match the expected PDA.")}, {6003U, new ProgramError<WorldErrorKind>(WorldErrorKind.TooManyAuthorities, "Exceed the maximum number of authorities.")}, {6004U, new ProgramError<WorldErrorKind>(WorldErrorKind.AuthorityNotFound, "The provided authority not found")}, {6005U, new ProgramError<WorldErrorKind>(WorldErrorKind.SystemNotApproved, "The system is not approved in this world instance")}, };
+            return new Dictionary<uint, ProgramError<WorldErrorKind>>{{6000U, new ProgramError<WorldErrorKind>(WorldErrorKind.InvalidAuthority, "Invalid authority for instruction")}, {6001U, new ProgramError<WorldErrorKind>(WorldErrorKind.InvalidSystemOutput, "Invalid system output")}, {6002U, new ProgramError<WorldErrorKind>(WorldErrorKind.WorldAccountMismatch, "The provided world account does not match the expected PDA.")}, {6003U, new ProgramError<WorldErrorKind>(WorldErrorKind.TooManyAuthorities, "Exceed the maximum number of authorities.")}, {6004U, new ProgramError<WorldErrorKind>(WorldErrorKind.AuthorityNotFound, "The provided authority not found")}, {6005U, new ProgramError<WorldErrorKind>(WorldErrorKind.SystemNotApproved, "The system is not approved in this world instance")}, {6006U, new ProgramError<WorldErrorKind>(WorldErrorKind.InvalidComponentOwner, "The component owner does not match the program")}, };
         }
     }
 
@@ -273,24 +342,34 @@ namespace World
 
         public class ApplyAccounts
         {
+            public PublicKey Buffer { get; set; }
+
             public PublicKey BoltSystem { get; set; }
 
             public PublicKey Authority { get; set; }
 
-            public PublicKey CpiAuth { get; set; } = new PublicKey("B2f2y3QTBv346wE6nWKor72AUhUvFF6mPk7TWCF2QVhi");
+            public PublicKey CpiAuth { get; set; }
+
             public PublicKey World { get; set; }
+
+            public PublicKey SystemProgram { get; set; } = new PublicKey("11111111111111111111111111111111");
         }
 
         public class ApplyWithSessionAccounts
         {
+            public PublicKey Buffer { get; set; }
+
             public PublicKey BoltSystem { get; set; }
 
             public PublicKey Authority { get; set; }
 
-            public PublicKey CpiAuth { get; set; } = new PublicKey("B2f2y3QTBv346wE6nWKor72AUhUvFF6mPk7TWCF2QVhi");
+            public PublicKey CpiAuth { get; set; }
+
             public PublicKey World { get; set; }
 
             public PublicKey SessionToken { get; set; }
+
+            public PublicKey SystemProgram { get; set; } = new PublicKey("11111111111111111111111111111111");
         }
 
         public class ApproveSystemAccounts
@@ -318,7 +397,8 @@ namespace World
 
             public PublicKey Component { get; set; }
 
-            public PublicKey CpiAuth { get; set; } = new PublicKey("B2f2y3QTBv346wE6nWKor72AUhUvFF6mPk7TWCF2QVhi");
+            public PublicKey CpiAuth { get; set; }
+
             public PublicKey SystemProgram { get; set; } = new PublicKey("11111111111111111111111111111111");
         }
 
@@ -334,7 +414,8 @@ namespace World
 
             public PublicKey Authority { get; set; }
 
-            public PublicKey CpiAuth { get; set; } = new PublicKey("B2f2y3QTBv346wE6nWKor72AUhUvFF6mPk7TWCF2QVhi");
+            public PublicKey CpiAuth { get; set; }
+
             public PublicKey SystemProgram { get; set; } = new PublicKey("11111111111111111111111111111111");
         }
 
@@ -432,7 +513,7 @@ namespace World
             {
                 programId ??= new(ID);
                 List<Solana.Unity.Rpc.Models.AccountMeta> keys = new()
-                {Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.BoltSystem, false), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.Authority, true), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.CpiAuth, false), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.World, false)};
+                {Solana.Unity.Rpc.Models.AccountMeta.Writable(accounts.Buffer, false), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.BoltSystem, false), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.Authority, true), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.CpiAuth, false), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.World, false), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.SystemProgram, false)};
                 byte[] _data = new byte[1200];
                 int offset = 0;
                 _data.WriteU64(16258613031726085112UL, offset);
@@ -450,7 +531,7 @@ namespace World
             {
                 programId ??= new(ID);
                 List<Solana.Unity.Rpc.Models.AccountMeta> keys = new()
-                {Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.BoltSystem, false), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.Authority, true), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.CpiAuth, false), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.World, false), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.SessionToken, false)};
+                {Solana.Unity.Rpc.Models.AccountMeta.Writable(accounts.Buffer, false), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.BoltSystem, false), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.Authority, true), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.CpiAuth, false), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.World, false), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.SessionToken, false), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.SystemProgram, false)};
                 byte[] _data = new byte[1200];
                 int offset = 0;
                 _data.WriteU64(7459768094276011477UL, offset);
