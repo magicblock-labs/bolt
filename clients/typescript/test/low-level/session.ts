@@ -7,8 +7,8 @@ import {
   SessionProgram,
   FindSessionTokenPda,
   BN,
-  CPI_AUTH_ADDRESS,
   FindBufferPda,
+  FindCpiAuthPda,
 } from "../../lib";
 import { Keypair } from "@solana/web3.js";
 
@@ -33,7 +33,7 @@ export function session(framework) {
           authority: framework.provider.wallet.publicKey,
           targetProgram: framework.worldProgram.programId,
           sessionToken,
-          cpiAuth: CPI_AUTH_ADDRESS,
+          cpiAuth: FindCpiAuthPda(),
         })
         .instruction();
       const transaction = new anchor.web3.Transaction().add(instruction);
@@ -54,7 +54,7 @@ export function session(framework) {
           payer: sessionSigner.publicKey,
           entity: entity,
           world: framework.worldPda,
-          cpiAuth: CPI_AUTH_ADDRESS,
+          cpiAuth: FindCpiAuthPda(),
         })
         .instruction();
       const transaction = new anchor.web3.Transaction().add(instruction);
@@ -75,7 +75,7 @@ export function session(framework) {
           data: component,
           componentProgram: componentId,
           authority: framework.worldProgram.programId,
-          cpiAuth: CPI_AUTH_ADDRESS,
+          cpiAuth: FindCpiAuthPda(),
         })
         .instruction();
       const transaction = new anchor.web3.Transaction().add(instruction);
@@ -91,12 +91,12 @@ export function session(framework) {
       const instruction = await framework.worldProgram.methods
         .applyWithSession(SerializeArgs())
         .accounts({
-          buffer: FindBufferPda(),
+          buffer: FindBufferPda(sessionSigner.publicKey),
           authority: sessionSigner.publicKey,
           boltSystem: framework.systemFly.programId,
           world: framework.worldPda,
           sessionToken,
-          cpiAuth: CPI_AUTH_ADDRESS,
+          cpiAuth: FindCpiAuthPda(),
         })
         .remainingAccounts([
           {
@@ -144,7 +144,7 @@ export function session(framework) {
           payer: sessionSigner.publicKey,
           world: framework.worldPda,
           entity: entityWithAuthority,
-          cpiAuth: CPI_AUTH_ADDRESS,
+          cpiAuth: FindCpiAuthPda(),
         })
         .instruction();
       const transaction = new anchor.web3.Transaction().add(instruction);
@@ -165,7 +165,7 @@ export function session(framework) {
           data: componentWithAuthority,
           componentProgram: componentId,
           authority: framework.provider.wallet.publicKey,
-          cpiAuth: CPI_AUTH_ADDRESS,
+          cpiAuth: FindCpiAuthPda(),
         })
         .instruction();
       const transaction = new anchor.web3.Transaction().add(instruction);
@@ -181,12 +181,12 @@ export function session(framework) {
       const instruction = await framework.worldProgram.methods
         .applyWithSession(SerializeArgs())
         .accounts({
-          buffer: FindBufferPda(),
+          buffer: FindBufferPda(sessionSigner.publicKey),
           authority: sessionSigner.publicKey,
           boltSystem: framework.systemFly.programId,
           world: framework.worldPda,
           sessionToken,
-          cpiAuth: CPI_AUTH_ADDRESS,
+          cpiAuth: FindCpiAuthPda(),
         })
         .remainingAccounts([
           {
