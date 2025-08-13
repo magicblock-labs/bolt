@@ -30,6 +30,7 @@ namespace Bolt {
         public static async Task<DestroyComponentInstruction> DestroyComponent(PublicKey authority, PublicKey receiver, PublicKey entity, PublicKey componentProgram, PublicKey componentPda) {
             var componentProgramData = WorldProgram.FindComponentProgramDataPda(componentProgram);
             var destroyComponent = new DestroyComponentAccounts() {
+                CpiAuth = WorldProgram.CPI_AUTH_ADDRESS,
                 Authority = authority,
                 Receiver = receiver,
                 Entity = entity,
