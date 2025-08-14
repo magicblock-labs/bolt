@@ -402,7 +402,7 @@ fn apply_impl<'info>(
         return Err(WorldError::SystemNotApproved.into());
     }
 
-    let mut pairs = Vec::new();
+    let mut pairs = Vec::with_capacity(remaining_accounts.len() / 2);
     while remaining_accounts.len() >= 2 {
         let program = remaining_accounts.remove(0);
         if program.key() == ID {
@@ -425,9 +425,10 @@ fn apply_impl<'info>(
         key_bytes.copy_from_slice(&data_ref[start..start+32]);
         let component_authority = Pubkey::new_from_array(key_bytes);
 
+        let unix_timestamp = Clock::get()?.unix_timestamp;
         if let Some(session_token) = session_token {
             if component_authority == ID {
-                require!(Clock::get()?.unix_timestamp < session_token.valid_until, session_keys::SessionError::InvalidToken);
+                require!(unix_timestamp < session_token.valid_until, session_keys::SessionError::InvalidToken);
             } else {
                 let validity_ctx = session_keys::ValidityChecker {
                     session_token: session_token.clone(),
