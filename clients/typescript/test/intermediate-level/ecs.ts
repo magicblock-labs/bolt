@@ -249,7 +249,15 @@ export function ecs(framework: Framework) {
           },
         ],
       });
-      await framework.provider.sendAndConfirm(applySystem.transaction);
+      let signature = await framework.provider.sendAndConfirm(
+        applySystem.transaction,
+      );
+
+      let transactionResponse =
+        await framework.provider.connection.getTransaction(signature, {
+          commitment: "confirmed",
+        });
+      console.log(transactionResponse?.meta?.logMessages); // Reference CU is 27771
 
       const position =
         await framework.exampleComponentPosition.account.position.fetch(

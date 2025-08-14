@@ -7,7 +7,7 @@
 
 import * as beet from "@metaplex-foundation/beet";
 import * as web3 from "@solana/web3.js";
-import { CPI_AUTH_ADDRESS } from "../../world/transactions";
+import { FindCpiAuthPda } from "../../index";
 
 /**
  * @category Instructions
@@ -98,7 +98,7 @@ export function createApplyInstruction(
       isSigner: false,
     },
     {
-      pubkey: CPI_AUTH_ADDRESS,
+      pubkey: FindCpiAuthPda(),
       isWritable: false,
       isSigner: false,
     },
