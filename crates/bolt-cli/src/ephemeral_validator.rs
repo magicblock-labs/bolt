@@ -39,7 +39,7 @@ impl EphemeralValidator {
             &temp_file,
             include_str!("templates/ephemeral-validator.toml"),
         )
-        .expect("Failed to write ephemeral validator config");
+        .map_err(|e| anyhow::anyhow!("Failed to write ephemeral validator config: {}", e))?;
         tokio::process::Command::new("ephemeral-validator")
             .arg(temp_file)
             .spawn()
