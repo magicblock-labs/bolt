@@ -3,7 +3,8 @@ use anchor_lang::{prelude::*, system_program};
 use error::WorldError;
 use std::collections::BTreeSet;
 
-static CPI_AUTH_ADDRESS: Pubkey = Pubkey::from_str_const("B2f2y3QTBv346wE6nWKor72AUhUvFF6mPk7TWCF2QVhi");
+static CPI_AUTH_ADDRESS: Pubkey =
+    Pubkey::from_str_const("B2f2y3QTBv346wE6nWKor72AUhUvFF6mPk7TWCF2QVhi");
 
 #[cfg(not(feature = "no-entrypoint"))]
 use solana_security_txt::security_txt;
@@ -376,7 +377,7 @@ pub mod world {
     }
 }
 
-#[allow(clippy::type_complexity)]
+#[allow(clippy::type_complexity, clippy::too_many_arguments)]
 fn apply_impl<'info>(
     buffer: &AccountInfo<'info>,
     buffer_bump: u8,
@@ -422,25 +423,39 @@ fn apply_impl<'info>(
         // BoltMetadata.authority is the last 32 bytes of the serialized component
         let start = 8; // Skip the discriminator
         let mut key_bytes = [0u8; 32];
-        key_bytes.copy_from_slice(&data_ref[start..start+32]);
+        key_bytes.copy_from_slice(&data_ref[start..start + 32]);
         let component_authority = Pubkey::new_from_array(key_bytes);
 
         let unix_timestamp = Clock::get()?.unix_timestamp;
         if let Some(session_token) = session_token {
             if component_authority == ID {
-                require!(unix_timestamp < session_token.valid_until, session_keys::SessionError::InvalidToken);
+                require!(
+                    unix_timestamp < session_token.valid_until,
+                    session_keys::SessionError::InvalidToken
+                );
             } else {
                 let validity_ctx = session_keys::ValidityChecker {
                     session_token: session_token.clone(),
                     session_signer: authority.clone(),
-                    authority: component_authority.clone(),
+                    authority: component_authority,
                     target_program: ID,
                 };
-                require!(session_token.validate(validity_ctx)?, session_keys::SessionError::InvalidToken);
-                require_eq!(component_authority, session_token.authority, session_keys::SessionError::InvalidToken);
+                require!(
+                    session_token.validate(validity_ctx)?,
+                    session_keys::SessionError::InvalidToken
+                );
+                require_eq!(
+                    component_authority,
+                    session_token.authority,
+                    session_keys::SessionError::InvalidToken
+                );
             }
         } else {
-            require!(component_authority == ID || (component_authority == *authority.key && authority.is_signer), WorldError::InvalidAuthority);
+            require!(
+                component_authority == ID
+                    || (component_authority == *authority.key && authority.is_signer),
+                WorldError::InvalidAuthority
+            );
         }
     }
 
@@ -491,17 +506,15 @@ fn apply_impl<'info>(
             *bolt_system.key,
         )?;
 
-        bolt_system::cpi::set_data(
-            CpiContext::new_with_signer(
-                bolt_system.to_account_info(),
-                bolt_system::cpi::accounts::SetData {
-                    cpi_auth: cpi_auth.to_account_info(),
-                    buffer: buffer.to_account_info(),
-                    component: component.to_account_info(),
-                },
-                &[World::cpi_auth_seeds().as_slice()],
-            ),
-        )?;
+        bolt_system::cpi::set_data(CpiContext::new_with_signer(
+            bolt_system.to_account_info(),
+            bolt_system::cpi::accounts::SetData {
+                cpi_auth: cpi_auth.to_account_info(),
+                buffer: buffer.to_account_info(),
+                component: component.to_account_info(),
+            },
+            &[World::cpi_auth_seeds().as_slice()],
+        ))?;
     }
 
     bolt_system::cpi::bolt_execute(
@@ -515,7 +528,7 @@ fn apply_impl<'info>(
             let mut data = buffer.try_borrow_mut_data()?;
             data.copy_from_slice(component.try_borrow_data()?.as_ref());
         }
-        
+
         bolt_system::cpi::set_owner(
             CpiContext::new_with_signer(
                 bolt_system.to_account_info(),
@@ -527,22 +540,20 @@ fn apply_impl<'info>(
             ),
             program.key(),
         )?;
-        
+
         if *component.owner != program.key() {
             return Err(WorldError::InvalidComponentOwner.into());
         }
 
-        bolt_component::cpi::set_data(
-            CpiContext::new_with_signer(
-                program.to_account_info(),
-                bolt_component::cpi::accounts::SetData {
-                    cpi_auth: cpi_auth.to_account_info(),
-                    buffer: buffer.to_account_info(),
-                    component: component.to_account_info(),
-                },
-                &[World::cpi_auth_seeds().as_slice()],
-            ),
-        )?;
+        bolt_component::cpi::set_data(CpiContext::new_with_signer(
+            program.to_account_info(),
+            bolt_component::cpi::accounts::SetData {
+                cpi_auth: cpi_auth.to_account_info(),
+                buffer: buffer.to_account_info(),
+                component: component.to_account_info(),
+            },
+            &[World::cpi_auth_seeds().as_slice()],
+        ))?;
     }
 
     buffer.realloc(0, false)?;

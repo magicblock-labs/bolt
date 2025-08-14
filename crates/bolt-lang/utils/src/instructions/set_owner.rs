@@ -1,5 +1,5 @@
-use quote::quote;
 use crate::instructions::InstructionGeneration;
+use quote::quote;
 
 /// Generate the set owner function and struct.
 pub fn generate_set_owner() -> InstructionGeneration {
