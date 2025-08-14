@@ -1,5 +1,5 @@
-use quote::quote;
 use crate::instructions::InstructionGeneration;
+use quote::quote;
 
 pub fn generate_set_data() -> InstructionGeneration {
     InstructionGeneration {
@@ -22,6 +22,6 @@ pub fn generate_set_data() -> InstructionGeneration {
                 #[account(mut)]
                 pub component: UncheckedAccount<'info>,
             }
-        }
+        },
     }
 }
