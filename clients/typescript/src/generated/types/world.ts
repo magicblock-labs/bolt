@@ -92,6 +92,18 @@ export type World = {
         {
           name: "buffer";
           writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: "const";
+                value: [98, 117, 102, 102, 101, 114];
+              },
+              {
+                kind: "account";
+                path: "authority";
+              },
+            ];
+          };
         },
         {
           name: "boltSystem";
@@ -126,6 +138,18 @@ export type World = {
         {
           name: "buffer";
           writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: "const";
+                value: [98, 117, 102, 102, 101, 114];
+              },
+              {
+                kind: "account";
+                path: "authority";
+              },
+            ];
+          };
         },
         {
           name: "boltSystem";
