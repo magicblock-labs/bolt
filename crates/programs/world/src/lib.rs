@@ -3,6 +3,8 @@ use anchor_lang::{prelude::*, system_program};
 use error::WorldError;
 use std::collections::BTreeSet;
 
+static CPI_AUTH_ADDRESS: Pubkey = Pubkey::from_str_const("B2f2y3QTBv346wE6nWKor72AUhUvFF6mPk7TWCF2QVhi");
+
 #[cfg(not(feature = "no-entrypoint"))]
 use solana_security_txt::security_txt;
 
@@ -260,12 +262,12 @@ pub mod world {
         if !ctx.accounts.authority.is_signer && ctx.accounts.authority.key != &ID {
             return Err(WorldError::InvalidAuthority.into());
         }
-        bolt_component::cpi::initialize(ctx.accounts.build(&[World::cpi_auth_seeds().as_array().as_slice()]))?;
+        bolt_component::cpi::initialize(ctx.accounts.build(&[World::cpi_auth_seeds().as_slice()]))?;
         Ok(())
     }
 
     pub fn destroy_component(ctx: Context<DestroyComponent>) -> Result<()> {
-        bolt_component::cpi::destroy(ctx.accounts.build(&[World::cpi_auth_seeds().as_array().as_slice()]))?;
+        bolt_component::cpi::destroy(ctx.accounts.build(&[World::cpi_auth_seeds().as_slice()]))?;
         Ok(())
     }
 
@@ -275,6 +277,7 @@ pub mod world {
     ) -> Result<()> {
         apply_impl(
             &ctx.accounts.buffer,
+            ctx.bumps.buffer,
             &ctx.accounts.authority,
             &ctx.accounts.world,
             &ctx.accounts.bolt_system,
@@ -291,7 +294,7 @@ pub mod world {
     #[derive(Accounts)]
     pub struct Apply<'info> {
         /// CHECK: buffer data check
-        #[account(mut)]
+        #[account(mut, seeds = [b"buffer", authority.key.as_ref()], bump)]
         pub buffer: AccountInfo<'info>,
         /// CHECK: bolt system program check
         #[account()]
@@ -325,6 +328,7 @@ pub mod world {
     ) -> Result<()> {
         apply_impl(
             &ctx.accounts.buffer,
+            ctx.bumps.buffer,
             &ctx.accounts.authority,
             &ctx.accounts.world,
             &ctx.accounts.bolt_system,
@@ -341,7 +345,7 @@ pub mod world {
     #[derive(Accounts)]
     pub struct ApplyWithSession<'info> {
         /// CHECK: buffer data check
-        #[account(mut)]
+        #[account(mut, seeds = [b"buffer", authority.key.as_ref()], bump)]
         pub buffer: AccountInfo<'info>,
         /// CHECK: bolt system program check
         #[account()]
@@ -375,6 +379,7 @@ pub mod world {
 #[allow(clippy::type_complexity)]
 fn apply_impl<'info>(
     buffer: &AccountInfo<'info>,
+    buffer_bump: u8,
     authority: &Signer<'info>,
     world: &Account<'info, World>,
     bolt_system: &UncheckedAccount<'info>,
@@ -458,7 +463,7 @@ fn apply_impl<'info>(
                     from: authority.to_account_info(),
                     to: buffer.to_account_info(),
                 },
-                &[World::buffer_seeds(authority.key).as_array().as_slice()],
+                &[&[b"buffer", authority.key.as_ref(), &[buffer_bump]]],
             ),
             lamports,
             size as u64,
@@ -480,7 +485,7 @@ fn apply_impl<'info>(
                     cpi_auth: cpi_auth.to_account_info(),
                     component: component.to_account_info(),
                 },
-                &[World::cpi_auth_seeds().as_array().as_slice()],
+                &[World::cpi_auth_seeds().as_slice()],
             ),
             *bolt_system.key,
         )?;
@@ -493,7 +498,7 @@ fn apply_impl<'info>(
                     buffer: buffer.to_account_info(),
                     component: component.to_account_info(),
                 },
-                &[World::cpi_auth_seeds().as_array().as_slice()],
+                &[World::cpi_auth_seeds().as_slice()],
             ),
         )?;
     }
@@ -517,7 +522,7 @@ fn apply_impl<'info>(
                     cpi_auth: cpi_auth.to_account_info(),
                     component: component.to_account_info(),
                 },
-                &[World::cpi_auth_seeds().as_array().as_slice()],
+                &[World::cpi_auth_seeds().as_slice()],
             ),
             program.key(),
         )?;
@@ -534,7 +539,7 @@ fn apply_impl<'info>(
                     buffer: buffer.to_account_info(),
                     component: component.to_account_info(),
                 },
-                &[World::cpi_auth_seeds().as_array().as_slice()],
+                &[World::cpi_auth_seeds().as_slice()],
             ),
         )?;
     }
@@ -777,37 +782,6 @@ pub struct WorldSystems {
     pub approved_systems: BTreeSet<Pubkey>,
 }
 
-pub struct BufferSeeds<'buffer, 'owner> {
-    pub buffer: &'buffer [u8],
-    pub owner: &'owner [u8],
-    pub bump: [u8; 1],
-}
-
-impl<'buffer, 'owner> BufferSeeds<'buffer, 'owner> {
-    pub fn new(buffer: &'buffer [u8], owner: &'owner [u8], bump: u8) -> Self {
-        Self { buffer, owner, bump: [bump] }
-    }
-
-    pub fn as_array(&self) -> [&[u8]; 3] {
-        [&self.buffer, &self.owner, &self.bump]
-    }
-}
-
-pub struct CpiAuthSeeds<'cpi_auth> {
-    pub cpi_auth: &'cpi_auth [u8],
-    pub bump: [u8; 1],
-}
-
-impl<'cpi_auth> CpiAuthSeeds<'cpi_auth> {
-    pub fn new(cpi_auth: &'cpi_auth [u8], bump: u8) -> Self {
-        Self { cpi_auth, bump: [bump] }
-    }
-
-    pub fn as_array(&self) -> [&[u8]; 2] {
-        [&self.cpi_auth, &self.bump]
-    }
-}
-
 impl World {
     pub fn seed() -> &'static [u8] {
         b"world"
@@ -821,18 +795,12 @@ impl World {
         Pubkey::find_program_address(&[World::seed(), &self.id.to_be_bytes()], &crate::ID)
     }
 
-    pub fn buffer_seeds<'buffer, 'owner>(owner: &'owner Pubkey) -> BufferSeeds<'buffer, 'owner> {
-        let (_, bump) = Pubkey::find_program_address(&[b"buffer", owner.as_ref()], &crate::ID);
-        BufferSeeds::new(b"buffer", owner.as_ref(), bump)
+    pub const fn cpi_auth_seeds() -> [&'static [u8]; 2] {
+        [b"cpi_auth", &[251]] // 251 is the pre-computed bump for cpi_auth.
     }
 
-    pub fn cpi_auth_seeds<'cpi_auth>() -> CpiAuthSeeds<'cpi_auth> {
-        let (_, bump) = Pubkey::find_program_address(&[b"cpi_auth"], &crate::ID);
-        CpiAuthSeeds::new(b"cpi_auth", bump)
-    }
-
-    pub fn cpi_auth_address() -> Pubkey {
-        Pubkey::find_program_address(&[b"cpi_auth"], &crate::ID).0
+    pub const fn cpi_auth_address() -> &'static Pubkey {
+        &CPI_AUTH_ADDRESS // This is the pre-computed address for cpi_auth.
     }
 }
 

@@ -1,8 +1,9 @@
 use crate::prelude::*;
 use crate::BoltError;
 
+#[inline(always)]
 pub fn checker<'info>(cpi_auth: &AccountInfo<'info>) -> Result<()> {
-    if !cpi_auth.is_signer || cpi_auth.key != &crate::world::World::cpi_auth_address() {
+    if !cpi_auth.is_signer || cpi_auth.key != crate::world::World::cpi_auth_address() {
         return Err(BoltError::InvalidCaller.into());
     }
     Ok(())
