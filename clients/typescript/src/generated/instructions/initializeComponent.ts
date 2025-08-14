@@ -7,6 +7,7 @@
 
 import * as beet from "@metaplex-foundation/beet";
 import * as web3 from "@solana/web3.js";
+import { CPI_AUTH_ADDRESS } from "../../world/transactions";
 
 /**
  * @category Instructions
@@ -27,7 +28,7 @@ export const initializeComponentStruct = new beet.BeetArgsStruct<{
  * @property [] entity
  * @property [] componentProgram
  * @property [] authority
- * @property [] instructionSysvarAccount
+ * @property [] cpiAuth
  * @category Instructions
  * @category InitializeComponent
  * @category generated
@@ -38,7 +39,6 @@ export interface InitializeComponentInstructionAccounts {
   entity: web3.PublicKey;
   componentProgram: web3.PublicKey;
   authority: web3.PublicKey;
-  instructionSysvarAccount: web3.PublicKey;
   systemProgram?: web3.PublicKey;
   anchorRemainingAccounts?: web3.AccountMeta[];
 }
@@ -89,7 +89,7 @@ export function createInitializeComponentInstruction(
       isSigner: false,
     },
     {
-      pubkey: accounts.instructionSysvarAccount,
+      pubkey: CPI_AUTH_ADDRESS,
       isWritable: false,
       isSigner: false,
     },

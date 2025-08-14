@@ -1,8 +1,8 @@
 {
-  "address": "A61GccEkeYiQeRM5HbQW5SZwiicoPjFJaRcLt22qSnhP",
+  "address": "WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n",
   "metadata": {
     "name": "world",
-    "version": "0.2.3",
+    "version": "0.2.4",
     "spec": "0.1.0",
     "description": "Bolt World program",
     "repository": "https://github.com/magicblock-labs/bolt"
@@ -124,8 +124,7 @@
           "signer": true
         },
         {
-          "name": "instruction_sysvar_account",
-          "address": "Sysvar1nstructions1111111111111111111111111"
+          "name": "cpi_auth"
         },
         {
           "name": "world"
@@ -159,8 +158,7 @@
           "signer": true
         },
         {
-          "name": "instruction_sysvar_account",
-          "address": "Sysvar1nstructions1111111111111111111111111"
+          "name": "cpi_auth"
         },
         {
           "name": "world"
@@ -244,8 +242,7 @@
           "writable": true
         },
         {
-          "name": "instruction_sysvar_account",
-          "address": "Sysvar1nstructions1111111111111111111111111"
+          "name": "cpi_auth"
         },
         {
           "name": "system_program",
@@ -286,8 +283,7 @@
           "name": "authority"
         },
         {
-          "name": "instruction_sysvar_account",
-          "address": "Sysvar1nstructions1111111111111111111111111"
+          "name": "cpi_auth"
         },
         {
           "name": "system_program",

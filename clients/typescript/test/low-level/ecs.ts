@@ -6,6 +6,7 @@ import {
   FindComponentProgramDataPda,
   FindEntityPda,
   SerializeArgs,
+  CPI_AUTH_ADDRESS,
 } from "../../lib";
 import { Direction } from "../framework";
 
@@ -104,6 +105,7 @@ export function ecs(framework) {
           data: framework.componentVelocityEntity1Pda,
           componentProgram: componentId,
           authority: framework.provider.wallet.publicKey,
+          cpiAuth: CPI_AUTH_ADDRESS,
         })
         .instruction();
       const transaction = new anchor.web3.Transaction().add(instruction);
@@ -124,6 +126,7 @@ export function ecs(framework) {
           data: framework.componentPositionEntity1Pda,
           componentProgram: componentId,
           authority: framework.worldProgram.programId,
+          cpiAuth: CPI_AUTH_ADDRESS,
         })
         .instruction();
       const transaction = new anchor.web3.Transaction().add(instruction);
@@ -144,6 +147,7 @@ export function ecs(framework) {
           data: componentPda,
           componentProgram: componentId,
           authority: framework.worldProgram.programId,
+          cpiAuth: CPI_AUTH_ADDRESS,
         })
         .instruction();
       const transaction = new anchor.web3.Transaction().add(instruction);
@@ -164,6 +168,7 @@ export function ecs(framework) {
           data: framework.componentPositionEntity4Pda,
           componentProgram: componentId,
           authority: framework.worldProgram.programId,
+          cpiAuth: CPI_AUTH_ADDRESS,
         })
         .instruction();
       const transaction = new anchor.web3.Transaction().add(instruction);
@@ -187,6 +192,7 @@ export function ecs(framework) {
           authority: framework.provider.wallet.publicKey,
           boltSystem: framework.systemSimpleMovement.programId,
           world: framework.worldPda,
+          cpiAuth: CPI_AUTH_ADDRESS,
         })
         .remainingAccounts([
           {
@@ -221,6 +227,7 @@ export function ecs(framework) {
           authority: framework.provider.wallet.publicKey,
           boltSystem: framework.systemSimpleMovement.programId,
           world: framework.worldPda,
+          cpiAuth: CPI_AUTH_ADDRESS,
         })
         .remainingAccounts([
           {
@@ -254,6 +261,7 @@ export function ecs(framework) {
           authority: framework.provider.wallet.publicKey,
           boltSystem: framework.systemFly.programId,
           world: framework.worldPda,
+          cpiAuth: CPI_AUTH_ADDRESS,
         })
         .remainingAccounts([
           {
@@ -287,6 +295,7 @@ export function ecs(framework) {
           authority: framework.provider.wallet.publicKey,
           boltSystem: framework.systemApplyVelocity.programId,
           world: framework.worldPda,
+          cpiAuth: CPI_AUTH_ADDRESS,
         })
         .remainingAccounts([
           {
@@ -339,6 +348,7 @@ export function ecs(framework) {
           authority: framework.provider.wallet.publicKey,
           boltSystem: framework.systemApplyVelocity.programId,
           world: framework.worldPda,
+          cpiAuth: CPI_AUTH_ADDRESS,
         })
         .remainingAccounts([
           {
@@ -394,6 +404,7 @@ export function ecs(framework) {
           authority: framework.provider.wallet.publicKey,
           boltSystem: framework.systemFly.programId,
           world: framework.worldPda,
+          cpiAuth: CPI_AUTH_ADDRESS,
         })
         .remainingAccounts([
           {
@@ -440,6 +451,7 @@ export function ecs(framework) {
           component: framework.componentVelocityEntity1Pda,
           componentProgramData: componentProgramData,
           receiver: keypair.publicKey,
+          cpiAuth: CPI_AUTH_ADDRESS,
         })
         .instruction();
       const transaction = new anchor.web3.Transaction().add(instruction);
