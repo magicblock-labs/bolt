@@ -190,7 +190,6 @@ impl SystemTransform {
         }).unwrap());
     }
 
-
     fn add_set_data_function(content: &mut Vec<syn::Item>) {
         let set_data = bolt_utils::instructions::generate_set_data();
         content.push(syn::parse2(set_data.function).unwrap());
