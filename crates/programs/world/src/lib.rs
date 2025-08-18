@@ -4,7 +4,7 @@ use error::WorldError;
 use std::collections::BTreeSet;
 
 static CPI_AUTH_ADDRESS: Pubkey =
-    Pubkey::from_str_const("B2f2y3QTBv346wE6nWKor72AUhUvFF6mPk7TWCF2QVhi");
+    Pubkey::from_str_const("B2f2y3QTBv346wE6nWKor72AUhUvFF6mPk7TWCF2QVhi"); // Seeds: ["cpi_auth", [251]]
 
 #[cfg(not(feature = "no-entrypoint"))]
 use solana_security_txt::security_txt;
