@@ -80,7 +80,7 @@ export class Framework {
     var worldReport: number = 0;
     for (let index in log) {
       let line = log[index];
-      if (line.includes(" consumed ")) {        
+      if (line.includes(" consumed ")) {
         if (!line.includes("WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n")) {
           cpi.push(this.consume(line));
         } else {
@@ -93,4 +93,5 @@ export class Framework {
     console.log(`Total CPI Consumed: ${total}`);
     console.log(`Number of Instructions: ${numberOfInstructions}`);
     console.log(`World Report: ${worldReport}`);
+  }
 }

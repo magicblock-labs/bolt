@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use proc_macro::TokenStream;
 
 use quote::quote;
@@ -61,8 +63,9 @@ pub fn system_input(_attr: TokenStream, item: TokenStream) -> TokenStream {
         })
         .collect();
 
-    let bolt_accounts = fields.iter().map(|f| {
-        let field_type = &f.ty;
+    let unique_fields = fields.iter().map(|f| f.ty.clone()).collect::<HashSet<_>>();
+    let bolt_accounts = unique_fields.iter().map(|f| {
+        let field_type = &f;
         quote! {
             pub type #field_type = bolt_lang::account::BoltAccount<super::#field_type, { bolt_lang::account::pubkey_p0(crate::ID) }, { bolt_lang::account::pubkey_p1(crate::ID) }>;
         }

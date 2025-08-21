@@ -7,8 +7,8 @@ declare_id!("A3kNNSgmkTNA5V1qtnrbtNeqKrYHNxUMCTkqTDaQzE97");
 #[system]
 pub mod system_with_few_components {
 
-    pub fn execute(ctx: Context<Components>, _args_p: Vec<u8>) -> Result<Components> {
-        Ok(ctx.accounts)
+    pub fn execute(_ctx: Context<Components>, _args_p: Vec<u8>) -> Result<()> {
+        Ok(())
     }
 
     #[system_input]
@@ -19,5 +19,4 @@ pub mod system_with_few_components {
         pub large4: Large,
         pub large5: Large,
     }
-
 }
