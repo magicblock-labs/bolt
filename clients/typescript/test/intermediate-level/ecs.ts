@@ -307,9 +307,9 @@ export function ecs(framework: Framework) {
       let transactionResponse: any;
       do {
         transactionResponse =
-        await framework.provider.connection.getTransaction(signature, {
-          commitment: "confirmed",
-        });
+          await framework.provider.connection.getTransaction(signature, {
+            commitment: "confirmed",
+          });
       } while (transactionResponse?.meta?.logMessages === undefined);
       framework.report(transactionResponse?.meta?.logMessages);
     });
@@ -331,9 +331,9 @@ export function ecs(framework: Framework) {
       let transactionResponse: any;
       do {
         transactionResponse =
-        await framework.provider.connection.getTransaction(signature, {
-          commitment: "confirmed",
-        });
+          await framework.provider.connection.getTransaction(signature, {
+            commitment: "confirmed",
+          });
       } while (transactionResponse?.meta?.logMessages === undefined);
       framework.report(transactionResponse?.meta?.logMessages);
     });
