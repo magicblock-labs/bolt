@@ -253,11 +253,13 @@ export function ecs(framework: Framework) {
         applySystem.transaction,
       );
 
-      let transactionResponse =
-        await framework.provider.connection.getTransaction(signature, {
-          commitment: "confirmed",
-        });
-      console.log(transactionResponse?.meta?.logMessages); // Reference CU is 27771
+      let transactionResponse: any;
+      do {
+        transactionResponse =
+          await framework.provider.connection.getTransaction(signature, {
+            commitment: "confirmed",
+          });
+      } while (transactionResponse?.meta?.logMessages === undefined);
 
       const position =
         await framework.exampleComponentPosition.account.position.fetch(
@@ -266,6 +268,74 @@ export function ecs(framework: Framework) {
       expect(position.x.toNumber()).to.greaterThan(1);
       expect(position.y.toNumber()).to.equal(1);
       expect(position.z.toNumber()).to.equal(300);
+    });
+
+    it("Initialize Large Component on Entity 1", async () => {
+      const initializeComponent = await InitializeComponent({
+        payer: framework.provider.wallet.publicKey,
+        entity: framework.entity1Pda,
+        componentId: framework.componentLarge.programId,
+      });
+      await framework.provider.sendAndConfirm(initializeComponent.transaction);
+      framework.componentLargeEntity1Pda = initializeComponent.componentPda; // Saved for later
+    });
+
+    it("Initialize Small Component on Entity 1", async () => {
+      const initializeComponent = await InitializeComponent({
+        payer: framework.provider.wallet.publicKey,
+        entity: framework.entity1Pda,
+        componentId: framework.componentSmall.programId,
+      });
+      await framework.provider.sendAndConfirm(initializeComponent.transaction);
+      framework.componentSmallEntity1Pda = initializeComponent.componentPda; // Saved for later
+    });
+
+    it("Apply System With Few Components on Entity 1", async () => {
+      const applySystem = await ApplySystem({
+        authority: framework.provider.wallet.publicKey,
+        systemId: framework.systemWithFewComponents.programId,
+        world: framework.worldPda,
+        entities: new Array(5).fill(0).map(() => ({
+          entity: framework.entity1Pda,
+          components: [{ componentId: framework.componentLarge.programId }],
+        })),
+      });
+      let signature = await framework.provider.sendAndConfirm(
+        applySystem.transaction,
+      );
+
+      let transactionResponse: any;
+      do {
+        transactionResponse =
+        await framework.provider.connection.getTransaction(signature, {
+          commitment: "confirmed",
+        });
+      } while (transactionResponse?.meta?.logMessages === undefined);
+      framework.report(transactionResponse?.meta?.logMessages);
+    });
+
+    it("Apply System With Many Components on Entity 1", async () => {
+      const applySystem = await ApplySystem({
+        authority: framework.provider.wallet.publicKey,
+        systemId: framework.systemWithManyComponents.programId,
+        world: framework.worldPda,
+        entities: new Array(10).fill(0).map(() => ({
+          entity: framework.entity1Pda,
+          components: [{ componentId: framework.componentSmall.programId }],
+        })),
+      });
+      let signature = await framework.provider.sendAndConfirm(
+        applySystem.transaction,
+      );
+
+      let transactionResponse: any;
+      do {
+        transactionResponse =
+        await framework.provider.connection.getTransaction(signature, {
+          commitment: "confirmed",
+        });
+      } while (transactionResponse?.meta?.logMessages === undefined);
+      framework.report(transactionResponse?.meta?.logMessages);
     });
 
     it("Apply Fly System on Entity 4", async () => {

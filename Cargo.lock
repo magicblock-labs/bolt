@@ -1259,6 +1259,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "component-large"
+version = "0.2.4"
+dependencies = [
+ "bolt-lang",
+]
+
+[[package]]
+name = "component-small"
+version = "0.2.4"
+dependencies = [
+ "bolt-lang",
+]
+
+[[package]]
 name = "concurrent-queue"
 version = "2.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5900,6 +5914,24 @@ version = "0.2.4"
 dependencies = [
  "bolt-lang",
  "bolt-types",
+ "serde",
+]
+
+[[package]]
+name = "system-with-few-components"
+version = "0.2.4"
+dependencies = [
+ "bolt-lang",
+ "component-large",
+ "serde",
+]
+
+[[package]]
+name = "system-with-many-components"
+version = "0.2.4"
+dependencies = [
+ "bolt-lang",
+ "component-small",
  "serde",
 ]
 

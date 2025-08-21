@@ -103,7 +103,7 @@ export function world(framework) {
         .instruction();
       let transaction = new anchor.web3.Transaction().add(instruction);
       await framework.provider.sendAndConfirm(transaction, [], {
-        skipPreflight: true
+        skipPreflight: true,
       });
 
       // Get World and check permissionless and systems
