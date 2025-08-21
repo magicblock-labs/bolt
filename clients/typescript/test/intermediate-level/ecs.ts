@@ -273,7 +273,6 @@ export function ecs(framework: Framework) {
         await framework.provider.sendAndConfirm(addEntity.transaction);
         entitiesPdas.push(addEntity.entityPda);
       }
-
       let componentsPdas: web3.PublicKey[] = [];
       for (let i = 0; i < 10; i++) {
         const initializeComponent = await InitializeComponent({
