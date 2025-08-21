@@ -61,6 +61,7 @@ export class Framework {
   componentPositionEntity1Pda: PublicKey;
   componentVelocityEntity1Pda: PublicKey;
   componentPositionEntity4Pda: PublicKey;
+  componentSmallEntity1Pda: PublicKey;
 
   constructor() {
     this.secondAuthority = Keypair.generate().publicKey;
@@ -70,9 +71,6 @@ export class Framework {
     this.systemSimpleMovement = anchor.workspace.SystemSimpleMovement;
     this.systemFly = anchor.workspace.SystemFly;
     this.systemApplyVelocity = anchor.workspace.SystemApplyVelocity;
-    this.systemWithManyComponents = anchor.workspace.SystemWithManyComponents;
-    this.systemWithFewComponents = anchor.workspace.SystemWithFewComponents;
-    this.componentLarge = anchor.workspace.Large;
     this.componentSmall = anchor.workspace.Small;
     this.systemWith1Component = anchor.workspace.With1Component;
     this.systemWith2Components = anchor.workspace.With2Components;

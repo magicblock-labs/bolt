@@ -8,6 +8,7 @@ members = [
     "crates/programs/world",
     "crates/types",
     "examples/*",
+    "examples/system-with-many-components",
 ]
 
 [workspace.package]

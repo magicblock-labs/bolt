@@ -15,6 +15,8 @@ position = "Fn1JzzEdyb55fsyduWS94mYHizGhJZuhvjX6DVvrmGbQ"
 system-apply-velocity = "6LHhFVwif6N9Po3jHtSmMVtPjF6zRfL3xMosSzcrQAS8"
 system-fly = "HT2YawJjkNmqWcLNfPAMvNsLdWwPvvvbKA5bpMw4eUpq"
 system-simple-movement = "FSa6qoJXFBR3a7ThQkTAMrC15p6NkchPEjBdd4n6dXxA"
+system-with-few-components = "A3kNNSgmkTNA5V1qtnrbtNeqKrYHNxUMCTkqTDaQzE97"
+system-with-many-components = "Hi4sMEb3uXhWCiLyrF7t3Z384an7YZsTj774cabAAPQB"
 velocity = "CbHEFbSQdRN4Wnoby9r16umnJ1zWbULBHg4yqzGQonU1"
 with-1-component = "BsVKJF2H9GN1P9WrexdgEY4ztiweKvfQo6ydLWUEw6n7"
 with-2-components = "X5wTvz1i6ocNXzfrEB8JmhFCniojUZxqk3TXDq98fZX"
@@ -35,7 +37,11 @@ cluster = "localnet"
 wallet = "./tests/fixtures/provider.json"
 
 [workspace]
+<<<<<<< HEAD
 members = ["crates/programs/bolt-component", "crates/programs/bolt-system", "crates/programs/world", "examples/component-position", "examples/component-velocity", "examples/system-apply-velocity", "examples/system-fly", "examples/system-simple-movement", "examples/component-small", "examples/system-with-1-component", "examples/system-with-2-components", "examples/system-with-3-components", "examples/system-with-4-components", "examples/system-with-5-components", "examples/system-with-6-components", "examples/system-with-7-components", "examples/system-with-8-components", "examples/system-with-9-components", "examples/system-with-10-components"]
+=======
+members = ["crates/programs/bolt-component", "crates/programs/bolt-system", "crates/programs/world", "examples/component-position", "examples/component-velocity", "examples/system-apply-velocity", "examples/system-fly", "examples/system-simple-movement", "examples/system-with-many-components", "examples/system-with-few-components", "examples/component-large", "examples/component-small"]
+>>>>>>> f665350 (:white_check_mark: Adding CU measurement in tests)
 
 [scripts]
 test = "tests/script.sh"
