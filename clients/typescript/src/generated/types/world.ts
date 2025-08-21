@@ -90,10 +90,27 @@ export type World = {
       discriminator: [248, 243, 145, 24, 105, 50, 162, 225];
       accounts: [
         {
+          name: "buffer";
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: "const";
+                value: [98, 117, 102, 102, 101, 114];
+              },
+              {
+                kind: "account";
+                path: "authority";
+              },
+            ];
+          };
+        },
+        {
           name: "boltSystem";
         },
         {
           name: "authority";
+          writable: true;
           signer: true;
         },
         {
@@ -101,6 +118,10 @@ export type World = {
         },
         {
           name: "world";
+        },
+        {
+          name: "systemProgram";
+          address: "11111111111111111111111111111111";
         },
       ];
       args: [
@@ -115,10 +136,27 @@ export type World = {
       discriminator: [213, 69, 29, 230, 142, 107, 134, 103];
       accounts: [
         {
+          name: "buffer";
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: "const";
+                value: [98, 117, 102, 102, 101, 114];
+              },
+              {
+                kind: "account";
+                path: "authority";
+              },
+            ];
+          };
+        },
+        {
           name: "boltSystem";
         },
         {
           name: "authority";
+          writable: true;
           signer: true;
         },
         {
@@ -129,6 +167,10 @@ export type World = {
         },
         {
           name: "sessionToken";
+        },
+        {
+          name: "systemProgram";
+          address: "11111111111111111111111111111111";
         },
       ];
       args: [
@@ -368,6 +410,10 @@ export type World = {
       discriminator: [47, 174, 110, 246, 184, 182, 252, 218];
     },
     {
+      name: "sessionToken";
+      discriminator: [233, 4, 115, 14, 46, 21, 1, 15];
+    },
+    {
       name: "world";
       discriminator: [145, 45, 170, 174, 122, 32, 155, 124];
     },
@@ -403,6 +449,11 @@ export type World = {
       name: "systemNotApproved";
       msg: "The system is not approved in this world instance";
     },
+    {
+      code: 6006;
+      name: "invalidComponentOwner";
+      msg: "The component owner does not match the program";
+    },
   ];
   types: [
     {
@@ -425,6 +476,30 @@ export type World = {
           {
             name: "worlds";
             type: "u64";
+          },
+        ];
+      };
+    },
+    {
+      name: "sessionToken";
+      type: {
+        kind: "struct";
+        fields: [
+          {
+            name: "authority";
+            type: "pubkey";
+          },
+          {
+            name: "targetProgram";
+            type: "pubkey";
+          },
+          {
+            name: "sessionSigner";
+            type: "pubkey";
+          },
+          {
+            name: "validUntil";
+            type: "i64";
           },
         ];
       };

@@ -117,10 +117,34 @@
       ],
       "accounts": [
         {
+          "name": "buffer",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  117,
+                  102,
+                  102,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "authority"
+              }
+            ]
+          }
+        },
+        {
           "name": "bolt_system"
         },
         {
           "name": "authority",
+          "writable": true,
           "signer": true
         },
         {
@@ -128,6 +152,10 @@
         },
         {
           "name": "world"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
         }
       ],
       "args": [
@@ -151,10 +179,34 @@
       ],
       "accounts": [
         {
+          "name": "buffer",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  117,
+                  102,
+                  102,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "authority"
+              }
+            ]
+          }
+        },
+        {
           "name": "bolt_system"
         },
         {
           "name": "authority",
+          "writable": true,
           "signer": true
         },
         {
@@ -165,6 +217,10 @@
         },
         {
           "name": "session_token"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
         }
       ],
       "args": [
@@ -506,6 +562,19 @@
       ]
     },
     {
+      "name": "SessionToken",
+      "discriminator": [
+        233,
+        4,
+        115,
+        14,
+        46,
+        21,
+        1,
+        15
+      ]
+    },
+    {
       "name": "World",
       "discriminator": [
         145,
@@ -549,6 +618,11 @@
       "code": 6005,
       "name": "SystemNotApproved",
       "msg": "The system is not approved in this world instance"
+    },
+    {
+      "code": 6006,
+      "name": "InvalidComponentOwner",
+      "msg": "The component owner does not match the program"
     }
   ],
   "types": [
@@ -572,6 +646,30 @@
           {
             "name": "worlds",
             "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "SessionToken",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "target_program",
+            "type": "pubkey"
+          },
+          {
+            "name": "session_signer",
+            "type": "pubkey"
+          },
+          {
+            "name": "valid_until",
+            "type": "i64"
           }
         ]
       }

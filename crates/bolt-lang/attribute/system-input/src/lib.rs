@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use proc_macro::TokenStream;
 
 use quote::quote;
@@ -61,13 +63,21 @@ pub fn system_input(_attr: TokenStream, item: TokenStream) -> TokenStream {
         })
         .collect();
 
+    let unique_fields = fields.iter().map(|f| f.ty.clone()).collect::<HashSet<_>>();
+    let bolt_accounts = unique_fields.iter().map(|f| {
+        let field_type = &f;
+        quote! {
+            pub type #field_type = bolt_lang::account::BoltAccount<super::#field_type, { bolt_lang::account::pubkey_p0(crate::ID) }, { bolt_lang::account::pubkey_p1(crate::ID) }>;
+        }
+    });
+
     // Transform fields for the struct definition
     let transformed_fields = fields.iter().map(|f| {
         let field_name = &f.ident;
         let field_type = &f.ty;
         quote! {
-            #[account()]
-            pub #field_name: Account<'info, #field_type>,
+            #[account(mut)]
+            pub #field_name: Account<'info, bolt_accounts::#field_type>,
         }
     });
 
@@ -82,18 +92,12 @@ pub fn system_input(_attr: TokenStream, item: TokenStream) -> TokenStream {
         }
     };
 
-    // Generate the try_to_vec method
-    let try_to_vec_fields = fields.iter().map(|f| {
-        let field_name = &f.ident;
-        quote! {
-            self.#field_name.try_to_vec()?
-        }
-    });
-
     let try_from_fields = fields.iter().enumerate().map(|(i, f)| {
         let field_name = &f.ident;
         quote! {
-            #field_name: Account::try_from(context.remaining_accounts.as_ref().get(#i).ok_or_else(|| ErrorCode::ConstraintAccountIsNone)?)?,
+            #field_name: {
+                Account::try_from(context.remaining_accounts.as_ref().get(#i).ok_or_else(|| ErrorCode::ConstraintAccountIsNone)?)?
+            },
         }
     });
 
@@ -111,13 +115,9 @@ pub fn system_input(_attr: TokenStream, item: TokenStream) -> TokenStream {
         }
     };
 
-    // Generate the implementation of try_to_vec for the struct
+    // Generate the implementation of try_from for the struct
     let output_impl = quote! {
         impl<'info> #name<'info> {
-            pub fn try_to_vec(&self) -> Result<Vec<Vec<u8>>> {
-                Ok(vec![#(#try_to_vec_fields,)*])
-            }
-
             fn try_from<'a, 'b>(context: &Context<'a, 'b, 'info, 'info, VariadicBoltComponents<'info>>) -> Result<Self> {
                 Ok(Self {
                     authority: context.accounts.authority.clone(),
@@ -129,6 +129,10 @@ pub fn system_input(_attr: TokenStream, item: TokenStream) -> TokenStream {
 
     // Combine the struct definition and its implementation into the final TokenStream
     let output = quote! {
+        mod bolt_accounts {
+            #(#bolt_accounts)*
+        }
+
         #output_struct
         #output_impl
         #output_trait

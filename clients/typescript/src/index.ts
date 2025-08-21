@@ -99,6 +99,20 @@ export function FindComponentProgramDataPda({
   )[0];
 }
 
+export function FindBufferPda(owner: PublicKey) {
+  return PublicKey.findProgramAddressSync(
+    [Buffer.from("buffer"), owner.toBuffer()],
+    WORLD_PROGRAM_ID,
+  )[0];
+}
+
+export function FindCpiAuthPda() {
+  return PublicKey.findProgramAddressSync(
+    [Buffer.from("cpi_auth")],
+    WORLD_PROGRAM_ID,
+  )[0];
+}
+
 // TODO: seed must be Uint8Array like the other FindPda functions
 export function FindComponentPda({
   componentId,

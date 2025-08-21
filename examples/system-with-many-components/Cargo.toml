@@ -1,0 +1,25 @@
+[package]
+name = "system-with-many-components"
+version.workspace = true
+edition.workspace = true
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "system_with_many_components"
+
+[features]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+default = []
+idl-build = ["bolt-lang/idl-build"]
+anchor-debug = ["bolt-lang/anchor-debug"]
+custom-heap = []
+custom-panic = []
+
+
+[dependencies]
+bolt-lang.workspace = true
+component-small.workspace = true
+serde.workspace = true

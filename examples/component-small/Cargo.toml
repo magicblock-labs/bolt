@@ -1,0 +1,23 @@
+[package]
+name = "component-small"
+version = "0.2.4"
+description = "Created with Bolt"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "component_small"
+
+[features]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+default = []
+idl-build = ["bolt-lang/idl-build"]
+anchor-debug = ["bolt-lang/anchor-debug"]
+custom-heap = []
+custom-panic = []
+
+[dependencies]
+bolt-lang.workspace = true

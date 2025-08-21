@@ -4,7 +4,7 @@ declare_id!("FSa6qoJXFBR3a7ThQkTAMrC15p6NkchPEjBdd4n6dXxA");
 
 #[system]
 pub mod system_simple_movement {
-    pub fn execute(ctx: Context<Components>, args: Args) -> Result<Components> {
+    pub fn execute(ctx: Context<Components>, args: Args) -> Result<()> {
         // Compute the new position based on the direction
         let (dx, dy) = match args.direction {
             Direction::Left => (-1, 0),
@@ -14,8 +14,7 @@ pub mod system_simple_movement {
         };
         ctx.accounts.position.x += dx;
         ctx.accounts.position.y += dy;
-
-        Ok(ctx.accounts)
+        Ok(())
     }
 
     #[system_input]
