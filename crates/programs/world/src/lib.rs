@@ -494,27 +494,29 @@ fn apply_impl<'info>(
             data.copy_from_slice(component.try_borrow_data()?.as_ref());
         }
 
-        bolt_component::cpi::set_owner(
-            CpiContext::new_with_signer(
-                program.to_account_info(),
-                bolt_component::cpi::accounts::SetOwner {
+        if component.owner != bolt_system.key {
+            bolt_component::cpi::set_owner(
+                CpiContext::new_with_signer(
+                    program.to_account_info(),
+                    bolt_component::cpi::accounts::SetOwner {
+                        cpi_auth: cpi_auth.to_account_info(),
+                        component: component.to_account_info(),
+                    },
+                    &[World::cpi_auth_seeds().as_slice()],
+                ),
+                *bolt_system.key,
+            )?;
+
+            bolt_system::cpi::set_data(CpiContext::new_with_signer(
+                bolt_system.to_account_info(),
+                bolt_system::cpi::accounts::SetData {
                     cpi_auth: cpi_auth.to_account_info(),
+                    buffer: buffer.to_account_info(),
                     component: component.to_account_info(),
                 },
                 &[World::cpi_auth_seeds().as_slice()],
-            ),
-            *bolt_system.key,
-        )?;
-
-        bolt_system::cpi::set_data(CpiContext::new_with_signer(
-            bolt_system.to_account_info(),
-            bolt_system::cpi::accounts::SetData {
-                cpi_auth: cpi_auth.to_account_info(),
-                buffer: buffer.to_account_info(),
-                component: component.to_account_info(),
-            },
-            &[World::cpi_auth_seeds().as_slice()],
-        ))?;
+            ))?;
+        }
     }
 
     bolt_system::cpi::bolt_execute(
@@ -529,31 +531,33 @@ fn apply_impl<'info>(
             data.copy_from_slice(component.try_borrow_data()?.as_ref());
         }
 
-        bolt_system::cpi::set_owner(
-            CpiContext::new_with_signer(
-                bolt_system.to_account_info(),
-                bolt_system::cpi::accounts::SetOwner {
+        if *component.owner != program.key() {
+            bolt_system::cpi::set_owner(
+                CpiContext::new_with_signer(
+                    bolt_system.to_account_info(),
+                    bolt_system::cpi::accounts::SetOwner {
+                        cpi_auth: cpi_auth.to_account_info(),
+                        component: component.to_account_info(),
+                    },
+                    &[World::cpi_auth_seeds().as_slice()],
+                ),
+                program.key(),
+            )?;
+
+            if *component.owner != program.key() {
+                return Err(WorldError::InvalidComponentOwner.into());
+            }
+
+            bolt_component::cpi::set_data(CpiContext::new_with_signer(
+                program.to_account_info(),
+                bolt_component::cpi::accounts::SetData {
                     cpi_auth: cpi_auth.to_account_info(),
+                    buffer: buffer.to_account_info(),
                     component: component.to_account_info(),
                 },
                 &[World::cpi_auth_seeds().as_slice()],
-            ),
-            program.key(),
-        )?;
-
-        if *component.owner != program.key() {
-            return Err(WorldError::InvalidComponentOwner.into());
+            ))?;
         }
-
-        bolt_component::cpi::set_data(CpiContext::new_with_signer(
-            program.to_account_info(),
-            bolt_component::cpi::accounts::SetData {
-                cpi_auth: cpi_auth.to_account_info(),
-                buffer: buffer.to_account_info(),
-                component: component.to_account_info(),
-            },
-            &[World::cpi_auth_seeds().as_slice()],
-        ))?;
     }
 
     buffer.realloc(0, false)?;
