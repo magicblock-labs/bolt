@@ -105,6 +105,7 @@ export function ecs(framework) {
           data: framework.componentVelocityEntity1Pda,
           componentProgram: componentId,
           authority: framework.provider.wallet.publicKey,
+          buffer: FindBufferPda(framework.provider.wallet.publicKey),
           cpiAuth: FindCpiAuthPda(),
         })
         .instruction();
@@ -126,6 +127,7 @@ export function ecs(framework) {
           data: framework.componentPositionEntity1Pda,
           componentProgram: componentId,
           authority: framework.worldProgram.programId,
+          buffer: FindBufferPda(framework.provider.wallet.publicKey),
           cpiAuth: FindCpiAuthPda(),
         })
         .instruction();
@@ -147,6 +149,7 @@ export function ecs(framework) {
           data: componentPda,
           componentProgram: componentId,
           authority: framework.worldProgram.programId,
+          buffer: FindBufferPda(framework.provider.wallet.publicKey),
           cpiAuth: FindCpiAuthPda(),
         })
         .instruction();
@@ -168,6 +171,7 @@ export function ecs(framework) {
           data: framework.componentPositionEntity4Pda,
           componentProgram: componentId,
           authority: framework.worldProgram.programId,
+          buffer: FindBufferPda(framework.provider.wallet.publicKey),
           cpiAuth: FindCpiAuthPda(),
         })
         .instruction();

@@ -75,6 +75,7 @@ export function session(framework) {
           data: component,
           componentProgram: componentId,
           authority: framework.worldProgram.programId,
+          buffer: FindBufferPda(sessionSigner.publicKey),
           cpiAuth: FindCpiAuthPda(),
         })
         .instruction();

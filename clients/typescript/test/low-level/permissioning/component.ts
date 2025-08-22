@@ -48,6 +48,7 @@ export function component(framework) {
           data: component,
           componentProgram: componentId,
           authority: framework.provider.wallet.publicKey,
+          buffer: FindBufferPda(framework.provider.wallet.publicKey),
           cpiAuth: FindCpiAuthPda(),
         })
         .instruction();
