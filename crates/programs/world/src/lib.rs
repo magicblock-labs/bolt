@@ -264,6 +264,34 @@ pub mod world {
             return Err(WorldError::InvalidAuthority.into());
         }
         bolt_component::cpi::initialize(ctx.accounts.build(&[World::cpi_auth_seeds().as_slice()]))?;
+
+        create_buffer_if_needed(&ctx.accounts.buffer, &ctx.accounts.payer, &ctx.accounts.system_program, &[&[b"buffer", ctx.accounts.authority.key.as_ref(), &[ctx.bumps.buffer]]])?;
+        {
+            ctx.accounts.buffer.realloc(ctx.accounts.data.data_len(), false)?;
+            let mut data = ctx.accounts.buffer.try_borrow_mut_data()?;
+            data.copy_from_slice(ctx.accounts.data.try_borrow_data()?.as_ref());
+        }
+
+        bolt_component::cpi::set_owner(
+            CpiContext::new_with_signer(
+                ctx.accounts.component_program.to_account_info(),
+                bolt_component::cpi::accounts::SetOwner {
+                    cpi_auth: ctx.accounts.cpi_auth.to_account_info(),
+                    component: ctx.accounts.data.to_account_info(),
+                },
+                &[World::cpi_auth_seeds().as_slice()],
+            ),
+            ID
+        )?;
+
+        {
+            ctx.accounts.data.realloc(ctx.accounts.buffer.data_len(), false)?;
+            let mut data = ctx.accounts.data.try_borrow_mut_data()?;
+            data.copy_from_slice(ctx.accounts.buffer.try_borrow_data()?.as_ref());
+        }
+
+        ctx.accounts.buffer.realloc(0, false)?;
+
         Ok(())
     }
 
@@ -288,8 +316,7 @@ pub mod world {
             &ctx.accounts.system_program,
             None,
             ctx.remaining_accounts,
-        )?;
-        Ok(())
+        )
     }
 
     #[derive(Accounts)]
@@ -377,6 +404,33 @@ pub mod world {
     }
 }
 
+fn create_buffer_if_needed<'info>(
+    buffer: &AccountInfo<'info>,
+    authority: &Signer<'info>,
+    system_program: &Program<'info, System>,
+    seeds: &[&[&[u8]]],
+) -> Result<()> {
+    if buffer.lamports() == 0 {
+        let size = 0;
+        let lamports = Rent::get()?.minimum_balance(size);
+        system_program::create_account(
+            CpiContext::new_with_signer(
+                system_program.to_account_info(),
+                system_program::CreateAccount {
+                    from: authority.to_account_info(),
+                    to: buffer.to_account_info(),
+                },
+                seeds,
+            ),
+            lamports,
+            size as u64,
+            &ID,
+        )?;
+    }
+
+    Ok(())
+}
+
 #[allow(clippy::type_complexity, clippy::too_many_arguments)]
 fn apply_impl<'info>(
     buffer: &AccountInfo<'info>,
@@ -451,28 +505,9 @@ fn apply_impl<'info>(
         }
     }
 
-    // Create the buffer account only if it does not already exist.
-    // Subsequent applies reuse the same PDA and only reallocate its data.
-    if buffer.lamports() == 0 {
-        let size = 0;
-        let lamports = Rent::get()?.minimum_balance(size);
-        system_program::create_account(
-            CpiContext::new_with_signer(
-                system_program.to_account_info(),
-                system_program::CreateAccount {
-                    from: authority.to_account_info(),
-                    to: buffer.to_account_info(),
-                },
-                &[&[b"buffer", authority.key.as_ref(), &[buffer_bump]]],
-            ),
-            lamports,
-            size as u64,
-            &ID,
-        )?;
-    }
+    create_buffer_if_needed(buffer, authority, system_program, &[&[b"buffer", authority.key.as_ref(), &[buffer_bump]]])?;
 
-    for pair in remaining_accounts[..index].chunks(2) {
-        let [program, component] = pair else { continue };
+    for component in remaining_accounts[..index].iter().skip(1).step_by(2) {
         buffer.realloc(component.data_len(), false)?;
         {
             let mut data = buffer.try_borrow_mut_data()?;
@@ -480,18 +515,8 @@ fn apply_impl<'info>(
         }
 
         if component.owner != bolt_system.key {
-            bolt_component::cpi::set_owner(
-                CpiContext::new_with_signer(
-                    program.to_account_info(),
-                    bolt_component::cpi::accounts::SetOwner {
-                        cpi_auth: cpi_auth.to_account_info(),
-                        component: component.to_account_info(),
-                    },
-                    &[World::cpi_auth_seeds().as_slice()],
-                ),
-                *bolt_system.key,
-            )?;
-
+            component.realloc(0, false)?;
+            component.assign(bolt_system.key);
             bolt_system::cpi::set_data(CpiContext::new_with_signer(
                 bolt_system.to_account_info(),
                 bolt_system::cpi::accounts::SetData {
@@ -510,15 +535,14 @@ fn apply_impl<'info>(
         args,
     )?;
 
-    for pair in remaining_accounts[..index].chunks(2) {
-        let [program, component] = pair else { continue };
-        buffer.realloc(component.data_len(), false)?;
-        {
-            let mut data = buffer.try_borrow_mut_data()?;
-            data.copy_from_slice(component.try_borrow_data()?.as_ref());
-        }
-
-        if *component.owner != program.key() {
+    for component in remaining_accounts[..index].iter().skip(1).step_by(2) {
+        if *component.owner != ID {
+            {
+                buffer.realloc(component.data_len(), false)?;
+                let mut data = buffer.try_borrow_mut_data()?;
+                data.copy_from_slice(component.try_borrow_data()?.as_ref());
+            }
+    
             bolt_system::cpi::set_owner(
                 CpiContext::new_with_signer(
                     bolt_system.to_account_info(),
@@ -528,22 +552,16 @@ fn apply_impl<'info>(
                     },
                     &[World::cpi_auth_seeds().as_slice()],
                 ),
-                program.key(),
+                ID,
             )?;
 
-            if *component.owner != program.key() {
-                return Err(WorldError::InvalidComponentOwner.into());
-            }
+            require_eq!(*component.owner, ID, WorldError::InvalidComponentOwner);
 
-            bolt_component::cpi::set_data(CpiContext::new_with_signer(
-                program.to_account_info(),
-                bolt_component::cpi::accounts::SetData {
-                    cpi_auth: cpi_auth.to_account_info(),
-                    buffer: buffer.to_account_info(),
-                    component: component.to_account_info(),
-                },
-                &[World::cpi_auth_seeds().as_slice()],
-            ))?;
+            {
+                component.realloc(buffer.data_len(), false)?;
+                let mut data = component.try_borrow_mut_data()?;
+                data.copy_from_slice(buffer.try_borrow_data()?.as_ref());
+            }
         }
     }
 
@@ -644,6 +662,9 @@ pub struct AddEntity<'info> {
 pub struct InitializeComponent<'info> {
     #[account(mut)]
     pub payer: Signer<'info>,
+    /// CHECK: buffer data check
+    #[account(mut, seeds = [b"buffer", authority.key.as_ref()], bump)]
+    pub buffer: AccountInfo<'info>,
     #[account(mut)]
     /// CHECK: component data check
     pub data: AccountInfo<'info>,
