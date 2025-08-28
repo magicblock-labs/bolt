@@ -287,7 +287,7 @@ pub mod world {
             args,
             &ctx.accounts.system_program,
             None,
-            ctx.remaining_accounts.to_vec(),
+            ctx.remaining_accounts,
         )?;
         Ok(())
     }
@@ -338,7 +338,7 @@ pub mod world {
             args,
             &ctx.accounts.system_program,
             Some(&ctx.accounts.session_token),
-            ctx.remaining_accounts.to_vec(),
+            ctx.remaining_accounts,
         )?;
         Ok(())
     }
@@ -389,7 +389,7 @@ fn apply_impl<'info>(
     args: Vec<u8>,
     system_program: &Program<'info, System>,
     session_token: Option<&Account<'info, session_keys::SessionToken>>,
-    mut remaining_accounts: Vec<AccountInfo<'info>>,
+    remaining_accounts: &[AccountInfo<'info>],
 ) -> Result<()> {
     if !authority.is_signer && authority.key != &ID {
         return Err(WorldError::InvalidAuthority.into());
@@ -403,18 +403,10 @@ fn apply_impl<'info>(
         return Err(WorldError::SystemNotApproved.into());
     }
 
-    let mut pairs = Vec::with_capacity(remaining_accounts.len() / 2);
-    while remaining_accounts.len() >= 2 {
-        let program = remaining_accounts.remove(0);
-        if program.key() == ID {
-            break;
-        }
-        let component = remaining_accounts.remove(0);
-        pairs.push((program, component));
-    }
+    let index = remaining_accounts.iter().position(|x| x.key() == ID).unwrap_or(remaining_accounts.len());
 
     // Authority check against component metadata (partial deserialize)
-    for (_, component) in &pairs {
+    for component in remaining_accounts[..index].iter().skip(1).step_by(2) {
         let data_ref = component.try_borrow_data()?;
         // Expect at least Anchor discriminator (8) + BoltMetadata (32)
         if data_ref.len() < 8 + 32 {
@@ -459,14 +451,6 @@ fn apply_impl<'info>(
         }
     }
 
-    let mut components_accounts = pairs
-        .iter()
-        .map(|(_, component)| component)
-        .cloned()
-        .collect::<Vec<_>>();
-    components_accounts.append(&mut remaining_accounts);
-    let remaining_accounts = components_accounts;
-
     // Create the buffer account only if it does not already exist.
     // Subsequent applies reuse the same PDA and only reallocate its data.
     if buffer.lamports() == 0 {
@@ -487,7 +471,8 @@ fn apply_impl<'info>(
         )?;
     }
 
-    for (program, component) in &pairs {
+    for pair in remaining_accounts[..index].chunks(2) {
+        let [program, component] = pair else { continue };
         buffer.realloc(component.data_len(), false)?;
         {
             let mut data = buffer.try_borrow_mut_data()?;
@@ -519,12 +504,14 @@ fn apply_impl<'info>(
         }
     }
 
+    let cpi_remaining_accounts = remaining_accounts[..index].iter().skip(1).step_by(2).chain(remaining_accounts[index..].iter().skip(1)).cloned().collect::<Vec<_>>();
     bolt_system::cpi::bolt_execute(
-        cpi_context.with_remaining_accounts(remaining_accounts),
+        cpi_context.with_remaining_accounts(cpi_remaining_accounts),
         args,
     )?;
 
-    for (program, component) in &pairs {
+    for pair in remaining_accounts[..index].chunks(2) {
+        let [program, component] = pair else { continue };
         buffer.realloc(component.data_len(), false)?;
         {
             let mut data = buffer.try_borrow_mut_data()?;
