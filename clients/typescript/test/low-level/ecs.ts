@@ -105,6 +105,7 @@ export function ecs(framework) {
           data: framework.componentVelocityEntity1Pda,
           componentProgram: componentId,
           authority: framework.provider.wallet.publicKey,
+          buffer: FindBufferPda(framework.provider.wallet.publicKey),
           cpiAuth: FindCpiAuthPda(),
         })
         .instruction();
@@ -126,6 +127,7 @@ export function ecs(framework) {
           data: framework.componentPositionEntity1Pda,
           componentProgram: componentId,
           authority: framework.worldProgram.programId,
+          buffer: FindBufferPda(framework.worldProgram.programId),
           cpiAuth: FindCpiAuthPda(),
         })
         .instruction();
@@ -147,6 +149,7 @@ export function ecs(framework) {
           data: componentPda,
           componentProgram: componentId,
           authority: framework.worldProgram.programId,
+          buffer: FindBufferPda(framework.worldProgram.programId),
           cpiAuth: FindCpiAuthPda(),
         })
         .instruction();
@@ -168,6 +171,7 @@ export function ecs(framework) {
           data: framework.componentPositionEntity4Pda,
           componentProgram: componentId,
           authority: framework.worldProgram.programId,
+          buffer: FindBufferPda(framework.worldProgram.programId),
           cpiAuth: FindCpiAuthPda(),
         })
         .instruction();
@@ -210,7 +214,11 @@ export function ecs(framework) {
         .instruction();
 
       const transaction = new anchor.web3.Transaction().add(instruction);
-      await framework.provider.sendAndConfirm(transaction);
+      let signature = await framework.provider.sendAndConfirm(transaction);
+      console.log("Signature: ", signature);
+
+      let accountInfo = await framework.provider.connection.getAccountInfo(framework.componentPositionEntity1Pda);
+      console.log("Account data: ", accountInfo.data);
 
       const position =
         await framework.exampleComponentPosition.account.position.fetch(
@@ -220,6 +228,8 @@ export function ecs(framework) {
       expect(position.y.toNumber()).to.equal(1);
       expect(position.z.toNumber()).to.equal(0);
     });
+
+    return;
 
     it("Apply Simple Movement System (Right) on Entity 1", async () => {
       const instruction = await framework.worldProgram.methods

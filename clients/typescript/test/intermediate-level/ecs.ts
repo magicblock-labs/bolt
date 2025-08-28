@@ -270,33 +270,37 @@ export function ecs(framework: Framework) {
       expect(position.z.toNumber()).to.equal(300);
     });
 
-    it("Initialize Large Component on Entity 1", async () => {
-      const initializeComponent = await InitializeComponent({
-        payer: framework.provider.wallet.publicKey,
-        entity: framework.entity1Pda,
-        componentId: framework.componentLarge.programId,
-      });
-      await framework.provider.sendAndConfirm(initializeComponent.transaction);
-      framework.componentLargeEntity1Pda = initializeComponent.componentPda; // Saved for later
-    });
-
-    it("Initialize Small Component on Entity 1", async () => {
-      const initializeComponent = await InitializeComponent({
-        payer: framework.provider.wallet.publicKey,
-        entity: framework.entity1Pda,
-        componentId: framework.componentSmall.programId,
-      });
-      await framework.provider.sendAndConfirm(initializeComponent.transaction);
-      framework.componentSmallEntity1Pda = initializeComponent.componentPda; // Saved for later
-    });
-
     it("Apply System With Few Components on Entity 1", async () => {
+      let entitiesPdas: web3.PublicKey[] = [];
+      for (let i = 0; i < 5; i++) {
+        const addEntity = await AddEntity({
+          payer: framework.provider.wallet.publicKey,
+          world: framework.worldPda,
+          connection: framework.provider.connection,
+        });
+        await framework.provider.sendAndConfirm(addEntity.transaction);
+        entitiesPdas.push(addEntity.entityPda);
+      }
+
+      let componentsPdas: web3.PublicKey[] = [];
+      for (let i = 0; i < 5; i++) {
+        const initializeComponent = await InitializeComponent({
+          payer: framework.provider.wallet.publicKey,
+          entity: entitiesPdas[i],
+          componentId: framework.componentLarge.programId,
+        });
+        await framework.provider.sendAndConfirm(
+          initializeComponent.transaction,
+        );
+        componentsPdas.push(initializeComponent.componentPda);
+      }
+
       const applySystem = await ApplySystem({
         authority: framework.provider.wallet.publicKey,
         systemId: framework.systemWithFewComponents.programId,
         world: framework.worldPda,
-        entities: new Array(5).fill(0).map(() => ({
-          entity: framework.entity1Pda,
+        entities: entitiesPdas.map((entity) => ({
+          entity,
           components: [{ componentId: framework.componentLarge.programId }],
         })),
       });
@@ -315,12 +319,36 @@ export function ecs(framework: Framework) {
     });
 
     it("Apply System With Many Components on Entity 1", async () => {
+      let entitiesPdas: web3.PublicKey[] = [];
+      for (let i = 0; i < 10; i++) {
+        const addEntity = await AddEntity({
+          payer: framework.provider.wallet.publicKey,
+          world: framework.worldPda,
+          connection: framework.provider.connection,
+        });
+        await framework.provider.sendAndConfirm(addEntity.transaction);
+        entitiesPdas.push(addEntity.entityPda);
+      }
+
+      let componentsPdas: web3.PublicKey[] = [];
+      for (let i = 0; i < 10; i++) {
+        const initializeComponent = await InitializeComponent({
+          payer: framework.provider.wallet.publicKey,
+          entity: entitiesPdas[i],
+          componentId: framework.componentSmall.programId,
+        });
+        await framework.provider.sendAndConfirm(
+          initializeComponent.transaction,
+        );
+        componentsPdas.push(initializeComponent.componentPda);
+      }
+
       const applySystem = await ApplySystem({
         authority: framework.provider.wallet.publicKey,
         systemId: framework.systemWithManyComponents.programId,
         world: framework.worldPda,
-        entities: new Array(10).fill(0).map(() => ({
-          entity: framework.entity1Pda,
+        entities: entitiesPdas.map((entity) => ({
+          entity,
           components: [{ componentId: framework.componentSmall.programId }],
         })),
       });

@@ -249,6 +249,22 @@ export type World = {
           signer: true;
         },
         {
+          name: "buffer";
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: "const";
+                value: [98, 117, 102, 102, 101, 114];
+              },
+              {
+                kind: "account";
+                path: "authority";
+              },
+            ];
+          };
+        },
+        {
           name: "data";
           writable: true;
         },

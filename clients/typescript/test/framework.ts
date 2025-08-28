@@ -44,9 +44,7 @@ export class Framework {
   acceleratedComponentPositionPda: PublicKey;
   componentPositionEntity1Pda: PublicKey;
   componentVelocityEntity1Pda: PublicKey;
-  componentLargeEntity1Pda: PublicKey;
   componentPositionEntity4Pda: PublicKey;
-  componentSmallEntity1Pda: PublicKey;
 
   constructor() {
     this.secondAuthority = Keypair.generate().publicKey;
