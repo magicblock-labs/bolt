@@ -130,7 +130,7 @@ export class Framework {
     let report = "```mermaid\n";
     report += `%%{init: {"xyChart": {"width": 1200, "height": 400, "xAxis": {}}}}%%\n`;
     report += "xychart\n";
-    report += "    title \"Bolt Apply System Cost\"\n";
+    report += '    title "Bolt Apply System Cost"\n';
     report += "    x-axis [";
     for (let i = 0; i < reports.length; i++) {
       report += `"${i + 1}C-CPIs:${reports[i].cpiCount}"`;
@@ -139,7 +139,7 @@ export class Framework {
       }
     }
     report += "]\n";
-    report += "    y-axis \"CU\" 5000 --> 200000\n";
+    report += '    y-axis "CU" 5000 --> 200000\n';
     report += "    bar [";
     for (let i = 0; i < reports.length; i++) {
       report += reports[i].totalCu;
