@@ -10,15 +10,22 @@ world = "WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n"
 [programs.localnet]
 bolt-component = "CmP2djJgABZ4cRokm4ndxuq6LerqpNHLBsaUv2XKEJua"
 bolt-system = "7X4EFsDJ5aYTcEjKzJ94rD8FRKgQeXC89fkpeTS4KaqP"
-component-large = "FJjiJoz799Q6NqYffXbsFFj1pBmwsQZgcoizCfWvM5HX"
 component-small = "9yBADAhoTWCkNRB6hbfpwUgPpxyJiF9uEiWVPR6k7A4y"
 position = "Fn1JzzEdyb55fsyduWS94mYHizGhJZuhvjX6DVvrmGbQ"
 system-apply-velocity = "6LHhFVwif6N9Po3jHtSmMVtPjF6zRfL3xMosSzcrQAS8"
 system-fly = "HT2YawJjkNmqWcLNfPAMvNsLdWwPvvvbKA5bpMw4eUpq"
 system-simple-movement = "FSa6qoJXFBR3a7ThQkTAMrC15p6NkchPEjBdd4n6dXxA"
-system-with-few-components = "A3kNNSgmkTNA5V1qtnrbtNeqKrYHNxUMCTkqTDaQzE97"
-system-with-many-components = "Hi4sMEb3uXhWCiLyrF7t3Z384an7YZsTj774cabAAPQB"
 velocity = "CbHEFbSQdRN4Wnoby9r16umnJ1zWbULBHg4yqzGQonU1"
+with-1-component = "BsVKJF2H9GN1P9WrexdgEY4ztiweKvfQo6ydLWUEw6n7"
+with-2-components = "X5wTvz1i6ocNXzfrEB8JmhFCniojUZxqk3TXDq98fZX"
+with-3-components = "9R7rvEwCuZ6iow1Ch3sdUQKib4LBvftyBmyvSnPaAZkG"
+with-4-components = "2w9pkZoCfEciHLLDhG3zrZRprcYH7nojhyBQMnD3PtUU"
+with-5-components = "8KsdHMGdS4mQjpKFhc2PWBw2tyxwNbEKCnZLKp3riC5o"
+with-6-components = "3ndvNAg4moKeLhuWQtDmcN43PuvvGsigQWRBPthfWEN3"
+with-7-components = "4ESiD77Gjjfuywhw8NBnryHezXtwDSA27ustL29JdX7i"
+with-8-components = "EbTAEnrVV4f8W7Fd4TxW3jLjfpyhr74wQf7rSHRQ8u78"
+with-9-components = "GKdPXW7pGhFNRdMPHWNsrmqc7haXQk4VFCAyZKsrgYQG"
+with-10-components = "C69UYWaXBQXUbhHQGtG8pB7DHSgh2z5Sm9ifyAnM1kkt"
 
 [registry]
 url = "https://api.apr.dev"
@@ -28,7 +35,7 @@ cluster = "localnet"
 wallet = "./tests/fixtures/provider.json"
 
 [workspace]
-members = ["crates/programs/bolt-component", "crates/programs/bolt-system", "crates/programs/world", "examples/component-position", "examples/component-velocity", "examples/system-apply-velocity", "examples/system-fly", "examples/system-simple-movement", "examples/system-with-many-components", "examples/system-with-few-components", "examples/component-large", "examples/component-small"]
+members = ["crates/programs/bolt-component", "crates/programs/bolt-system", "crates/programs/world", "examples/component-position", "examples/component-velocity", "examples/system-apply-velocity", "examples/system-fly", "examples/system-simple-movement", "examples/component-small", "examples/system-with-1-component", "examples/system-with-2-components", "examples/system-with-3-components", "examples/system-with-4-components", "examples/system-with-5-components", "examples/system-with-6-components", "examples/system-with-7-components", "examples/system-with-8-components", "examples/system-with-9-components", "examples/system-with-10-components"]
 
 [scripts]
 test = "tests/script.sh"

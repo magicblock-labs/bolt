@@ -270,55 +270,7 @@ export function ecs(framework: Framework) {
       expect(position.z.toNumber()).to.equal(300);
     });
 
-    it("Apply System With Few Components on Entity 1", async () => {
-      let entitiesPdas: web3.PublicKey[] = [];
-      for (let i = 0; i < 5; i++) {
-        const addEntity = await AddEntity({
-          payer: framework.provider.wallet.publicKey,
-          world: framework.worldPda,
-          connection: framework.provider.connection,
-        });
-        await framework.provider.sendAndConfirm(addEntity.transaction);
-        entitiesPdas.push(addEntity.entityPda);
-      }
-
-      let componentsPdas: web3.PublicKey[] = [];
-      for (let i = 0; i < 5; i++) {
-        const initializeComponent = await InitializeComponent({
-          payer: framework.provider.wallet.publicKey,
-          entity: entitiesPdas[i],
-          componentId: framework.componentLarge.programId,
-        });
-        await framework.provider.sendAndConfirm(
-          initializeComponent.transaction,
-        );
-        componentsPdas.push(initializeComponent.componentPda);
-      }
-
-      const applySystem = await ApplySystem({
-        authority: framework.provider.wallet.publicKey,
-        systemId: framework.systemWithFewComponents.programId,
-        world: framework.worldPda,
-        entities: entitiesPdas.map((entity) => ({
-          entity,
-          components: [{ componentId: framework.componentLarge.programId }],
-        })),
-      });
-      let signature = await framework.provider.sendAndConfirm(
-        applySystem.transaction,
-      );
-
-      let transactionResponse: any;
-      do {
-        transactionResponse =
-          await framework.provider.connection.getTransaction(signature, {
-            commitment: "confirmed",
-          });
-      } while (transactionResponse?.meta?.logMessages === undefined);
-      framework.report(transactionResponse?.meta?.logMessages);
-    });
-
-    it("Apply System With Many Components on Entity 1", async () => {
+    it("Reports profile", async () => {
       let entitiesPdas: web3.PublicKey[] = [];
       for (let i = 0; i < 10; i++) {
         const addEntity = await AddEntity({
@@ -343,27 +295,48 @@ export function ecs(framework: Framework) {
         componentsPdas.push(initializeComponent.componentPda);
       }
 
-      const applySystem = await ApplySystem({
-        authority: framework.provider.wallet.publicKey,
-        systemId: framework.systemWithManyComponents.programId,
-        world: framework.worldPda,
-        entities: entitiesPdas.map((entity) => ({
-          entity,
-          components: [{ componentId: framework.componentSmall.programId }],
-        })),
-      });
-      let signature = await framework.provider.sendAndConfirm(
-        applySystem.transaction,
-      );
+      let systems = [
+        framework.systemWith1Component.programId,
+        framework.systemWith2Components.programId,
+        framework.systemWith3Components.programId,
+        framework.systemWith4Components.programId,
+        framework.systemWith5Components.programId,
+        framework.systemWith6Components.programId,
+        framework.systemWith7Components.programId,
+        framework.systemWith8Components.programId,
+        framework.systemWith9Components.programId,
+        framework.systemWith10Components.programId,
+      ];
 
-      let transactionResponse: any;
-      do {
-        transactionResponse =
-          await framework.provider.connection.getTransaction(signature, {
-            commitment: "confirmed",
-          });
-      } while (transactionResponse?.meta?.logMessages === undefined);
-      framework.report(transactionResponse?.meta?.logMessages);
+      var reports: any[] = [];
+      for (let i = 0; i < systems.length; i++) {
+        const systemId = systems[i];
+        const applySystem = await ApplySystem({
+          authority: framework.provider.wallet.publicKey,
+          systemId: systemId,
+          world: framework.worldPda,
+          entities: entitiesPdas.slice(0, i + 1).map((entity) => ({
+            entity,
+            components: [{ componentId: framework.componentSmall.programId }],
+          })),
+        });
+
+        let signature = await framework.provider.sendAndConfirm(
+          applySystem.transaction,
+        );
+
+        let transactionResponse: any;
+        do {
+          transactionResponse =
+            await framework.provider.connection.getTransaction(signature, {
+              commitment: "confirmed",
+            });
+        } while (transactionResponse?.meta?.logMessages === undefined);
+        let report = framework.report(transactionResponse?.meta?.logMessages);
+        reports.push(report);
+      }
+
+      framework.saveReport(reports);
     });
 
     it("Apply Fly System on Entity 4", async () => {

@@ -1,10 +1,10 @@
 use bolt_lang::*;
 use component_small::Small;
 
-declare_id!("Hi4sMEb3uXhWCiLyrF7t3Z384an7YZsTj774cabAAPQB");
+declare_id!("EbTAEnrVV4f8W7Fd4TxW3jLjfpyhr74wQf7rSHRQ8u78");
 
 #[system]
-pub mod system_with_many_components {
+pub mod with_8_components {
 
     pub fn execute(ctx: Context<Components>, _args_p: Vec<u8>) -> Result<Components> {
         Ok(ctx.accounts)
@@ -20,8 +20,6 @@ pub mod system_with_many_components {
         pub small6: Small,
         pub small7: Small,
         pub small8: Small,
-        pub small9: Small,
-        pub small10: Small,
     }
 
 }

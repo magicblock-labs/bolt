@@ -1,11 +1,12 @@
 [package]
-name = "component-large"
-version.workspace = true
-edition.workspace = true
+name = "with-1-component"
+version = "0.2.3"
+description = "Created with Bolt"
+edition = "2021"
 
 [lib]
 crate-type = ["cdylib", "lib"]
-name = "component_large"
+name = "with_1_component"
 
 [features]
 no-entrypoint = []
@@ -18,5 +19,8 @@ anchor-debug = ["bolt-lang/anchor-debug"]
 custom-heap = []
 custom-panic = []
 
+
 [dependencies]
 bolt-lang.workspace = true
+component-small.workspace = true
+serde.workspace = true

@@ -1,12 +1,12 @@
 [package]
-name = "system-with-few-components"
-version = "0.2.4"
+name = "with-10-components"
+version = "0.2.3"
 description = "Created with Bolt"
 edition = "2021"
 
 [lib]
 crate-type = ["cdylib", "lib"]
-name = "system_with_few_components"
+name = "with_10_components"
 
 [features]
 no-entrypoint = []
@@ -22,5 +22,5 @@ custom-panic = []
 
 [dependencies]
 bolt-lang.workspace = true
-serde.workspace = true 
-component-large.workspace = true
+component-small.workspace = true
+serde.workspace = true

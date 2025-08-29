@@ -1,11 +1,12 @@
 [package]
-name = "system-with-many-components"
-version.workspace = true
-edition.workspace = true
+name = "with-2-components"
+version = "0.2.3"
+description = "Created with Bolt"
+edition = "2021"
 
 [lib]
 crate-type = ["cdylib", "lib"]
-name = "system_with_many_components"
+name = "with_2_components"
 
 [features]
 no-entrypoint = []
