@@ -21,5 +21,4 @@ pub mod with_8_components {
         pub small7: Small,
         pub small8: Small,
     }
-
 }

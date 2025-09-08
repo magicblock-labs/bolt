@@ -14,5 +14,4 @@ pub mod with_1_component {
     pub struct Components {
         pub small1: Small,
     }
-
 }

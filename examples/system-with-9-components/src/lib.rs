@@ -22,5 +22,4 @@ pub mod with_9_components {
         pub small8: Small,
         pub small9: Small,
     }
-
 }

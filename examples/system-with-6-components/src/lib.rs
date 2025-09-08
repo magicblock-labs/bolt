@@ -19,5 +19,4 @@ pub mod with_6_components {
         pub small5: Small,
         pub small6: Small,
     }
-
 }
