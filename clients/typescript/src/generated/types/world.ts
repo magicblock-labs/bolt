@@ -180,22 +180,24 @@ export type World = {
       args: [];
     },
     {
-      name: "delegateBuffer";
-      discriminator: [121, 134, 252, 65, 64, 83, 93, 91];
+      name: "delegateComponent";
+      discriminator: [191, 212, 179, 193, 178, 94, 119, 93];
       accounts: [
         {
           name: "payer";
+          writable: true;
           signer: true;
         },
         {
           name: "component";
+          writable: true;
         },
         {
           name: "componentBuffer";
           writable: true;
         },
         {
-          name: "ownerProgram";
+          name: "componentProgram";
         },
         {
           name: "buffer";
@@ -215,6 +217,24 @@ export type World = {
         {
           name: "systemProgram";
           address: "11111111111111111111111111111111";
+        },
+        {
+          name: "entity";
+        },
+        {
+          name: "worldProgram";
+        },
+        {
+          name: "bufferBuffer";
+          writable: true;
+        },
+        {
+          name: "bufferDelegationRecord";
+          writable: true;
+        },
+        {
+          name: "bufferDelegationMetadata";
+          writable: true;
         },
       ];
       args: [

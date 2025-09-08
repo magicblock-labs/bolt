@@ -7,9 +7,6 @@ import {
 } from "../../lib";
 import { expect } from "chai";
 import { Direction } from "../framework";
-import { convertIdlToCamelCase } from "@coral-xyz/anchor/dist/cjs/idl";
-import { sendAndConfirmTransaction, Keypair } from "@solana/web3.js";
-import fs from "fs";
 import { Framework } from "../framework";
 
 export function acceleration(framework: Framework) {
@@ -54,7 +51,7 @@ export function acceleration(framework: Framework) {
         delegateComponent.transaction,
         [],
         {
-          skipPreflight: true,
+          skipPreflight: false,
           commitment: "confirmed",
         },
       );

@@ -87,7 +87,7 @@ export function createDelegateInstruction(
   const keys: web3.AccountMeta[] = [
     {
       pubkey: accounts.payer,
-      isWritable: false,
+      isWritable: true,
       isSigner: true,
     },
     {
@@ -174,56 +174,63 @@ export async function DelegateComponent({
   delegationProgram?: web3.PublicKey;
   systemProgram?: web3.PublicKey;
 }): Promise<{
-  instructions: TransactionInstruction[];
+  instruction: TransactionInstruction;
   transaction: Transaction;
   componentPda: PublicKey;
 }> {
   const componentPda = FindComponentPda({ componentId, entity, seed });
+  const componentProgram = componentId;
   const componentBuffer = FindBufferPda(componentPda);
-  const delegateComponentIx = createDelegateInstruction({
-    payer,
-    entity,
-    account: componentPda,
-    ownerProgram: componentId,
-    buffer,
-    delegationRecord,
-    delegationMetadata,
-    delegationProgram,
-    systemProgram,
-  });
+  systemProgram = systemProgram ?? web3.SystemProgram.programId;
+  buffer =
+    buffer ??
+    delegateBufferPdaFromDelegatedAccountAndOwnerProgram(
+      componentPda,
+      componentProgram,
+    );
+  delegationRecord =
+    delegationRecord ?? delegationRecordPdaFromDelegatedAccount(componentPda);
+  delegationMetadata =
+    delegationMetadata ??
+    delegationMetadataPdaFromDelegatedAccount(componentPda);
+  delegationProgram = delegationProgram ?? new PublicKey(DELEGATION_PROGRAM_ID);
+  const worldProgram = new PublicKey(worldIdl.address);
 
-  const componentBufferDelegationRecord =
+  const bufferDelegationRecord =
     delegationRecordPdaFromDelegatedAccount(componentBuffer);
 
-  const componentBufferDelegationMetadata =
+  const bufferDelegationMetadata =
     delegationMetadataPdaFromDelegatedAccount(componentBuffer);
 
-  const componentBufferBuffer =
-    delegateBufferPdaFromDelegatedAccountAndOwnerProgram(
-      componentBuffer,
-      new PublicKey(worldIdl.address),
-    );
+  const bufferBuffer = delegateBufferPdaFromDelegatedAccountAndOwnerProgram(
+    componentBuffer,
+    worldProgram,
+  );
 
   const program = new Program(worldIdl as Idl) as unknown as Program;
-  const delegateBufferComponentIx = await program.methods
-    .delegateBuffer(0, null)
+  const delegateComponentIx = await program.methods
+    .delegateComponent(0, null)
     .accounts({
       payer,
       component: componentPda,
       componentBuffer,
-      ownerProgram: worldIdl.address,
-      buffer: componentBufferBuffer,
-      delegationRecord: componentBufferDelegationRecord,
-      delegationMetadata: componentBufferDelegationMetadata,
-      delegationProgram: DELEGATION_PROGRAM_ID,
+      componentProgram,
+      buffer,
+      delegationRecord,
+      delegationMetadata,
+      delegationProgram,
+      systemProgram,
+      entity,
+      worldProgram,
+      bufferBuffer,
+      bufferDelegationRecord,
+      bufferDelegationMetadata,
     })
     .instruction();
 
   return {
-    instructions: [delegateComponentIx, delegateBufferComponentIx], // TODO: Make it a single instruction again using the World program as a proxy.
-    transaction: new Transaction()
-      .add(delegateComponentIx)
-      .add(delegateBufferComponentIx),
+    instruction: delegateComponentIx,
+    transaction: new Transaction().add(delegateComponentIx),
     componentPda,
   };
 }

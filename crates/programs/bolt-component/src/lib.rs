@@ -21,6 +21,38 @@ pub mod bolt_component {
     pub fn set_data(_ctx: Context<SetData>) -> Result<()> {
         Ok(())
     }
+
+    pub fn delegate(_ctx: Context<DelegateInput>, _commit_frequency_ms: u32, _validator: Option<Pubkey>) -> Result<()> {
+        Ok(())
+    }
+}
+
+
+#[derive(Accounts)]
+pub struct DelegateInput<'info> {
+    #[account(mut)]
+    pub payer: Signer<'info>,
+    /// CHECK:
+    #[account()]
+    pub entity: AccountInfo<'info>,
+    /// CHECK:
+    #[account(mut)]
+    pub account: AccountInfo<'info>,
+    /// CHECK:`
+    pub owner_program: AccountInfo<'info>,
+    /// CHECK:
+    #[account(mut)]
+    pub buffer: AccountInfo<'info>,
+    /// CHECK:`
+    #[account(mut)]
+    pub delegation_record: AccountInfo<'info>,
+    /// CHECK:`
+    #[account(mut)]
+    pub delegation_metadata: AccountInfo<'info>,
+    /// CHECK:`
+    pub delegation_program: AccountInfo<'info>,
+    /// CHECK:`
+    pub system_program: AccountInfo<'info>,
 }
 
 #[derive(Accounts)]
