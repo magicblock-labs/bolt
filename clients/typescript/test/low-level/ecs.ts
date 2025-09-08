@@ -189,7 +189,7 @@ export function ecs(framework) {
       const instruction = await framework.worldProgram.methods
         .apply(SerializeArgs({ direction: Direction.Up }))
         .accounts({
-          buffer: FindBufferPda(framework.provider.wallet.publicKey),
+          buffer: FindBufferPda(framework.componentPositionEntity1Pda),
           authority: framework.provider.wallet.publicKey,
           boltSystem: framework.systemSimpleMovement.programId,
           world: framework.worldPda,
@@ -225,7 +225,7 @@ export function ecs(framework) {
       const instruction = await framework.worldProgram.methods
         .apply(SerializeArgs({ direction: Direction.Right }))
         .accounts({
-          buffer: FindBufferPda(framework.provider.wallet.publicKey),
+          buffer: FindBufferPda(framework.componentPositionEntity1Pda),
           authority: framework.provider.wallet.publicKey,
           boltSystem: framework.systemSimpleMovement.programId,
           world: framework.worldPda,
@@ -260,7 +260,7 @@ export function ecs(framework) {
       const instruction = await framework.worldProgram.methods
         .apply(SerializeArgs())
         .accounts({
-          buffer: FindBufferPda(framework.provider.wallet.publicKey),
+          buffer: FindBufferPda(framework.componentPositionEntity1Pda),
           authority: framework.provider.wallet.publicKey,
           boltSystem: framework.systemFly.programId,
           world: framework.worldPda,
@@ -295,7 +295,7 @@ export function ecs(framework) {
       const instruction = await framework.worldProgram.methods
         .apply(SerializeArgs())
         .accounts({
-          buffer: FindBufferPda(framework.provider.wallet.publicKey),
+          buffer: FindBufferPda(framework.componentVelocityEntity1Pda),
           authority: framework.provider.wallet.publicKey,
           boltSystem: framework.systemApplyVelocity.programId,
           world: framework.worldPda,
@@ -349,7 +349,7 @@ export function ecs(framework) {
       const instruction = await framework.worldProgram.methods
         .apply(SerializeArgs())
         .accounts({
-          buffer: FindBufferPda(framework.provider.wallet.publicKey),
+          buffer: FindBufferPda(framework.componentVelocityEntity1Pda),
           authority: framework.provider.wallet.publicKey,
           boltSystem: framework.systemApplyVelocity.programId,
           world: framework.worldPda,
@@ -406,7 +406,7 @@ export function ecs(framework) {
       const instruction = await framework.worldProgram.methods
         .apply(SerializeArgs())
         .accounts({
-          buffer: FindBufferPda(framework.provider.wallet.publicKey),
+          buffer: FindBufferPda(framework.componentPositionEntity4Pda),
           authority: framework.provider.wallet.publicKey,
           boltSystem: framework.systemFly.programId,
           world: framework.worldPda,

@@ -35,7 +35,8 @@ namespace Bolt {
                 Entity = entity,
                 Data = componentPda,
                 ComponentProgram = componentId,
-                Authority = authority ?? new PublicKey(WorldProgram.ID)
+                Authority = authority ?? new PublicKey(WorldProgram.ID),
+                Buffer = WorldProgram.FindBufferPda(componentPda)
             };
             var instruction = WorldProgram.InitializeComponent(initializeComponent);
             return new InitializeComponentInstruction() {

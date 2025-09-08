@@ -99,9 +99,9 @@ export function FindComponentProgramDataPda({
   )[0];
 }
 
-export function FindBufferPda(owner: PublicKey) {
+export function FindBufferPda(component: PublicKey) {
   return PublicKey.findProgramAddressSync(
-    [Buffer.from("buffer"), owner.toBuffer()],
+    [Buffer.from("buffer"), component.toBuffer()],
     WORLD_PROGRAM_ID,
   )[0];
 }

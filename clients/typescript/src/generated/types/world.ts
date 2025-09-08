@@ -92,18 +92,6 @@ export type World = {
         {
           name: "buffer";
           writable: true;
-          pda: {
-            seeds: [
-              {
-                kind: "const";
-                value: [98, 117, 102, 102, 101, 114];
-              },
-              {
-                kind: "account";
-                path: "authority";
-              },
-            ];
-          };
         },
         {
           name: "boltSystem";
@@ -138,18 +126,6 @@ export type World = {
         {
           name: "buffer";
           writable: true;
-          pda: {
-            seeds: [
-              {
-                kind: "const";
-                value: [98, 117, 102, 102, 101, 114];
-              },
-              {
-                kind: "account";
-                path: "authority";
-              },
-            ];
-          };
         },
         {
           name: "boltSystem";
@@ -202,6 +178,57 @@ export type World = {
         },
       ];
       args: [];
+    },
+    {
+      name: "delegateBuffer";
+      discriminator: [121, 134, 252, 65, 64, 83, 93, 91];
+      accounts: [
+        {
+          name: "payer";
+          signer: true;
+        },
+        {
+          name: "component";
+        },
+        {
+          name: "componentBuffer";
+          writable: true;
+        },
+        {
+          name: "ownerProgram";
+        },
+        {
+          name: "buffer";
+          writable: true;
+        },
+        {
+          name: "delegationRecord";
+          writable: true;
+        },
+        {
+          name: "delegationMetadata";
+          writable: true;
+        },
+        {
+          name: "delegationProgram";
+        },
+        {
+          name: "systemProgram";
+          address: "11111111111111111111111111111111";
+        },
+      ];
+      args: [
+        {
+          name: "commitFrequencyMs";
+          type: "u32";
+        },
+        {
+          name: "validator";
+          type: {
+            option: "pubkey";
+          };
+        },
+      ];
     },
     {
       name: "destroyComponent";
@@ -267,6 +294,22 @@ export type World = {
         {
           name: "systemProgram";
           address: "11111111111111111111111111111111";
+        },
+        {
+          name: "buffer";
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: "const";
+                value: [98, 117, 102, 102, 101, 114];
+              },
+              {
+                kind: "account";
+                path: "data";
+              },
+            ];
+          };
         },
       ];
       args: [];
@@ -453,6 +496,11 @@ export type World = {
       code: 6006;
       name: "invalidComponentOwner";
       msg: "The component owner does not match the program";
+    },
+    {
+      code: 6007;
+      name: "invalidBufferAccount";
+      msg: "Invalid buffer account";
     },
   ];
   types: [

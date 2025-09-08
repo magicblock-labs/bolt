@@ -236,7 +236,7 @@ namespace World
                 if (sessionToken != null) {
                     var apply = new ApplyWithSessionAccounts() {
                         CpiAuth = WorldProgram.FindCpiAuthPda(),
-                        Buffer = FindBufferPda(authority),
+                        Buffer = FindBufferPda(componentPdas[0]),
                         BoltSystem = system,
                         Authority = authority,
                         World = world,
@@ -246,7 +246,7 @@ namespace World
                 } else {
                     var apply = new ApplyAccounts() {
                         CpiAuth = WorldProgram.FindCpiAuthPda(),
-                        Buffer = FindBufferPda(authority),
+                        Buffer = FindBufferPda(componentPdas[0]),
                         BoltSystem = system,
                         Authority = authority,
                         World = world,

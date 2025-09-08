@@ -417,6 +417,8 @@ namespace World
             public PublicKey CpiAuth { get; set; }
 
             public PublicKey SystemProgram { get; set; } = new PublicKey("11111111111111111111111111111111");
+
+            public PublicKey Buffer { get; set; }
         }
 
         public class InitializeNewWorldAccounts
@@ -577,7 +579,7 @@ namespace World
             {
                 programId ??= new(ID);
                 List<Solana.Unity.Rpc.Models.AccountMeta> keys = new()
-                {Solana.Unity.Rpc.Models.AccountMeta.Writable(accounts.Payer, true), Solana.Unity.Rpc.Models.AccountMeta.Writable(accounts.Data, false), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.Entity, false), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.ComponentProgram, false), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.Authority, false), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.CpiAuth, false), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.SystemProgram, false)};
+                {Solana.Unity.Rpc.Models.AccountMeta.Writable(accounts.Payer, true), Solana.Unity.Rpc.Models.AccountMeta.Writable(accounts.Data, false), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.Entity, false), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.ComponentProgram, false), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.Authority, false), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.CpiAuth, false), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.SystemProgram, false), Solana.Unity.Rpc.Models.AccountMeta.Writable(accounts.Buffer, false)};
                 byte[] _data = new byte[1200];
                 int offset = 0;
                 _data.WriteU64(2179155133888827172UL, offset);
