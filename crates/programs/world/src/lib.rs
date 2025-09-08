@@ -277,7 +277,11 @@ pub mod world {
                         from: ctx.accounts.payer.to_account_info(),
                         to: ctx.accounts.buffer.to_account_info(),
                     },
-                    &[&[b"buffer", ctx.accounts.data.key.as_ref(), &[ctx.bumps.buffer]]],
+                    &[&[
+                        b"buffer",
+                        ctx.accounts.data.key.as_ref(),
+                        &[ctx.bumps.buffer],
+                    ]],
                 ),
                 lamports,
                 size as u64,
@@ -288,7 +292,11 @@ pub mod world {
         Ok(())
     }
 
-    pub fn delegate_component(ctx: Context<DelegateComponent>, commit_frequency_ms: u32, validator: Option<Pubkey>) -> Result<()> {
+    pub fn delegate_component(
+        ctx: Context<DelegateComponent>,
+        commit_frequency_ms: u32,
+        validator: Option<Pubkey>,
+    ) -> Result<()> {
         let pda_seeds: &[&[u8]] = &[b"buffer", &ctx.accounts.component.key().to_bytes()];
 
         let del_accounts = ephemeral_rollups_sdk::cpi::DelegateAccounts {
@@ -307,11 +315,7 @@ pub mod world {
             validator,
         };
 
-        ephemeral_rollups_sdk::cpi::delegate_account(
-            del_accounts,
-            pda_seeds,
-            config,
-        )?;
+        ephemeral_rollups_sdk::cpi::delegate_account(del_accounts, pda_seeds, config)?;
 
         bolt_component::cpi::delegate(
             CpiContext::new(
@@ -325,11 +329,11 @@ pub mod world {
                     delegation_metadata: ctx.accounts.delegation_metadata.to_account_info(),
                     delegation_record: ctx.accounts.delegation_record.to_account_info(),
                     delegation_program: ctx.accounts.delegation_program.to_account_info(),
-                    system_program: ctx.accounts.system_program.to_account_info()
-                }
+                    system_program: ctx.accounts.system_program.to_account_info(),
+                },
             ),
             commit_frequency_ms,
-            validator
+            validator,
         )?;
 
         Ok(())
@@ -374,7 +378,6 @@ pub mod world {
         /// CHECK:`
         #[account(mut)]
         pub buffer_delegation_metadata: AccountInfo<'info>,
-    
     }
 
     pub fn destroy_component(ctx: Context<DestroyComponent>) -> Result<()> {
@@ -509,7 +512,10 @@ fn apply_impl<'info>(
 
     require!(buffer.data_len() == 0, WorldError::InvalidBufferAccount);
 
-    let index = remaining_accounts.iter().position(|x| x.key() == ID).unwrap_or(remaining_accounts.len());
+    let index = remaining_accounts
+        .iter()
+        .position(|x| x.key() == ID)
+        .unwrap_or(remaining_accounts.len());
 
     // Authority check against component metadata (partial deserialize)
     for component in remaining_accounts[..index].iter().skip(1).step_by(2) {
@@ -590,7 +596,13 @@ fn apply_impl<'info>(
         }
     }
 
-    let cpi_remaining_accounts = remaining_accounts[..index].iter().skip(1).step_by(2).chain(remaining_accounts[index..].iter().skip(1)).cloned().collect::<Vec<_>>();
+    let cpi_remaining_accounts = remaining_accounts[..index]
+        .iter()
+        .skip(1)
+        .step_by(2)
+        .chain(remaining_accounts[index..].iter().skip(1))
+        .cloned()
+        .collect::<Vec<_>>();
     bolt_system::cpi::bolt_execute(
         cpi_context.with_remaining_accounts(cpi_remaining_accounts),
         args,
@@ -745,7 +757,7 @@ pub struct InitializeComponent<'info> {
     pub system_program: Program<'info, System>,
     /// CHECK: Buffer account
     #[account(mut, seeds = [b"buffer", data.key.as_ref()], bump)]
-    pub buffer: UncheckedAccount<'info>
+    pub buffer: UncheckedAccount<'info>,
 }
 
 impl<'info> InitializeComponent<'info> {

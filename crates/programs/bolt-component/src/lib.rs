@@ -22,11 +22,14 @@ pub mod bolt_component {
         Ok(())
     }
 
-    pub fn delegate(_ctx: Context<DelegateInput>, _commit_frequency_ms: u32, _validator: Option<Pubkey>) -> Result<()> {
+    pub fn delegate(
+        _ctx: Context<DelegateInput>,
+        _commit_frequency_ms: u32,
+        _validator: Option<Pubkey>,
+    ) -> Result<()> {
         Ok(())
     }
 }
-
 
 #[derive(Accounts)]
 pub struct DelegateInput<'info> {

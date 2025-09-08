@@ -17,5 +17,5 @@ pub enum WorldError {
     #[msg("The component owner does not match the program")]
     InvalidComponentOwner,
     #[msg("Invalid buffer account")]
-    InvalidBufferAccount
+    InvalidBufferAccount,
 }
