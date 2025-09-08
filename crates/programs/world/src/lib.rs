@@ -288,16 +288,16 @@ pub mod world {
         Ok(())
     }
 
-    pub fn delegate_buffer(ctx: Context<DelegateBuffer>, commit_frequency_ms: u32, validator: Option<Pubkey>) -> Result<()> {
+    pub fn delegate_component(ctx: Context<DelegateComponent>, commit_frequency_ms: u32, validator: Option<Pubkey>) -> Result<()> {
         let pda_seeds: &[&[u8]] = &[b"buffer", &ctx.accounts.component.key().to_bytes()];
 
         let del_accounts = ephemeral_rollups_sdk::cpi::DelegateAccounts {
             payer: &ctx.accounts.payer,
             pda: &ctx.accounts.component_buffer,
-            owner_program: &ctx.accounts.owner_program,
-            buffer: &ctx.accounts.buffer,
-            delegation_record: &ctx.accounts.delegation_record,
-            delegation_metadata: &ctx.accounts.delegation_metadata,
+            owner_program: &ctx.accounts.world_program,
+            buffer: &ctx.accounts.buffer_buffer,
+            delegation_record: &ctx.accounts.buffer_delegation_record,
+            delegation_metadata: &ctx.accounts.buffer_delegation_metadata,
             delegation_program: &ctx.accounts.delegation_program,
             system_program: &ctx.accounts.system_program,
         };
@@ -313,20 +313,39 @@ pub mod world {
             config,
         )?;
 
+        bolt_component::cpi::delegate(
+            CpiContext::new(
+                ctx.accounts.component_program.to_account_info(),
+                bolt_component::cpi::accounts::DelegateInput {
+                    payer: ctx.accounts.payer.to_account_info(),
+                    entity: ctx.accounts.entity.to_account_info(),
+                    account: ctx.accounts.component.to_account_info(),
+                    owner_program: ctx.accounts.component_program.to_account_info(),
+                    buffer: ctx.accounts.buffer.to_account_info(),
+                    delegation_metadata: ctx.accounts.delegation_metadata.to_account_info(),
+                    delegation_record: ctx.accounts.delegation_record.to_account_info(),
+                    delegation_program: ctx.accounts.delegation_program.to_account_info(),
+                    system_program: ctx.accounts.system_program.to_account_info()
+                }
+            ),
+            commit_frequency_ms,
+            validator
+        )?;
+
         Ok(())
     }
 
     #[derive(Accounts)]
-    pub struct DelegateBuffer<'info> {
+    pub struct DelegateComponent<'info> {
         pub payer: Signer<'info>,
         /// CHECK:
-        #[account()]
+        #[account(mut)]
         pub component: AccountInfo<'info>,
         /// CHECK:
         #[account(mut)]
         pub component_buffer: AccountInfo<'info>,
         /// CHECK:`
-        pub owner_program: AccountInfo<'info>,
+        pub component_program: AccountInfo<'info>,
         /// CHECK:
         #[account(mut)]
         pub buffer: AccountInfo<'info>,
@@ -340,6 +359,21 @@ pub mod world {
         pub delegation_program: AccountInfo<'info>,
         /// CHECK:`
         pub system_program: Program<'info, System>,
+        /// CHECK:
+        #[account()]
+        pub entity: AccountInfo<'info>,
+        /// CHECK:`
+        pub world_program: AccountInfo<'info>,
+        /// CHECK:
+        #[account(mut)]
+        pub buffer_buffer: AccountInfo<'info>,
+        /// CHECK:`
+        #[account(mut)]
+        pub buffer_delegation_record: AccountInfo<'info>,
+        /// CHECK:`
+        #[account(mut)]
+        pub buffer_delegation_metadata: AccountInfo<'info>,
+    
     }
 
     pub fn destroy_component(ctx: Context<DestroyComponent>) -> Result<()> {

@@ -50,11 +50,13 @@ export function acceleration(framework: Framework) {
         componentId: framework.exampleComponentPosition.programId,
       });
 
+      console.log("Payer: " + framework.provider.wallet.publicKey);
+      console.log("Entity: " + framework.acceleratedEntityPda);
       await framework.provider.sendAndConfirm(
         delegateComponent.transaction,
         [],
         {
-          skipPreflight: true,
+          skipPreflight: false,
           commitment: "confirmed",
         },
       );
