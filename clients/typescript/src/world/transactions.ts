@@ -409,6 +409,7 @@ export async function InitializeComponent({
     data: componentPda,
     componentProgram: componentId,
     authority: authority ?? PROGRAM_ID,
+    buffer: FindBufferPda(componentPda),
     anchorRemainingAccounts,
   });
   const transaction = new Transaction().add(instruction);
@@ -489,7 +490,7 @@ async function createApplySystemInstruction({
     return program.methods
       .applyWithSession(SerializeArgs(args))
       .accounts({
-        buffer: FindBufferPda(authority ?? PROGRAM_ID),
+        buffer: FindBufferPda(remainingAccounts[1].pubkey), // First component PDA
         authority: authority ?? PROGRAM_ID,
         boltSystem: systemId,
         sessionToken: session.token,
@@ -502,7 +503,7 @@ async function createApplySystemInstruction({
     return program.methods
       .apply(SerializeArgs(args))
       .accounts({
-        buffer: FindBufferPda(authority ?? PROGRAM_ID),
+        buffer: FindBufferPda(remainingAccounts[1].pubkey), // First component PDA
         authority: authority ?? PROGRAM_ID,
         boltSystem: systemId,
         world,

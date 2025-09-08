@@ -118,26 +118,7 @@
       "accounts": [
         {
           "name": "buffer",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  98,
-                  117,
-                  102,
-                  102,
-                  101,
-                  114
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "authority"
-              }
-            ]
-          }
+          "writable": true
         },
         {
           "name": "bolt_system"
@@ -180,26 +161,7 @@
       "accounts": [
         {
           "name": "buffer",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  98,
-                  117,
-                  102,
-                  102,
-                  101,
-                  114
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "authority"
-              }
-            ]
-          }
+          "writable": true
         },
         {
           "name": "bolt_system"
@@ -261,6 +223,66 @@
         }
       ],
       "args": []
+    },
+    {
+      "name": "delegate_buffer",
+      "discriminator": [
+        121,
+        134,
+        252,
+        65,
+        64,
+        83,
+        93,
+        91
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "signer": true
+        },
+        {
+          "name": "component"
+        },
+        {
+          "name": "component_buffer",
+          "writable": true
+        },
+        {
+          "name": "owner_program"
+        },
+        {
+          "name": "buffer",
+          "writable": true
+        },
+        {
+          "name": "delegation_record",
+          "writable": true
+        },
+        {
+          "name": "delegation_metadata",
+          "writable": true
+        },
+        {
+          "name": "delegation_program"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "commit_frequency_ms",
+          "type": "u32"
+        },
+        {
+          "name": "validator",
+          "type": {
+            "option": "pubkey"
+          }
+        }
+      ]
     },
     {
       "name": "destroy_component",
@@ -344,6 +366,29 @@
         {
           "name": "system_program",
           "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "buffer",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  117,
+                  102,
+                  102,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "data"
+              }
+            ]
+          }
         }
       ],
       "args": []
@@ -623,6 +668,11 @@
       "code": 6006,
       "name": "InvalidComponentOwner",
       "msg": "The component owner does not match the program"
+    },
+    {
+      "code": 6007,
+      "name": "InvalidBufferAccount",
+      "msg": "Invalid buffer account"
     }
   ],
   "types": [

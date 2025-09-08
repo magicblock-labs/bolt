@@ -112,7 +112,7 @@ namespace ECSTest {
                 Authority = framework.Wallet.Account.PublicKey,
                 BoltSystem = framework.SystemSimpleMovement,
                 World = framework.WorldPda,
-                Buffer = WorldProgram.FindBufferPda(framework.Wallet.Account.PublicKey),
+                Buffer = WorldProgram.FindBufferPda(framework.ComponentPositionEntity1Pda),
             };
             var instruction = WorldProgram.Apply(apply, Bolt.World.SerializeArgs(new { direction = "Up" }));
             instruction.Keys.Add(AccountMeta.ReadOnly(framework.ExampleComponentPosition, false));

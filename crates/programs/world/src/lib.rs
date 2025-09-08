@@ -264,7 +264,82 @@ pub mod world {
             return Err(WorldError::InvalidAuthority.into());
         }
         bolt_component::cpi::initialize(ctx.accounts.build(&[World::cpi_auth_seeds().as_slice()]))?;
+
+        // Create the buffer account only if it does not already exist.
+        // Subsequent applies reuse the same PDA and only reallocate its data.
+        if ctx.accounts.buffer.lamports() == 0 {
+            let size = 0;
+            let lamports = Rent::get()?.minimum_balance(size);
+            system_program::create_account(
+                CpiContext::new_with_signer(
+                    ctx.accounts.system_program.to_account_info(),
+                    system_program::CreateAccount {
+                        from: ctx.accounts.payer.to_account_info(),
+                        to: ctx.accounts.buffer.to_account_info(),
+                    },
+                    &[&[b"buffer", ctx.accounts.data.key.as_ref(), &[ctx.bumps.buffer]]],
+                ),
+                lamports,
+                size as u64,
+                &ID,
+            )?;
+        }
+
         Ok(())
+    }
+
+    pub fn delegate_buffer(ctx: Context<DelegateBuffer>, commit_frequency_ms: u32, validator: Option<Pubkey>) -> Result<()> {
+        let pda_seeds: &[&[u8]] = &[b"buffer", &ctx.accounts.component.key().to_bytes()];
+
+        let del_accounts = ephemeral_rollups_sdk::cpi::DelegateAccounts {
+            payer: &ctx.accounts.payer,
+            pda: &ctx.accounts.component_buffer,
+            owner_program: &ctx.accounts.owner_program,
+            buffer: &ctx.accounts.buffer,
+            delegation_record: &ctx.accounts.delegation_record,
+            delegation_metadata: &ctx.accounts.delegation_metadata,
+            delegation_program: &ctx.accounts.delegation_program,
+            system_program: &ctx.accounts.system_program,
+        };
+
+        let config = ephemeral_rollups_sdk::cpi::DelegateConfig {
+            commit_frequency_ms,
+            validator,
+        };
+
+        ephemeral_rollups_sdk::cpi::delegate_account(
+            del_accounts,
+            pda_seeds,
+            config,
+        )?;
+
+        Ok(())
+    }
+
+    #[derive(Accounts)]
+    pub struct DelegateBuffer<'info> {
+        pub payer: Signer<'info>,
+        /// CHECK:
+        #[account()]
+        pub component: AccountInfo<'info>,
+        /// CHECK:
+        #[account(mut)]
+        pub component_buffer: AccountInfo<'info>,
+        /// CHECK:`
+        pub owner_program: AccountInfo<'info>,
+        /// CHECK:
+        #[account(mut)]
+        pub buffer: AccountInfo<'info>,
+        /// CHECK:`
+        #[account(mut)]
+        pub delegation_record: AccountInfo<'info>,
+        /// CHECK:`
+        #[account(mut)]
+        pub delegation_metadata: AccountInfo<'info>,
+        /// CHECK:`
+        pub delegation_program: AccountInfo<'info>,
+        /// CHECK:`
+        pub system_program: Program<'info, System>,
     }
 
     pub fn destroy_component(ctx: Context<DestroyComponent>) -> Result<()> {
@@ -278,14 +353,12 @@ pub mod world {
     ) -> Result<()> {
         apply_impl(
             &ctx.accounts.buffer,
-            ctx.bumps.buffer,
             &ctx.accounts.authority,
             &ctx.accounts.world,
             &ctx.accounts.bolt_system,
             &ctx.accounts.cpi_auth,
             ctx.accounts.build(),
             args,
-            &ctx.accounts.system_program,
             None,
             ctx.remaining_accounts,
         )?;
@@ -295,7 +368,7 @@ pub mod world {
     #[derive(Accounts)]
     pub struct Apply<'info> {
         /// CHECK: buffer data check
-        #[account(mut, seeds = [b"buffer", authority.key.as_ref()], bump)]
+        #[account(mut)]
         pub buffer: AccountInfo<'info>,
         /// CHECK: bolt system program check
         #[account()]
@@ -329,14 +402,12 @@ pub mod world {
     ) -> Result<()> {
         apply_impl(
             &ctx.accounts.buffer,
-            ctx.bumps.buffer,
             &ctx.accounts.authority,
             &ctx.accounts.world,
             &ctx.accounts.bolt_system,
             &ctx.accounts.cpi_auth,
             ctx.accounts.build(),
             args,
-            &ctx.accounts.system_program,
             Some(&ctx.accounts.session_token),
             ctx.remaining_accounts,
         )?;
@@ -346,7 +417,7 @@ pub mod world {
     #[derive(Accounts)]
     pub struct ApplyWithSession<'info> {
         /// CHECK: buffer data check
-        #[account(mut, seeds = [b"buffer", authority.key.as_ref()], bump)]
+        #[account(mut)]
         pub buffer: AccountInfo<'info>,
         /// CHECK: bolt system program check
         #[account()]
@@ -380,14 +451,12 @@ pub mod world {
 #[allow(clippy::type_complexity, clippy::too_many_arguments)]
 fn apply_impl<'info>(
     buffer: &AccountInfo<'info>,
-    buffer_bump: u8,
     authority: &Signer<'info>,
     world: &Account<'info, World>,
     bolt_system: &UncheckedAccount<'info>,
     cpi_auth: &UncheckedAccount<'info>,
     cpi_context: CpiContext<'_, '_, '_, 'info, bolt_system::cpi::accounts::BoltExecute<'info>>,
     args: Vec<u8>,
-    system_program: &Program<'info, System>,
     session_token: Option<&Account<'info, session_keys::SessionToken>>,
     remaining_accounts: &[AccountInfo<'info>],
 ) -> Result<()> {
@@ -402,6 +471,8 @@ fn apply_impl<'info>(
     {
         return Err(WorldError::SystemNotApproved.into());
     }
+
+    require!(buffer.data_len() == 0, WorldError::InvalidBufferAccount);
 
     let index = remaining_accounts.iter().position(|x| x.key() == ID).unwrap_or(remaining_accounts.len());
 
@@ -449,26 +520,6 @@ fn apply_impl<'info>(
                 WorldError::InvalidAuthority
             );
         }
-    }
-
-    // Create the buffer account only if it does not already exist.
-    // Subsequent applies reuse the same PDA and only reallocate its data.
-    if buffer.lamports() == 0 {
-        let size = 0;
-        let lamports = Rent::get()?.minimum_balance(size);
-        system_program::create_account(
-            CpiContext::new_with_signer(
-                system_program.to_account_info(),
-                system_program::CreateAccount {
-                    from: authority.to_account_info(),
-                    to: buffer.to_account_info(),
-                },
-                &[&[b"buffer", authority.key.as_ref(), &[buffer_bump]]],
-            ),
-            lamports,
-            size as u64,
-            &ID,
-        )?;
     }
 
     for pair in remaining_accounts[..index].chunks(2) {
@@ -657,6 +708,9 @@ pub struct InitializeComponent<'info> {
     /// CHECK: cpi auth check
     pub cpi_auth: UncheckedAccount<'info>,
     pub system_program: Program<'info, System>,
+    /// CHECK: Buffer account
+    #[account(mut, seeds = [b"buffer", data.key.as_ref()], bump)]
+    pub buffer: UncheckedAccount<'info>
 }
 
 impl<'info> InitializeComponent<'info> {

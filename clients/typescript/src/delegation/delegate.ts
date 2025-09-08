@@ -7,12 +7,14 @@ import {
   delegationMetadataPdaFromDelegatedAccount,
   delegationRecordPdaFromDelegatedAccount,
 } from "@magicblock-labs/ephemeral-rollups-sdk";
-import { FindComponentPda } from "../index";
+import { FindBufferPda, FindComponentPda, Program } from "../index";
 import {
-  type PublicKey,
+  PublicKey,
   Transaction,
   type TransactionInstruction,
 } from "@solana/web3.js";
+import { worldIdl } from "../generated";
+import { Idl } from "@coral-xyz/anchor";
 
 export interface DelegateInstructionArgs {
   commitFrequencyMs: number;
@@ -172,11 +174,12 @@ export async function DelegateComponent({
   delegationProgram?: web3.PublicKey;
   systemProgram?: web3.PublicKey;
 }): Promise<{
-  instruction: TransactionInstruction;
+  instructions: TransactionInstruction[];
   transaction: Transaction;
   componentPda: PublicKey;
 }> {
   const componentPda = FindComponentPda({ componentId, entity, seed });
+  const componentBuffer = FindBufferPda(componentPda);
   const delegateComponentIx = createDelegateInstruction({
     payer,
     entity,
@@ -189,9 +192,38 @@ export async function DelegateComponent({
     systemProgram,
   });
 
+  const componentBufferDelegationRecord =
+    delegationRecordPdaFromDelegatedAccount(componentBuffer);
+
+  const componentBufferDelegationMetadata =
+    delegationMetadataPdaFromDelegatedAccount(componentBuffer);
+
+  const componentBufferBuffer =
+    delegateBufferPdaFromDelegatedAccountAndOwnerProgram(
+      componentBuffer,
+      new PublicKey(worldIdl.address),
+    );
+
+  const program = new Program(worldIdl as Idl) as unknown as Program;
+  const delegateBufferComponentIx = await program.methods
+    .delegateBuffer(0, null)
+    .accounts({
+      payer,
+      component: componentPda,
+      componentBuffer,
+      ownerProgram: worldIdl.address,
+      buffer: componentBufferBuffer,
+      delegationRecord: componentBufferDelegationRecord,
+      delegationMetadata: componentBufferDelegationMetadata,
+      delegationProgram: DELEGATION_PROGRAM_ID,
+    })
+    .instruction();
+
   return {
-    instruction: delegateComponentIx,
-    transaction: new Transaction().add(delegateComponentIx),
+    instructions: [delegateComponentIx, delegateBufferComponentIx], // TODO: Make it a single instruction again using the World program as a proxy.
+    transaction: new Transaction()
+      .add(delegateComponentIx)
+      .add(delegateBufferComponentIx),
     componentPda,
   };
 }

@@ -91,7 +91,7 @@ export function session(framework) {
       const instruction = await framework.worldProgram.methods
         .applyWithSession(SerializeArgs())
         .accounts({
-          buffer: FindBufferPda(sessionSigner.publicKey),
+          buffer: FindBufferPda(component),
           authority: sessionSigner.publicKey,
           boltSystem: framework.systemFly.programId,
           world: framework.worldPda,
@@ -181,7 +181,7 @@ export function session(framework) {
       const instruction = await framework.worldProgram.methods
         .applyWithSession(SerializeArgs())
         .accounts({
-          buffer: FindBufferPda(sessionSigner.publicKey),
+          buffer: FindBufferPda(componentWithAuthority),
           authority: sessionSigner.publicKey,
           boltSystem: framework.systemFly.programId,
           world: framework.worldPda,

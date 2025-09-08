@@ -66,7 +66,7 @@ export function component(framework) {
       const instruction = await framework.worldProgram.methods
         .apply(SerializeArgs())
         .accounts({
-          buffer: FindBufferPda(keypair.publicKey),
+          buffer: FindBufferPda(component),
           authority: keypair.publicKey,
           boltSystem: framework.systemFly.programId,
           world: framework.worldPda,
@@ -117,7 +117,7 @@ export function component(framework) {
       const instruction = await framework.worldProgram.methods
         .apply(SerializeArgs())
         .accounts({
-          buffer: FindBufferPda(framework.provider.wallet.publicKey),
+          buffer: FindBufferPda(component),
           authority: framework.provider.wallet.publicKey,
           boltSystem: framework.systemFly.programId,
           world: framework.worldPda,

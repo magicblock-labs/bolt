@@ -39,6 +39,7 @@ export interface InitializeComponentInstructionAccounts {
   entity: web3.PublicKey;
   componentProgram: web3.PublicKey;
   authority: web3.PublicKey;
+  buffer: web3.PublicKey;
   systemProgram?: web3.PublicKey;
   anchorRemainingAccounts?: web3.AccountMeta[];
 }
@@ -96,6 +97,11 @@ export function createInitializeComponentInstruction(
     {
       pubkey: accounts.systemProgram ?? web3.SystemProgram.programId,
       isWritable: false,
+      isSigner: false,
+    },
+    {
+      pubkey: accounts.buffer,
+      isWritable: true,
       isSigner: false,
     },
   ];
