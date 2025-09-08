@@ -19,9 +19,4 @@ pub mod with_6_components {
         pub small5: Small,
         pub small6: Small,
     }
-<<<<<<< HEAD
 }
-=======
-
-}
->>>>>>> faa205c (:white_check_mark: Profiling system with 1 to 10 components)
