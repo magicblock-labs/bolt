@@ -43,8 +43,7 @@ namespace AccelerationTest {
 
         public static async Task DelegateComponent(Framework framework) {
             var delegateComponent = await Bolt.World.DelegateComponent(framework.Wallet.Account.PublicKey, framework.AccelerationEntityPda, framework.ExampleComponentPosition);
-            await framework.SendAndConfirmInstruction(delegateComponent.gTransaction);
-            var delegateBuffer = await Bolt.World.DelegateBuffer();
+            await framework.SendAndConfirmInstruction(delegateComponent.Instruction);
         }
 
         public static async Task ApplySimpleMovementSystemOnAccelerator(Framework framework) {
