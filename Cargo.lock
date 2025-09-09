@@ -1259,6 +1259,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "component-small"
+version = "0.2.4"
+dependencies = [
+ "bolt-lang",
+]
+
+[[package]]
 name = "concurrent-queue"
 version = "2.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -6979,6 +6986,96 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6f42320e61fe2cfd34354ecb597f86f413484a798ba44a8ca1165c58d42da6c1"
 dependencies = [
  "bitflags 2.6.0",
+]
+
+[[package]]
+name = "with-1-component"
+version = "0.2.3"
+dependencies = [
+ "bolt-lang",
+ "component-small",
+ "serde",
+]
+
+[[package]]
+name = "with-10-components"
+version = "0.2.3"
+dependencies = [
+ "bolt-lang",
+ "component-small",
+ "serde",
+]
+
+[[package]]
+name = "with-2-components"
+version = "0.2.3"
+dependencies = [
+ "bolt-lang",
+ "component-small",
+ "serde",
+]
+
+[[package]]
+name = "with-3-components"
+version = "0.2.3"
+dependencies = [
+ "bolt-lang",
+ "component-small",
+ "serde",
+]
+
+[[package]]
+name = "with-4-components"
+version = "0.2.3"
+dependencies = [
+ "bolt-lang",
+ "component-small",
+ "serde",
+]
+
+[[package]]
+name = "with-5-components"
+version = "0.2.3"
+dependencies = [
+ "bolt-lang",
+ "component-small",
+ "serde",
+]
+
+[[package]]
+name = "with-6-components"
+version = "0.2.3"
+dependencies = [
+ "bolt-lang",
+ "component-small",
+ "serde",
+]
+
+[[package]]
+name = "with-7-components"
+version = "0.2.3"
+dependencies = [
+ "bolt-lang",
+ "component-small",
+ "serde",
+]
+
+[[package]]
+name = "with-8-components"
+version = "0.2.3"
+dependencies = [
+ "bolt-lang",
+ "component-small",
+ "serde",
+]
+
+[[package]]
+name = "with-9-components"
+version = "0.2.3"
+dependencies = [
+ "bolt-lang",
+ "component-small",
+ "serde",
 ]
 
 [[package]]
