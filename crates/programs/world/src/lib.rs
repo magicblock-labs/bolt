@@ -395,7 +395,6 @@ pub mod world {
             &ctx.accounts.world,
             &ctx.accounts.bolt_system,
             &ctx.accounts.cpi_auth,
-            ctx.accounts.build(),
             args,
             None,
             ctx.remaining_accounts,
@@ -444,7 +443,6 @@ pub mod world {
             &ctx.accounts.world,
             &ctx.accounts.bolt_system,
             &ctx.accounts.cpi_auth,
-            ctx.accounts.build(),
             args,
             Some(&ctx.accounts.session_token),
             ctx.remaining_accounts,
@@ -493,7 +491,6 @@ fn apply_impl<'info>(
     world: &Account<'info, World>,
     bolt_system: &UncheckedAccount<'info>,
     cpi_auth: &UncheckedAccount<'info>,
-    cpi_context: CpiContext<'_, '_, '_, 'info, bolt_system::cpi::accounts::BoltExecute<'info>>,
     args: Vec<u8>,
     session_token: Option<&Account<'info, session_keys::SessionToken>>,
     remaining_accounts: &[AccountInfo<'info>],
@@ -518,6 +515,7 @@ fn apply_impl<'info>(
         .unwrap_or(remaining_accounts.len());
 
     // Authority check against component metadata (partial deserialize)
+    let unix_timestamp = Clock::get()?.unix_timestamp;
     for component in remaining_accounts[..index].iter().skip(1).step_by(2) {
         let data_ref = component.try_borrow_data()?;
         // Expect at least Anchor discriminator (8) + BoltMetadata (32)
@@ -530,7 +528,6 @@ fn apply_impl<'info>(
         key_bytes.copy_from_slice(&data_ref[start..start + 32]);
         let component_authority = Pubkey::new_from_array(key_bytes);
 
-        let unix_timestamp = Clock::get()?.unix_timestamp;
         if let Some(session_token) = session_token {
             if component_authority == ID {
                 require!(
@@ -563,85 +560,147 @@ fn apply_impl<'info>(
         }
     }
 
+    let cpi_auth_seeds = World::cpi_auth_seeds();
     for pair in remaining_accounts[..index].chunks(2) {
         let [program, component] = pair else { continue };
-        buffer.realloc(component.data_len(), false)?;
+        if buffer.data_len() != component.data_len() {
+            buffer.realloc(component.data_len(), false)?;
+        }
         {
             let mut data = buffer.try_borrow_mut_data()?;
             data.copy_from_slice(component.try_borrow_data()?.as_ref());
         }
 
         if component.owner != bolt_system.key {
-            bolt_component::cpi::set_owner(
-                CpiContext::new_with_signer(
-                    program.to_account_info(),
-                    bolt_component::cpi::accounts::SetOwner {
-                        cpi_auth: cpi_auth.to_account_info(),
-                        component: component.to_account_info(),
-                    },
-                    &[World::cpi_auth_seeds().as_slice()],
-                ),
-                *bolt_system.key,
-            )?;
+            // bolt_component::set_owner(owner = bolt_system)
+            {
+                use anchor_lang::solana_program::instruction::{AccountMeta, Instruction};
+                let metas = vec![
+                    AccountMeta::new_readonly(cpi_auth.key(), true),
+                    AccountMeta::new(component.key(), false),
+                ];
+                let mut data = Vec::with_capacity(8 + 32);
+                data.extend_from_slice(&[72 as u8, 202, 120, 52, 77, 128, 96, 197]);
+                data.extend_from_slice(&bolt_system.key().to_bytes());
+                let ix = Instruction { program_id: program.key(), accounts: metas, data };
+                let account_infos = [cpi_auth.to_account_info(), component.to_account_info()];
+                anchor_lang::solana_program::program::invoke_signed(
+                    &ix,
+                    &account_infos,
+                    &[cpi_auth_seeds.as_slice()],
+                )?;
+            }
 
-            bolt_system::cpi::set_data(CpiContext::new_with_signer(
-                bolt_system.to_account_info(),
-                bolt_system::cpi::accounts::SetData {
-                    cpi_auth: cpi_auth.to_account_info(),
-                    buffer: buffer.to_account_info(),
-                    component: component.to_account_info(),
-                },
-                &[World::cpi_auth_seeds().as_slice()],
-            ))?;
+            // bolt_system::set_data(buffer -> component)
+            {
+                use anchor_lang::solana_program::instruction::{AccountMeta, Instruction};
+                let metas = vec![
+                    AccountMeta::new_readonly(cpi_auth.key(), true),
+                    AccountMeta::new_readonly(buffer.key(), false),
+                    AccountMeta::new(component.key(), false),
+                ];
+                let mut data = Vec::with_capacity(8);
+                data.extend_from_slice(&[223 as u8, 114, 91, 136, 197, 78, 153, 153]);
+                let ix = Instruction { program_id: bolt_system.key(), accounts: metas, data };
+                let account_infos = [cpi_auth.to_account_info(), buffer.to_account_info(), component.to_account_info()];
+                anchor_lang::solana_program::program::invoke_signed(
+                    &ix,
+                    &account_infos,
+                    &[cpi_auth_seeds.as_slice()],
+                )?;
+            }
         }
     }
 
-    let cpi_remaining_accounts = remaining_accounts[..index]
-        .iter()
-        .skip(1)
-        .step_by(2)
-        .chain(remaining_accounts[index..].iter().skip(1))
-        .cloned()
-        .collect::<Vec<_>>();
-    bolt_system::cpi::bolt_execute(
-        cpi_context.with_remaining_accounts(cpi_remaining_accounts),
-        args,
-    )?;
+    // bolt_system::bolt_execute with remaining accounts (components + extra accounts)
+    {
+        use anchor_lang::solana_program::instruction::{AccountMeta, Instruction};
+        let mut accounts_metas = vec![AccountMeta::new_readonly(authority.key(), authority.is_signer)];
+
+        // Build metas for remaining accounts in the same order as before
+        let extra_iter = remaining_accounts[..index]
+            .iter()
+            .skip(1)
+            .step_by(2)
+            .chain(remaining_accounts[index..].iter().skip(1));
+        let extra_len = extra_iter.clone().count();
+        accounts_metas.reserve(extra_len);
+
+        let mut account_infos: Vec<AccountInfo<'info>> = Vec::with_capacity(1 + extra_len);
+        account_infos.push(authority.to_account_info());
+
+        for ai in extra_iter {
+            let meta = if ai.is_writable {
+                AccountMeta::new(ai.key(), ai.is_signer)
+            } else {
+                AccountMeta::new_readonly(ai.key(), ai.is_signer)
+            };
+            accounts_metas.push(meta);
+            account_infos.push(ai.clone());
+        }
+
+        let mut data = Vec::with_capacity(8 + 4 + args.len());
+        data.extend_from_slice(&[75 as u8, 206, 62, 210, 52, 215, 104, 109]);
+        let args_len_le = (args.len() as u32).to_le_bytes();
+        data.extend_from_slice(&args_len_le);
+        data.extend_from_slice(&args);
+        let ix = Instruction { program_id: bolt_system.key(), accounts: accounts_metas, data };
+
+        anchor_lang::solana_program::program::invoke(&ix, &account_infos)?;
+    }
 
     for pair in remaining_accounts[..index].chunks(2) {
         let [program, component] = pair else { continue };
-        buffer.realloc(component.data_len(), false)?;
+        if buffer.data_len() != component.data_len() {
+            buffer.realloc(component.data_len(), false)?;
+        }
         {
             let mut data = buffer.try_borrow_mut_data()?;
             data.copy_from_slice(component.try_borrow_data()?.as_ref());
         }
 
         if *component.owner != program.key() {
-            bolt_system::cpi::set_owner(
-                CpiContext::new_with_signer(
-                    bolt_system.to_account_info(),
-                    bolt_system::cpi::accounts::SetOwner {
-                        cpi_auth: cpi_auth.to_account_info(),
-                        component: component.to_account_info(),
-                    },
-                    &[World::cpi_auth_seeds().as_slice()],
-                ),
-                program.key(),
-            )?;
+            // bolt_system::set_owner(owner = original program)
+            {
+                use anchor_lang::solana_program::instruction::{AccountMeta, Instruction};
+                let metas = vec![
+                    AccountMeta::new_readonly(cpi_auth.key(), true),
+                    AccountMeta::new(component.key(), false),
+                ];
+                let mut data = Vec::with_capacity(8 + 32);
+                data.extend_from_slice(&[72 as u8, 202, 120, 52, 77, 128, 96, 197]);
+                data.extend_from_slice(&program.key().to_bytes());
+                let ix = Instruction { program_id: bolt_system.key(), accounts: metas, data };
+                let account_infos = [cpi_auth.to_account_info(), component.to_account_info()];
+                anchor_lang::solana_program::program::invoke_signed(
+                    &ix,
+                    &account_infos,
+                    &[cpi_auth_seeds.as_slice()],
+                )?;
+            }
 
             if *component.owner != program.key() {
                 return Err(WorldError::InvalidComponentOwner.into());
             }
 
-            bolt_component::cpi::set_data(CpiContext::new_with_signer(
-                program.to_account_info(),
-                bolt_component::cpi::accounts::SetData {
-                    cpi_auth: cpi_auth.to_account_info(),
-                    buffer: buffer.to_account_info(),
-                    component: component.to_account_info(),
-                },
-                &[World::cpi_auth_seeds().as_slice()],
-            ))?;
+            // bolt_component::set_data(buffer -> component) on original program
+            {
+                use anchor_lang::solana_program::instruction::{AccountMeta, Instruction};
+                let metas = vec![
+                    AccountMeta::new_readonly(cpi_auth.key(), true),
+                    AccountMeta::new_readonly(buffer.key(), false),
+                    AccountMeta::new(component.key(), false),
+                ];
+                let mut data = Vec::with_capacity(8);
+                data.extend_from_slice(&[223 as u8, 114, 91, 136, 197, 78, 153, 153]);
+                let ix = Instruction { program_id: program.key(), accounts: metas, data };
+                let account_infos = [cpi_auth.to_account_info(), buffer.to_account_info(), component.to_account_info()];
+                anchor_lang::solana_program::program::invoke_signed(
+                    &ix,
+                    &account_infos,
+                    &[cpi_auth_seeds.as_slice()],
+                )?;
+            }
         }
     }
 
