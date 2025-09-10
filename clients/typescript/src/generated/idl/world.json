@@ -117,10 +117,15 @@
       ],
       "accounts": [
         {
+          "name": "buffer",
+          "writable": true
+        },
+        {
           "name": "bolt_system"
         },
         {
           "name": "authority",
+          "writable": true,
           "signer": true
         },
         {
@@ -128,6 +133,10 @@
         },
         {
           "name": "world"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
         }
       ],
       "args": [
@@ -151,10 +160,15 @@
       ],
       "accounts": [
         {
+          "name": "buffer",
+          "writable": true
+        },
+        {
           "name": "bolt_system"
         },
         {
           "name": "authority",
+          "writable": true,
           "signer": true
         },
         {
@@ -165,6 +179,10 @@
         },
         {
           "name": "session_token"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
         }
       ],
       "args": [
@@ -205,6 +223,86 @@
         }
       ],
       "args": []
+    },
+    {
+      "name": "delegate_component",
+      "discriminator": [
+        191,
+        212,
+        179,
+        193,
+        178,
+        94,
+        119,
+        93
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "component",
+          "writable": true
+        },
+        {
+          "name": "component_buffer",
+          "writable": true
+        },
+        {
+          "name": "component_program"
+        },
+        {
+          "name": "buffer",
+          "writable": true
+        },
+        {
+          "name": "delegation_record",
+          "writable": true
+        },
+        {
+          "name": "delegation_metadata",
+          "writable": true
+        },
+        {
+          "name": "delegation_program"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "entity"
+        },
+        {
+          "name": "world_program"
+        },
+        {
+          "name": "buffer_buffer",
+          "writable": true
+        },
+        {
+          "name": "buffer_delegation_record",
+          "writable": true
+        },
+        {
+          "name": "buffer_delegation_metadata",
+          "writable": true
+        }
+      ],
+      "args": [
+        {
+          "name": "commit_frequency_ms",
+          "type": "u32"
+        },
+        {
+          "name": "validator",
+          "type": {
+            "option": "pubkey"
+          }
+        }
+      ]
     },
     {
       "name": "destroy_component",
@@ -288,6 +386,29 @@
         {
           "name": "system_program",
           "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "buffer",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  117,
+                  102,
+                  102,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "data"
+              }
+            ]
+          }
         }
       ],
       "args": []
@@ -506,6 +627,19 @@
       ]
     },
     {
+      "name": "SessionToken",
+      "discriminator": [
+        233,
+        4,
+        115,
+        14,
+        46,
+        21,
+        1,
+        15
+      ]
+    },
+    {
       "name": "World",
       "discriminator": [
         145,
@@ -549,6 +683,16 @@
       "code": 6005,
       "name": "SystemNotApproved",
       "msg": "The system is not approved in this world instance"
+    },
+    {
+      "code": 6006,
+      "name": "InvalidComponentOwner",
+      "msg": "The component owner does not match the program"
+    },
+    {
+      "code": 6007,
+      "name": "InvalidBufferAccount",
+      "msg": "Invalid buffer account"
     }
   ],
   "types": [
@@ -572,6 +716,30 @@
           {
             "name": "worlds",
             "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "SessionToken",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "target_program",
+            "type": "pubkey"
+          },
+          {
+            "name": "session_signer",
+            "type": "pubkey"
+          },
+          {
+            "name": "valid_until",
+            "type": "i64"
           }
         ]
       }

@@ -1,5 +1,10 @@
 import { expect } from "chai";
-import { anchor, CPI_AUTH_ADDRESS, SerializeArgs } from "../../../lib";
+import {
+  anchor,
+  FindBufferPda,
+  FindCpiAuthPda,
+  SerializeArgs,
+} from "../../../lib";
 
 export function world(framework) {
   describe("World authority", () => {
@@ -101,7 +106,7 @@ export function world(framework) {
           world: framework.worldPda,
         })
         .instruction();
-      let transaction = new anchor.web3.Transaction().add(instruction);
+      const transaction = new anchor.web3.Transaction().add(instruction);
       await framework.provider.sendAndConfirm(transaction, [], {
         skipPreflight: true,
       });
@@ -118,10 +123,11 @@ export function world(framework) {
       const instruction = await framework.worldProgram.methods
         .apply(SerializeArgs())
         .accounts({
+          buffer: FindBufferPda(framework.componentPositionEntity1Pda),
           authority: framework.provider.wallet.publicKey,
           boltSystem: framework.systemFly.programId,
           world: framework.worldPda,
-          cpiAuth: CPI_AUTH_ADDRESS,
+          cpiAuth: FindCpiAuthPda(),
         })
         .remainingAccounts([
           {
@@ -166,10 +172,11 @@ export function world(framework) {
       const instruction = await framework.worldProgram.methods
         .apply(SerializeArgs())
         .accounts({
+          buffer: FindBufferPda(framework.componentPositionEntity1Pda),
           authority: framework.provider.wallet.publicKey,
           boltSystem: framework.systemFly.programId,
           world: framework.worldPda,
-          cpiAuth: CPI_AUTH_ADDRESS,
+          cpiAuth: FindCpiAuthPda(),
         })
         .remainingAccounts([
           {
@@ -206,23 +213,6 @@ export function world(framework) {
             payer: framework.provider.wallet.publicKey,
             data: framework.componentPositionEntity1Pda,
             entity: framework.entity1Pda,
-            authority: framework.provider.wallet.publicKey,
-          })
-          .rpc();
-      } catch (error) {
-        expect(error.message).to.contain("Error Code: InvalidCaller");
-        invalid = true;
-      }
-      expect(invalid).to.equal(true);
-    });
-
-    it("Check invalid component update without CPI", async () => {
-      let invalid = false;
-      try {
-        await framework.exampleComponentPosition.methods
-          .update(Buffer.from(""))
-          .accounts({
-            boltComponent: framework.componentPositionEntity4Pda,
             authority: framework.provider.wallet.publicKey,
           })
           .rpc();

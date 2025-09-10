@@ -4,7 +4,8 @@ import {
   FindEntityPda,
   FindComponentPda,
   SerializeArgs,
-  CPI_AUTH_ADDRESS,
+  FindBufferPda,
+  FindCpiAuthPda,
 } from "../../../lib";
 import { assert, expect } from "chai";
 
@@ -47,7 +48,7 @@ export function component(framework) {
           data: component,
           componentProgram: componentId,
           authority: framework.provider.wallet.publicKey,
-          cpiAuth: CPI_AUTH_ADDRESS,
+          cpiAuth: FindCpiAuthPda(),
         })
         .instruction();
       const transaction = new anchor.web3.Transaction().add(instruction);
@@ -65,10 +66,11 @@ export function component(framework) {
       const instruction = await framework.worldProgram.methods
         .apply(SerializeArgs())
         .accounts({
+          buffer: FindBufferPda(component),
           authority: keypair.publicKey,
           boltSystem: framework.systemFly.programId,
           world: framework.worldPda,
-          cpiAuth: CPI_AUTH_ADDRESS,
+          cpiAuth: FindCpiAuthPda(),
         })
         .remainingAccounts([
           {
@@ -115,10 +117,11 @@ export function component(framework) {
       const instruction = await framework.worldProgram.methods
         .apply(SerializeArgs())
         .accounts({
+          buffer: FindBufferPda(component),
           authority: framework.provider.wallet.publicKey,
           boltSystem: framework.systemFly.programId,
           world: framework.worldPda,
-          cpiAuth: CPI_AUTH_ADDRESS,
+          cpiAuth: FindCpiAuthPda(),
         })
         .remainingAccounts([
           {

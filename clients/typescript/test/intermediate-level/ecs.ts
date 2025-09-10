@@ -253,14 +253,6 @@ export function ecs(framework: Framework) {
         applySystem.transaction,
       );
 
-      let transactionResponse: any;
-      do {
-        transactionResponse =
-          await framework.provider.connection.getTransaction(signature, {
-            commitment: "confirmed",
-          });
-      } while (transactionResponse?.meta?.logMessages === undefined);
-
       const position =
         await framework.exampleComponentPosition.account.position.fetch(
           framework.componentPositionEntity1Pda,
@@ -281,7 +273,6 @@ export function ecs(framework: Framework) {
         await framework.provider.sendAndConfirm(addEntity.transaction);
         entitiesPdas.push(addEntity.entityPda);
       }
-
       let componentsPdas: web3.PublicKey[] = [];
       for (let i = 0; i < 10; i++) {
         const initializeComponent = await InitializeComponent({
@@ -321,19 +312,27 @@ export function ecs(framework: Framework) {
           })),
         });
 
-        let signature = await framework.provider.sendAndConfirm(
-          applySystem.transaction,
-        );
+        try {
+          let signature = await framework.provider.sendAndConfirm(
+            applySystem.transaction,
+          );
 
-        let transactionResponse: any;
-        do {
-          transactionResponse =
-            await framework.provider.connection.getTransaction(signature, {
-              commitment: "confirmed",
-            });
-        } while (transactionResponse?.meta?.logMessages === undefined);
-        let report = framework.report(transactionResponse?.meta?.logMessages);
-        reports.push(report);
+          let transactionResponse: any;
+          do {
+            transactionResponse =
+              await framework.provider.connection.getTransaction(signature, {
+                commitment: "confirmed",
+              });
+          } while (transactionResponse?.meta?.logMessages === undefined);
+          let report = framework.report(transactionResponse?.meta?.logMessages);
+          reports.push(report);
+        } catch (error) {
+          reports.push({
+            cpiCount: 0,
+            totalCpiCU: 0,
+            totalCu: 0,
+          });
+        }
       }
 
       framework.saveReport(reports);

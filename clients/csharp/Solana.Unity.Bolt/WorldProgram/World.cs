@@ -27,6 +27,18 @@ namespace World
                 return AddEntity(accounts, System.Text.Encoding.UTF8.GetBytes(extraSeed), programId);
             }
 
+            public static PublicKey FindCpiAuthPda() {
+                PublicKey.TryFindProgramAddress(new[]
+                {
+                    Encoding.UTF8.GetBytes("cpi_auth"),
+                }, new PublicKey(ID), out var pda, out _);
+                return pda;
+            }
+
+            public static PublicKey FindBufferPda(PublicKey account) {
+                return FindBufferPda(account, new PublicKey(ID));
+            }
+
             public static PublicKey FindSessionTokenPda(PublicKey sessionSigner, PublicKey authority)
             {
                 PublicKey.TryFindProgramAddress(new[]
@@ -223,6 +235,8 @@ namespace World
                 Solana.Unity.Rpc.Models.TransactionInstruction instruction;
                 if (sessionToken != null) {
                     var apply = new ApplyWithSessionAccounts() {
+                        CpiAuth = WorldProgram.FindCpiAuthPda(),
+                        Buffer = FindBufferPda(componentPdas[0]),
                         BoltSystem = system,
                         Authority = authority,
                         World = world,
@@ -231,6 +245,8 @@ namespace World
                     instruction = ApplyWithSession(apply, args, programId);
                 } else {
                     var apply = new ApplyAccounts() {
+                        CpiAuth = WorldProgram.FindCpiAuthPda(),
+                        Buffer = FindBufferPda(componentPdas[0]),
                         BoltSystem = system,
                         Authority = authority,
                         World = world,

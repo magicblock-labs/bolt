@@ -108,9 +108,11 @@ namespace ECSTest {
 
         public static async Task ApplySimpleMovementSystemUpOnEntity1(Framework framework) {
             var apply = new ApplyAccounts() {
+                CpiAuth = WorldProgram.FindCpiAuthPda(),
                 Authority = framework.Wallet.Account.PublicKey,
                 BoltSystem = framework.SystemSimpleMovement,
                 World = framework.WorldPda,
+                Buffer = WorldProgram.FindBufferPda(framework.ComponentPositionEntity1Pda),
             };
             var instruction = WorldProgram.Apply(apply, Bolt.World.SerializeArgs(new { direction = "Up" }));
             instruction.Keys.Add(AccountMeta.ReadOnly(framework.ExampleComponentPosition, false));

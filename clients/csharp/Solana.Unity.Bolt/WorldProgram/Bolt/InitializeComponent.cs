@@ -30,11 +30,13 @@ namespace Bolt {
 
         public static async Task<InitializeComponentInstruction> InitializeComponent(PublicKey payer, PublicKey entity, PublicKey componentId, PublicKey componentPda, PublicKey authority = null) {
             var initializeComponent = new InitializeComponentAccounts() {
+                CpiAuth = WorldProgram.FindCpiAuthPda(),
                 Payer = payer,
                 Entity = entity,
                 Data = componentPda,
                 ComponentProgram = componentId,
-                Authority = authority ?? new PublicKey(WorldProgram.ID)
+                Authority = authority ?? new PublicKey(WorldProgram.ID),
+                Buffer = WorldProgram.FindBufferPda(componentPda)
             };
             var instruction = WorldProgram.InitializeComponent(initializeComponent);
             return new InitializeComponentInstruction() {

@@ -6,8 +6,8 @@ declare_id!("3ndvNAg4moKeLhuWQtDmcN43PuvvGsigQWRBPthfWEN3");
 #[system]
 pub mod with_6_components {
 
-    pub fn execute(ctx: Context<Components>, _args_p: Vec<u8>) -> Result<Components> {
-        Ok(ctx.accounts)
+    pub fn execute(_ctx: Context<Components>, _args_p: Vec<u8>) -> Result<()> {
+        Ok(())
     }
 
     #[system_input]

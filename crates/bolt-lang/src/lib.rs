@@ -2,11 +2,19 @@ pub mod prelude;
 
 pub use anchor_lang;
 pub use anchor_lang::error::ErrorCode::AccountDidNotDeserialize as AccountDidNotDeserializeErrorCode;
+pub use anchor_lang::error::ErrorCode::AccountDidNotSerialize as AccountDidNotSerializeErrorCode;
 pub use anchor_lang::prelude::*;
 pub use anchor_lang::{
     AccountDeserialize, AccountSerialize, AnchorDeserialize, AnchorSerialize, Bumps, Result,
 };
 
+pub mod bpf_writer;
+pub mod instructions;
+pub use instructions::*;
+
+pub mod account;
+pub mod cpi;
+pub use account::BoltAccount;
 pub use session_keys;
 
 pub use bolt_attribute_bolt_arguments::arguments;

@@ -7,7 +7,7 @@
 
 import * as beet from "@metaplex-foundation/beet";
 import * as web3 from "@solana/web3.js";
-import { CPI_AUTH_ADDRESS } from "../../world/transactions";
+import { FindCpiAuthPda } from "../../index";
 
 /**
  * @category Instructions
@@ -39,6 +39,7 @@ export interface InitializeComponentInstructionAccounts {
   entity: web3.PublicKey;
   componentProgram: web3.PublicKey;
   authority: web3.PublicKey;
+  buffer: web3.PublicKey;
   systemProgram?: web3.PublicKey;
   anchorRemainingAccounts?: web3.AccountMeta[];
 }
@@ -89,13 +90,18 @@ export function createInitializeComponentInstruction(
       isSigner: false,
     },
     {
-      pubkey: CPI_AUTH_ADDRESS,
+      pubkey: FindCpiAuthPda(),
       isWritable: false,
       isSigner: false,
     },
     {
       pubkey: accounts.systemProgram ?? web3.SystemProgram.programId,
       isWritable: false,
+      isSigner: false,
+    },
+    {
+      pubkey: accounts.buffer,
+      isWritable: true,
       isSigner: false,
     },
   ];

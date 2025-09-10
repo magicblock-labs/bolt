@@ -21,10 +21,12 @@ namespace AccelerationTest {
             await Profiler.Run("DelegateComponent", async () => {
                 await DelegateComponent(framework);
             });
-            // TODO: Re-enable this test when ephemeral-validator is properly installed on the CI.
-            // await Profiler.Run("ApplySimpleMovementSystemOnAccelerator 10", async () => {
-            //     await ApplySimpleMovementSystemOnAccelerator(framework);
-            // });
+            await Profiler.Run("ApplySimpleMovementSystemOnAccelerator 10", async () => {
+                if (Environment.GetEnvironmentVariable("GITHUB_ACTIONS") != null) {
+                    return;
+                }
+                await ApplySimpleMovementSystemOnAccelerator(framework);
+            });
         }
 
         public static async Task AddAccelerationEntity(Framework framework) {
@@ -47,10 +49,13 @@ namespace AccelerationTest {
         public static async Task ApplySimpleMovementSystemOnAccelerator(Framework framework) {
             for (int i = 0; i < 10; i++) {
                 var apply = new ApplyAccounts() {
+                    CpiAuth = WorldProgram.FindCpiAuthPda(),
                     Authority = framework.Wallet.Account.PublicKey,
                     BoltSystem = framework.SystemSimpleMovement,
                     World = framework.WorldPda,
+                    Buffer = WorldProgram.FindBufferPda(framework.AccelerationComponentPositionPda)
                 };
+
                 var instruction = WorldProgram.Apply(apply, Bolt.World.SerializeArgs(new { direction = "Up" }));
                 instruction.Keys.Add(AccountMeta.ReadOnly(framework.ExampleComponentPosition, false));
                 instruction.Keys.Add(AccountMeta.Writable(framework.AccelerationComponentPositionPda, false));

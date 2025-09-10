@@ -17,6 +17,8 @@ import {
   WORLD_PROGRAM_ID,
   BN,
   FindComponentProgramDataPda,
+  FindBufferPda,
+  FindCpiAuthPda,
 } from "../index";
 import web3 from "@solana/web3.js";
 import {
@@ -26,17 +28,13 @@ import {
   Transaction,
   type TransactionInstruction,
 } from "@solana/web3.js";
-import type WorldProgram from "../generated";
+import type { World as WorldProgram } from "../generated/types/world";
 import {
   createInitializeRegistryInstruction,
   PROGRAM_ID,
   worldIdl,
 } from "../generated";
 import { type Idl, Program } from "@coral-xyz/anchor";
-
-export const CPI_AUTH_ADDRESS = new web3.PublicKey(
-  "B2f2y3QTBv346wE6nWKor72AUhUvFF6mPk7TWCF2QVhi",
-);
 
 export async function InitializeRegistry({
   payer,
@@ -154,9 +152,7 @@ export async function AddAuthority({
   instruction: TransactionInstruction;
   transaction: Transaction;
 }> {
-  const program = new Program(
-    worldIdl as Idl,
-  ) as unknown as Program<WorldProgram>;
+  const program = new Program(worldIdl as Idl) as unknown as Program;
   const worldInstance = await World.fromAccountAddress(connection, world);
   const worldId = new BN(worldInstance.id);
   const instruction = await program.methods
@@ -196,9 +192,7 @@ export async function RemoveAuthority({
   instruction: TransactionInstruction;
   transaction: Transaction;
 }> {
-  const program = new Program(
-    worldIdl as Idl,
-  ) as unknown as Program<WorldProgram>;
+  const program = new Program(worldIdl as Idl) as unknown as Program;
   const worldInstance = await World.fromAccountAddress(connection, world);
   const worldId = new BN(worldInstance.id);
   const instruction = await program.methods
@@ -235,9 +229,7 @@ export async function ApproveSystem({
   instruction: TransactionInstruction;
   transaction: Transaction;
 }> {
-  const program = new Program(
-    worldIdl as Idl,
-  ) as unknown as Program<WorldProgram>;
+  const program = new Program(worldIdl as Idl) as unknown as Program;
   const instruction = await program.methods
     .approveSystem()
     .accounts({
@@ -272,9 +264,7 @@ export async function RemoveSystem({
   instruction: TransactionInstruction;
   transaction: Transaction;
 }> {
-  const program = new Program(
-    worldIdl as Idl,
-  ) as unknown as Program<WorldProgram>;
+  const program = new Program(worldIdl as Idl) as unknown as Program;
   const instruction = await program.methods
     .removeSystem()
     .accounts({
@@ -358,9 +348,7 @@ export async function DestroyComponent({
   instruction: TransactionInstruction;
   transaction: Transaction;
 }> {
-  const program = new Program(
-    worldIdl as Idl,
-  ) as unknown as Program<WorldProgram>;
+  const program = new Program(worldIdl as Idl) as unknown as Program;
   const componentProgramData = FindComponentProgramDataPda({
     programId: componentId,
   });
@@ -375,7 +363,7 @@ export async function DestroyComponent({
       componentProgram,
       componentProgramData,
       receiver,
-      cpiAuth: CPI_AUTH_ADDRESS,
+      cpiAuth: FindCpiAuthPda(),
     })
     .instruction();
   const transaction = new Transaction().add(instruction);
@@ -421,6 +409,7 @@ export async function InitializeComponent({
     data: componentPda,
     componentProgram: componentId,
     authority: authority ?? PROGRAM_ID,
+    buffer: FindBufferPda(componentPda),
     anchorRemainingAccounts,
   });
   const transaction = new Transaction().add(instruction);
@@ -449,9 +438,7 @@ async function createApplySystemInstruction({
   extraAccounts,
   args,
 }: ApplySystemInstruction): Promise<web3.TransactionInstruction> {
-  const program = new Program(
-    worldIdl as Idl,
-  ) as unknown as Program<WorldProgram>;
+  const program = new Program(worldIdl as Idl) as unknown as Program;
   let componentCount = 0;
   entities.forEach(function (entity) {
     componentCount += entity.components.length;
@@ -503,11 +490,12 @@ async function createApplySystemInstruction({
     return program.methods
       .applyWithSession(SerializeArgs(args))
       .accounts({
+        buffer: FindBufferPda(remainingAccounts[1].pubkey), // First component PDA
         authority: authority ?? PROGRAM_ID,
         boltSystem: systemId,
         sessionToken: session.token,
         world,
-        cpiAuth: CPI_AUTH_ADDRESS,
+        cpiAuth: FindCpiAuthPda(),
       })
       .remainingAccounts(remainingAccounts)
       .instruction();
@@ -515,10 +503,11 @@ async function createApplySystemInstruction({
     return program.methods
       .apply(SerializeArgs(args))
       .accounts({
+        buffer: FindBufferPda(remainingAccounts[1].pubkey), // First component PDA
         authority: authority ?? PROGRAM_ID,
         boltSystem: systemId,
         world,
-        cpiAuth: CPI_AUTH_ADDRESS,
+        cpiAuth: FindCpiAuthPda(),
       })
       .remainingAccounts(remainingAccounts)
       .instruction();

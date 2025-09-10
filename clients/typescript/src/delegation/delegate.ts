@@ -7,12 +7,14 @@ import {
   delegationMetadataPdaFromDelegatedAccount,
   delegationRecordPdaFromDelegatedAccount,
 } from "@magicblock-labs/ephemeral-rollups-sdk";
-import { FindComponentPda } from "../index";
+import { FindBufferPda, FindComponentPda, Program } from "../index";
 import {
-  type PublicKey,
+  PublicKey,
   Transaction,
   type TransactionInstruction,
 } from "@solana/web3.js";
+import { worldIdl } from "../generated";
+import { Idl } from "@coral-xyz/anchor";
 
 export interface DelegateInstructionArgs {
   commitFrequencyMs: number;
@@ -85,7 +87,7 @@ export function createDelegateInstruction(
   const keys: web3.AccountMeta[] = [
     {
       pubkey: accounts.payer,
-      isWritable: false,
+      isWritable: true,
       isSigner: true,
     },
     {
@@ -177,17 +179,54 @@ export async function DelegateComponent({
   componentPda: PublicKey;
 }> {
   const componentPda = FindComponentPda({ componentId, entity, seed });
-  const delegateComponentIx = createDelegateInstruction({
-    payer,
-    entity,
-    account: componentPda,
-    ownerProgram: componentId,
-    buffer,
-    delegationRecord,
-    delegationMetadata,
-    delegationProgram,
-    systemProgram,
-  });
+  const componentProgram = componentId;
+  const componentBuffer = FindBufferPda(componentPda);
+  systemProgram = systemProgram ?? web3.SystemProgram.programId;
+  buffer =
+    buffer ??
+    delegateBufferPdaFromDelegatedAccountAndOwnerProgram(
+      componentPda,
+      componentProgram,
+    );
+  delegationRecord =
+    delegationRecord ?? delegationRecordPdaFromDelegatedAccount(componentPda);
+  delegationMetadata =
+    delegationMetadata ??
+    delegationMetadataPdaFromDelegatedAccount(componentPda);
+  delegationProgram = delegationProgram ?? new PublicKey(DELEGATION_PROGRAM_ID);
+  const worldProgram = new PublicKey(worldIdl.address);
+
+  const bufferDelegationRecord =
+    delegationRecordPdaFromDelegatedAccount(componentBuffer);
+
+  const bufferDelegationMetadata =
+    delegationMetadataPdaFromDelegatedAccount(componentBuffer);
+
+  const bufferBuffer = delegateBufferPdaFromDelegatedAccountAndOwnerProgram(
+    componentBuffer,
+    worldProgram,
+  );
+
+  const program = new Program(worldIdl as Idl) as unknown as Program;
+  const delegateComponentIx = await program.methods
+    .delegateComponent(0, null)
+    .accounts({
+      payer,
+      component: componentPda,
+      componentBuffer,
+      componentProgram,
+      buffer,
+      delegationRecord,
+      delegationMetadata,
+      delegationProgram,
+      systemProgram,
+      entity,
+      worldProgram,
+      bufferBuffer,
+      bufferDelegationRecord,
+      bufferDelegationMetadata,
+    })
+    .instruction();
 
   return {
     instruction: delegateComponentIx,

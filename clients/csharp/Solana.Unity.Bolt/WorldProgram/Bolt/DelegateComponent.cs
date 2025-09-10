@@ -20,12 +20,18 @@ namespace Bolt {
         }
 
         public static async Task<DelegateComponentInstruction> DelegateComponent(PublicKey payer, PublicKey entity, PublicKey componentId, string seed = "") {
-            var account = WorldProgram.FindComponentPda(componentId, entity, seed);
-            var bufferPda = WorldProgram.FindBufferPda(account, componentId);
-            var delegationRecord = WorldProgram.FindDelegationProgramPda("delegation", account);
-            var delegationMetadata = WorldProgram.FindDelegationProgramPda("delegation-metadata", account);
+            var componentPda = WorldProgram.FindComponentPda(componentId, entity, seed);
+            var componentBuffer = WorldProgram.FindBufferPda(componentPda);
 
-            byte[] discriminator = new byte[] { 90, 147, 75, 178, 85, 88, 4, 137 };
+            var componentDelegationRecord = WorldProgram.FindDelegationProgramPda("delegation", componentPda);
+            var componentDelegationMetadata = WorldProgram.FindDelegationProgramPda("delegation-metadata", componentPda);
+
+            var worldProgram = new PublicKey(WorldProgram.ID);
+            var bufferDelegationRecord = WorldProgram.FindDelegationProgramPda("delegation", componentBuffer);
+            var bufferDelegationMetadata = WorldProgram.FindDelegationProgramPda("delegation-metadata", componentBuffer);
+            var bufferBuffer = WorldProgram.FindBufferPda(componentBuffer, worldProgram);
+
+            byte[] discriminator = new byte[] { 191, 212, 179, 193, 178, 94, 119, 93 };
             uint commitFrequencyMs = 0;
             byte[] commitFrequencyBytes = BitConverter.GetBytes(commitFrequencyMs);
             if (!BitConverter.IsLittleEndian) Array.Reverse(commitFrequencyBytes);
@@ -38,22 +44,27 @@ namespace Bolt {
             Array.Copy(validator, 0, data, discriminator.Length + commitFrequencyBytes.Length, validator.Length);
 
             TransactionInstruction instruction = new TransactionInstruction() {
-                ProgramId = componentId,
+                ProgramId = new PublicKey(WorldProgram.ID),
                 Keys = new List<AccountMeta>() {
-                    AccountMeta.ReadOnly(payer, true),
-                    AccountMeta.ReadOnly(entity, false),
-                    AccountMeta.Writable(account, false),
+                    AccountMeta.Writable(payer, true),
+                    AccountMeta.Writable(componentPda, false),
+                    AccountMeta.Writable(componentBuffer, false),
                     AccountMeta.ReadOnly(componentId, false),
-                    AccountMeta.Writable(bufferPda, false),
-                    AccountMeta.Writable(delegationRecord, false),
-                    AccountMeta.Writable(delegationMetadata, false),
+                    AccountMeta.Writable(WorldProgram.FindBufferPda(componentPda, componentId), false),
+                    AccountMeta.Writable(componentDelegationRecord, false),
+                    AccountMeta.Writable(componentDelegationMetadata, false),
                     AccountMeta.ReadOnly(WorldProgram.DelegationProgram, false),
                     AccountMeta.ReadOnly(SystemProgram.ProgramIdKey, false),
+                    AccountMeta.ReadOnly(entity, false),
+                    AccountMeta.ReadOnly(worldProgram, false),
+                    AccountMeta.Writable(bufferBuffer, false),
+                    AccountMeta.Writable(bufferDelegationRecord, false),
+                    AccountMeta.Writable(bufferDelegationMetadata, false),
                 },
                 Data = data,
             };
             return new DelegateComponentInstruction() {
-                Pda = WorldProgram.FindDelegationProgramPda(seed, entity),
+                Pda = componentPda,
                 Instruction = instruction,
             };
         }
