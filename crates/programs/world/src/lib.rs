@@ -580,9 +580,13 @@ fn apply_impl<'info>(
                     AccountMeta::new(component.key(), false),
                 ];
                 let mut data = Vec::with_capacity(8 + 32);
-                data.extend_from_slice(&[72 as u8, 202, 120, 52, 77, 128, 96, 197]);
+                data.extend_from_slice(&[72_u8, 202, 120, 52, 77, 128, 96, 197]);
                 data.extend_from_slice(&bolt_system.key().to_bytes());
-                let ix = Instruction { program_id: program.key(), accounts: metas, data };
+                let ix = Instruction {
+                    program_id: program.key(),
+                    accounts: metas,
+                    data,
+                };
                 let account_infos = [cpi_auth.to_account_info(), component.to_account_info()];
                 anchor_lang::solana_program::program::invoke_signed(
                     &ix,
@@ -600,9 +604,17 @@ fn apply_impl<'info>(
                     AccountMeta::new(component.key(), false),
                 ];
                 let mut data = Vec::with_capacity(8);
-                data.extend_from_slice(&[223 as u8, 114, 91, 136, 197, 78, 153, 153]);
-                let ix = Instruction { program_id: bolt_system.key(), accounts: metas, data };
-                let account_infos = [cpi_auth.to_account_info(), buffer.to_account_info(), component.to_account_info()];
+                data.extend_from_slice(&[223_u8, 114, 91, 136, 197, 78, 153, 153]);
+                let ix = Instruction {
+                    program_id: bolt_system.key(),
+                    accounts: metas,
+                    data,
+                };
+                let account_infos = [
+                    cpi_auth.to_account_info(),
+                    buffer.to_account_info(),
+                    component.to_account_info(),
+                ];
                 anchor_lang::solana_program::program::invoke_signed(
                     &ix,
                     &account_infos,
@@ -615,7 +627,10 @@ fn apply_impl<'info>(
     // bolt_system::bolt_execute with remaining accounts (components + extra accounts)
     {
         use anchor_lang::solana_program::instruction::{AccountMeta, Instruction};
-        let mut accounts_metas = vec![AccountMeta::new_readonly(authority.key(), authority.is_signer)];
+        let mut accounts_metas = vec![AccountMeta::new_readonly(
+            authority.key(),
+            authority.is_signer,
+        )];
 
         // Build metas for remaining accounts in the same order as before
         let extra_iter = remaining_accounts[..index]
@@ -640,11 +655,15 @@ fn apply_impl<'info>(
         }
 
         let mut data = Vec::with_capacity(8 + 4 + args.len());
-        data.extend_from_slice(&[75 as u8, 206, 62, 210, 52, 215, 104, 109]);
+        data.extend_from_slice(&[75_u8, 206, 62, 210, 52, 215, 104, 109]);
         let args_len_le = (args.len() as u32).to_le_bytes();
         data.extend_from_slice(&args_len_le);
         data.extend_from_slice(&args);
-        let ix = Instruction { program_id: bolt_system.key(), accounts: accounts_metas, data };
+        let ix = Instruction {
+            program_id: bolt_system.key(),
+            accounts: accounts_metas,
+            data,
+        };
 
         anchor_lang::solana_program::program::invoke(&ix, &account_infos)?;
     }
@@ -668,9 +687,13 @@ fn apply_impl<'info>(
                     AccountMeta::new(component.key(), false),
                 ];
                 let mut data = Vec::with_capacity(8 + 32);
-                data.extend_from_slice(&[72 as u8, 202, 120, 52, 77, 128, 96, 197]);
+                data.extend_from_slice(&[72_u8, 202, 120, 52, 77, 128, 96, 197]);
                 data.extend_from_slice(&program.key().to_bytes());
-                let ix = Instruction { program_id: bolt_system.key(), accounts: metas, data };
+                let ix = Instruction {
+                    program_id: bolt_system.key(),
+                    accounts: metas,
+                    data,
+                };
                 let account_infos = [cpi_auth.to_account_info(), component.to_account_info()];
                 anchor_lang::solana_program::program::invoke_signed(
                     &ix,
@@ -692,9 +715,17 @@ fn apply_impl<'info>(
                     AccountMeta::new(component.key(), false),
                 ];
                 let mut data = Vec::with_capacity(8);
-                data.extend_from_slice(&[223 as u8, 114, 91, 136, 197, 78, 153, 153]);
-                let ix = Instruction { program_id: program.key(), accounts: metas, data };
-                let account_infos = [cpi_auth.to_account_info(), buffer.to_account_info(), component.to_account_info()];
+                data.extend_from_slice(&[223_u8, 114, 91, 136, 197, 78, 153, 153]);
+                let ix = Instruction {
+                    program_id: program.key(),
+                    accounts: metas,
+                    data,
+                };
+                let account_infos = [
+                    cpi_auth.to_account_info(),
+                    buffer.to_account_info(),
+                    component.to_account_info(),
+                ];
                 anchor_lang::solana_program::program::invoke_signed(
                     &ix,
                     &account_infos,
