@@ -188,7 +188,7 @@ impl VisitMut for SystemTransform {
 impl SystemTransform {
     fn add_variadic_execute_function(content: &mut Vec<syn::Item>) {
         content.push(syn::parse2(quote! {
-            pub fn bolt_execute<'info>(ctx: Context<'_, '_, 'info, 'info, VariadicBoltComponents<'info>>, args: Vec<u8>) -> Result<Vec<Vec<u8>>> {
+            pub fn bolt_execute<'a, 'b, 'info>(ctx: Context<'a, 'b, 'info, 'info, VariadicBoltComponents<'info>>, args: Vec<u8>) -> Result<Vec<Vec<u8>>> {
                 let mut components = Components::try_from(&ctx)?;
                 let bumps = ComponentsBumps {};
                 let context = Context::new(ctx.program_id, &mut components, ctx.remaining_accounts, bumps);
@@ -317,11 +317,15 @@ impl VisitMut for Extractor {
                     let last_segment = type_path.path.segments.last().unwrap();
                     if last_segment.ident == "Context" {
                         if let PathArguments::AngleBracketed(args) = &last_segment.arguments {
-                            if let Some(syn::GenericArgument::Type(syn::Type::Path(type_path))) =
-                                args.args.first()
-                            {
-                                let ident = &type_path.path.segments.first().unwrap().ident;
-                                self.context_struct_name = Some(ident.to_string());
+                            // Find the first generic argument that is a Type::Path (e.g., Components)
+                            for ga in args.args.iter() {
+                                if let syn::GenericArgument::Type(syn::Type::Path(type_path)) = ga {
+                                    if let Some(first_seg) = type_path.path.segments.first() {
+                                        self.context_struct_name =
+                                            Some(first_seg.ident.to_string());
+                                        break;
+                                    }
+                                }
                             }
                         }
                     }
