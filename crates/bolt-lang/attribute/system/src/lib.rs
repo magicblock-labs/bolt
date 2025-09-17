@@ -321,7 +321,8 @@ impl VisitMut for Extractor {
                             for ga in args.args.iter() {
                                 if let syn::GenericArgument::Type(syn::Type::Path(type_path)) = ga {
                                     if let Some(first_seg) = type_path.path.segments.first() {
-                                        self.context_struct_name = Some(first_seg.ident.to_string());
+                                        self.context_struct_name =
+                                            Some(first_seg.ident.to_string());
                                         break;
                                     }
                                 }
