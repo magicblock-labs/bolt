@@ -1843,6 +1843,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "escrow-funding"
+version = "0.2.4"
+dependencies = [
+ "bolt-lang",
+ "component-small",
+ "serde",
+]
+
+[[package]]
 name = "event-listener"
 version = "2.5.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
