@@ -1,4 +1,26 @@
 
+## [0.2.5] - 2025-09-17
+
+### ✨️ Features
+ - CPI Authentication using a World PDA (#196)
+
+
+### 🐛 Bug Fixes
+ - Fixing extra accounts lifetime (#201)
+ - Fix: improve error handling in ephemeral validator (#189)
+Co-authored-by: Gabriele Picco <piccogabriele@gmail.com>
+Co-authored-by: Danilo Guanabara <danilo@magicblock.gg>
+ - Fix link README.md (#183)
+Co-authored-by: Gabriele Picco <piccogabriele@gmail.com>
+
+### 📚 Documentation
+ - Docs: fix typos (#193)
+Co-authored-by: greptile-apps[bot] <165735046+greptile-apps[bot]@users.noreply.github.com>
+
+### 🧪 Testing
+ - Test validator (#176)
+Co-authored-by: Danilo Guanabara <danilo@magicblock.gg>
+
 ## [0.2.4] - 2025-07-23
 
 ### 📚 Documentation
@@ -151,7 +173,7 @@ Make the CI run `yarn build` before testing
  - Upgrade to latest anchor version, supporting the new IDL s… (#33)
  - Propagate signing authority to the systems (#31)
  - Macro to define and access extra accounts  (#26)
-Inject extra account init fn with th system macro, to generate a correct idl which contains also the extra accounts
+Inject extra account init fn with th system macro, to generate a correct idl wich contains also the extra accounts
 
 ## [0.1.1] - 2024-03-09
 
