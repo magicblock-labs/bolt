@@ -1,4 +1,26 @@
 
+## [0.2.5] - 2025-09-17
+
+### ✨️ Features
+ - CPI Authentication using a World PDA (#196)
+
+
+### 🐛 Bug Fixes
+ - Fixing extra accounts lifetime (#201)
+ - Fix: improve error handling in ephemeral validator (#189)
+Co-authored-by: Gabriele Picco <piccogabriele@gmail.com>
+Co-authored-by: Danilo Guanabara <danilo@magicblock.gg>
+ - Fix link README.md (#183)
+Co-authored-by: Gabriele Picco <piccogabriele@gmail.com>
+
+### 📚 Documentation
+ - Docs: fix typos (#193)
+Co-authored-by: greptile-apps[bot] <165735046+greptile-apps[bot]@users.noreply.github.com>
+
+### 🧪 Testing
+ - Test validator (#176)
+Co-authored-by: Danilo Guanabara <danilo@magicblock.gg>
+
 ## [0.2.4] - 2025-07-23
 
 ### 📚 Documentation

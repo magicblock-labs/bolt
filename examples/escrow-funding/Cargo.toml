@@ -1,6 +1,6 @@
 [package]
 name = "escrow-funding"
-version = "0.2.4"
+version.workspace = true
 description = "Created with Bolt"
 edition = "2021"
 
