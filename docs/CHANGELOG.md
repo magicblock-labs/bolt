@@ -1,7 +1,8 @@
 
-## [0.2.5] - 2025-09-17
+## [0.2.6] - 2025-09-24
 
 ### ✨️ Features
+ - Implicit execute lifetimes (#203)
  - CPI Authentication using a World PDA (#196)
 
 
