@@ -21,6 +21,8 @@ edition = "2021"
 [workspace.dependencies]
 bolt-types = { path = "crates/types", version = "=0.2.6" }
 bolt-lang = { path = "crates/bolt-lang", version = "=0.2.6" }
+bolt-attribute = { path = "crates/bolt-lang/attribute", version = "=0.2.6" }
+bolt-attribute-bolt-bundle = { path = "crates/bolt-lang/attribute/bolt-attribute-bolt-bundle", version = "=0.2.6" }
 bolt-attribute-bolt-program = { path = "crates/bolt-lang/attribute/bolt-program", version = "=0.2.6" }
 bolt-attribute-bolt-delegate = { path = "crates/bolt-lang/attribute/delegate", version = "=0.2.6" }
 bolt-attribute-bolt-component = { path = "crates/bolt-lang/attribute/component", version = "=0.2.6" }
