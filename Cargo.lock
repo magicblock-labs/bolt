@@ -1873,6 +1873,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "example-bundle"
+version = "0.2.5"
+dependencies = [
+ "bolt-lang",
+ "serde",
+]
+
+[[package]]
 name = "fastbloom"
 version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"

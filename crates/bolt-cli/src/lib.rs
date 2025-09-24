@@ -2,6 +2,7 @@ mod commands;
 mod ephemeral_validator;
 
 mod component;
+mod bundle;
 mod instructions;
 mod rust_template;
 mod system;
@@ -16,6 +17,7 @@ use crate::instructions::{
 };
 use crate::rust_template::{create_component, create_system};
 use crate::system::new_system;
+use crate::bundle::new_bundle;
 use anchor_cli::config;
 use anchor_cli::config::{
     BootstrapMode, Config, ConfigOverride, GenesisEntry, ProgramArch, ProgramDeployment,
@@ -39,6 +41,8 @@ pub const ANCHOR_VERSION: &str = anchor_cli::VERSION;
 pub enum BoltCommand {
     #[clap(about = "Create a new component")]
     Component(ComponentCommand),
+    #[clap(about = "Create a new Component-System bundle")]
+    Bundle(BundleCommand),
     #[clap(about = "Create a new system")]
     System(SystemCommand),
     // Include all existing commands from anchor_cli::Command
@@ -66,6 +70,11 @@ pub struct InitCommand {
 
 #[derive(Debug, Parser)]
 pub struct ComponentCommand {
+    pub name: String,
+}
+
+#[derive(Debug, Parser)]
+pub struct BundleCommand {
     pub name: String,
 }
 
@@ -186,6 +195,7 @@ pub async fn entry(opts: Opts) -> Result<()> {
             }
         },
         BoltCommand::Component(command) => new_component(&opts.cfg_override, command.name),
+        BoltCommand::Bundle(command) => new_bundle(&opts.cfg_override, command.name),
         BoltCommand::System(command) => new_system(&opts.cfg_override, command.name),
         BoltCommand::Registry(_command) => create_registry(&opts.cfg_override).await,
         BoltCommand::World(_command) => create_world(&opts.cfg_override).await,
