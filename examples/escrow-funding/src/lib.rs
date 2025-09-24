@@ -6,10 +6,7 @@ declare_id!("4Um2d8SvyfWyLLtfu2iJMFhM77DdjjyQusEy7K3VhPkd");
 
 #[system]
 pub mod escrow_funding {
-    pub fn execute<'info>(
-        ctx: Context<'_, '_, '_, 'info, Components<'info>>,
-        args: Args,
-    ) -> Result<Components<'info>> {
+    pub fn execute(ctx: Context<Components>, args: Args) -> Result<Components> {
         let receiver = ctx.accounts.receiver.to_account_info();
         let sender = ctx.sender()?.clone();
         let system_program = ctx.system_program()?.clone();

@@ -123,6 +123,8 @@ impl VisitMut for SystemTransform {
     // Modify the return type of the system function to Result<Vec<u8>,*>
     fn visit_item_fn_mut(&mut self, item_fn: &mut ItemFn) {
         if item_fn.sig.ident == "execute" {
+            // Ensure execute has lifetimes and a fully-qualified Context
+            Self::inject_lifetimes_and_context(item_fn);
             // Modify the return type to Result<Vec<u8>> if necessary
             if let ReturnType::Type(_, type_box) = &item_fn.sig.output {
                 if let Type::Path(type_path) = &**type_box {
@@ -186,6 +188,84 @@ impl VisitMut for SystemTransform {
 }
 
 impl SystemTransform {
+    fn inject_lifetimes_and_context(item_fn: &mut ItemFn) {
+        // Add lifetimes <'a, 'b, 'c, 'info> if missing
+        let lifetime_idents = ["a", "b", "c", "info"];
+        for name in lifetime_idents.iter() {
+            let exists = item_fn.sig.generics.params.iter().any(|p| match p {
+                syn::GenericParam::Lifetime(l) => l.lifetime.ident == *name,
+                _ => false,
+            });
+            if !exists {
+                let lifetime: syn::Lifetime =
+                    syn::parse_str(&format!("'{}", name)).expect("valid lifetime");
+                let gp: syn::GenericParam = syn::parse_quote!(#lifetime);
+                item_fn.sig.generics.params.push(gp);
+            }
+        }
+
+        // Update the first argument type from Context<Components> to Context<'a, 'b, 'c, 'info, Components<'info>>
+        if let Some(FnArg::Typed(pat_type)) = item_fn.sig.inputs.first_mut() {
+            if let Type::Path(type_path) = pat_type.ty.as_mut() {
+                if let Some(last_segment) = type_path.path.segments.last_mut() {
+                    if last_segment.ident == "Context" {
+                        // Extract Components path from existing generic args (if any)
+                        let mut components_ty_opt: Option<Type> = None;
+                        if let PathArguments::AngleBracketed(args) = &last_segment.arguments {
+                            for ga in args.args.iter() {
+                                if let GenericArgument::Type(t) = ga {
+                                    components_ty_opt = Some(t.clone());
+                                    break;
+                                }
+                            }
+                        }
+
+                        // If not found, leave early
+                        if let Some(components_ty) = components_ty_opt {
+                            // Ensure Components<'info>
+                            let components_with_info: Type = match components_ty {
+                                Type::Path(mut tp) => {
+                                    let seg = tp.path.segments.last_mut().unwrap();
+                                    match &mut seg.arguments {
+                                        PathArguments::AngleBracketed(ab) => {
+                                            if ab.args.is_empty() {
+                                                ab.args.push(GenericArgument::Lifetime(
+                                                    syn::parse_quote!('info),
+                                                ));
+                                            }
+                                        }
+                                        _ => {
+                                            seg.arguments = PathArguments::AngleBracketed(
+                                                syn::AngleBracketedGenericArguments {
+                                                    colon2_token: None,
+                                                    lt_token: Default::default(),
+                                                    args: std::iter::once(
+                                                        GenericArgument::Lifetime(
+                                                            syn::parse_quote!('info),
+                                                        ),
+                                                    )
+                                                    .collect(),
+                                                    gt_token: Default::default(),
+                                                },
+                                            );
+                                        }
+                                    }
+                                    Type::Path(tp)
+                                }
+                                other => other,
+                            };
+
+                            // Build new Context<'a, 'b, 'c, 'info, Components<'info>> type
+                            let new_ty: Type = syn::parse_quote! {
+                                Context<'a, 'b, 'c, 'info, #components_with_info>
+                            };
+                            pat_type.ty = Box::new(new_ty);
+                        }
+                    }
+                }
+            }
+        }
+    }
     fn add_variadic_execute_function(content: &mut Vec<syn::Item>) {
         content.push(syn::parse2(quote! {
             pub fn bolt_execute<'a, 'b, 'info>(ctx: Context<'a, 'b, 'info, 'info, VariadicBoltComponents<'info>>, args: Vec<u8>) -> Result<Vec<Vec<u8>>> {
