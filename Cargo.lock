@@ -839,6 +839,7 @@ dependencies = [
 ]
 
 [[package]]
+<<<<<<< HEAD
 name = "bolt-attribute-bolt-program"
 version = "0.2.6"
 dependencies = [
@@ -849,6 +850,8 @@ dependencies = [
 ]
 
 [[package]]
+=======
+>>>>>>> 02fce99 (:recycle: WIP - Refactoring #[component])
 name = "bolt-attribute-bolt-system"
 version = "0.2.6"
 dependencies = [
@@ -908,7 +911,6 @@ dependencies = [
  "bolt-attribute-bolt-component-id",
  "bolt-attribute-bolt-delegate",
  "bolt-attribute-bolt-extra-accounts",
- "bolt-attribute-bolt-program",
  "bolt-attribute-bolt-system",
  "bolt-attribute-bolt-system-input",
  "bolt-system",

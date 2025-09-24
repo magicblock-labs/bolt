@@ -1,36 +1,40 @@
+use heck::ToSnakeCase;
+use syn::DeriveInput;
+use quote::{quote, ToTokens};
+
+pub fn generate_program(type_: &DeriveInput, attributes: &crate::component::Attributes) -> proc_macro2::TokenStream {
+    let pascal_case_name = &type_.ident;
+    let snake_case_name = pascal_case_name.to_string().to_snake_case();
+    let component_name = syn::Ident::new(&snake_case_name, type_.ident.span());
+
+    let program_mod: syn::ItemMod = if attributes.delegate {
+        parse_quote! {
+            #[delegate(#pascal_case_name)]
+            pub mod #component_name {
+                use super::*;
+            }
+        }
+    } else {
+        parse_quote! {
+            pub mod #component_name {
+                use super::*;
+            }
+        }
+    };
+    generate_instructions(program_mod, pascal_case_name).into()
+}
+
 use proc_macro::TokenStream;
 use proc_macro2::TokenStream as TokenStream2;
-use quote::{quote, ToTokens};
 use syn::{
-    parse_macro_input, parse_quote, spanned::Spanned, Attribute, AttributeArgs, Field, Fields, ItemMod, ItemStruct, NestedMeta, Type
+    parse_quote, spanned::Spanned, Attribute, Field, Fields, ItemMod, ItemStruct, Type
 };
 
-/// This macro attribute is used to define a BOLT component.
-///
-/// Bolt components are themselves programs that can be called by other programs.
-///
-/// # Example
-/// ```ignore
-/// #[bolt_program(Position)]
-/// #[program]
-/// pub mod component_position {
-///     use super::*;
-/// }
-///
-///
-/// #[component]
-/// pub struct Position {
-///     pub x: i64,
-///     pub y: i64,
-///     pub z: i64,
-/// }
-/// ```
-#[proc_macro_attribute]
-pub fn bolt_program(args: TokenStream, input: TokenStream) -> TokenStream {
-    let ast = parse_macro_input!(input as syn::ItemMod);
-    let args = parse_macro_input!(args as syn::AttributeArgs);
-    let component_type =
-        extract_type_name(&args).expect("Expected a component type in macro arguments");
+fn generate_instructions(ast: ItemMod, pascal_case_name: &syn::Ident) -> TokenStream {
+    let component_type = Type::Path(syn::TypePath {
+        qself: None,
+        path: pascal_case_name.clone().into(),
+    });
     let modified = modify_component_module(ast, &component_type);
     let additional_macro: Attribute = parse_quote! { #[program] };
     TokenStream::from(quote! {
@@ -85,20 +89,6 @@ fn modify_component_module(mut module: ItemMod, component_type: &Type) -> ItemMo
     });
 
     module
-}
-
-/// Extracts the type name from attribute arguments.
-fn extract_type_name(args: &AttributeArgs) -> Option<Type> {
-    args.iter().find_map(|arg| {
-        if let NestedMeta::Meta(syn::Meta::Path(path)) = arg {
-            Some(Type::Path(syn::TypePath {
-                qself: None,
-                path: path.clone(),
-            }))
-        } else {
-            None
-        }
-    })
 }
 
 /// Modifies the Apply struct, change the bolt system to accept any compatible system.
