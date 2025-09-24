@@ -1,5 +1,10 @@
 import { expect } from "chai";
-import { anchor, CPI_AUTH_ADDRESS, SerializeArgs } from "../../../lib";
+import {
+  anchor,
+  CPI_AUTH_ADDRESS,
+  SerializeArgs,
+  GetDiscriminator,
+} from "../../../lib";
 
 export function world(framework) {
   describe("World authority", () => {
@@ -116,7 +121,11 @@ export function world(framework) {
 
     it("Apply Fly System on Entity 1", async () => {
       const instruction = await framework.worldProgram.methods
-        .apply(SerializeArgs())
+        .apply(
+          GetDiscriminator("global:bolt_execute"),
+          [GetDiscriminator("global:update")],
+          SerializeArgs(),
+        )
         .accounts({
           authority: framework.provider.wallet.publicKey,
           boltSystem: framework.systemFly.programId,
@@ -164,7 +173,11 @@ export function world(framework) {
 
     it("Apply unauthorized Fly System on Entity 1", async () => {
       const instruction = await framework.worldProgram.methods
-        .apply(SerializeArgs())
+        .apply(
+          GetDiscriminator("global:bolt_execute"),
+          [GetDiscriminator("global:update")],
+          SerializeArgs(),
+        )
         .accounts({
           authority: framework.provider.wallet.publicKey,
           boltSystem: framework.systemFly.programId,

@@ -34,9 +34,10 @@ namespace Bolt {
                 Entity = entity,
                 Data = componentPda,
                 ComponentProgram = componentId,
-                Authority = authority ?? new PublicKey(WorldProgram.ID)
+                Authority = new PublicKey(WorldProgram.ID),
+                CpiAuth = WorldProgram.CpiAuthAddress
             };
-            var instruction = WorldProgram.InitializeComponent(initializeComponent);
+            var instruction = WorldProgram.InitializeComponent(initializeComponent, GetDiscriminator("global:initialize"));
             return new InitializeComponentInstruction() {
                 Pda = componentPda,
                 Instruction = instruction

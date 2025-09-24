@@ -35,9 +35,10 @@ namespace Bolt {
                 Entity = entity,
                 Component = componentPda,
                 ComponentProgram = componentProgram,
-                ComponentProgramData = componentProgramData
+                ComponentProgramData = componentProgramData,
+                CpiAuth = WorldProgram.CpiAuthAddress
             };
-            var instruction = WorldProgram.DestroyComponent(destroyComponent);
+            var instruction = WorldProgram.DestroyComponent(destroyComponent, GetDiscriminator("global:destroy"));
             return new DestroyComponentInstruction() {
                 Instruction = instruction
             };

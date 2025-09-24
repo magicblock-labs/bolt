@@ -7,8 +7,10 @@ import {
   FindEntityPda,
   SerializeArgs,
   CPI_AUTH_ADDRESS,
+  GetDiscriminator,
 } from "../../lib";
 import { Direction } from "../framework";
+import crypto from "crypto";
 
 export function ecs(framework) {
   describe("ECS", () => {
@@ -98,7 +100,7 @@ export function ecs(framework) {
         seed: "component-velocity",
       });
       const instruction = await framework.worldProgram.methods
-        .initializeComponent()
+        .initializeComponent(GetDiscriminator("global:initialize"))
         .accounts({
           payer: framework.provider.wallet.publicKey,
           entity: framework.entity1Pda,
@@ -118,8 +120,9 @@ export function ecs(framework) {
         componentId,
         entity: framework.entity1Pda,
       });
+
       const instruction = await framework.worldProgram.methods
-        .initializeComponent()
+        .initializeComponent(GetDiscriminator("global:initialize"))
         .accounts({
           payer: framework.provider.wallet.publicKey,
           entity: framework.entity1Pda,
@@ -140,7 +143,7 @@ export function ecs(framework) {
         entity: framework.entity2Pda,
       });
       const instruction = await framework.worldProgram.methods
-        .initializeComponent()
+        .initializeComponent(GetDiscriminator("global:initialize"))
         .accounts({
           payer: framework.provider.wallet.publicKey,
           entity: framework.entity2Pda,
@@ -161,7 +164,7 @@ export function ecs(framework) {
         entity: framework.entity4Pda,
       });
       const instruction = await framework.worldProgram.methods
-        .initializeComponent()
+        .initializeComponent(GetDiscriminator("global:initialize"))
         .accounts({
           payer: framework.provider.wallet.publicKey,
           entity: framework.entity4Pda,
@@ -187,7 +190,11 @@ export function ecs(framework) {
 
     it("Apply Simple Movement System (Up) on Entity 1", async () => {
       const instruction = await framework.worldProgram.methods
-        .apply(SerializeArgs({ direction: Direction.Up }))
+        .apply(
+          GetDiscriminator("global:bolt_execute"),
+          [GetDiscriminator("global:update")],
+          SerializeArgs({ direction: Direction.Up }),
+        )
         .accounts({
           authority: framework.provider.wallet.publicKey,
           boltSystem: framework.systemSimpleMovement.programId,
@@ -222,7 +229,11 @@ export function ecs(framework) {
 
     it("Apply Simple Movement System (Right) on Entity 1", async () => {
       const instruction = await framework.worldProgram.methods
-        .apply(SerializeArgs({ direction: Direction.Right }))
+        .apply(
+          GetDiscriminator("global:bolt_execute"),
+          [GetDiscriminator("global:update")],
+          SerializeArgs({ direction: Direction.Right }),
+        )
         .accounts({
           authority: framework.provider.wallet.publicKey,
           boltSystem: framework.systemSimpleMovement.programId,
@@ -256,7 +267,11 @@ export function ecs(framework) {
 
     it("Apply Fly System on Entity 1", async () => {
       const instruction = await framework.worldProgram.methods
-        .apply(SerializeArgs())
+        .apply(
+          GetDiscriminator("global:bolt_execute"),
+          [GetDiscriminator("global:update")],
+          SerializeArgs(),
+        )
         .accounts({
           authority: framework.provider.wallet.publicKey,
           boltSystem: framework.systemFly.programId,
@@ -290,7 +305,14 @@ export function ecs(framework) {
 
     it("Apply System Velocity on Entity 1", async () => {
       const instruction = await framework.worldProgram.methods
-        .apply(SerializeArgs())
+        .apply(
+          GetDiscriminator("global:bolt_execute"),
+          [
+            GetDiscriminator("global:update"),
+            GetDiscriminator("global:update"),
+          ],
+          SerializeArgs(),
+        )
         .accounts({
           authority: framework.provider.wallet.publicKey,
           boltSystem: framework.systemApplyVelocity.programId,
@@ -343,7 +365,14 @@ export function ecs(framework) {
 
     it("Apply System Velocity on Entity 1, with Clock external account", async () => {
       const instruction = await framework.worldProgram.methods
-        .apply(SerializeArgs())
+        .apply(
+          GetDiscriminator("global:bolt_execute"),
+          [
+            GetDiscriminator("global:update"),
+            GetDiscriminator("global:update"),
+          ],
+          SerializeArgs(),
+        )
         .accounts({
           authority: framework.provider.wallet.publicKey,
           boltSystem: framework.systemApplyVelocity.programId,
@@ -399,7 +428,11 @@ export function ecs(framework) {
 
     it("Apply Fly System on Entity 4", async () => {
       const instruction = await framework.worldProgram.methods
-        .apply(SerializeArgs())
+        .apply(
+          GetDiscriminator("global:bolt_execute"),
+          [GetDiscriminator("global:update")],
+          SerializeArgs(),
+        )
         .accounts({
           authority: framework.provider.wallet.publicKey,
           boltSystem: framework.systemFly.programId,
@@ -443,7 +476,7 @@ export function ecs(framework) {
       });
 
       const instruction = await framework.worldProgram.methods
-        .destroyComponent()
+        .destroyComponent(GetDiscriminator("global:destroy"))
         .accounts({
           authority: framework.provider.wallet.publicKey,
           componentProgram: framework.exampleComponentVelocity.programId,

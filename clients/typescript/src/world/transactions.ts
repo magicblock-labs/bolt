@@ -1,7 +1,5 @@
 import {
-  createApplyInstruction,
   createAddEntityInstruction,
-  createInitializeComponentInstruction,
   createInitializeNewWorldInstruction,
   FindComponentPda,
   FindEntityPda,
@@ -9,7 +7,6 @@ import {
   FindRegistryPda,
   Registry,
   SerializeArgs,
-  SYSVAR_INSTRUCTIONS_PUBKEY,
   World,
   SessionProgram,
   Session,
@@ -17,6 +14,8 @@ import {
   WORLD_PROGRAM_ID,
   BN,
   FindComponentProgramDataPda,
+  GetDiscriminator,
+  Component,
 } from "../index";
 import web3 from "@solana/web3.js";
 import {
@@ -33,6 +32,7 @@ import {
   worldIdl,
 } from "../generated";
 import { type Idl, Program } from "@coral-xyz/anchor";
+import { System } from "../ecs";
 
 export const CPI_AUTH_ADDRESS = new web3.PublicKey(
   "B2f2y3QTBv346wE6nWKor72AUhUvFF6mPk7TWCF2QVhi",
@@ -351,7 +351,7 @@ export async function DestroyComponent({
 }: {
   authority: PublicKey;
   entity: PublicKey;
-  componentId: PublicKey;
+  componentId: PublicKey | Component;
   receiver: PublicKey;
   seed?: string;
 }): Promise<{
@@ -361,13 +361,19 @@ export async function DestroyComponent({
   const program = new Program(
     worldIdl as Idl,
   ) as unknown as Program<WorldProgram>;
+  const componentName =
+    componentId instanceof Component
+      ? "global:" + componentId.name + "_destroy"
+      : "global:destroy";
+  componentId =
+    componentId instanceof Component ? componentId.program : componentId;
   const componentProgramData = FindComponentProgramDataPda({
     programId: componentId,
   });
   const componentProgram = componentId;
   const component = FindComponentPda({ componentId, entity, seed });
   const instruction = await program.methods
-    .destroyComponent()
+    .destroyComponent(GetDiscriminator(componentName))
     .accounts({
       authority,
       component,
@@ -405,7 +411,7 @@ export async function InitializeComponent({
 }: {
   payer: PublicKey;
   entity: PublicKey;
-  componentId: PublicKey;
+  componentId: PublicKey | Component;
   seed?: string;
   authority?: web3.PublicKey;
   anchorRemainingAccounts?: web3.AccountMeta[];
@@ -414,15 +420,30 @@ export async function InitializeComponent({
   transaction: Transaction;
   componentPda: PublicKey;
 }> {
+  const componentName =
+    componentId instanceof Component
+      ? "global:" + componentId.name + "_initialize"
+      : "global:initialize";
+  componentId =
+    componentId instanceof Component ? componentId.program : componentId;
   const componentPda = FindComponentPda({ componentId, entity, seed });
-  const instruction = createInitializeComponentInstruction({
-    payer,
-    entity,
-    data: componentPda,
-    componentProgram: componentId,
-    authority: authority ?? PROGRAM_ID,
-    anchorRemainingAccounts,
-  });
+  const program = new Program(
+    worldIdl as Idl,
+  ) as unknown as Program<WorldProgram>;
+
+  const instruction = await program.methods
+    .initializeComponent(GetDiscriminator(componentName))
+    .accounts({
+      payer,
+      entity,
+      data: componentPda,
+      componentProgram: componentId,
+      authority: authority ?? PROGRAM_ID,
+      cpiAuth: CPI_AUTH_ADDRESS,
+    })
+    .remainingAccounts(anchorRemainingAccounts ?? [])
+    .instruction();
+
   const transaction = new Transaction().add(instruction);
   return {
     instruction,
@@ -433,7 +454,7 @@ export async function InitializeComponent({
 
 interface ApplySystemInstruction {
   authority: PublicKey;
-  systemId: PublicKey;
+  systemId: PublicKey | System;
   entities: ApplySystemEntity[];
   world: PublicKey;
   session?: Session;
@@ -461,7 +482,7 @@ async function createApplySystemInstruction({
   }
 
   let remainingAccounts: web3.AccountMeta[] = [];
-  let components: { id: PublicKey; pda: PublicKey }[] = [];
+  let components: { id: PublicKey; pda: PublicKey; name?: string }[] = [];
   for (const entity of entities) {
     for (const component of entity.components) {
       const componentPda = FindComponentPda({
@@ -472,6 +493,7 @@ async function createApplySystemInstruction({
       components.push({
         id: component.componentId,
         pda: componentPda,
+        name: component.name,
       });
     }
   }
@@ -499,12 +521,35 @@ async function createApplySystemInstruction({
     }
   }
 
+  // Build discriminators per component in order of remaining accounts pairs
+  const discriminators: Buffer[] = components.map((component) =>
+    Buffer.from(
+      GetDiscriminator(
+        "global:" +
+          (component.name ? component.name + "_" : "") +
+          (session ? "update_with_session" : "update"),
+      ),
+    ),
+  );
+
+  const systemDiscriminator = Buffer.from(
+    GetDiscriminator(
+      "global:" +
+        (systemId instanceof System ? systemId.name + "_" : "") +
+        "bolt_execute",
+    ),
+  );
+
   if (session)
     return program.methods
-      .applyWithSession(SerializeArgs(args))
+      .applyWithSession(
+        systemDiscriminator,
+        discriminators,
+        SerializeArgs(args),
+      )
       .accounts({
         authority: authority ?? PROGRAM_ID,
-        boltSystem: systemId,
+        boltSystem: systemId instanceof System ? systemId.program : systemId,
         sessionToken: session.token,
         world,
         cpiAuth: CPI_AUTH_ADDRESS,
@@ -513,10 +558,10 @@ async function createApplySystemInstruction({
       .instruction();
   else
     return program.methods
-      .apply(SerializeArgs(args))
+      .apply(systemDiscriminator, discriminators, SerializeArgs(args))
       .accounts({
         authority: authority ?? PROGRAM_ID,
-        boltSystem: systemId,
+        boltSystem: systemId instanceof System ? systemId.program : systemId,
         world,
         cpiAuth: CPI_AUTH_ADDRESS,
       })
@@ -530,6 +575,7 @@ interface ApplySystemEntity {
 }
 interface ApplySystemComponent {
   componentId: PublicKey;
+  name?: string;
   seed?: string;
 }
 
@@ -552,7 +598,7 @@ export async function ApplySystem({
   session,
 }: {
   authority: PublicKey;
-  systemId: PublicKey;
+  systemId: PublicKey | System;
   entities: ApplySystemEntity[];
   world: PublicKey;
   extraAccounts?: web3.AccountMeta[];

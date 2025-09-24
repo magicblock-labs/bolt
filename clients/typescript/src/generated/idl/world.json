@@ -132,6 +132,16 @@
       ],
       "args": [
         {
+          "name": "system_discriminator",
+          "type": "bytes"
+        },
+        {
+          "name": "discriminators",
+          "type": {
+            "vec": "bytes"
+          }
+        },
+        {
           "name": "args",
           "type": "bytes"
         }
@@ -168,6 +178,16 @@
         }
       ],
       "args": [
+        {
+          "name": "system_discriminator",
+          "type": "bytes"
+        },
+        {
+          "name": "discriminators",
+          "type": {
+            "vec": "bytes"
+          }
+        },
         {
           "name": "args",
           "type": "bytes"
@@ -249,7 +269,12 @@
           "address": "11111111111111111111111111111111"
         }
       ],
-      "args": []
+      "args": [
+        {
+          "name": "discriminator",
+          "type": "bytes"
+        }
+      ]
     },
     {
       "name": "initialize_component",
@@ -290,7 +315,12 @@
           "address": "11111111111111111111111111111111"
         }
       ],
-      "args": []
+      "args": [
+        {
+          "name": "discriminator",
+          "type": "bytes"
+        }
+      ]
     },
     {
       "name": "initialize_new_world",

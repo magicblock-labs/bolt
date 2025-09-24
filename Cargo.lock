@@ -833,6 +833,7 @@ dependencies = [
 name = "bolt-attribute-bolt-program"
 version = "0.2.6"
 dependencies = [
+ "heck 0.5.0",
  "proc-macro2",
  "quote",
  "syn 1.0.109",
