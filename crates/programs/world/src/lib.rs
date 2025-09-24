@@ -23,6 +23,8 @@ mod error;
 
 #[program]
 pub mod world {
+    use anchor_lang::solana_program::program::invoke_signed;
+
     use super::*;
     use crate::error::WorldError;
 
@@ -257,21 +259,105 @@ pub mod world {
         Ok(())
     }
 
-    pub fn initialize_component(ctx: Context<InitializeComponent>) -> Result<()> {
+    pub fn initialize_component(ctx: Context<InitializeComponent>, discriminator: Vec<u8>) -> Result<()> {
         if !ctx.accounts.authority.is_signer && ctx.accounts.authority.key != &ID {
             return Err(WorldError::InvalidAuthority.into());
         }
+<<<<<<< HEAD
         bolt_component::cpi::initialize(ctx.accounts.build())?;
         Ok(())
     }
 
     pub fn destroy_component(ctx: Context<DestroyComponent>) -> Result<()> {
         bolt_component::cpi::destroy(ctx.accounts.build())?;
+=======
+        // Pure Solana SDK logic for CPI to bolt_component::initialize
+        use anchor_lang::solana_program::{
+            instruction::{AccountMeta, Instruction},
+        };
+
+        // Prepare the accounts for the CPI
+        let accounts = vec![
+            AccountMeta::new_readonly(ctx.accounts.cpi_auth.key(), true),
+            AccountMeta::new(ctx.accounts.payer.key(), true),
+            AccountMeta::new(ctx.accounts.data.key(), false),
+            AccountMeta::new_readonly(ctx.accounts.entity.key(), false),
+            AccountMeta::new_readonly(ctx.accounts.authority.key(), false),
+            AccountMeta::new_readonly(ctx.accounts.system_program.key(), false),
+        ];
+
+
+        let data = discriminator.to_vec();
+
+        let ix = Instruction {
+            program_id: ctx.accounts.component_program.key(),
+            accounts,
+            data,
+        };
+
+        // CPI: invoke the instruction
+        invoke_signed(
+            &ix,
+            &[
+                ctx.accounts.cpi_auth.to_account_info(),
+                ctx.accounts.payer.to_account_info(),
+                ctx.accounts.data.to_account_info(),
+                ctx.accounts.entity.to_account_info(),
+                ctx.accounts.authority.to_account_info(),
+                ctx.accounts.system_program.to_account_info(),
+            ],
+            &[World::cpi_auth_seeds().as_slice()],
+        )?;
+        Ok(())
+    }
+
+    pub fn destroy_component(ctx: Context<DestroyComponent>, discriminator: Vec<u8>) -> Result<()> {
+        // Pure Solana SDK logic for CPI to bolt_component::destroy
+        use anchor_lang::solana_program::{
+            instruction::{AccountMeta, Instruction},
+        };
+
+        // Prepare the accounts for the CPI (must match bolt_component::Destroy)
+        let accounts = vec![
+            AccountMeta::new_readonly(ctx.accounts.cpi_auth.key(), true),
+            AccountMeta::new_readonly(ctx.accounts.authority.key(), true),
+            AccountMeta::new(ctx.accounts.receiver.key(), false),
+            AccountMeta::new_readonly(ctx.accounts.entity.key(), false),
+            AccountMeta::new(ctx.accounts.component.key(), false),
+            AccountMeta::new_readonly(ctx.accounts.component_program_data.key(), false),
+            AccountMeta::new_readonly(ctx.accounts.system_program.key(), false),
+        ];
+
+        let data = discriminator.to_vec();
+
+        let ix = Instruction {
+            program_id: ctx.accounts.component_program.key(),
+            accounts,
+            data,
+        };
+
+        // CPI: invoke the instruction
+        invoke_signed(
+            &ix,
+            &[
+                ctx.accounts.cpi_auth.to_account_info(),
+                ctx.accounts.authority.to_account_info(),
+                ctx.accounts.receiver.to_account_info(),
+                ctx.accounts.entity.to_account_info(),
+                ctx.accounts.component.to_account_info(),
+                ctx.accounts.component_program_data.to_account_info(),
+                ctx.accounts.system_program.to_account_info(),
+            ],
+            &[World::cpi_auth_seeds().as_slice()],
+        )?;
+>>>>>>> 540630b (:sparkles: Client-side TS & C# code for ECS bundle)
         Ok(())
     }
 
     pub fn apply<'info>(
         ctx: Context<'_, '_, '_, 'info, Apply<'info>>,
+        system_discriminator: Vec<u8>,
+        discriminators: Vec<Vec<u8>>,
         args: Vec<u8>,
     ) -> Result<()> {
         let (pairs, results) = apply_impl(
@@ -279,9 +365,11 @@ pub mod world {
             &ctx.accounts.world,
             &ctx.accounts.bolt_system,
             ctx.accounts.build(),
+            system_discriminator,
             args,
             ctx.remaining_accounts.to_vec(),
         )?;
+<<<<<<< HEAD
         for ((program, component), result) in pairs.into_iter().zip(results.into_iter()) {
             bolt_component::cpi::update(
                 build_update_context(
@@ -291,6 +379,43 @@ pub mod world {
                     ctx.accounts.instruction_sysvar_account.clone(),
                 ),
                 result,
+=======
+        require_eq!(pairs.len(), discriminators.len(), WorldError::InvalidSystemOutput);
+
+        use anchor_lang::solana_program::instruction::{AccountMeta, Instruction};
+        use anchor_lang::solana_program::program::invoke_signed as invoke_signed_program;
+
+        for (((program, component), result), discr) in pairs
+            .into_iter()
+            .zip(results.into_iter())
+            .zip(discriminators.into_iter())
+        {
+            let accounts = vec![
+                AccountMeta::new_readonly(ctx.accounts.cpi_auth.key(), true),
+                AccountMeta::new(component.key(), false),
+                AccountMeta::new_readonly(ctx.accounts.authority.key(), true),
+            ];
+
+            let mut data = discr;
+            let len_le = (result.len() as u32).to_le_bytes();
+            data.extend_from_slice(&len_le);
+            data.extend_from_slice(result.as_slice());
+
+            let ix = Instruction {
+                program_id: program.key(),
+                accounts,
+                data,
+            };
+
+            invoke_signed_program(
+                &ix,
+                &[
+                    ctx.accounts.cpi_auth.to_account_info(),
+                    component.clone(),
+                    ctx.accounts.authority.to_account_info(),
+                ],
+                &[World::cpi_auth_seeds().as_slice()],
+>>>>>>> 540630b (:sparkles: Client-side TS & C# code for ECS bundle)
             )?;
         }
         Ok(())
@@ -325,6 +450,8 @@ pub mod world {
 
     pub fn apply_with_session<'info>(
         ctx: Context<'_, '_, '_, 'info, ApplyWithSession<'info>>,
+        system_discriminator: Vec<u8>,
+        discriminators: Vec<Vec<u8>>,
         args: Vec<u8>,
     ) -> Result<()> {
         let (pairs, results) = apply_impl(
@@ -332,19 +459,47 @@ pub mod world {
             &ctx.accounts.world,
             &ctx.accounts.bolt_system,
             ctx.accounts.build(),
+            system_discriminator,
             args,
             ctx.remaining_accounts.to_vec(),
         )?;
-        for ((program, component), result) in pairs.into_iter().zip(results.into_iter()) {
-            bolt_component::cpi::update_with_session(
-                build_update_context_with_session(
-                    program,
-                    component,
-                    ctx.accounts.authority.clone(),
-                    ctx.accounts.instruction_sysvar_account.clone(),
-                    ctx.accounts.session_token.clone(),
-                ),
-                result,
+        require_eq!(pairs.len(), discriminators.len(), WorldError::InvalidSystemOutput);
+
+        use anchor_lang::solana_program::instruction::{AccountMeta, Instruction};
+        use anchor_lang::solana_program::program::invoke_signed as invoke_signed_program;
+
+        for (((program, component), result), discr) in pairs
+            .into_iter()
+            .zip(results.into_iter())
+            .zip(discriminators.into_iter())
+        {
+            let accounts = vec![
+                AccountMeta::new_readonly(ctx.accounts.cpi_auth.key(), true),
+                AccountMeta::new(component.key(), false),
+                AccountMeta::new_readonly(ctx.accounts.authority.key(), true),
+                AccountMeta::new_readonly(ctx.accounts.session_token.key(), false),
+            ];
+
+            let mut data = discr;
+            let len_le = (result.len() as u32).to_le_bytes();
+            data.extend_from_slice(&len_le);
+            data.extend_from_slice(result.as_slice());
+
+            let ix = Instruction {
+                program_id: program.key(),
+                accounts,
+                data,
+            };
+
+            invoke_signed_program(
+                &ix,
+                &[
+                    ctx.accounts.cpi_auth.to_account_info(),
+                    component.clone(),
+                    ctx.accounts.authority.to_account_info(),
+                    ctx.accounts.session_token.to_account_info(),
+                ],
+                &[World::cpi_auth_seeds().as_slice()],
             )?;
         }
         Ok(())
@@ -387,6 +542,7 @@ fn apply_impl<'info>(
     world: &Account<'info, World>,
     bolt_system: &UncheckedAccount<'info>,
     cpi_context: CpiContext<'_, '_, '_, 'info, bolt_system::cpi::accounts::BoltExecute<'info>>,
+    system_discriminator: Vec<u8>,
     args: Vec<u8>,
     mut remaining_accounts: Vec<AccountInfo<'info>>,
 ) -> Result<(Vec<(AccountInfo<'info>, AccountInfo<'info>)>, Vec<Vec<u8>>)> {
@@ -420,11 +576,37 @@ fn apply_impl<'info>(
     components_accounts.append(&mut remaining_accounts);
     let remaining_accounts = components_accounts;
 
-    let results = bolt_system::cpi::bolt_execute(
-        cpi_context.with_remaining_accounts(remaining_accounts),
-        args,
-    )?
-    .get();
+    let mut data = system_discriminator;
+    let len_le = (args.len() as u32).to_le_bytes();
+    data.extend_from_slice(&len_le);
+    data.extend_from_slice(args.as_slice());
+
+    use anchor_lang::solana_program::instruction::{AccountMeta, Instruction};
+    use anchor_lang::solana_program::program::invoke;
+
+    let mut accounts = vec![AccountMeta::new_readonly(cpi_context.accounts.authority.key(), false)];
+    accounts.extend(remaining_accounts.iter().map(|account| AccountMeta::new_readonly(account.key(), false)));
+
+    let mut account_infos = vec![cpi_context.accounts.authority.to_account_info()];
+    account_infos.extend(remaining_accounts.iter().map(|account| account.to_account_info()));
+
+    let ix = Instruction {
+        program_id: bolt_system.key(),
+        accounts,
+        data,
+    };
+
+    invoke(
+        &ix,
+        &account_infos
+    )?;
+
+    // Extract return data using Solana SDK
+    use anchor_lang::solana_program::program::get_return_data;
+    let (pid, data) = get_return_data().ok_or(WorldError::InvalidSystemOutput)?;
+    require_keys_eq!(pid, bolt_system.key(), WorldError::InvalidSystemOutput);
+    let results: Vec<Vec<u8>> = borsh::BorshDeserialize::try_from_slice(&data)
+        .map_err(|_| WorldError::InvalidSystemOutput)?;
 
     if results.len() != pairs.len() {
         return Err(WorldError::InvalidSystemOutput.into());
@@ -539,6 +721,7 @@ pub struct InitializeComponent<'info> {
     pub system_program: Program<'info, System>,
 }
 
+<<<<<<< HEAD
 impl<'info> InitializeComponent<'info> {
     pub fn build(
         &self,
@@ -557,6 +740,8 @@ impl<'info> InitializeComponent<'info> {
     }
 }
 
+=======
+>>>>>>> 540630b (:sparkles: Client-side TS & C# code for ECS bundle)
 #[derive(Accounts)]
 pub struct DestroyComponent<'info> {
     #[account(mut)]

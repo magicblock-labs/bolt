@@ -106,6 +106,16 @@ export type World = {
       ];
       args: [
         {
+          name: "systemDiscriminator";
+          type: "bytes";
+        },
+        {
+          name: "discriminators";
+          type: {
+            vec: "bytes";
+          };
+        },
+        {
           name: "args";
           type: "bytes";
         },
@@ -134,6 +144,16 @@ export type World = {
         },
       ];
       args: [
+        {
+          name: "systemDiscriminator";
+          type: "bytes";
+        },
+        {
+          name: "discriminators";
+          type: {
+            vec: "bytes";
+          };
+        },
         {
           name: "args";
           type: "bytes";
@@ -198,7 +218,12 @@ export type World = {
           address: "11111111111111111111111111111111";
         },
       ];
-      args: [];
+      args: [
+        {
+          name: "discriminator";
+          type: "bytes";
+        },
+      ];
     },
     {
       name: "initializeComponent";
@@ -231,7 +256,12 @@ export type World = {
           address: "11111111111111111111111111111111";
         },
       ];
-      args: [];
+      args: [
+        {
+          name: "discriminator";
+          type: "bytes";
+        },
+      ];
     },
     {
       name: "initializeNewWorld";

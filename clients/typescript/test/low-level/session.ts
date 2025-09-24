@@ -7,6 +7,7 @@ import {
   SessionProgram,
   FindSessionTokenPda,
   BN,
+  GetDiscriminator,
 } from "../../lib";
 import { Keypair } from "@solana/web3.js";
 
@@ -64,7 +65,7 @@ export function session(framework) {
         entity,
       });
       const instruction = await framework.worldProgram.methods
-        .initializeComponent()
+        .initializeComponent(GetDiscriminator("global:initialize"))
         .accounts({
           payer: sessionSigner.publicKey,
           entity: entity,
@@ -84,7 +85,11 @@ export function session(framework) {
         );
 
       const instruction = await framework.worldProgram.methods
-        .applyWithSession(SerializeArgs())
+        .applyWithSession(
+          GetDiscriminator("global:bolt_execute"),
+          [GetDiscriminator("global:update")],
+          SerializeArgs(),
+        )
         .accounts({
           authority: sessionSigner.publicKey,
           boltSystem: framework.systemFly.programId,
@@ -150,7 +155,7 @@ export function session(framework) {
         entity: entityWithAuthority,
       });
       const instruction = await framework.worldProgram.methods
-        .initializeComponent()
+        .initializeComponent(GetDiscriminator("global:initialize"))
         .accounts({
           payer: sessionSigner.publicKey,
           entity: entityWithAuthority,
@@ -170,7 +175,11 @@ export function session(framework) {
         );
 
       const instruction = await framework.worldProgram.methods
-        .applyWithSession(SerializeArgs())
+        .applyWithSession(
+          GetDiscriminator("global:bolt_execute"),
+          [GetDiscriminator("global:update_with_session")],
+          SerializeArgs(),
+        )
         .accounts({
           authority: sessionSigner.publicKey,
           boltSystem: framework.systemFly.programId,

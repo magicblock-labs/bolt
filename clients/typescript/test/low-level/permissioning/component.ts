@@ -4,6 +4,7 @@ import {
   FindEntityPda,
   FindComponentPda,
   SerializeArgs,
+  GetDiscriminator,
 } from "../../../lib";
 import { assert, expect } from "chai";
 
@@ -39,7 +40,7 @@ export function component(framework) {
         entity: entity,
       });
       const instruction = await framework.worldProgram.methods
-        .initializeComponent()
+        .initializeComponent(GetDiscriminator("global:initialize"))
         .accounts({
           payer: framework.provider.wallet.publicKey,
           entity: entity,
@@ -61,7 +62,11 @@ export function component(framework) {
       const keypair = Keypair.generate();
 
       const instruction = await framework.worldProgram.methods
-        .apply(SerializeArgs())
+        .apply(
+          GetDiscriminator("global:bolt_execute"),
+          [GetDiscriminator("global:update")],
+          SerializeArgs(),
+        )
         .accounts({
           authority: keypair.publicKey,
           boltSystem: framework.systemFly.programId,
@@ -110,7 +115,11 @@ export function component(framework) {
         );
 
       const instruction = await framework.worldProgram.methods
-        .apply(SerializeArgs())
+        .apply(
+          GetDiscriminator("global:bolt_execute"),
+          [GetDiscriminator("global:update")],
+          SerializeArgs(),
+        )
         .accounts({
           authority: framework.provider.wallet.publicKey,
           boltSystem: framework.systemFly.programId,

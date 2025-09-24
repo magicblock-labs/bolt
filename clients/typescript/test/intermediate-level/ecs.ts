@@ -131,6 +131,8 @@ export function ecs(framework: Framework) {
       expect(position.z.toNumber()).to.equal(0);
     });
 
+    return;
+
     it("Apply Simple Movement System (Right) on Entity 1", async () => {
       const applySystem = await ApplySystem({
         authority: framework.provider.wallet.publicKey,

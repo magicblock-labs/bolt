@@ -2,8 +2,7 @@ use proc_macro::TokenStream;
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, ToTokens};
 use syn::{
-    parse_macro_input, parse_quote, Attribute, AttributeArgs, Field, Fields, ItemMod, ItemStruct,
-    NestedMeta, Type,
+    parse_macro_input, parse_quote, spanned::Spanned, Attribute, AttributeArgs, Field, Fields, ItemMod, ItemStruct, NestedMeta, Type
 };
 
 /// This macro attribute is used to define a BOLT component.
@@ -42,11 +41,16 @@ pub fn bolt_program(args: TokenStream, input: TokenStream) -> TokenStream {
 
 /// Modifies the component module and adds the necessary functions and structs.
 fn modify_component_module(mut module: ItemMod, component_type: &Type) -> ItemMod {
+<<<<<<< HEAD
     let (initialize_fn, initialize_struct) = generate_initialize(component_type);
     let (destroy_fn, destroy_struct) = generate_destroy(component_type);
     //let (apply_fn, apply_struct, apply_impl, update_fn, update_struct) = generate_instructions(component_type);
+=======
+    let (initialize_fn, initialize_struct) = generate_initialize(component_type, None);
+    let (destroy_fn, destroy_struct) = generate_destroy(component_type, None);
+>>>>>>> 540630b (:sparkles: Client-side TS & C# code for ECS bundle)
     let (update_fn, update_with_session_fn, update_struct, update_with_session_struct) =
-        generate_update(component_type);
+        generate_update(component_type, None);
 
     module.content = module.content.map(|(brace, mut items)| {
         items.extend(
@@ -119,11 +123,16 @@ fn create_check_attribute() -> Attribute {
 }
 
 /// Generates the destroy function and struct.
-fn generate_destroy(component_type: &Type) -> (TokenStream2, TokenStream2) {
+fn generate_destroy(component_type: &Type, component_name: Option<String>) -> (TokenStream2, TokenStream2) {
+    let fn_destroy = if let Some(name) = component_name {
+        syn::Ident::new(&format!("{}_destroy", name), component_type.span())
+    } else {
+        syn::Ident::new("destroy", component_type.span())
+    };
     (
         quote! {
             #[automatically_derived]
-            pub fn destroy(ctx: Context<Destroy>) -> Result<()> {
+            pub fn #fn_destroy(ctx: Context<Destroy>) -> Result<()> {
                 let program_data_address =
                     Pubkey::find_program_address(&[crate::id().as_ref()], &bolt_lang::prelude::solana_program::bpf_loader_upgradeable::id()).0;
 
@@ -179,7 +188,12 @@ fn generate_destroy(component_type: &Type) -> (TokenStream2, TokenStream2) {
 }
 
 /// Generates the initialize function and struct.
-fn generate_initialize(component_type: &Type) -> (TokenStream2, TokenStream2) {
+fn generate_initialize(component_type: &Type, component_name: Option<String>) -> (TokenStream2, TokenStream2) {
+    let fn_initialize = if let Some(name) = component_name {
+        syn::Ident::new(&format!("{}_initialize", name), component_type.span())
+    } else {
+        syn::Ident::new("initialize", component_type.span())
+    };
     (
         quote! {
             #[automatically_derived]
@@ -218,11 +232,22 @@ fn generate_initialize(component_type: &Type) -> (TokenStream2, TokenStream2) {
 /// Generates the instructions and related structs to inject in the component.
 fn generate_update(
     component_type: &Type,
+    component_name: Option<String>,
 ) -> (TokenStream2, TokenStream2, TokenStream2, TokenStream2) {
+    let fn_update = if let Some(name) = &component_name {
+        syn::Ident::new(&format!("{}_update", name), component_type.span())
+    } else {
+        syn::Ident::new("update", component_type.span())
+    };
+    let fn_update_with_session = if let Some(name) = &component_name {
+        syn::Ident::new(&format!("{}_update_with_session", name), component_type.span())
+    } else {
+        syn::Ident::new("update_with_session", component_type.span())
+    };
     (
         quote! {
             #[automatically_derived]
-            pub fn update(ctx: Context<Update>, data: Vec<u8>) -> Result<()> {
+            pub fn #fn_update(ctx: Context<Update>, data: Vec<u8>) -> Result<()> {
                 require!(ctx.accounts.bolt_component.bolt_metadata.authority == World::id() || (ctx.accounts.bolt_component.bolt_metadata.authority == *ctx.accounts.authority.key && ctx.accounts.authority.is_signer), BoltError::InvalidAuthority);
 
                 // Check if the instruction is called from the world program
@@ -237,7 +262,7 @@ fn generate_update(
         },
         quote! {
             #[automatically_derived]
-            pub fn update_with_session(ctx: Context<UpdateWithSession>, data: Vec<u8>) -> Result<()> {
+            pub fn #fn_update_with_session(ctx: Context<UpdateWithSession>, data: Vec<u8>) -> Result<()> {
                 if ctx.accounts.bolt_component.bolt_metadata.authority == World::id() {
                     require!(Clock::get()?.unix_timestamp < ctx.accounts.session_token.valid_until, bolt_lang::session_keys::SessionError::InvalidToken);
                 } else {

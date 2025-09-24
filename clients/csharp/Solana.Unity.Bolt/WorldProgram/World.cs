@@ -15,6 +15,7 @@ namespace World
     {
         public partial class WorldProgram
         {
+            public static readonly PublicKey CpiAuthAddress = new("B2f2y3QTBv346wE6nWKor72AUhUvFF6mPk7TWCF2QVhi");
             public static Solana.Unity.Rpc.Models.TransactionInstruction AddEntity(AddEntityAccounts accounts, PublicKey programId = null)
             {
                 programId ??= new(ID);
@@ -220,22 +221,37 @@ namespace World
                     throw new ArgumentException("Component IDs and PDAs must be the same length");
                 }
 
+                var discriminators = new List<byte[]>();
+                foreach (var entity in systemInput)
+                {
+                    if (sessionToken != null)
+                    {
+                        discriminators.Add(Bolt.World.GetDiscriminator("global:update_with_session"));
+                    }
+                    else
+                    {
+                        discriminators.Add(Bolt.World.GetDiscriminator("global:update"));
+                    }
+                }
+
                 Solana.Unity.Rpc.Models.TransactionInstruction instruction;
                 if (sessionToken != null) {
                     var apply = new ApplyWithSessionAccounts() {
                         BoltSystem = system,
                         Authority = authority,
+                        CpiAuth = CpiAuthAddress,
                         World = world,
                         SessionToken = sessionToken,
                     };
-                    instruction = ApplyWithSession(apply, args, programId);
+                    instruction = ApplyWithSession(apply, Bolt.World.GetDiscriminator("global:bolt_execute"), discriminators.ToArray(), args, programId);
                 } else {
                     var apply = new ApplyAccounts() {
                         BoltSystem = system,
                         Authority = authority,
+                        CpiAuth = CpiAuthAddress,
                         World = world,
                     };
-                    instruction = Apply(apply, args, programId);
+                    instruction = Apply(apply, Bolt.World.GetDiscriminator("global:bolt_execute"), discriminators.ToArray(), args, programId);
                 }
                 for (int i = 0; i < componentIds.Count; i++) {
                     instruction.Keys.Add(AccountMeta.ReadOnly(componentIds[i], false));

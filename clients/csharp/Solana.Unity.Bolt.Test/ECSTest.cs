@@ -107,14 +107,16 @@ namespace ECSTest {
         }
 
         public static async Task ApplySimpleMovementSystemUpOnEntity1(Framework framework) {
-            var apply = new ApplyAccounts() {
-                Authority = framework.Wallet.Account.PublicKey,
-                BoltSystem = framework.SystemSimpleMovement,
-                World = framework.WorldPda,
-            };
-            var instruction = WorldProgram.Apply(apply, Bolt.World.SerializeArgs(new { direction = "Up" }));
-            instruction.Keys.Add(AccountMeta.ReadOnly(framework.ExampleComponentPosition, false));
-            instruction.Keys.Add(AccountMeta.Writable(framework.ComponentPositionEntity1Pda, false));
+            var instruction = Bolt.World.ApplySystem(
+                framework.WorldPda,
+                framework.SystemSimpleMovement,
+                new Bolt.World.EntityType[] {
+                    new Bolt.World.EntityType(framework.Entity1Pda,
+                    new PublicKey[] { framework.ExampleComponentPosition })
+                },
+                Bolt.World.SerializeArgs(new { direction = "Up" }),
+                framework.Wallet.Account.PublicKey
+            );
             await framework.SendAndConfirmInstruction(instruction);
 
             var accountInfo = await framework.GetAccountInfo(framework.ComponentPositionEntity1Pda);

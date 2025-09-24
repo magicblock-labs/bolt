@@ -9,6 +9,8 @@ using Solana.Unity.Wallet.Bip39;
 using World.Program;
 using System.Diagnostics;
 using Solana.Unity.Rpc.Types;
+using Bolt;
+
 namespace AccelerationTest {
     public class Test {
         public static async Task Run(Framework framework) {
@@ -45,14 +47,16 @@ namespace AccelerationTest {
 
         public static async Task ApplySimpleMovementSystemOnAccelerator(Framework framework) {
             for (int i = 0; i < 10; i++) {
-                var apply = new ApplyAccounts() {
-                    Authority = framework.Wallet.Account.PublicKey,
-                    BoltSystem = framework.SystemSimpleMovement,
-                    World = framework.WorldPda,
-                };
-                var instruction = WorldProgram.Apply(apply, Bolt.World.SerializeArgs(new { direction = "Up" }));
-                instruction.Keys.Add(AccountMeta.ReadOnly(framework.ExampleComponentPosition, false));
-                instruction.Keys.Add(AccountMeta.Writable(framework.AccelerationComponentPositionPda, false));
+                var instruction = Bolt.World.ApplySystem(
+                    framework.WorldPda,
+                    framework.SystemSimpleMovement,
+                    new Bolt.World.EntityType[] {
+                        new Bolt.World.EntityType(framework.AccelerationEntityPda,
+                        new PublicKey[] { framework.ExampleComponentPosition })
+                    },
+                    Bolt.World.SerializeArgs(new { direction = "Up" }),
+                    framework.Wallet.Account.PublicKey
+                );
                 await framework.SendAndConfirmInstruction(framework.AcceleratorClient, instruction);
                 await Task.Delay(50);
             }
