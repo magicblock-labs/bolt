@@ -16,7 +16,6 @@ pub use bolt_attribute_bolt_component_id::component_id;
 pub use bolt_attribute_bolt_delegate::delegate;
 pub use bolt_attribute_bolt_extra_accounts::extra_accounts;
 pub use bolt_attribute_bolt_extra_accounts::pubkey;
-pub use bolt_attribute_bolt_program::bolt_program;
 pub use bolt_attribute_bolt_bundle::bundle;
 pub use bolt_attribute_bolt_system::system;
 pub use bolt_attribute_bolt_system_input::system_input;
