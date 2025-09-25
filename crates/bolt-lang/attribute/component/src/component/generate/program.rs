@@ -45,14 +45,8 @@ fn generate_instructions(ast: ItemMod, pascal_case_name: &syn::Ident) -> TokenSt
 
 /// Modifies the component module and adds the necessary functions and structs.
 fn modify_component_module(mut module: ItemMod, component_type: &Type) -> ItemMod {
-<<<<<<< HEAD
-    let (initialize_fn, initialize_struct) = generate_initialize(component_type);
-    let (destroy_fn, destroy_struct) = generate_destroy(component_type);
-    //let (apply_fn, apply_struct, apply_impl, update_fn, update_struct) = generate_instructions(component_type);
-=======
     let (initialize_fn, initialize_struct) = generate_initialize(component_type, None);
     let (destroy_fn, destroy_struct) = generate_destroy(component_type, None);
->>>>>>> 540630b (:sparkles: Client-side TS & C# code for ECS bundle)
     let (update_fn, update_with_session_fn, update_struct, update_with_session_struct) =
         generate_update(component_type, None);
 
@@ -123,6 +117,7 @@ fn generate_destroy(component_type: &Type, component_name: Option<String>) -> (T
         quote! {
             #[automatically_derived]
             pub fn #fn_destroy(ctx: Context<Destroy>) -> Result<()> {
+<<<<<<< HEAD
                 let program_data_address =
                     Pubkey::find_program_address(&[crate::id().as_ref()], &bolt_lang::prelude::solana_program::bpf_loader_upgradeable::id()).0;
 
@@ -153,6 +148,9 @@ fn generate_destroy(component_type: &Type, component_name: Option<String>) -> (T
                     return Err(BoltError::InvalidCaller.into());
                 }
                 Ok(())
+=======
+                bolt_lang::instructions::destroy(&crate::id(), &ctx.accounts.cpi_auth.to_account_info(), &ctx.accounts.authority.to_account_info(), &ctx.accounts.component_program_data, ctx.accounts.component.bolt_metadata.authority)
+>>>>>>> 8caeec5 (:recycle: Moving component instructions implementation to bolt-lang)
             }
         },
         quote! {
@@ -187,6 +185,7 @@ fn generate_initialize(component_type: &Type, component_name: Option<String>) ->
     (
         quote! {
             #[automatically_derived]
+<<<<<<< HEAD
             pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
                 let instruction = anchor_lang::solana_program::sysvar::instructions::get_instruction_relative(
                     0, &ctx.accounts.instruction_sysvar_account.to_account_info()
@@ -195,6 +194,10 @@ fn generate_initialize(component_type: &Type, component_name: Option<String>) ->
                     return Err(BoltError::InvalidCaller.into());
                 }
                 ctx.accounts.data.set_inner(<#component_type>::default());
+=======
+            pub fn #fn_initialize(ctx: Context<Initialize>) -> Result<()> {
+                bolt_lang::instructions::initialize(&ctx.accounts.cpi_auth.to_account_info(), &mut ctx.accounts.data)?;
+>>>>>>> 8caeec5 (:recycle: Moving component instructions implementation to bolt-lang)
                 ctx.accounts.data.bolt_metadata.authority = *ctx.accounts.authority.key;
                 Ok(())
             }
@@ -238,6 +241,7 @@ fn generate_update(
         quote! {
             #[automatically_derived]
             pub fn #fn_update(ctx: Context<Update>, data: Vec<u8>) -> Result<()> {
+<<<<<<< HEAD
                 require!(ctx.accounts.bolt_component.bolt_metadata.authority == World::id() || (ctx.accounts.bolt_component.bolt_metadata.authority == *ctx.accounts.authority.key && ctx.accounts.authority.is_signer), BoltError::InvalidAuthority);
 
                 // Check if the instruction is called from the world program
@@ -247,12 +251,16 @@ fn generate_update(
                 require_eq!(instruction.program_id, World::id(), BoltError::InvalidCaller);
 
                 ctx.accounts.bolt_component.set_inner(<#component_type>::try_from_slice(&data)?);
+=======
+                bolt_lang::instructions::update(&ctx.accounts.cpi_auth.to_account_info(), &ctx.accounts.authority.to_account_info(), ctx.accounts.bolt_component.bolt_metadata.authority, &mut ctx.accounts.bolt_component, &data)?;
+>>>>>>> 8caeec5 (:recycle: Moving component instructions implementation to bolt-lang)
                 Ok(())
             }
         },
         quote! {
             #[automatically_derived]
             pub fn #fn_update_with_session(ctx: Context<UpdateWithSession>, data: Vec<u8>) -> Result<()> {
+<<<<<<< HEAD
                 if ctx.accounts.bolt_component.bolt_metadata.authority == World::id() {
                     require!(Clock::get()?.unix_timestamp < ctx.accounts.session_token.valid_until, bolt_lang::session_keys::SessionError::InvalidToken);
                 } else {
@@ -273,6 +281,9 @@ fn generate_update(
                 require_eq!(instruction.program_id, World::id(), BoltError::InvalidCaller);
 
                 ctx.accounts.bolt_component.set_inner(<#component_type>::try_from_slice(&data)?);
+=======
+                bolt_lang::instructions::update_with_session(&ctx.accounts.cpi_auth.to_account_info(), &ctx.accounts.authority, ctx.accounts.bolt_component.bolt_metadata.authority, &mut ctx.accounts.bolt_component, &ctx.accounts.session_token, &data)?;
+>>>>>>> 8caeec5 (:recycle: Moving component instructions implementation to bolt-lang)
                 Ok(())
             }
         },
