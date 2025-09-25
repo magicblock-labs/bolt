@@ -37,9 +37,7 @@ fn generate_instructions(ast: ItemMod, pascal_case_name: &syn::Ident) -> TokenSt
     });
     let modified = modify_component_module(ast, &component_type);
     let additional_macro: Attribute = parse_quote! { #[program] };
-    let cpi_checker = generate_cpi_checker();
     TokenStream::from(quote! {
-        #cpi_checker
         #additional_macro
         #modified
     })
@@ -108,18 +106,6 @@ fn create_check_attribute() -> Attribute {
     }
 }
 
-/// Generates the CPI checker function.
-fn generate_cpi_checker() -> TokenStream2 {
-    quote! {
-        fn cpi_checker<'info>(cpi_auth: &AccountInfo<'info>) -> Result<()> {
-            if !cpi_auth.is_signer || cpi_auth.key != &bolt_lang::world::World::cpi_auth_address() {
-                return Err(BoltError::InvalidCaller.into());
-            }
-            Ok(())
-        }
-    }
-}
-
 /// Generates the destroy function and struct.
 fn generate_destroy(component_type: &Type, component_name: Option<String>) -> (TokenStream2, TokenStream2) {
     let fn_destroy = if let Some(name) = component_name {
@@ -131,32 +117,7 @@ fn generate_destroy(component_type: &Type, component_name: Option<String>) -> (T
         quote! {
             #[automatically_derived]
             pub fn #fn_destroy(ctx: Context<Destroy>) -> Result<()> {
-                let program_data_address =
-                    Pubkey::find_program_address(&[crate::id().as_ref()], &bolt_lang::prelude::solana_program::bpf_loader_upgradeable::id()).0;
-
-                if !program_data_address.eq(ctx.accounts.component_program_data.key) {
-                    return Err(BoltError::InvalidAuthority.into());
-                }
-
-                let program_account_data = ctx.accounts.component_program_data.try_borrow_data()?;
-                let upgrade_authority = if let bolt_lang::prelude::solana_program::bpf_loader_upgradeable::UpgradeableLoaderState::ProgramData {
-                    upgrade_authority_address,
-                    ..
-                } =
-                    bolt_lang::prelude::bincode::deserialize(&program_account_data).map_err(|_| BoltError::InvalidAuthority)?
-                {
-                    Ok(upgrade_authority_address)
-                } else {
-                    Err(anchor_lang::error::Error::from(BoltError::InvalidAuthority))
-                }?.ok_or_else(|| BoltError::InvalidAuthority)?;
-
-                if ctx.accounts.authority.key != &ctx.accounts.component.bolt_metadata.authority && ctx.accounts.authority.key != &upgrade_authority {
-                    return Err(BoltError::InvalidAuthority.into());
-                }
-
-                cpi_checker(&ctx.accounts.cpi_auth.to_account_info())?;
-
-                Ok(())
+                bolt_lang::instructions::destroy(&crate::id(), &ctx.accounts.cpi_auth.to_account_info(), &ctx.accounts.authority.to_account_info(), &ctx.accounts.component_program_data, ctx.accounts.component.bolt_metadata.authority)
             }
         },
         quote! {
@@ -192,8 +153,7 @@ fn generate_initialize(component_type: &Type, component_name: Option<String>) ->
         quote! {
             #[automatically_derived]
             pub fn #fn_initialize(ctx: Context<Initialize>) -> Result<()> {
-                cpi_checker(&ctx.accounts.cpi_auth.to_account_info())?;
-                ctx.accounts.data.set_inner(<#component_type>::default());
+                bolt_lang::instructions::initialize(&ctx.accounts.cpi_auth.to_account_info(), &mut ctx.accounts.data)?;
                 ctx.accounts.data.bolt_metadata.authority = *ctx.accounts.authority.key;
                 Ok(())
             }
@@ -237,33 +197,14 @@ fn generate_update(
         quote! {
             #[automatically_derived]
             pub fn #fn_update(ctx: Context<Update>, data: Vec<u8>) -> Result<()> {
-                require!(ctx.accounts.bolt_component.bolt_metadata.authority == World::id() || (ctx.accounts.bolt_component.bolt_metadata.authority == *ctx.accounts.authority.key && ctx.accounts.authority.is_signer), BoltError::InvalidAuthority);
-
-                cpi_checker(&ctx.accounts.cpi_auth.to_account_info())?;
-
-                ctx.accounts.bolt_component.set_inner(<#component_type>::try_from_slice(&data)?);
+                bolt_lang::instructions::update(&ctx.accounts.cpi_auth.to_account_info(), &ctx.accounts.authority.to_account_info(), ctx.accounts.bolt_component.bolt_metadata.authority, &mut ctx.accounts.bolt_component, &data)?;
                 Ok(())
             }
         },
         quote! {
             #[automatically_derived]
             pub fn #fn_update_with_session(ctx: Context<UpdateWithSession>, data: Vec<u8>) -> Result<()> {
-                if ctx.accounts.bolt_component.bolt_metadata.authority == World::id() {
-                    require!(Clock::get()?.unix_timestamp < ctx.accounts.session_token.valid_until, bolt_lang::session_keys::SessionError::InvalidToken);
-                } else {
-                    let validity_ctx = bolt_lang::session_keys::ValidityChecker {
-                        session_token: ctx.accounts.session_token.clone(),
-                        session_signer: ctx.accounts.authority.clone(),
-                        authority: ctx.accounts.bolt_component.bolt_metadata.authority.clone(),
-                        target_program: World::id(),
-                    };
-                    require!(ctx.accounts.session_token.validate(validity_ctx)?, bolt_lang::session_keys::SessionError::InvalidToken);
-                    require_eq!(ctx.accounts.bolt_component.bolt_metadata.authority, ctx.accounts.session_token.authority, bolt_lang::session_keys::SessionError::InvalidToken);
-                }
-
-                cpi_checker(&ctx.accounts.cpi_auth.to_account_info())?;
-
-                ctx.accounts.bolt_component.set_inner(<#component_type>::try_from_slice(&data)?);
+                bolt_lang::instructions::update_with_session(&ctx.accounts.cpi_auth.to_account_info(), &ctx.accounts.authority, ctx.accounts.bolt_component.bolt_metadata.authority, &mut ctx.accounts.bolt_component, &ctx.accounts.session_token, &data)?;
                 Ok(())
             }
         },
