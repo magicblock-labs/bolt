@@ -1,56 +1,34 @@
-use heck::ToSnakeCase;
-use syn::DeriveInput;
+use heck::ToPascalCase;
 use quote::{quote, ToTokens};
 
-pub fn generate_program(type_: &DeriveInput, attributes: &crate::component::Attributes) -> proc_macro2::TokenStream {
-    let pascal_case_name = &type_.ident;
-    let snake_case_name = pascal_case_name.to_string().to_snake_case();
-    let component_name = syn::Ident::new(&snake_case_name, type_.ident.span());
-
-    let program_mod: syn::ItemMod = if attributes.delegate {
-        parse_quote! {
-            #[delegate(#pascal_case_name)]
-            pub mod #component_name {
-                use super::*;
-            }
-        }
-    } else {
-        parse_quote! {
-            pub mod #component_name {
-                use super::*;
-            }
-        }
-    };
-    generate_instructions(program_mod, pascal_case_name).into()
-}
-
-use proc_macro::TokenStream;
 use proc_macro2::TokenStream as TokenStream2;
 use syn::{
     parse_quote, spanned::Spanned, Attribute, Field, Fields, ItemMod, ItemStruct, Type
 };
 
-fn generate_instructions(ast: ItemMod, pascal_case_name: &syn::Ident) -> TokenStream {
+pub fn remove_component_attributes(attrs: &mut Vec<syn::Attribute>) {
+    attrs.retain(|attr| !attr.path.is_ident("component"));
+}
+
+pub fn generate_instructions(program_mod: &mut ItemMod, attributes: &crate::component::Attributes, pascal_case_name: &syn::Ident, component_name: Option<&String>) {
     let component_type = Type::Path(syn::TypePath {
         qself: None,
         path: pascal_case_name.clone().into(),
     });
-    let modified = modify_component_module(ast, &component_type);
-    let additional_macro: Attribute = parse_quote! { #[program] };
-    TokenStream::from(quote! {
-        #additional_macro
-        #modified
-    })
+    if attributes.delegate {
+        program_mod.attrs.push(parse_quote! { #[delegate(#pascal_case_name)] });
+    }
+    modify_component_module(program_mod, &component_type, component_name)
 }
 
 /// Modifies the component module and adds the necessary functions and structs.
-fn modify_component_module(mut module: ItemMod, component_type: &Type) -> ItemMod {
-    let (initialize_fn, initialize_struct) = generate_initialize(component_type, None);
-    let (destroy_fn, destroy_struct) = generate_destroy(component_type, None);
+fn modify_component_module(module: &mut ItemMod, component_type: &Type, component_name: Option<&String>) {
+    let (initialize_fn, initialize_struct) = generate_initialize(component_type, component_name);
+    let (destroy_fn, destroy_struct) = generate_destroy(component_type, component_name);
     let (update_fn, update_with_session_fn, update_struct, update_with_session_struct) =
-        generate_update(component_type, None);
+        generate_update(component_type, component_name);
 
-    module.content = module.content.map(|(brace, mut items)| {
+    module.content.as_mut().map(|(brace, items)| {
         items.extend(
             vec![
                 initialize_fn,
@@ -67,22 +45,20 @@ fn modify_component_module(mut module: ItemMod, component_type: &Type) -> ItemMo
             .collect::<Vec<_>>(),
         );
 
-        let modified_items = items
+        let modified_items: Vec<syn::Item> = items
             .into_iter()
-            .map(|item| match item {
+            .map(|item| match item.clone() {
                 syn::Item::Struct(mut struct_item)
                     if struct_item.ident == "Apply" || struct_item.ident == "ApplyWithSession" =>
                 {
                     modify_apply_struct(&mut struct_item);
                     syn::Item::Struct(struct_item)
                 }
-                _ => item,
+                _ => item.clone(),
             })
             .collect();
         (brace, modified_items)
     });
-
-    module
 }
 
 /// Modifies the Apply struct, change the bolt system to accept any compatible system.
@@ -107,7 +83,12 @@ fn create_check_attribute() -> Attribute {
 }
 
 /// Generates the destroy function and struct.
-fn generate_destroy(component_type: &Type, component_name: Option<String>) -> (TokenStream2, TokenStream2) {
+fn generate_destroy(component_type: &Type, component_name: Option<&String>) -> (TokenStream2, TokenStream2) {
+    let structure_name = if let Some(name) = component_name {
+        syn::Ident::new(&format!("{}Destroy", name.to_pascal_case()), component_type.span())
+    } else {
+        syn::Ident::new("Destroy", component_type.span())
+    };
     let fn_destroy = if let Some(name) = component_name {
         syn::Ident::new(&format!("{}_destroy", name), component_type.span())
     } else {
@@ -116,14 +97,14 @@ fn generate_destroy(component_type: &Type, component_name: Option<String>) -> (T
     (
         quote! {
             #[automatically_derived]
-            pub fn #fn_destroy(ctx: Context<Destroy>) -> Result<()> {
+            pub fn #fn_destroy(ctx: Context<#structure_name>) -> Result<()> {
                 bolt_lang::instructions::destroy(&crate::id(), &ctx.accounts.cpi_auth.to_account_info(), &ctx.accounts.authority.to_account_info(), &ctx.accounts.component_program_data, ctx.accounts.component.bolt_metadata.authority)
             }
         },
         quote! {
             #[automatically_derived]
             #[derive(Accounts)]
-            pub struct Destroy<'info> {
+            pub struct #structure_name<'info> {
                 #[account()]
                 pub cpi_auth: Signer<'info>,
                 #[account()]
@@ -143,7 +124,12 @@ fn generate_destroy(component_type: &Type, component_name: Option<String>) -> (T
 }
 
 /// Generates the initialize function and struct.
-fn generate_initialize(component_type: &Type, component_name: Option<String>) -> (TokenStream2, TokenStream2) {
+fn generate_initialize(component_type: &Type, component_name: Option<&String>) -> (TokenStream2, TokenStream2) {
+    let structure_name = if let Some(name) = component_name {
+        syn::Ident::new(&format!("{}Initialize", name.to_pascal_case()), component_type.span())
+    } else {
+        syn::Ident::new("Initialize", component_type.span())
+    };
     let fn_initialize = if let Some(name) = component_name {
         syn::Ident::new(&format!("{}_initialize", name), component_type.span())
     } else {
@@ -152,7 +138,7 @@ fn generate_initialize(component_type: &Type, component_name: Option<String>) ->
     (
         quote! {
             #[automatically_derived]
-            pub fn #fn_initialize(ctx: Context<Initialize>) -> Result<()> {
+            pub fn #fn_initialize(ctx: Context<#structure_name>) -> Result<()> {
                 bolt_lang::instructions::initialize(&ctx.accounts.cpi_auth.to_account_info(), &mut ctx.accounts.data)?;
                 ctx.accounts.data.bolt_metadata.authority = *ctx.accounts.authority.key;
                 Ok(())
@@ -161,7 +147,7 @@ fn generate_initialize(component_type: &Type, component_name: Option<String>) ->
         quote! {
             #[automatically_derived]
             #[derive(Accounts)]
-            pub struct Initialize<'info>  {
+            pub struct #structure_name<'info>  {
                 #[account()]
                 pub cpi_auth: Signer<'info>,
                 #[account(mut)]
@@ -181,8 +167,18 @@ fn generate_initialize(component_type: &Type, component_name: Option<String>) ->
 /// Generates the instructions and related structs to inject in the component.
 fn generate_update(
     component_type: &Type,
-    component_name: Option<String>,
+    component_name: Option<&String>,
 ) -> (TokenStream2, TokenStream2, TokenStream2, TokenStream2) {
+    let update_structure_name = if let Some(name) = component_name {
+        syn::Ident::new(&format!("{}Update", name.to_pascal_case()), component_type.span())
+    } else {
+        syn::Ident::new("Update", component_type.span())
+    };
+    let update_with_session_structure_name = if let Some(name) = component_name {
+        syn::Ident::new(&format!("{}UpdateWithSession", name.to_pascal_case()), component_type.span())
+    } else {
+        syn::Ident::new("UpdateWithSession", component_type.span())
+    };
     let fn_update = if let Some(name) = &component_name {
         syn::Ident::new(&format!("{}_update", name), component_type.span())
     } else {
@@ -196,14 +192,14 @@ fn generate_update(
     (
         quote! {
             #[automatically_derived]
-            pub fn #fn_update(ctx: Context<Update>, data: Vec<u8>) -> Result<()> {
+            pub fn #fn_update(ctx: Context<#update_structure_name>, data: Vec<u8>) -> Result<()> {
                 bolt_lang::instructions::update(&ctx.accounts.cpi_auth.to_account_info(), &ctx.accounts.authority.to_account_info(), ctx.accounts.bolt_component.bolt_metadata.authority, &mut ctx.accounts.bolt_component, &data)?;
                 Ok(())
             }
         },
         quote! {
             #[automatically_derived]
-            pub fn #fn_update_with_session(ctx: Context<UpdateWithSession>, data: Vec<u8>) -> Result<()> {
+            pub fn #fn_update_with_session(ctx: Context<#update_with_session_structure_name>, data: Vec<u8>) -> Result<()> {
                 bolt_lang::instructions::update_with_session(&ctx.accounts.cpi_auth.to_account_info(), &ctx.accounts.authority, ctx.accounts.bolt_component.bolt_metadata.authority, &mut ctx.accounts.bolt_component, &ctx.accounts.session_token, &data)?;
                 Ok(())
             }
@@ -211,7 +207,7 @@ fn generate_update(
         quote! {
             #[automatically_derived]
             #[derive(Accounts)]
-            pub struct Update<'info> {
+            pub struct #update_structure_name<'info> {
                 #[account()]
                 pub cpi_auth: Signer<'info>,
                 #[account(mut)]
@@ -223,7 +219,7 @@ fn generate_update(
         quote! {
             #[automatically_derived]
             #[derive(Accounts)]
-            pub struct UpdateWithSession<'info> {
+            pub struct #update_with_session_structure_name<'info> {
                 #[account()]
                 pub cpi_auth: Signer<'info>,
                 #[account(mut)]

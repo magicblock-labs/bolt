@@ -1,6 +1,6 @@
 mod program;
 
-use syn::DeriveInput;
+use syn::{DeriveInput, ItemMod};
 use quote::quote;
 use syn::{parse_quote, Attribute};
 
@@ -14,19 +14,15 @@ pub fn enrich_type(type_: &mut DeriveInput) {
     bolt_utils::add_bolt_metadata(type_);
 }
 
-pub fn generate_implementation(input: &DeriveInput, attributes: &super::Attributes) -> proc_macro2::TokenStream {
-    let new_fn = generate_new_fn(&input);
-    let component_traits = generate_component_traits(&input, attributes);
-    quote! {
-        #new_fn
-        #component_traits
-    }
+pub fn generate_implementation(program: &mut ItemMod, attributes: &super::Attributes, input: &DeriveInput) {
+    generate_new_fn(program, &input);
+    generate_component_traits(program, attributes, &input);
 }
 
-fn generate_component_traits(input: &DeriveInput, attributes: &super::Attributes) -> proc_macro2::TokenStream {
+fn generate_component_traits(program: &mut ItemMod, attributes: &super::Attributes, input: &DeriveInput) {
     let name = &input.ident;
     let component_id_value = &attributes.component_id;
-    quote! {
+    let implementation = quote! {
         #[automatically_derived]
         impl ComponentTraits for #name {
             fn seed() -> &'static [u8] {
@@ -37,11 +33,13 @@ fn generate_component_traits(input: &DeriveInput, attributes: &super::Attributes
                 8 + <#name>::INIT_SPACE
             }
         }
-    }
+    };
+    let (_, items) = program.content.as_mut().unwrap();
+    items.push(parse_quote!(#implementation));
 }
 
 /// Create a fn `new` to initialize the struct without bolt_metadata field
-fn generate_new_fn(input: &DeriveInput) -> proc_macro2::TokenStream {
+fn generate_new_fn(program: &mut ItemMod, input: &DeriveInput) {
     let struct_name = &input.ident;
     let init_struct_name = syn::Ident::new(&format!("{}Init", struct_name), struct_name.span());
 
@@ -60,13 +58,13 @@ fn generate_new_fn(input: &DeriveInput) -> proc_macro2::TokenStream {
                 quote! { #name: init_struct.#name }
             });
 
-            // Generate the new function and the init struct
-            let gen = quote! {
+            let structure = quote! {
                 // Define a new struct to hold initialization parameters
                 pub struct #init_struct_name {
                     #(#init_struct_fields),*
                 }
-
+            };
+            let implementation = quote! {
                 impl #struct_name {
                     pub fn new(init_struct: #init_struct_name) -> Self {
                         Self {
@@ -76,8 +74,9 @@ fn generate_new_fn(input: &DeriveInput) -> proc_macro2::TokenStream {
                     }
                 }
             };
-            return gen;
+            let (_, items) = program.content.as_mut().unwrap();
+            items.push(parse_quote!(#structure));
+            items.push(parse_quote!(#implementation));
         }
     }
-    quote! {}
 }

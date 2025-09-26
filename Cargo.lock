@@ -773,6 +773,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "bolt-attribute"
+version = "0.2.6"
+dependencies = [
+ "bolt-utils",
+ "heck 0.5.0",
+ "proc-macro2",
+ "quote",
+ "syn 1.0.109",
+]
+
+[[package]]
 name = "bolt-attribute-bolt-arguments"
 version = "0.2.6"
 dependencies = [
@@ -783,22 +794,16 @@ dependencies = [
 
 [[package]]
 name = "bolt-attribute-bolt-bundle"
-version = "0.2.5"
+version = "0.2.6"
 dependencies = [
- "proc-macro2",
- "quote",
- "syn 1.0.109",
+ "bolt-attribute",
 ]
 
 [[package]]
 name = "bolt-attribute-bolt-component"
 version = "0.2.6"
 dependencies = [
- "bolt-utils",
- "heck 0.5.0",
- "proc-macro2",
- "quote",
- "syn 1.0.109",
+ "bolt-attribute",
 ]
 
 [[package]]
@@ -839,19 +844,6 @@ dependencies = [
 ]
 
 [[package]]
-<<<<<<< HEAD
-name = "bolt-attribute-bolt-program"
-version = "0.2.6"
-dependencies = [
- "heck 0.5.0",
- "proc-macro2",
- "quote",
- "syn 1.0.109",
-]
-
-[[package]]
-=======
->>>>>>> 02fce99 (:recycle: WIP - Refactoring #[component])
 name = "bolt-attribute-bolt-system"
 version = "0.2.6"
 dependencies = [

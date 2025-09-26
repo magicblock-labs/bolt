@@ -1,5 +1,3 @@
-mod component;
-
 use proc_macro::TokenStream;
 
 /// This Component attribute is used to automatically generate the seed and size functions
@@ -17,5 +15,5 @@ use proc_macro::TokenStream;
 /// ```
 #[proc_macro_attribute]
 pub fn component(attr: TokenStream, item: TokenStream) -> TokenStream {
-    component::process(attr, item)
+    bolt_attribute::component::process(attr, item)
 }
