@@ -99,14 +99,10 @@ pub fn system_input(_attr: TokenStream, item: TokenStream) -> TokenStream {
 
     let number_of_components = fields.len();
 
-    let output_trait = quote! {
-        pub trait NumberOfComponents<'a, 'b, 'c, 'info, T> {
-            const NUMBER_OF_COMPONENTS: usize;
-        }
-    };
+    // NumberOfComponents trait now lives in bolt_lang; no local trait emission needed
 
     let output_trait_implementation = quote! {
-        impl<'a, 'b, 'c, 'info, T: bolt_lang::Bumps> NumberOfComponents<'a, 'b, 'c, 'info, T> for Context<'a, 'b, 'c, 'info, T> {
+        impl<'info> bolt_lang::NumberOfComponents for #name<'info> {
             const NUMBER_OF_COMPONENTS: usize = #number_of_components;
         }
     };
@@ -131,16 +127,8 @@ pub fn system_input(_attr: TokenStream, item: TokenStream) -> TokenStream {
     let output = quote! {
         #output_struct
         #output_impl
-        #output_trait
         #output_trait_implementation
         #(#components_imports)*
-
-        #[derive(Accounts)]
-        pub struct VariadicBoltComponents<'info> {
-            /// CHECK: Authority check
-            #[account()]
-            pub authority: AccountInfo<'info>,
-        }
     };
 
     TokenStream::from(output)

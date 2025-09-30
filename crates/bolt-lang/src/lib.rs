@@ -71,6 +71,11 @@ pub trait ComponentDeserialize: Sized {
     fn from_account_info(account: &anchor_lang::prelude::AccountInfo) -> Result<Self>;
 }
 
+/// Number of system input components expected by a system.
+pub trait NumberOfComponents {
+    const NUMBER_OF_COMPONENTS: usize;
+}
+
 /// Metadata for the component.
 #[derive(InitSpace, AnchorSerialize, AnchorDeserialize, Default, Copy, Clone)]
 pub struct BoltMetadata {

@@ -10,6 +10,12 @@ pub fn generate_program(identifier: &str) -> syn::ItemMod {
         #[program]
         pub mod #snake_case_name {
             use super::*;
+
+            #[derive(Accounts)]
+            pub struct VariadicBoltComponents<'info> {
+                #[account()]
+                pub authority: AccountInfo<'info>,
+            }
         }
     }
 }
