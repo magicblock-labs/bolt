@@ -847,6 +847,7 @@ dependencies = [
 name = "bolt-attribute-bolt-system"
 version = "0.2.6"
 dependencies = [
+ "bolt-attribute",
  "proc-macro2",
  "quote",
  "syn 1.0.109",
