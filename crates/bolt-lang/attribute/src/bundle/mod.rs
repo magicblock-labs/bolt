@@ -4,6 +4,7 @@ use syn::{parse_macro_input, parse_quote, ItemMod};
 use quote::ToTokens;
 
 use crate::component;
+use crate::system;
 use crate::common::generate_program;
 
 pub fn process(_attr: TokenStream, item: TokenStream) -> TokenStream {
@@ -29,14 +30,35 @@ pub fn process(_attr: TokenStream, item: TokenStream) -> TokenStream {
                         component::enrich_type(&mut type_);
                         let (_, items) = program.content.as_mut().unwrap();
                         items.push(parse_quote!(#type_));
+                    } else {
+                        // Not a bolt component; include as-is
+                        let (_, program_items) = program.content.as_mut().unwrap();
+                        let original: syn::Item = syn::Item::Struct(item);
+                        program_items.push(parse_quote!(#original));
                     }
                 }
-                syn::Item::Mod(_mod_item) => {
+                syn::Item::Mod(mut mod_item) => {
+                    if mod_item.attrs.iter().any(|a| a.path.is_ident("system")) {
+                        let suffix = mod_item.ident.to_string().to_snake_case();
+                        let inlined_items = system::transform_module_for_bundle(&mut mod_item, Some(&suffix));
+                        let (_, program_items) = program.content.as_mut().unwrap();
+                        program_items.extend(inlined_items.into_iter());
+                    } else {
+                        // Regular module; include as-is
+                        let (_, program_items) = program.content.as_mut().unwrap();
+                        let original: syn::Item = syn::Item::Mod(mod_item);
+                        program_items.push(parse_quote!(#original));
+                    }
                 }
-                _ => {}
+                other => {
+                    // Any other non-bolt item; include as-is
+                    let (_, program_items) = program.content.as_mut().unwrap();
+                    program_items.push(parse_quote!(#other));
+                }
             }
         }
     }
 
     program.to_token_stream().into()
 }
+

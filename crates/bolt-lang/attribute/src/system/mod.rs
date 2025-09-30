@@ -1,10 +1,11 @@
 use proc_macro::TokenStream;
-use proc_macro2::Ident;
+use proc_macro2::{Ident, Span};
 use quote::{quote, ToTokens, TokenStreamExt};
 use syn::{
-    parse_macro_input, parse_quote, visit_mut::VisitMut, Expr, FnArg, GenericArgument, ItemFn,
+    parse_macro_input, parse_quote, visit_mut::VisitMut, Expr, FnArg, GenericArgument, Item, ItemFn,
     ItemMod, ItemStruct, PathArguments, ReturnType, Stmt, Type, TypePath,
 };
+use heck::ToPascalCase;
 
 #[derive(Default)]
 struct SystemTransform;
@@ -13,6 +14,17 @@ struct SystemTransform;
 struct Extractor {
     context_struct_name: Option<String>,
     field_count: Option<usize>,
+}
+
+fn generate_bolt_execute_wrapper(fn_ident: Ident, callee_ident: Ident, components_ident: Ident, bumps_ident: Ident) -> Item {
+    parse_quote! {
+        pub fn #fn_ident<'a, 'b, 'info>(ctx: Context<'a, 'b, 'info, 'info, VariadicBoltComponents<'info>>, args: Vec<u8>) -> Result<Vec<Vec<u8>>> {
+            let mut components = #components_ident::try_from(&ctx)?;
+            let bumps = #bumps_ident {};
+            let context = Context::new(ctx.program_id, &mut components, ctx.remaining_accounts, bumps);
+            #callee_ident(context, args)
+        }
+    }
 }
 
 pub fn process(_attr: TokenStream, item: TokenStream) -> TokenStream {
@@ -25,7 +37,25 @@ pub fn process(_attr: TokenStream, item: TokenStream) -> TokenStream {
         let use_super = syn::parse_quote! { use super::*; };
         if let Some((_, ref mut items)) = ast.content {
             items.insert(0, syn::Item::Use(use_super));
-            SystemTransform::add_variadic_execute_function(items);
+            // Ensure a single VariadicBoltComponents per program for standalone #[system]
+            let has_variadic = items.iter().any(|it| matches!(it, syn::Item::Struct(s) if s.ident == "VariadicBoltComponents"));
+            if !has_variadic {
+                let variadic_struct: Item = parse_quote! {
+                    #[derive(Accounts)]
+                    pub struct VariadicBoltComponents<'info> {
+                        #[account()]
+                        pub authority: AccountInfo<'info>,
+                    }
+                };
+                items.insert(1, variadic_struct);
+            }
+            let wrapper = generate_bolt_execute_wrapper(
+                Ident::new("bolt_execute", Span::call_site()),
+                Ident::new("execute", Span::call_site()),
+                Ident::new("Components", Span::call_site()),
+                Ident::new("ComponentsBumps", Span::call_site()),
+            );
+            items.push(wrapper);
         }
 
         let mut transform = SystemTransform;
@@ -43,6 +73,105 @@ pub fn process(_attr: TokenStream, item: TokenStream) -> TokenStream {
             extractor.context_struct_name.unwrap()
         );
     }
+}
+
+pub fn transform_module_for_bundle(module: &mut ItemMod, name_suffix: Option<&str>) -> Vec<Item> {
+    module.attrs.retain(|a| !a.path.is_ident("system"));
+
+    let mut extractor = Extractor::default();
+    extractor.visit_item_mod_mut(module);
+
+    if extractor.field_count.is_none() {
+        panic!(
+            "Could not find the component bundle: {} in the module",
+            extractor.context_struct_name.unwrap_or_default()
+        );
+    }
+
+    let mut transform = SystemTransform;
+    transform.visit_item_mod_mut(module);
+
+    let mut items: Vec<Item> = match module.content.take() {
+        Some((_, items)) => items,
+        None => vec![],
+    };
+
+    if let Some(suffix) = name_suffix {
+        let pascal = suffix.to_pascal_case();
+        let new_components_ident = Ident::new(&format!("{}Components", pascal), Span::call_site());
+        let new_bumps_ident = Ident::new(&format!("{}ComponentsBumps", pascal), Span::call_site());
+
+        struct SystemRename {
+            new_components: Ident,
+            new_bumps: Ident,
+        }
+        impl VisitMut for SystemRename {
+            fn visit_item_struct_mut(&mut self, i: &mut ItemStruct) {
+                if i.ident == "Components" {
+                    i.ident = self.new_components.clone();
+                } else if i.ident == "ComponentsBumps" {
+                    i.ident = self.new_bumps.clone();
+                }
+                syn::visit_mut::visit_item_struct_mut(self, i);
+            }
+            fn visit_type_path_mut(&mut self, i: &mut TypePath) {
+                for seg in i.path.segments.iter_mut() {
+                    if seg.ident == "Components" {
+                        seg.ident = self.new_components.clone();
+                    } else if seg.ident == "ComponentsBumps" {
+                        seg.ident = self.new_bumps.clone();
+                    }
+                }
+                syn::visit_mut::visit_type_path_mut(self, i);
+            }
+            fn visit_expr_path_mut(&mut self, i: &mut syn::ExprPath) {
+                if let Some(seg) = i.path.segments.last_mut() {
+                    if seg.ident == "Components" {
+                        seg.ident = self.new_components.clone();
+                    } else if seg.ident == "ComponentsBumps" {
+                        seg.ident = self.new_bumps.clone();
+                    }
+                }
+                syn::visit_mut::visit_expr_path_mut(self, i);
+            }
+        }
+
+        // Rename inner execute to a unique name per system to avoid collisions
+        let new_execute_ident = Ident::new(&format!("execute_{}", suffix), Span::call_site());
+        struct ExecRename { new_ident: Ident }
+        impl VisitMut for ExecRename {
+            fn visit_item_fn_mut(&mut self, i: &mut ItemFn) {
+                if i.sig.ident == "execute" {
+                    i.sig.ident = self.new_ident.clone();
+                }
+                syn::visit_mut::visit_item_fn_mut(self, i);
+            }
+        }
+
+        let mut renamer = SystemRename { new_components: new_components_ident.clone(), new_bumps: new_bumps_ident.clone() };
+        for item in items.iter_mut() {
+            renamer.visit_item_mut(item);
+        }
+
+        let mut exec_renamer = ExecRename { new_ident: new_execute_ident.clone() };
+        for item in items.iter_mut() {
+            exec_renamer.visit_item_mut(item);
+        }
+
+        let fn_ident = Ident::new(&format!("bolt_execute_{}", suffix), Span::call_site());
+        let wrapper_fn = generate_bolt_execute_wrapper(fn_ident, new_execute_ident, new_components_ident, new_bumps_ident);
+        items.push(wrapper_fn);
+    } else {
+        let wrapper_fn = generate_bolt_execute_wrapper(
+            Ident::new("bolt_execute", Span::call_site()),
+            Ident::new("execute", Span::call_site()),
+            Ident::new("Components", Span::call_site()),
+            Ident::new("ComponentsBumps", Span::call_site()),
+        );
+        items.push(wrapper_fn);
+    }
+
+    items
 }
 
 impl SystemTransform {
@@ -229,16 +358,6 @@ impl SystemTransform {
                 }
             }
         }
-    }
-    fn add_variadic_execute_function(content: &mut Vec<syn::Item>) {
-        content.push(syn::parse2(quote! {
-            pub fn bolt_execute<'a, 'b, 'info>(ctx: Context<'a, 'b, 'info, 'info, VariadicBoltComponents<'info>>, args: Vec<u8>) -> Result<Vec<Vec<u8>>> {
-                let mut components = Components::try_from(&ctx)?;
-                let bumps = ComponentsBumps {};
-                let context = Context::new(ctx.program_id, &mut components, ctx.remaining_accounts, bumps);
-                execute(context, args)
-            }
-        }).unwrap());
     }
 
     fn check_is_result_vec_u8(ty: &TypePath) -> bool {

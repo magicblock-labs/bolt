@@ -4,6 +4,7 @@ import {
   ApplySystem,
   InitializeComponent,
   DestroyComponent,
+  Component,
 } from "../../lib";
 import { Direction, Framework } from "../framework";
 import { expect } from "chai";
@@ -60,6 +61,43 @@ export function ecs(framework: Framework) {
       });
       await framework.provider.sendAndConfirm(initializeComponent.transaction);
       framework.componentVelocityEntity1Pda = initializeComponent.componentPda; // Saved for later
+    });
+
+    it("Initialize Bundled Position Component on Entity 1", async () => {
+      const initializeComponent = await InitializeComponent({
+        payer: framework.provider.wallet.publicKey,
+        entity: framework.entity1Pda,
+        componentId: new Component(framework.exampleBundle.programId, "position"),
+      });
+
+      await framework.provider.sendAndConfirm(initializeComponent.transaction);
+      framework.bundlePositionEntity1Pda = initializeComponent.componentPda; // Saved for later
+
+      const position =
+        await framework.exampleBundle.account.position.fetch(
+          framework.bundlePositionEntity1Pda,
+        );
+      expect(position.x.toNumber()).to.equal(0);
+      expect(position.y.toNumber()).to.equal(0);
+      expect(position.z.toNumber()).to.equal(0);
+    });
+
+    it("Initialize Bundled Velocity Component on Entity 1", async () => {
+      const initializeComponent = await InitializeComponent({
+        payer: framework.provider.wallet.publicKey,
+        entity: framework.entity1Pda,
+        componentId: new Component(framework.exampleBundle.programId, "velocity"),
+      });
+      await framework.provider.sendAndConfirm(initializeComponent.transaction);
+      framework.bundleVelocityEntity1Pda = initializeComponent.componentPda; // Saved for later
+
+      const velocity =
+        await framework.exampleBundle.account.velocity.fetch(
+          framework.bundleVelocityEntity1Pda,
+        );
+      expect(velocity.x.toNumber()).to.equal(1);
+      expect(velocity.y.toNumber()).to.equal(2);
+      expect(velocity.z.toNumber()).to.equal(3);
     });
 
     it("Initialize Position Component on Entity 1", async () => {
@@ -130,8 +168,6 @@ export function ecs(framework: Framework) {
       expect(position.y.toNumber()).to.equal(1);
       expect(position.z.toNumber()).to.equal(0);
     });
-
-    return;
 
     it("Apply Simple Movement System (Right) on Entity 1", async () => {
       const applySystem = await ApplySystem({
