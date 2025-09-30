@@ -365,13 +365,21 @@ export async function DestroyComponent({
     componentId instanceof Component
       ? "global:" + componentId.name + "_destroy"
       : "global:destroy";
+  const derivedSeed =
+    componentId instanceof Component ? componentId.name : seed;
   componentId =
     componentId instanceof Component ? componentId.program : componentId;
   const componentProgramData = FindComponentProgramDataPda({
     programId: componentId,
   });
   const componentProgram = componentId;
-  const component = FindComponentPda({ componentId, entity, seed });
+  const seedToUse = (componentIdObj: PublicKey | Component, s?: string) =>
+    componentIdObj instanceof Component ? componentIdObj.name : s;
+  const component = FindComponentPda({
+    componentId,
+    entity,
+    seed: derivedSeed,
+  });
   const instruction = await program.methods
     .destroyComponent(GetDiscriminator(componentName))
     .accounts({
@@ -424,9 +432,15 @@ export async function InitializeComponent({
     componentId instanceof Component
       ? "global:" + componentId.name + "_initialize"
       : "global:initialize";
+  const derivedSeed =
+    componentId instanceof Component ? componentId.name : seed;
   componentId =
     componentId instanceof Component ? componentId.program : componentId;
-  const componentPda = FindComponentPda({ componentId, entity, seed });
+  const componentPda = FindComponentPda({
+    componentId,
+    entity,
+    seed: derivedSeed,
+  });
   const program = new Program(
     worldIdl as Idl,
   ) as unknown as Program<WorldProgram>;
@@ -535,8 +549,9 @@ async function createApplySystemInstruction({
   const systemDiscriminator = Buffer.from(
     GetDiscriminator(
       "global:" +
-        (systemId instanceof System ? systemId.name + "_" : "") +
-        "bolt_execute",
+        (systemId instanceof System
+          ? `bolt_execute_${systemId.name}`
+          : "bolt_execute"),
     ),
   );
 
