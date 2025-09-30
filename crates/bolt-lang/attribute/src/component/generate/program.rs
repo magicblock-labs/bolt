@@ -3,7 +3,7 @@ use quote::{quote, ToTokens};
 
 use proc_macro2::TokenStream as TokenStream2;
 use syn::{
-    parse_quote, spanned::Spanned, Attribute, Field, Fields, ItemMod, ItemStruct, Type
+    parse_quote, spanned::Spanned, Attribute, Field, Fields, ItemMod, ItemStruct, Type, LitByteStr
 };
 
 pub fn remove_component_attributes(attrs: &mut Vec<syn::Attribute>) {
@@ -94,6 +94,14 @@ fn generate_destroy(component_type: &Type, component_name: Option<&String>) -> (
     } else {
         syn::Ident::new("destroy", component_type.span())
     };
+    // Build PDA seeds, adding component name when bundled
+    let seeds_tokens = if let Some(name) = component_name {
+        let name_bytes = LitByteStr::new(name.as_bytes(), component_type.span());
+        quote! { [#name_bytes, entity.key().as_ref()] }
+    } else {
+        quote! { [<#component_type>::seed(), entity.key().as_ref()] }
+    };
+
     (
         quote! {
             pub fn #fn_destroy(ctx: Context<#structure_name>) -> Result<()> {
@@ -110,7 +118,7 @@ fn generate_destroy(component_type: &Type, component_name: Option<&String>) -> (
                 pub receiver: AccountInfo<'info>,
                 #[account()]
                 pub entity: Account<'info, Entity>,
-                #[account(mut, close = receiver, seeds = [<#component_type>::seed(), entity.key().as_ref()], bump)]
+                #[account(mut, close = receiver, seeds = #seeds_tokens, bump)]
                 pub component: Account<'info, #component_type>,
                 #[account()]
                 pub component_program_data: AccountInfo<'info>,
@@ -134,6 +142,14 @@ fn generate_initialize(component_type: &Type, component_name: Option<&String>) -
     } else {
         syn::Ident::new("initialize", component_type.span())
     };
+    // Build PDA seeds, adding component name when bundled
+    let seeds_tokens = if let Some(name) = component_name {
+        let name_bytes = LitByteStr::new(name.as_bytes(), component_type.span());
+        quote! { [#name_bytes, entity.key().as_ref()] }
+    } else {
+        quote! { [<#component_type>::seed(), entity.key().as_ref()] }
+    };
+
     (
         quote! {
             #[automatically_derived]
@@ -151,7 +167,7 @@ fn generate_initialize(component_type: &Type, component_name: Option<&String>) -
                 pub cpi_auth: Signer<'info>,
                 #[account(mut)]
                 pub payer: Signer<'info>,
-                #[account(init_if_needed, payer = payer, space = <#component_type>::size(), seeds = [<#component_type>::seed(), entity.key().as_ref()], bump)]
+                #[account(init_if_needed, payer = payer, space = <#component_type>::size(), seeds = #seeds_tokens, bump)]
                 pub data: Account<'info, #component_type>,
                 #[account()]
                 pub entity: Account<'info, Entity>,

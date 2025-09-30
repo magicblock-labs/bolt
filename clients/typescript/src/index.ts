@@ -115,8 +115,9 @@ export function FindComponentPda({
   entity: PublicKey;
   seed?: string;
 }) {
+  const seedBuf = Buffer.from(seed ?? "");
   return PublicKey.findProgramAddressSync(
-    [Buffer.from(seed ?? ""), entity.toBytes()],
+    [seedBuf, entity.toBytes()],
     componentId,
   )[0];
 }
