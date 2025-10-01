@@ -33,15 +33,15 @@ pub fn delegate(args: TokenStream, input: TokenStream) -> TokenStream {
 /// Modifies the component module and adds the necessary functions and structs.
 fn modify_component_module(mut module: ItemMod, component_type: &Type) -> ItemMod {
     let (delegate_fn, delegate_struct) = generate_delegate(component_type);
-    let (reinit_undelegate_fn, reinit_undelegate_struct) = generate_reinit_after_undelegate();
+    let (process_undelegation_fn, process_undelegation_struct) = generate_process_undelegation();
     let (undelegate_fn, undelegate_struct) = generate_undelegate();
     module.content = module.content.map(|(brace, mut items)| {
         items.extend(
             vec![
                 delegate_fn,
                 delegate_struct,
-                reinit_undelegate_fn,
-                reinit_undelegate_struct,
+                process_undelegation_fn,
+                process_undelegation_struct,
                 undelegate_fn,
                 undelegate_struct,
             ]
@@ -90,11 +90,11 @@ fn generate_undelegate() -> (TokenStream2, TokenStream2) {
 }
 
 /// Generates the undelegate function and struct.
-fn generate_reinit_after_undelegate() -> (TokenStream2, TokenStream2) {
+fn generate_process_undelegation() -> (TokenStream2, TokenStream2) {
     (
         quote! {
             #[automatically_derived]
-            pub fn process_undelegation(ctx: Context<InitializeAfterUndelegation>, account_seeds: Vec<Vec<u8>>) -> Result<()> {
+            pub fn process_undelegation(ctx: Context<ProcessUndelegation>, account_seeds: Vec<Vec<u8>>) -> Result<()> {
                 let [delegated_account, buffer, payer, system_program] = [
                     &ctx.accounts.delegated_account,
                     &ctx.accounts.buffer,
@@ -115,7 +115,7 @@ fn generate_reinit_after_undelegate() -> (TokenStream2, TokenStream2) {
         quote! {
             #[automatically_derived]
             #[derive(Accounts)]
-            pub struct InitializeAfterUndelegation<'info> {
+            pub struct ProcessUndelegation<'info> {
                 /// CHECK:`
                 #[account(mut)]
                 pub delegated_account: AccountInfo<'info>,

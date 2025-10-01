@@ -54,7 +54,6 @@ export function acceleration(framework: Framework) {
         delegateComponent.transaction,
         [],
         {
-          skipPreflight: true,
           commitment: "confirmed",
         },
       );
