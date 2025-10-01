@@ -1,4 +1,4 @@
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct Attributes {
     pub is_component: bool,
     pub component_id: String,

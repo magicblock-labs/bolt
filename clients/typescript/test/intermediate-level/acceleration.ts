@@ -54,7 +54,6 @@ export function acceleration(framework: Framework) {
         delegateComponent.transaction,
         [],
         {
-          skipPreflight: true,
           commitment: "confirmed",
         },
       );
@@ -63,6 +62,8 @@ export function acceleration(framework: Framework) {
       );
       expect(acc?.owner.toBase58()).to.equal(DELEGATION_PROGRAM_ID.toBase58());
     });
+
+    return;
 
     // TODO: Re-enable this test when ephemeral-validator is properly installed on the CI.
     // it("Apply Simple Movement System (Up) on Entity 1 on Accelerator 10 times", async () => {
