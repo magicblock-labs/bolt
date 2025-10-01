@@ -201,10 +201,9 @@ export function ecs(framework: Framework) {
       });
       await framework.provider.sendAndConfirm(applySystem.transaction);
 
-      const position =
-        await framework.exampleBundle.account.position.fetch(
-          framework.bundlePositionEntity1Pda,
-        );
+      const position = await framework.exampleBundle.account.position.fetch(
+        framework.bundlePositionEntity1Pda,
+      );
       expect(position.x.toNumber()).to.equal(1);
       expect(position.y.toNumber()).to.equal(2);
       expect(position.z.toNumber()).to.equal(3);
@@ -219,17 +218,21 @@ export function ecs(framework: Framework) {
           {
             entity: framework.entity1Pda,
             components: [
-              { componentId: new Component(framework.exampleBundle.programId, "velocity") },
+              {
+                componentId: new Component(
+                  framework.exampleBundle.programId,
+                  "velocity",
+                ),
+              },
             ],
           },
         ],
       });
       await framework.provider.sendAndConfirm(applySystem.transaction);
 
-      const velocity =
-        await framework.exampleBundle.account.velocity.fetch(
-          framework.bundleVelocityEntity1Pda,
-        );
+      const velocity = await framework.exampleBundle.account.velocity.fetch(
+        framework.bundleVelocityEntity1Pda,
+      );
       expect(velocity.x.toNumber()).to.equal(0);
       expect(velocity.y.toNumber()).to.equal(0);
       expect(velocity.z.toNumber()).to.equal(0);
