@@ -35,6 +35,29 @@ import {
 } from "../generated";
 import { type Idl, Program } from "@coral-xyz/anchor";
 import { System } from "../ecs";
+function isComponentId(value: PublicKey | Component): value is Component {
+  const anyVal: any = value as any;
+  return (
+    anyVal &&
+    typeof anyVal === "object" &&
+    typeof anyVal.name === "string" &&
+    anyVal.program &&
+    typeof anyVal.program.toBuffer === "function"
+  );
+}
+
+function ensurePublicKey(value: any): PublicKey {
+  if (value && typeof value === "object") {
+    if (value instanceof web3.PublicKey) return value as PublicKey;
+    if (typeof value.toBuffer === "function") return value as PublicKey;
+    if (typeof value.toBytes === "function")
+      return new web3.PublicKey(value.toBytes());
+    if (typeof value.toString === "function")
+      return new web3.PublicKey(value.toString());
+  }
+  if (typeof value === "string") return new web3.PublicKey(value);
+  throw new Error("Invalid PublicKey-like value");
+}
 
 export async function InitializeRegistry({
   payer,
@@ -359,14 +382,13 @@ export async function DestroyComponent({
   const program = new Program(
     worldIdl as Idl,
   ) as unknown as Program<WorldProgram>;
-  const componentName =
-    componentId instanceof Component
-      ? "global:" + componentId.name + "_destroy"
-      : "global:destroy";
-  const derivedSeed =
-    componentId instanceof Component ? componentId.name : seed;
-  componentId =
-    componentId instanceof Component ? componentId.program : componentId;
+  const componentName = isComponentId(componentId)
+    ? "global:" + componentId.name + "_destroy"
+    : "global:destroy";
+  const derivedSeed = isComponentId(componentId) ? componentId.name : seed;
+  componentId = ensurePublicKey(
+    isComponentId(componentId) ? componentId.program : componentId,
+  );
   const componentProgramData = FindComponentProgramDataPda({
     programId: componentId,
   });
@@ -425,14 +447,13 @@ export async function InitializeComponent({
   transaction: Transaction;
   componentPda: PublicKey;
 }> {
-  const componentName =
-    componentId instanceof Component
-      ? "global:" + componentId.name + "_initialize"
-      : "global:initialize";
-  const derivedSeed =
-    componentId instanceof Component ? componentId.name : seed;
-  componentId =
-    componentId instanceof Component ? componentId.program : componentId;
+  const componentName = isComponentId(componentId)
+    ? "global:" + componentId.name + "_initialize"
+    : "global:initialize";
+  const derivedSeed = isComponentId(componentId) ? componentId.name : seed;
+  componentId = ensurePublicKey(
+    isComponentId(componentId) ? componentId.program : componentId,
+  );
   const componentPda = FindComponentPda({
     componentId,
     entity,
@@ -496,15 +517,28 @@ async function createApplySystemInstruction({
   let components: { id: PublicKey; pda: PublicKey; name?: string }[] = [];
   for (const entity of entities) {
     for (const component of entity.components) {
+      const compId: PublicKey = ensurePublicKey(
+        isComponentId(component.componentId)
+          ? component.componentId.program
+          : component.componentId,
+      );
+      const seedToUse: string | undefined = isComponentId(component.componentId)
+        ? component.componentId.name
+        : component.seed;
+      const nameToUse: string | undefined =
+        component.name ??
+        (isComponentId(component.componentId)
+          ? component.componentId.name
+          : undefined);
       const componentPda = FindComponentPda({
-        componentId: component.componentId,
+        componentId: compId,
         entity: entity.entity,
-        seed: component.seed,
+        seed: seedToUse,
       });
       components.push({
-        id: component.componentId,
+        id: compId,
         pda: componentPda,
-        name: component.name,
+        name: nameToUse,
       });
     }
   }
@@ -584,7 +618,7 @@ interface ApplySystemEntity {
   components: ApplySystemComponent[];
 }
 interface ApplySystemComponent {
-  componentId: PublicKey;
+  componentId: PublicKey | Component;
   name?: string;
   seed?: string;
 }
