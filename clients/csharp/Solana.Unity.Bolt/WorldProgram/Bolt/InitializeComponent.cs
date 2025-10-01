@@ -43,5 +43,31 @@ namespace Bolt {
                 Instruction = instruction
             };
         }
+
+		/// <summary>
+		/// Initialize a bundled component using its program and name, mirroring TS client behavior.
+		/// Uses component name as seed and component-specific initialize discriminator.
+		/// </summary>
+		/// <param name="payer">Payer public key.</param>
+		/// <param name="entity">Entity PDA.</param>
+		/// <param name="component">Bundled component identifier (program + name).</param>
+		/// <param name="authority">Optional authority, defaults to world program id.</param>
+		public static async Task<InitializeComponentInstruction> InitializeComponent(PublicKey payer, PublicKey entity, Component component, PublicKey authority = null) {
+			var componentPda = WorldProgram.FindComponentPda(component.Program, entity, component.Name);
+			var initializeComponent = new InitializeComponentAccounts() {
+				Payer = payer,
+				Entity = entity,
+				Data = componentPda,
+				ComponentProgram = component.Program,
+				Authority = authority ?? new PublicKey(WorldProgram.ID),
+				CpiAuth = WorldProgram.CpiAuthAddress
+			};
+			var discriminatorName = $"global:{component.Name}_initialize";
+			var instruction = WorldProgram.InitializeComponent(initializeComponent, GetDiscriminator(discriminatorName));
+			return new InitializeComponentInstruction() {
+				Pda = componentPda,
+				Instruction = instruction
+			};
+		}
     }
 }
