@@ -5,6 +5,7 @@ import {
   InitializeComponent,
   DestroyComponent,
   Component,
+  System,
 } from "../../lib";
 import { Direction, Framework } from "../framework";
 import { expect } from "chai";
@@ -171,6 +172,67 @@ export function ecs(framework: Framework) {
       expect(position.x.toNumber()).to.equal(0);
       expect(position.y.toNumber()).to.equal(1);
       expect(position.z.toNumber()).to.equal(0);
+    });
+
+    it("Apply bundled movement system on Entity 1", async () => {
+      const applySystem = await ApplySystem({
+        authority: framework.provider.wallet.publicKey,
+        systemId: new System(framework.exampleBundle.programId, "movement"),
+        world: framework.worldPda,
+        entities: [
+          {
+            entity: framework.entity1Pda,
+            components: [
+              {
+                componentId: new Component(
+                  framework.exampleBundle.programId,
+                  "position",
+                ),
+              },
+              {
+                componentId: new Component(
+                  framework.exampleBundle.programId,
+                  "velocity",
+                ),
+              },
+            ],
+          },
+        ],
+      });
+      await framework.provider.sendAndConfirm(applySystem.transaction);
+
+      const position =
+        await framework.exampleBundle.account.position.fetch(
+          framework.bundlePositionEntity1Pda,
+        );
+      expect(position.x.toNumber()).to.equal(1);
+      expect(position.y.toNumber()).to.equal(2);
+      expect(position.z.toNumber()).to.equal(3);
+    });
+
+    it("Apply bundled stop system on Entity 1", async () => {
+      const applySystem = await ApplySystem({
+        authority: framework.provider.wallet.publicKey,
+        systemId: new System(framework.exampleBundle.programId, "stop"),
+        world: framework.worldPda,
+        entities: [
+          {
+            entity: framework.entity1Pda,
+            components: [
+              { componentId: new Component(framework.exampleBundle.programId, "velocity") },
+            ],
+          },
+        ],
+      });
+      await framework.provider.sendAndConfirm(applySystem.transaction);
+
+      const velocity =
+        await framework.exampleBundle.account.velocity.fetch(
+          framework.bundleVelocityEntity1Pda,
+        );
+      expect(velocity.x.toNumber()).to.equal(0);
+      expect(velocity.y.toNumber()).to.equal(0);
+      expect(velocity.z.toNumber()).to.equal(0);
     });
 
     it("Apply Simple Movement System (Right) on Entity 1", async () => {
