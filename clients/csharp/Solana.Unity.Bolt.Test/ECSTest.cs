@@ -27,6 +27,12 @@ namespace ECSTest {
             await Profiler.Run("InitializeVelocityComponentOnEntity1WithSeed", async () => {
                 await InitializeVelocityComponentOnEntity1WithSeed(framework);
             });
+            await Profiler.Run("InitializeBundledPositionOnEntity1", async () => {
+                await InitializeBundledPositionOnEntity1(framework);
+            });
+            await Profiler.Run("InitializeBundledVelocityOnEntity1", async () => {
+                await InitializeBundledVelocityOnEntity1(framework);
+            });
             await Profiler.Run("InitializePositionComponentOnEntity1", async () => {
                 await InitializePositionComponentOnEntity1(framework);
             });
@@ -44,6 +50,12 @@ namespace ECSTest {
             });
             await Profiler.Run("ApplySimpleMovementSystemRightOnEntity1", async () => {
                 await ApplySimpleMovementSystemRightOnEntity1(framework);
+            });
+            await Profiler.Run("ApplyBundledMovementOnEntity1", async () => {
+                await ApplyBundledMovementOnEntity1(framework);
+            });
+            await Profiler.Run("ApplyBundledStopOnEntity1", async () => {
+                await ApplyBundledStopOnEntity1(framework);
             });
             await Profiler.Run("DestroyVelocityComponentOnEntity1", async () => {
                 await DestroyVelocityComponentOnEntity1(framework);
@@ -77,6 +89,43 @@ namespace ECSTest {
             var initializeComponent = await Bolt.World.InitializeComponent(framework.Wallet.Account.PublicKey, framework.Entity1Pda, framework.ExampleComponentVelocity, "component-velocity", framework.Wallet.Account.PublicKey);
             framework.ComponentVelocityEntity1Pda = initializeComponent.Pda;
             await framework.SendAndConfirmInstruction(initializeComponent.Instruction);
+        }
+
+        public static async Task InitializeBundledPositionOnEntity1(Framework framework) {
+            var initializeComponent = await Bolt.World.InitializeComponent(
+                framework.Wallet.Account.PublicKey,
+                framework.Entity1Pda,
+                new Bolt.Component(framework.ExampleBundleProgramId, "position")
+            );
+            framework.BundlePositionEntity1Pda = initializeComponent.Pda;
+            await framework.SendAndConfirmInstruction(initializeComponent.Instruction);
+
+            var accountInfo = await framework.GetAccountInfo(framework.BundlePositionEntity1Pda);
+            var data = Convert.FromBase64String(accountInfo.Data[0]);
+            var position = Position.Accounts.Position.Deserialize(data);
+            Debug.Assert(0 == position.X, "X is not equal to 0");
+            Debug.Assert(0 == position.Y, "Y is not equal to 0");
+            Debug.Assert(0 == position.Z, "Z is not equal to 0");
+        }
+
+        public static async Task InitializeBundledVelocityOnEntity1(Framework framework) {
+            var initializeComponent = await Bolt.World.InitializeComponent(
+                framework.Wallet.Account.PublicKey,
+                framework.Entity1Pda,
+                new Bolt.Component(framework.ExampleBundleProgramId, "velocity")
+            );
+            framework.BundleVelocityEntity1Pda = initializeComponent.Pda;
+            await framework.SendAndConfirmInstruction(initializeComponent.Instruction);
+
+            var accountInfo = await framework.GetAccountInfo(framework.BundleVelocityEntity1Pda);
+            var data = Convert.FromBase64String(accountInfo.Data[0]);
+            int offset = 8; // skip discriminator
+            long x = BitConverter.ToInt64(data, offset); offset += 8;
+            long y = BitConverter.ToInt64(data, offset); offset += 8;
+            long z = BitConverter.ToInt64(data, offset); offset += 8;
+            Debug.Assert(1 == x, "X is not equal to 1");
+            Debug.Assert(2 == y, "Y is not equal to 2");
+            Debug.Assert(3 == z, "Z is not equal to 3");
         }
 
         public static async Task InitializePositionComponentOnEntity1(Framework framework) {
@@ -145,6 +194,54 @@ namespace ECSTest {
             Debug.Assert(1 == position.X, "X is not equal to 1");
             Debug.Assert(1 == position.Y, "Y is not equal to 1");
             Debug.Assert(0 == position.Z, "Z is not equal to 0");
+        }
+
+        public static async Task ApplyBundledMovementOnEntity1(Framework framework) {
+            var instruction = Bolt.World.ApplySystem(
+                framework.WorldPda,
+                new Bolt.System(framework.ExampleBundleProgramId, "movement"),
+                new (PublicKey entity, Bolt.Component[] components, string[] seeds)?[] {
+                    (framework.Entity1Pda, new Bolt.Component[] {
+                        new Bolt.Component(framework.ExampleBundleProgramId, "position"),
+                        new Bolt.Component(framework.ExampleBundleProgramId, "velocity")
+                    }, null)
+                },
+                new { },
+                framework.Wallet.Account.PublicKey
+            );
+            await framework.SendAndConfirmInstruction(instruction);
+
+            var accountInfo = await framework.GetAccountInfo(framework.BundlePositionEntity1Pda);
+            var data = Convert.FromBase64String(accountInfo.Data[0]);
+            var position = Position.Accounts.Position.Deserialize(data);
+            Debug.Assert(1 == position.X, "X is not equal to 1");
+            Debug.Assert(2 == position.Y, "Y is not equal to 2");
+            Debug.Assert(3 == position.Z, "Z is not equal to 3");
+        }
+
+        public static async Task ApplyBundledStopOnEntity1(Framework framework) {
+            var instruction = Bolt.World.ApplySystem(
+                framework.WorldPda,
+                new Bolt.System(framework.ExampleBundleProgramId, "stop"),
+                new (PublicKey entity, Bolt.Component[] components, string[] seeds)?[] {
+                    (framework.Entity1Pda, new Bolt.Component[] {
+                        new Bolt.Component(framework.ExampleBundleProgramId, "velocity")
+                    }, null)
+                },
+                new { },
+                framework.Wallet.Account.PublicKey
+            );
+            await framework.SendAndConfirmInstruction(instruction);
+
+            var accountInfo = await framework.GetAccountInfo(framework.BundleVelocityEntity1Pda);
+            var data = Convert.FromBase64String(accountInfo.Data[0]);
+            int offset = 8; // skip discriminator
+            long x = BitConverter.ToInt64(data, offset); offset += 8;
+            long y = BitConverter.ToInt64(data, offset); offset += 8;
+            long z = BitConverter.ToInt64(data, offset); offset += 8;
+            Debug.Assert(0 == x, "X is not equal to 0");
+            Debug.Assert(0 == y, "Y is not equal to 0");
+            Debug.Assert(0 == z, "Z is not equal to 0");
         }
 
         public static async Task DestroyVelocityComponentOnEntity1(Framework framework) {
