@@ -180,8 +180,6 @@ jobs:
             -p bolt-cli \
             -p bolt-lang \
             -p bolt-utils \
-            -p bolt-system \
-            -p bolt-component \
             -p bolt-attribute-bolt-arguments \
             -p bolt-attribute-bolt-bundle \
             -p bolt-attribute-bolt-component \

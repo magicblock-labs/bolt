@@ -8,4 +8,8 @@ export class Identifier {
     this.program = program;
     this.name = name;
   }
+
+  getMethodDiscriminator(method: string): string {
+    return "global:" + (this.name ? this.name + "_" : "") + method;
+  }
 }

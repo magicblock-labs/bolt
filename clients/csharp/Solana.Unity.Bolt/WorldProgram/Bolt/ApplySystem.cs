@@ -51,7 +51,7 @@ namespace Bolt {
 
         /// <summary>
         /// Apply a bundled system and/or bundled components by name, mirroring TS client behavior.
-        /// - If systemId is a bundled System (program + name), we use "global:bolt_execute_{name}" discriminator.
+        /// - If systemId is a bundled System (program + name), we use "global:{name}_bolt_execute" discriminator.
         /// - For each component, if provided as bundled Component (program + name), we:
         ///   * use the component name as the PDA seed and
         ///   * build the component-specific update discriminator (name + _update or _update_with_session).

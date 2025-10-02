@@ -23,7 +23,6 @@ pub use bolt_attribute_bolt_bundle::bundle;
 pub use bolt_attribute_bolt_system::system;
 pub use bolt_attribute_bolt_system_input::system_input;
 
-pub use bolt_system;
 pub use world;
 pub use world::program::World;
 pub use world::Entity;

@@ -8,8 +8,8 @@ import { acceleration } from "./acceleration";
 describe("Intermediate level API", () => {
   const framework: Framework = new Framework();
   world(framework);
-  // ecs(framework);
-  // session(framework);
+  ecs(framework);
+  session(framework);
   acceleration(framework);
-  // permissioning(framework);
+  permissioning(framework);
 });

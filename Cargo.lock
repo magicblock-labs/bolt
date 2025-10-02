@@ -883,14 +883,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "bolt-component"
-version = "0.2.6"
-dependencies = [
- "anchor-lang",
- "bolt-system",
-]
-
-[[package]]
 name = "bolt-lang"
 version = "0.2.6"
 dependencies = [
@@ -906,7 +898,6 @@ dependencies = [
  "bolt-attribute-bolt-extra-accounts",
  "bolt-attribute-bolt-system",
  "bolt-attribute-bolt-system-input",
- "bolt-system",
  "ephemeral-rollups-sdk",
  "getrandom 0.1.16",
  "serde",
@@ -915,13 +906,6 @@ dependencies = [
  "solana-program",
  "world",
  "zeroize",
-]
-
-[[package]]
-name = "bolt-system"
-version = "0.2.6"
-dependencies = [
- "anchor-lang",
 ]
 
 [[package]]
@@ -7183,8 +7167,6 @@ name = "world"
 version = "0.2.6"
 dependencies = [
  "anchor-lang",
- "bolt-component",
- "bolt-system",
  "solana-security-txt",
  "tuple-conv",
 ]
