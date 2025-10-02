@@ -1,6 +1,5 @@
 #![allow(clippy::manual_unwrap_or_default)]
 use anchor_lang::prelude::*;
-use bolt_component::CpiContextBuilder;
 use error::WorldError;
 use std::collections::BTreeSet;
 
@@ -263,14 +262,6 @@ pub mod world {
         if !ctx.accounts.authority.is_signer && ctx.accounts.authority.key != &ID {
             return Err(WorldError::InvalidAuthority.into());
         }
-<<<<<<< HEAD
-        bolt_component::cpi::initialize(ctx.accounts.build())?;
-        Ok(())
-    }
-
-    pub fn destroy_component(ctx: Context<DestroyComponent>) -> Result<()> {
-        bolt_component::cpi::destroy(ctx.accounts.build())?;
-=======
         // Pure Solana SDK logic for CPI to bolt_component::initialize
         use anchor_lang::solana_program::{
             instruction::{AccountMeta, Instruction},
@@ -350,7 +341,6 @@ pub mod world {
             ],
             &[World::cpi_auth_seeds().as_slice()],
         )?;
->>>>>>> 540630b (:sparkles: Client-side TS & C# code for ECS bundle)
         Ok(())
     }
 
@@ -364,22 +354,10 @@ pub mod world {
             &ctx.accounts.authority,
             &ctx.accounts.world,
             &ctx.accounts.bolt_system,
-            ctx.accounts.build(),
             system_discriminator,
             args,
             ctx.remaining_accounts.to_vec(),
         )?;
-<<<<<<< HEAD
-        for ((program, component), result) in pairs.into_iter().zip(results.into_iter()) {
-            bolt_component::cpi::update(
-                build_update_context(
-                    program,
-                    component,
-                    ctx.accounts.authority.clone(),
-                    ctx.accounts.instruction_sysvar_account.clone(),
-                ),
-                result,
-=======
         require_eq!(pairs.len(), discriminators.len(), WorldError::InvalidSystemOutput);
 
         use anchor_lang::solana_program::instruction::{AccountMeta, Instruction};
@@ -415,7 +393,6 @@ pub mod world {
                     ctx.accounts.authority.to_account_info(),
                 ],
                 &[World::cpi_auth_seeds().as_slice()],
->>>>>>> 540630b (:sparkles: Client-side TS & C# code for ECS bundle)
             )?;
         }
         Ok(())
@@ -436,18 +413,6 @@ pub mod world {
         pub world: Account<'info, World>,
     }
 
-    impl<'info> Apply<'info> {
-        pub fn build(
-            &self,
-        ) -> CpiContext<'_, '_, '_, 'info, bolt_system::cpi::accounts::BoltExecute<'info>> {
-            let cpi_program = self.bolt_system.to_account_info();
-            let cpi_accounts = bolt_system::cpi::accounts::BoltExecute {
-                authority: self.authority.to_account_info(),
-            };
-            CpiContext::new(cpi_program, cpi_accounts)
-        }
-    }
-
     pub fn apply_with_session<'info>(
         ctx: Context<'_, '_, '_, 'info, ApplyWithSession<'info>>,
         system_discriminator: Vec<u8>,
@@ -458,7 +423,6 @@ pub mod world {
             &ctx.accounts.authority,
             &ctx.accounts.world,
             &ctx.accounts.bolt_system,
-            ctx.accounts.build(),
             system_discriminator,
             args,
             ctx.remaining_accounts.to_vec(),
@@ -522,18 +486,6 @@ pub mod world {
         /// CHECK: The session token
         pub session_token: UncheckedAccount<'info>,
     }
-
-    impl<'info> ApplyWithSession<'info> {
-        pub fn build(
-            &self,
-        ) -> CpiContext<'_, '_, '_, 'info, bolt_system::cpi::accounts::BoltExecute<'info>> {
-            let cpi_program = self.bolt_system.to_account_info();
-            let cpi_accounts = bolt_system::cpi::accounts::BoltExecute {
-                authority: self.authority.to_account_info(),
-            };
-            CpiContext::new(cpi_program, cpi_accounts)
-        }
-    }
 }
 
 #[allow(clippy::type_complexity)]
@@ -541,7 +493,6 @@ fn apply_impl<'info>(
     authority: &Signer<'info>,
     world: &Account<'info, World>,
     bolt_system: &UncheckedAccount<'info>,
-    cpi_context: CpiContext<'_, '_, '_, 'info, bolt_system::cpi::accounts::BoltExecute<'info>>,
     system_discriminator: Vec<u8>,
     args: Vec<u8>,
     mut remaining_accounts: Vec<AccountInfo<'info>>,
@@ -584,10 +535,10 @@ fn apply_impl<'info>(
     use anchor_lang::solana_program::instruction::{AccountMeta, Instruction};
     use anchor_lang::solana_program::program::invoke;
 
-    let mut accounts = vec![AccountMeta::new_readonly(cpi_context.accounts.authority.key(), false)];
+    let mut accounts = vec![AccountMeta::new_readonly(authority.key(), false)];
     accounts.extend(remaining_accounts.iter().map(|account| AccountMeta::new_readonly(account.key(), false)));
 
-    let mut account_infos = vec![cpi_context.accounts.authority.to_account_info()];
+    let mut account_infos = vec![authority.to_account_info()];
     account_infos.extend(remaining_accounts.iter().map(|account| account.to_account_info()));
 
     let ix = Instruction {
@@ -764,6 +715,7 @@ pub struct DestroyComponent<'info> {
     pub system_program: Program<'info, System>,
 }
 
+<<<<<<< HEAD
 impl<'info> DestroyComponent<'info> {
     pub fn build(
         &self,
@@ -782,6 +734,8 @@ impl<'info> DestroyComponent<'info> {
         CpiContext::new(cpi_program, cpi_accounts)
     }
 }
+=======
+>>>>>>> ff88294 (:recycle: Removing bolt-component and bolt-system)
 
 #[account]
 #[derive(InitSpace, Default, Copy)]
@@ -887,6 +841,7 @@ impl SystemWhitelist {
         8 + Registry::INIT_SPACE
     }
 }
+<<<<<<< HEAD
 
 /// Builds the context for updating a component.
 pub fn build_update_context<'info>(
@@ -927,3 +882,5 @@ pub fn build_update_context_with_session<'info>(
     }
     .build_cpi_context(cpi_program)
 }
+=======
+>>>>>>> ff88294 (:recycle: Removing bolt-component and bolt-system)

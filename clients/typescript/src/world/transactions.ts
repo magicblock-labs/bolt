@@ -460,6 +460,7 @@ async function createApplySystemInstruction({
   extraAccounts,
   args,
 }: ApplySystemInstruction): Promise<web3.TransactionInstruction> {
+  let system = System.from(systemId);
   const program = new Program(
     worldIdl as Idl,
   ) as unknown as Program<WorldProgram>;
@@ -513,21 +514,14 @@ async function createApplySystemInstruction({
   // Build discriminators per component in order of remaining accounts pairs
   const discriminators: Buffer[] = components.map((component) =>
     Buffer.from(
-      GetDiscriminator(
-        "global:" +
-          (component.name ? component.name + "_" : "") +
-          (session ? "update_with_session" : "update"),
+      Component.from(component.id).getMethodDiscriminator(
+        session ? "update_with_session" : "update",
       ),
     ),
   );
 
   const systemDiscriminator = Buffer.from(
-    GetDiscriminator(
-      "global:" +
-        (systemId instanceof System
-          ? `bolt_execute_${systemId.name}`
-          : "bolt_execute"),
-    ),
+    system.getMethodDiscriminator("bolt_execute"),
   );
 
   if (session)
@@ -539,7 +533,7 @@ async function createApplySystemInstruction({
       )
       .accounts({
         authority: authority ?? PROGRAM_ID,
-        boltSystem: systemId instanceof System ? systemId.program : systemId,
+        boltSystem: system.program,
         sessionToken: session.token,
         world,
       })
@@ -550,7 +544,7 @@ async function createApplySystemInstruction({
       .apply(systemDiscriminator, discriminators, SerializeArgs(args))
       .accounts({
         authority: authority ?? PROGRAM_ID,
-        boltSystem: systemId instanceof System ? systemId.program : systemId,
+        boltSystem: system.program,
         world,
       })
       .remainingAccounts(remainingAccounts)

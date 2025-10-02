@@ -13,10 +13,6 @@ export class Component extends Identifier {
       : new Component(componentId);
   }
 
-  getMethodDiscriminator(method: string): string {
-    return "global:" + (this.name ? this.name + "_" : "") + method;
-  }
-
   pda(entity: PublicKey, seed?: string): PublicKey {
     return FindComponentPda({
       componentId: this.program,

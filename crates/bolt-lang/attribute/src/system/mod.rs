@@ -158,7 +158,7 @@ pub fn transform_module_for_bundle(module: &mut ItemMod, name_suffix: Option<&st
             exec_renamer.visit_item_mut(item);
         }
 
-        let fn_ident = Ident::new(&format!("bolt_execute_{}", suffix), Span::call_site());
+        let fn_ident = Ident::new(&format!("{}_bolt_execute", suffix), Span::call_site());
         let wrapper_fn = generate_bolt_execute_wrapper(fn_ident, new_execute_ident, new_components_ident, new_bumps_ident);
         items.push(wrapper_fn);
     } else {

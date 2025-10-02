@@ -28,7 +28,6 @@ bolt-attribute-bolt-arguments = { workspace = true }
 
 # Bolt Programs
 world = { workspace = true }
-bolt-system = { workspace = true }
 
 # Session Keys
 session-keys = { workspace = true }

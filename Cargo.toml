@@ -3,8 +3,6 @@ resolver = "2"
 members = [
     "crates/bolt-cli",
     "crates/bolt-lang",
-    "crates/programs/bolt-component",
-    "crates/programs/bolt-system",
     "crates/programs/world",
     "crates/types",
     "examples/*",
@@ -34,9 +32,8 @@ bolt-attribute-bolt-component-deserialize = { path = "crates/bolt-lang/attribute
 bolt-attribute-bolt-component-id = { path = "crates/bolt-lang/attribute/component-id", version = "=0.2.6" }
 bolt-utils = { path = "crates/bolt-lang/utils", version = "=0.2.6" }
 world = { path = "crates/programs/world", features = ["cpi"], version = "=0.2.6"}
-bolt-system = { path = "crates/programs/bolt-system", features = ["cpi"], version = "=0.2.6"}
-bolt-component = { path = "crates/programs/bolt-component", features = ["cpi"], version = "=0.2.6"}
 small = { path = "examples/component-small", features = ["cpi"], version = "=0.2.6"}
+component-large = { path = "examples/component-large", features = ["cpi"], version = "=0.2.6"}
 
 ## External crates
 session-keys       = { version = "^2", features = ["no-entrypoint"] }

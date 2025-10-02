@@ -161,9 +161,7 @@ export function ecs(framework: Framework) {
           direction: Direction.Up,
         },
       });
-      await framework.provider.sendAndConfirm(applySystem.transaction, [], {
-        skipPreflight: true,
-      });
+      await framework.provider.sendAndConfirm(applySystem.transaction);
 
       const position =
         await framework.exampleComponentPosition.account.position.fetch(
