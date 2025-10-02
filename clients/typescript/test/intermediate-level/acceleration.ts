@@ -1,6 +1,7 @@
 import {
   AddEntity,
   ApplySystem,
+  Component,
   DelegateComponent,
   DELEGATION_PROGRAM_ID,
   InitializeComponent,
@@ -43,6 +44,32 @@ export function acceleration(framework: Framework) {
       );
     });
 
+    it("Create accelerated bundled component position", async () => {
+      const createAcceleratedBundledComponentPosition =
+        await InitializeComponent({
+          payer: framework.provider.wallet.publicKey,
+          entity: framework.acceleratedEntityPda,
+          componentId: new Component(
+            framework.exampleBundle.programId,
+            "position",
+          ),
+        });
+
+      framework.componentPositionEntity1Pda =
+        createAcceleratedBundledComponentPosition.componentPda;
+
+      await framework.provider.sendAndConfirm(
+        createAcceleratedBundledComponentPosition.transaction,
+      );
+
+      const position = await framework.exampleBundle.account.position.fetch(
+        framework.componentPositionEntity1Pda,
+      );
+      expect(position.x.toNumber()).to.equal(0);
+      expect(position.y.toNumber()).to.equal(0);
+      expect(position.z.toNumber()).to.equal(0);
+    });
+
     it("Check component delegation to accelerator", async () => {
       const delegateComponent = await DelegateComponent({
         payer: framework.provider.wallet.publicKey,
@@ -57,6 +84,29 @@ export function acceleration(framework: Framework) {
           commitment: "confirmed",
         },
       );
+      const acc = await framework.provider.connection.getAccountInfo(
+        delegateComponent.componentPda,
+      );
+      expect(acc?.owner.toBase58()).to.equal(DELEGATION_PROGRAM_ID.toBase58());
+    });
+
+    it("Check bundled component position delegation to accelerator", async () => {
+      const delegateComponent = await DelegateComponent({
+        payer: framework.provider.wallet.publicKey,
+        entity: framework.acceleratedEntityPda,
+        componentId: new Component(
+          framework.exampleBundle.programId,
+          "position",
+        ),
+      });
+      await framework.provider.sendAndConfirm(
+        delegateComponent.transaction,
+        [],
+        {
+          commitment: "confirmed",
+        },
+      );
+
       const acc = await framework.provider.connection.getAccountInfo(
         delegateComponent.componentPda,
       );

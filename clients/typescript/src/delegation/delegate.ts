@@ -7,7 +7,7 @@ import {
   delegationMetadataPdaFromDelegatedAccount,
   delegationRecordPdaFromDelegatedAccount,
 } from "@magicblock-labs/ephemeral-rollups-sdk";
-import { FindComponentPda } from "../index";
+import { Component } from "../index";
 import {
   type PublicKey,
   Transaction,
@@ -17,6 +17,7 @@ import {
 export interface DelegateInstructionArgs {
   commitFrequencyMs: number;
   validator: beet.COption<PublicKey>;
+  pdaSeeds: Uint8Array[];
 }
 
 export const delegateStruct = new beet.FixableBeetArgsStruct<
@@ -28,6 +29,7 @@ export const delegateStruct = new beet.FixableBeetArgsStruct<
     ["instructionDiscriminator", beet.uniformFixedSizeArray(beet.u8, 8)],
     ["commitFrequencyMs", beet.u32],
     ["validator", beet.coption(beetSolana.publicKey)],
+    ["pdaSeeds", beet.array(beet.bytes)],
   ],
   "DelegateInstructionArgs",
 );
@@ -59,6 +61,7 @@ export const delegateInstructionDiscriminator = [
 
 export function createDelegateInstruction(
   accounts: DelegateInstructionAccounts,
+  pdaSeeds: Uint8Array[],
   commitFrequencyMs: number = 0,
   validator?: PublicKey,
   programId = accounts.ownerProgram,
@@ -67,6 +70,7 @@ export function createDelegateInstruction(
     instructionDiscriminator: delegateInstructionDiscriminator,
     commitFrequencyMs,
     validator: validator ?? null,
+    pdaSeeds,
   });
 
   const delegationRecord = delegationRecordPdaFromDelegatedAccount(
@@ -164,7 +168,7 @@ export async function DelegateComponent({
 }: {
   payer: PublicKey;
   entity: PublicKey;
-  componentId: PublicKey;
+  componentId: PublicKey | Component;
   seed?: string;
   buffer?: web3.PublicKey;
   delegationRecord?: web3.PublicKey;
@@ -176,18 +180,24 @@ export async function DelegateComponent({
   transaction: Transaction;
   componentPda: PublicKey;
 }> {
-  const componentPda = FindComponentPda({ componentId, entity, seed });
-  const delegateComponentIx = createDelegateInstruction({
-    payer,
-    entity,
-    account: componentPda,
-    ownerProgram: componentId,
-    buffer,
-    delegationRecord,
-    delegationMetadata,
-    delegationProgram,
-    systemProgram,
-  });
+  const component = Component.from(componentId);
+  let ownerProgram = component.program;
+  const pdaSeeds = component.seeds(seed);
+  const componentPda = component.pda(entity, seed);
+  const delegateComponentIx = createDelegateInstruction(
+    {
+      payer,
+      entity,
+      account: componentPda,
+      ownerProgram,
+      buffer,
+      delegationRecord,
+      delegationMetadata,
+      delegationProgram,
+      systemProgram,
+    },
+    [Buffer.from(pdaSeeds), entity.toBytes()],
+  );
 
   return {
     instruction: delegateComponentIx,

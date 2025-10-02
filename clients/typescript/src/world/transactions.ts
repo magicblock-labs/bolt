@@ -35,29 +35,6 @@ import {
 } from "../generated";
 import { type Idl, Program } from "@coral-xyz/anchor";
 import { System } from "../ecs";
-function isComponentId(value: PublicKey | Component): value is Component {
-  const anyVal: any = value as any;
-  return (
-    anyVal &&
-    typeof anyVal === "object" &&
-    typeof anyVal.name === "string" &&
-    anyVal.program &&
-    typeof anyVal.program.toBuffer === "function"
-  );
-}
-
-function ensurePublicKey(value: any): PublicKey {
-  if (value && typeof value === "object") {
-    if (value instanceof web3.PublicKey) return value as PublicKey;
-    if (typeof value.toBuffer === "function") return value as PublicKey;
-    if (typeof value.toBytes === "function")
-      return new web3.PublicKey(value.toBytes());
-    if (typeof value.toString === "function")
-      return new web3.PublicKey(value.toString());
-  }
-  if (typeof value === "string") return new web3.PublicKey(value);
-  throw new Error("Invalid PublicKey-like value");
-}
 
 export async function InitializeRegistry({
   payer,
@@ -379,32 +356,21 @@ export async function DestroyComponent({
   instruction: TransactionInstruction;
   transaction: Transaction;
 }> {
+  const component = Component.from(componentId);
   const program = new Program(
     worldIdl as Idl,
   ) as unknown as Program<WorldProgram>;
-  const componentName = isComponentId(componentId)
-    ? "global:" + componentId.name + "_destroy"
-    : "global:destroy";
-  const derivedSeed = isComponentId(componentId) ? componentId.name : seed;
-  componentId = ensurePublicKey(
-    isComponentId(componentId) ? componentId.program : componentId,
-  );
+  const componentName = component.getMethodDiscriminator("destroy");
+  const componentProgram = component.program;
   const componentProgramData = FindComponentProgramDataPda({
-    programId: componentId,
+    programId: componentProgram,
   });
-  const componentProgram = componentId;
-  const seedToUse = (componentIdObj: PublicKey | Component, s?: string) =>
-    componentIdObj instanceof Component ? componentIdObj.name : s;
-  const component = FindComponentPda({
-    componentId,
-    entity,
-    seed: derivedSeed,
-  });
+  const componentPda = component.pda(entity, seed);
   const instruction = await program.methods
     .destroyComponent(GetDiscriminator(componentName))
     .accounts({
       authority,
-      component,
+      component: componentPda,
       entity,
       componentProgram,
       componentProgramData,
@@ -447,18 +413,10 @@ export async function InitializeComponent({
   transaction: Transaction;
   componentPda: PublicKey;
 }> {
-  const componentName = isComponentId(componentId)
-    ? "global:" + componentId.name + "_initialize"
-    : "global:initialize";
-  const derivedSeed = isComponentId(componentId) ? componentId.name : seed;
-  componentId = ensurePublicKey(
-    isComponentId(componentId) ? componentId.program : componentId,
-  );
-  const componentPda = FindComponentPda({
-    componentId,
-    entity,
-    seed: derivedSeed,
-  });
+  const component = Component.from(componentId);
+  const componentName = component.getMethodDiscriminator("initialize");
+  const componentProgram = component.program;
+  const componentPda = component.pda(entity, seed);
   const program = new Program(
     worldIdl as Idl,
   ) as unknown as Program<WorldProgram>;
@@ -469,7 +427,7 @@ export async function InitializeComponent({
       payer,
       entity,
       data: componentPda,
-      componentProgram: componentId,
+      componentProgram: componentProgram,
       authority: authority ?? PROGRAM_ID,
       instructionSysvarAccount: SYSVAR_INSTRUCTIONS_PUBKEY,
     })
@@ -516,29 +474,15 @@ async function createApplySystemInstruction({
   let remainingAccounts: web3.AccountMeta[] = [];
   let components: { id: PublicKey; pda: PublicKey; name?: string }[] = [];
   for (const entity of entities) {
-    for (const component of entity.components) {
-      const compId: PublicKey = ensurePublicKey(
-        isComponentId(component.componentId)
-          ? component.componentId.program
-          : component.componentId,
-      );
-      const seedToUse: string | undefined = isComponentId(component.componentId)
-        ? component.componentId.name
-        : component.seed;
-      const nameToUse: string | undefined =
-        component.name ??
-        (isComponentId(component.componentId)
-          ? component.componentId.name
-          : undefined);
-      const componentPda = FindComponentPda({
-        componentId: compId,
-        entity: entity.entity,
-        seed: seedToUse,
-      });
+    for (const applyComponent of entity.components) {
+      const component = Component.from(applyComponent.componentId);
+      const id = component.program;
+      const name = component.name;
+      const pda = component.pda(entity.entity, applyComponent.seed);
       components.push({
-        id: compId,
-        pda: componentPda,
-        name: nameToUse,
+        id,
+        pda,
+        name,
       });
     }
   }

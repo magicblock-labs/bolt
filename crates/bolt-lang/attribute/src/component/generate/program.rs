@@ -16,7 +16,7 @@ pub fn generate_instructions(program_mod: &mut ItemMod, attributes: &crate::comp
         path: pascal_case_name.clone().into(),
     });
     if attributes.delegate {
-        inject_delegate_items(program_mod, &component_type, component_name);
+        inject_delegate_items(program_mod);
     }
     modify_component_module(program_mod, &component_type, component_name)
 }
@@ -62,7 +62,7 @@ fn modify_component_module(module: &mut ItemMod, component_type: &Type, componen
 }
 
 /// Injects delegate-related functions and structs directly into the program module.
-fn inject_delegate_items(module: &mut ItemMod, component_type: &Type, component_name: Option<&String>) {
+fn inject_delegate_items(module: &mut ItemMod) {
     let (
         delegate_fn,
         delegate_struct,
@@ -70,7 +70,7 @@ fn inject_delegate_items(module: &mut ItemMod, component_type: &Type, component_
         reinit_undelegate_struct,
         undelegate_fn,
         undelegate_struct,
-    ) = generate_delegate_set(component_type, component_name);
+    ) = generate_delegate_set();
 
     module.content.as_mut().map(|(brace, items)| {
         items.extend(
@@ -160,22 +160,12 @@ fn generate_destroy(component_type: &Type, component_name: Option<&String>) -> (
 }
 
 /// Generates the delegate/undelegate functions and related structs to inject in the component program.
-fn generate_delegate_set(
-    component_type: &Type,
-    component_name: Option<&String>,
-) -> (TokenStream2, TokenStream2, TokenStream2, TokenStream2, TokenStream2, TokenStream2) {
-    // Build PDA seeds, adding component name when bundled
-    let pda_seeds_tokens = if let Some(name) = component_name {
-        let name_bytes = LitByteStr::new(name.as_bytes(), component_type.span());
-        quote! { &[ #name_bytes, &ctx.accounts.entity.key().to_bytes() ] }
-    } else {
-        quote! { &[ <#component_type>::seed(), &ctx.accounts.entity.key().to_bytes() ] }
-    };
-
+fn generate_delegate_set() -> (TokenStream2, TokenStream2, TokenStream2, TokenStream2, TokenStream2, TokenStream2) {
     let delegate_fn = quote! {
         #[automatically_derived]
-        pub fn delegate(ctx: Context<DelegateInput>, commit_frequency_ms: u32, validator: Option<Pubkey>) -> Result<()> {
-            let pda_seeds: &[&[u8]] = #pda_seeds_tokens;
+        pub fn delegate(ctx: Context<DelegateInput>, commit_frequency_ms: u32, validator: Option<Pubkey>, pda_seeds: Vec<Vec<u8>>) -> Result<()> {
+            let pda_seeds = pda_seeds.iter().map(|seed| seed.as_slice()).collect::<Vec<_>>();
+            let pda_seeds: &[&[u8]] = pda_seeds.as_slice();
 
             let del_accounts = ::bolt_lang::DelegateAccounts {
                 payer: &ctx.accounts.payer,
