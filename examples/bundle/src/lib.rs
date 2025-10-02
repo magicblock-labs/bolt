@@ -2,7 +2,7 @@ use bolt_lang::*;
 
 declare_id!("CgfPBUeDUL3GT6b5AUDFE56KKgU4ycWA9ERjEWsfMZCj");
 
-#[bundle]
+#[bundle(delegate)]
 pub mod example_bundle {
 
 	#[component]
