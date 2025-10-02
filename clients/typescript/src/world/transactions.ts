@@ -360,14 +360,14 @@ export async function DestroyComponent({
   const program = new Program(
     worldIdl as Idl,
   ) as unknown as Program<WorldProgram>;
-  const componentName = component.getMethodDiscriminator("destroy");
+  const discriminator = component.getMethodDiscriminator("destroy");
   const componentProgram = component.program;
   const componentProgramData = FindComponentProgramDataPda({
     programId: componentProgram,
   });
   const componentPda = component.pda(entity, seed);
   const instruction = await program.methods
-    .destroyComponent(GetDiscriminator(componentName))
+    .destroyComponent(discriminator)
     .accounts({
       authority,
       component: componentPda,
@@ -414,7 +414,7 @@ export async function InitializeComponent({
   componentPda: PublicKey;
 }> {
   const component = Component.from(componentId);
-  const componentName = component.getMethodDiscriminator("initialize");
+  const discriminator = component.getMethodDiscriminator("initialize");
   const componentProgram = component.program;
   const componentPda = component.pda(entity, seed);
   const program = new Program(
@@ -422,7 +422,7 @@ export async function InitializeComponent({
   ) as unknown as Program<WorldProgram>;
 
   const instruction = await program.methods
-    .initializeComponent(GetDiscriminator(componentName))
+    .initializeComponent(discriminator)
     .accounts({
       payer,
       entity,
@@ -513,16 +513,12 @@ async function createApplySystemInstruction({
 
   // Build discriminators per component in order of remaining accounts pairs
   const discriminators: Buffer[] = components.map((component) =>
-    Buffer.from(
-      Component.from(component.id).getMethodDiscriminator(
-        session ? "update_with_session" : "update",
-      ),
+    Component.from(component.id).getMethodDiscriminator(
+      session ? "update_with_session" : "update",
     ),
   );
 
-  const systemDiscriminator = Buffer.from(
-    system.getMethodDiscriminator("bolt_execute"),
-  );
+  const systemDiscriminator = system.getMethodDiscriminator("bolt_execute");
 
   if (session)
     return program.methods

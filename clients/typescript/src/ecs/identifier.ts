@@ -1,4 +1,5 @@
 import { PublicKey } from "@solana/web3.js";
+import { GetDiscriminator } from "../index";
 
 export class Identifier {
   public program: PublicKey;
@@ -9,7 +10,9 @@ export class Identifier {
     this.name = name;
   }
 
-  getMethodDiscriminator(method: string): string {
-    return "global:" + (this.name ? this.name + "_" : "") + method;
+  getMethodDiscriminator(method: string): Buffer {
+    return GetDiscriminator(
+      "global:" + (this.name ? this.name + "_" : "") + method,
+    );
   }
 }

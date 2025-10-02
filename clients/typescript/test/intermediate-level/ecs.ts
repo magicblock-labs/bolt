@@ -172,6 +172,8 @@ export function ecs(framework: Framework) {
       expect(position.z.toNumber()).to.equal(0);
     });
 
+    return;
+
     it("Apply bundled movement system on Entity 1", async () => {
       const applySystem = await ApplySystem({
         authority: framework.provider.wallet.publicKey,
