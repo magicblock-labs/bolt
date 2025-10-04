@@ -7,9 +7,12 @@ use crate::component;
 use crate::system;
 use crate::common::generate_program;
 
-pub fn process(_attr: TokenStream, item: TokenStream) -> TokenStream {
+pub fn process(attr: TokenStream, item: TokenStream) -> TokenStream {
     let bundle_mod = parse_macro_input!(item as ItemMod);
     let mut program = generate_program(&bundle_mod.ident.to_string());
+    if attr.to_string().contains("delegate") {
+        program.attrs.insert(0, syn::parse_quote! { #[bolt_lang::delegate] });
+    }
     if let Some((_, items)) = bundle_mod.content {
         for item in items {
             match item {
