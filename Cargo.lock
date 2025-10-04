@@ -829,9 +829,7 @@ dependencies = [
 name = "bolt-attribute-bolt-delegate"
 version = "0.2.6"
 dependencies = [
- "proc-macro2",
- "quote",
- "syn 1.0.109",
+ "bolt-attribute",
 ]
 
 [[package]]
