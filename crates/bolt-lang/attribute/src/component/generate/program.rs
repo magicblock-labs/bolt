@@ -3,26 +3,37 @@ use quote::{quote, ToTokens};
 
 use proc_macro2::TokenStream as TokenStream2;
 use syn::{
-    parse_quote, spanned::Spanned, Attribute, Field, Fields, ItemMod, ItemStruct, Type, LitByteStr
+    parse_quote, spanned::Spanned, Attribute, Field, Fields, ItemMod, ItemStruct, LitByteStr, Type,
 };
 
 pub fn remove_component_attributes(attrs: &mut Vec<syn::Attribute>) {
     attrs.retain(|attr| !attr.path.is_ident("component"));
 }
 
-pub fn generate_instructions(program_mod: &mut ItemMod, attributes: &crate::component::Attributes, pascal_case_name: &syn::Ident, component_name: Option<&String>) {
+pub fn generate_instructions(
+    program_mod: &mut ItemMod,
+    attributes: &crate::component::Attributes,
+    pascal_case_name: &syn::Ident,
+    component_name: Option<&String>,
+) {
     let component_type = Type::Path(syn::TypePath {
         qself: None,
         path: pascal_case_name.clone().into(),
     });
     if attributes.delegate {
-        program_mod.attrs.insert(0, syn::parse_quote! { #[bolt_lang::delegate] });
+        program_mod
+            .attrs
+            .insert(0, syn::parse_quote! { #[bolt_lang::delegate] });
     }
     modify_component_module(program_mod, &component_type, component_name)
 }
 
 /// Modifies the component module and adds the necessary functions and structs.
-fn modify_component_module(module: &mut ItemMod, component_type: &Type, component_name: Option<&String>) {
+fn modify_component_module(
+    module: &mut ItemMod,
+    component_type: &Type,
+    component_name: Option<&String>,
+) {
     let (initialize_fn, initialize_struct) = generate_initialize(component_type, component_name);
     let (destroy_fn, destroy_struct) = generate_destroy(component_type, component_name);
     let (update_fn, update_with_session_fn, update_struct, update_with_session_struct) =
@@ -46,7 +57,7 @@ fn modify_component_module(module: &mut ItemMod, component_type: &Type, componen
         );
 
         let modified_items: Vec<syn::Item> = items
-            .into_iter()
+            .iter_mut()
             .map(|item| match item.clone() {
                 syn::Item::Struct(mut struct_item)
                     if struct_item.ident == "Apply" || struct_item.ident == "ApplyWithSession" =>
@@ -83,9 +94,15 @@ fn create_check_attribute() -> Attribute {
 }
 
 /// Generates the destroy function and struct.
-fn generate_destroy(component_type: &Type, component_name: Option<&String>) -> (TokenStream2, TokenStream2) {
+fn generate_destroy(
+    component_type: &Type,
+    component_name: Option<&String>,
+) -> (TokenStream2, TokenStream2) {
     let structure_name = if let Some(name) = component_name {
-        syn::Ident::new(&format!("{}Destroy", name.to_pascal_case()), component_type.span())
+        syn::Ident::new(
+            &format!("{}Destroy", name.to_pascal_case()),
+            component_type.span(),
+        )
     } else {
         syn::Ident::new("Destroy", component_type.span())
     };
@@ -131,9 +148,15 @@ fn generate_destroy(component_type: &Type, component_name: Option<&String>) -> (
 }
 
 /// Generates the initialize function and struct.
-fn generate_initialize(component_type: &Type, component_name: Option<&String>) -> (TokenStream2, TokenStream2) {
+fn generate_initialize(
+    component_type: &Type,
+    component_name: Option<&String>,
+) -> (TokenStream2, TokenStream2) {
     let structure_name = if let Some(name) = component_name {
-        syn::Ident::new(&format!("{}Initialize", name.to_pascal_case()), component_type.span())
+        syn::Ident::new(
+            &format!("{}Initialize", name.to_pascal_case()),
+            component_type.span(),
+        )
     } else {
         syn::Ident::new("Initialize", component_type.span())
     };
@@ -187,12 +210,18 @@ fn generate_update(
     component_name: Option<&String>,
 ) -> (TokenStream2, TokenStream2, TokenStream2, TokenStream2) {
     let update_structure_name = if let Some(name) = component_name {
-        syn::Ident::new(&format!("{}Update", name.to_pascal_case()), component_type.span())
+        syn::Ident::new(
+            &format!("{}Update", name.to_pascal_case()),
+            component_type.span(),
+        )
     } else {
         syn::Ident::new("Update", component_type.span())
     };
     let update_with_session_structure_name = if let Some(name) = component_name {
-        syn::Ident::new(&format!("{}UpdateWithSession", name.to_pascal_case()), component_type.span())
+        syn::Ident::new(
+            &format!("{}UpdateWithSession", name.to_pascal_case()),
+            component_type.span(),
+        )
     } else {
         syn::Ident::new("UpdateWithSession", component_type.span())
     };
@@ -202,7 +231,10 @@ fn generate_update(
         syn::Ident::new("update", component_type.span())
     };
     let fn_update_with_session = if let Some(name) = &component_name {
-        syn::Ident::new(&format!("{}_update_with_session", name), component_type.span())
+        syn::Ident::new(
+            &format!("{}_update_with_session", name),
+            component_type.span(),
+        )
     } else {
         syn::Ident::new("update_with_session", component_type.span())
     };

@@ -258,14 +258,15 @@ pub mod world {
         Ok(())
     }
 
-    pub fn initialize_component(ctx: Context<InitializeComponent>, discriminator: Vec<u8>) -> Result<()> {
+    pub fn initialize_component(
+        ctx: Context<InitializeComponent>,
+        discriminator: Vec<u8>,
+    ) -> Result<()> {
         if !ctx.accounts.authority.is_signer && ctx.accounts.authority.key != &ID {
             return Err(WorldError::InvalidAuthority.into());
         }
         // Pure Solana SDK logic for CPI to bolt_component::initialize
-        use anchor_lang::solana_program::{
-            instruction::{AccountMeta, Instruction},
-        };
+        use anchor_lang::solana_program::instruction::{AccountMeta, Instruction};
 
         // Prepare the accounts for the CPI
         let accounts = vec![
@@ -276,7 +277,6 @@ pub mod world {
             AccountMeta::new_readonly(ctx.accounts.authority.key(), false),
             AccountMeta::new_readonly(ctx.accounts.system_program.key(), false),
         ];
-
 
         let data = discriminator.to_vec();
 
@@ -304,9 +304,7 @@ pub mod world {
 
     pub fn destroy_component(ctx: Context<DestroyComponent>, discriminator: Vec<u8>) -> Result<()> {
         // Pure Solana SDK logic for CPI to bolt_component::destroy
-        use anchor_lang::solana_program::{
-            instruction::{AccountMeta, Instruction},
-        };
+        use anchor_lang::solana_program::instruction::{AccountMeta, Instruction};
 
         // Prepare the accounts for the CPI (must match bolt_component::Destroy)
         let accounts = vec![
@@ -358,7 +356,11 @@ pub mod world {
             args,
             ctx.remaining_accounts.to_vec(),
         )?;
-        require_eq!(pairs.len(), discriminators.len(), WorldError::InvalidSystemOutput);
+        require_eq!(
+            pairs.len(),
+            discriminators.len(),
+            WorldError::InvalidSystemOutput
+        );
 
         use anchor_lang::solana_program::instruction::{AccountMeta, Instruction};
         use anchor_lang::solana_program::program::invoke_signed as invoke_signed_program;
@@ -427,7 +429,11 @@ pub mod world {
             args,
             ctx.remaining_accounts.to_vec(),
         )?;
-        require_eq!(pairs.len(), discriminators.len(), WorldError::InvalidSystemOutput);
+        require_eq!(
+            pairs.len(),
+            discriminators.len(),
+            WorldError::InvalidSystemOutput
+        );
 
         use anchor_lang::solana_program::instruction::{AccountMeta, Instruction};
         use anchor_lang::solana_program::program::invoke_signed as invoke_signed_program;
@@ -536,10 +542,18 @@ fn apply_impl<'info>(
     use anchor_lang::solana_program::program::invoke;
 
     let mut accounts = vec![AccountMeta::new_readonly(authority.key(), false)];
-    accounts.extend(remaining_accounts.iter().map(|account| AccountMeta::new_readonly(account.key(), false)));
+    accounts.extend(
+        remaining_accounts
+            .iter()
+            .map(|account| AccountMeta::new_readonly(account.key(), false)),
+    );
 
     let mut account_infos = vec![authority.to_account_info()];
-    account_infos.extend(remaining_accounts.iter().map(|account| account.to_account_info()));
+    account_infos.extend(
+        remaining_accounts
+            .iter()
+            .map(|account| account.to_account_info()),
+    );
 
     let ix = Instruction {
         program_id: bolt_system.key(),
@@ -547,10 +561,7 @@ fn apply_impl<'info>(
         data,
     };
 
-    invoke(
-        &ix,
-        &account_infos
-    )?;
+    invoke(&ix, &account_infos)?;
 
     // Extract return data using Solana SDK
     use anchor_lang::solana_program::program::get_return_data;
@@ -672,27 +683,6 @@ pub struct InitializeComponent<'info> {
     pub system_program: Program<'info, System>,
 }
 
-<<<<<<< HEAD
-impl<'info> InitializeComponent<'info> {
-    pub fn build(
-        &self,
-    ) -> CpiContext<'_, '_, '_, 'info, bolt_component::cpi::accounts::Initialize<'info>> {
-        let cpi_program = self.component_program.to_account_info();
-
-        let cpi_accounts = bolt_component::cpi::accounts::Initialize {
-            payer: self.payer.to_account_info(),
-            data: self.data.to_account_info(),
-            entity: self.entity.to_account_info(),
-            authority: self.authority.to_account_info(),
-            instruction_sysvar_account: self.instruction_sysvar_account.to_account_info(),
-            system_program: self.system_program.to_account_info(),
-        };
-        CpiContext::new(cpi_program, cpi_accounts)
-    }
-}
-
-=======
->>>>>>> 540630b (:sparkles: Client-side TS & C# code for ECS bundle)
 #[derive(Accounts)]
 pub struct DestroyComponent<'info> {
     #[account(mut)]
@@ -714,28 +704,6 @@ pub struct DestroyComponent<'info> {
     pub instruction_sysvar_account: UncheckedAccount<'info>,
     pub system_program: Program<'info, System>,
 }
-
-<<<<<<< HEAD
-impl<'info> DestroyComponent<'info> {
-    pub fn build(
-        &self,
-    ) -> CpiContext<'_, '_, '_, 'info, bolt_component::cpi::accounts::Destroy<'info>> {
-        let cpi_program = self.component_program.to_account_info();
-
-        let cpi_accounts = bolt_component::cpi::accounts::Destroy {
-            authority: self.authority.to_account_info(),
-            receiver: self.receiver.to_account_info(),
-            entity: self.entity.to_account_info(),
-            component: self.component.to_account_info(),
-            component_program_data: self.component_program_data.to_account_info(),
-            instruction_sysvar_account: self.instruction_sysvar_account.to_account_info(),
-            system_program: self.system_program.to_account_info(),
-        };
-        CpiContext::new(cpi_program, cpi_accounts)
-    }
-}
-=======
->>>>>>> ff88294 (:recycle: Removing bolt-component and bolt-system)
 
 #[account]
 #[derive(InitSpace, Default, Copy)]
@@ -841,46 +809,3 @@ impl SystemWhitelist {
         8 + Registry::INIT_SPACE
     }
 }
-<<<<<<< HEAD
-
-/// Builds the context for updating a component.
-pub fn build_update_context<'info>(
-    component_program: AccountInfo<'info>,
-    bolt_component: AccountInfo<'info>,
-    authority: Signer<'info>,
-    instruction_sysvar_account: UncheckedAccount<'info>,
-) -> CpiContext<'info, 'info, 'info, 'info, bolt_component::cpi::accounts::Update<'info>> {
-    let authority = authority.to_account_info();
-    let instruction_sysvar_account = instruction_sysvar_account.to_account_info();
-    let cpi_program = component_program;
-    bolt_component::cpi::accounts::Update {
-        bolt_component,
-        authority,
-        instruction_sysvar_account,
-    }
-    .build_cpi_context(cpi_program)
-}
-
-/// Builds the context for updating a component.
-pub fn build_update_context_with_session<'info>(
-    component_program: AccountInfo<'info>,
-    bolt_component: AccountInfo<'info>,
-    authority: Signer<'info>,
-    instruction_sysvar_account: UncheckedAccount<'info>,
-    session_token: UncheckedAccount<'info>,
-) -> CpiContext<'info, 'info, 'info, 'info, bolt_component::cpi::accounts::UpdateWithSession<'info>>
-{
-    let authority = authority.to_account_info();
-    let instruction_sysvar_account = instruction_sysvar_account.to_account_info();
-    let cpi_program = component_program;
-    let session_token = session_token.to_account_info();
-    bolt_component::cpi::accounts::UpdateWithSession {
-        bolt_component,
-        authority,
-        instruction_sysvar_account,
-        session_token,
-    }
-    .build_cpi_context(cpi_program)
-}
-=======
->>>>>>> ff88294 (:recycle: Removing bolt-component and bolt-system)

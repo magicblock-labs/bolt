@@ -1,11 +1,11 @@
+use heck::ToPascalCase;
 use proc_macro::TokenStream;
 use proc_macro2::{Ident, Span};
 use quote::{quote, ToTokens, TokenStreamExt};
 use syn::{
-    parse_macro_input, parse_quote, visit_mut::VisitMut, Expr, FnArg, GenericArgument, Item, ItemFn,
-    ItemMod, ItemStruct, PathArguments, ReturnType, Stmt, Type, TypePath,
+    parse_macro_input, parse_quote, visit_mut::VisitMut, Expr, FnArg, GenericArgument, Item,
+    ItemFn, ItemMod, ItemStruct, PathArguments, ReturnType, Stmt, Type, TypePath,
 };
-use heck::ToPascalCase;
 
 #[derive(Default)]
 struct SystemTransform;
@@ -16,7 +16,12 @@ struct Extractor {
     field_count: Option<usize>,
 }
 
-fn generate_bolt_execute_wrapper(fn_ident: Ident, callee_ident: Ident, components_ident: Ident, bumps_ident: Ident) -> Item {
+fn generate_bolt_execute_wrapper(
+    fn_ident: Ident,
+    callee_ident: Ident,
+    components_ident: Ident,
+    bumps_ident: Ident,
+) -> Item {
     parse_quote! {
         pub fn #fn_ident<'a, 'b, 'info>(ctx: Context<'a, 'b, 'info, 'info, VariadicBoltComponents<'info>>, args: Vec<u8>) -> Result<Vec<Vec<u8>>> {
             let mut components = #components_ident::try_from(&ctx)?;
@@ -38,7 +43,9 @@ pub fn process(_attr: TokenStream, item: TokenStream) -> TokenStream {
         if let Some((_, ref mut items)) = ast.content {
             items.insert(0, syn::Item::Use(use_super));
             // Ensure a single VariadicBoltComponents per program for standalone #[system]
-            let has_variadic = items.iter().any(|it| matches!(it, syn::Item::Struct(s) if s.ident == "VariadicBoltComponents"));
+            let has_variadic = items.iter().any(
+                |it| matches!(it, syn::Item::Struct(s) if s.ident == "VariadicBoltComponents"),
+            );
             if !has_variadic {
                 let variadic_struct: Item = parse_quote! {
                     #[derive(Accounts)]
@@ -138,7 +145,9 @@ pub fn transform_module_for_bundle(module: &mut ItemMod, name_suffix: Option<&st
 
         // Rename inner execute to a unique name per system to avoid collisions
         let new_execute_ident = Ident::new(&format!("execute_{}", suffix), Span::call_site());
-        struct ExecRename { new_ident: Ident }
+        struct ExecRename {
+            new_ident: Ident,
+        }
         impl VisitMut for ExecRename {
             fn visit_item_fn_mut(&mut self, i: &mut ItemFn) {
                 if i.sig.ident == "execute" {
@@ -148,18 +157,28 @@ pub fn transform_module_for_bundle(module: &mut ItemMod, name_suffix: Option<&st
             }
         }
 
-        let mut renamer = SystemRename { new_components: new_components_ident.clone(), new_bumps: new_bumps_ident.clone() };
+        let mut renamer = SystemRename {
+            new_components: new_components_ident.clone(),
+            new_bumps: new_bumps_ident.clone(),
+        };
         for item in items.iter_mut() {
             renamer.visit_item_mut(item);
         }
 
-        let mut exec_renamer = ExecRename { new_ident: new_execute_ident.clone() };
+        let mut exec_renamer = ExecRename {
+            new_ident: new_execute_ident.clone(),
+        };
         for item in items.iter_mut() {
             exec_renamer.visit_item_mut(item);
         }
 
         let fn_ident = Ident::new(&format!("{}_bolt_execute", suffix), Span::call_site());
-        let wrapper_fn = generate_bolt_execute_wrapper(fn_ident, new_execute_ident, new_components_ident, new_bumps_ident);
+        let wrapper_fn = generate_bolt_execute_wrapper(
+            fn_ident,
+            new_execute_ident,
+            new_components_ident,
+            new_bumps_ident,
+        );
         items.push(wrapper_fn);
     } else {
         let wrapper_fn = generate_bolt_execute_wrapper(

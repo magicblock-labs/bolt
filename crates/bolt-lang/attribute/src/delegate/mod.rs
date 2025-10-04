@@ -1,7 +1,7 @@
 use proc_macro::TokenStream;
+use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, ToTokens};
 use syn::{parse_macro_input, ItemMod};
-use proc_macro2::TokenStream as TokenStream2;
 
 pub fn process(_attr: TokenStream, item: TokenStream) -> TokenStream {
     let mut ast = parse_macro_input!(item as syn::ItemMod);
@@ -39,7 +39,14 @@ fn inject_delegate_items(module: &mut ItemMod) {
 }
 
 /// Generates the delegate/undelegate functions and related structs to inject in the component program.
-fn generate_delegate_set() -> (TokenStream2, TokenStream2, TokenStream2, TokenStream2, TokenStream2, TokenStream2) {
+fn generate_delegate_set() -> (
+    TokenStream2,
+    TokenStream2,
+    TokenStream2,
+    TokenStream2,
+    TokenStream2,
+    TokenStream2,
+) {
     let delegate_fn = quote! {
         #[automatically_derived]
         pub fn delegate(ctx: Context<DelegateInput>, commit_frequency_ms: u32, validator: Option<Pubkey>, pda_seeds: Vec<Vec<u8>>) -> Result<()> {

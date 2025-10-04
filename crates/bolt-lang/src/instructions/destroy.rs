@@ -2,8 +2,18 @@ use anchor_lang::prelude::*;
 
 use crate::BoltError;
 
-pub fn destroy<'info>(program_id: &Pubkey, cpi_auth: &AccountInfo<'info>, authority: &AccountInfo<'info>, component_program_data: &AccountInfo<'info>, component_authority: Pubkey) -> Result<()> {
-    let pda = Pubkey::find_program_address(&[program_id.as_ref()], &crate::prelude::solana_program::bpf_loader_upgradeable::id()).0;
+pub fn destroy<'info>(
+    program_id: &Pubkey,
+    cpi_auth: &AccountInfo<'info>,
+    authority: &AccountInfo<'info>,
+    component_program_data: &AccountInfo<'info>,
+    component_authority: Pubkey,
+) -> Result<()> {
+    let pda = Pubkey::find_program_address(
+        &[program_id.as_ref()],
+        &crate::prelude::solana_program::bpf_loader_upgradeable::id(),
+    )
+    .0;
 
     if !pda.eq(component_program_data.key) {
         return Err(BoltError::InvalidAuthority.into());
@@ -19,7 +29,7 @@ pub fn destroy<'info>(program_id: &Pubkey, cpi_auth: &AccountInfo<'info>, author
         Ok(upgrade_authority_address)
     } else {
         Err(anchor_lang::error::Error::from(BoltError::InvalidAuthority))
-    }?.ok_or_else(|| BoltError::InvalidAuthority)?;
+    }?.ok_or(BoltError::InvalidAuthority)?;
 
     if authority.key != &component_authority && authority.key != &upgrade_authority {
         return Err(BoltError::InvalidAuthority.into());

@@ -12,18 +12,23 @@ use syn::{Lit, Meta, MetaList, MetaNameValue, NestedMeta};
 
 impl From<Vec<syn::Attribute>> for Attributes {
     fn from(attrs: Vec<syn::Attribute>) -> Self {
-        attrs.iter().find(|attr| attr.path.is_ident("component")).map(|attr| {
-            Self::from(attr.parse_meta().unwrap())
-        }).unwrap_or_default()
+        attrs
+            .iter()
+            .find(|attr| attr.path.is_ident("component"))
+            .map(|attr| Self::from(attr.parse_meta().unwrap()))
+            .unwrap_or_default()
     }
 }
 
 impl From<TokenStream> for Attributes {
     fn from(attr: TokenStream) -> Self {
-        attr.is_empty().not().then(|| {
-            let attr_meta: Meta = syn::parse(attr.into()).expect("Invalid component attribute");
-            Self::from(attr_meta)
-        }).unwrap_or_default()
+        attr.is_empty()
+            .not()
+            .then(|| {
+                let attr_meta: Meta = syn::parse(attr).expect("Invalid component attribute");
+                Self::from(attr_meta)
+            })
+            .unwrap_or_default()
     }
 }
 
@@ -41,9 +46,13 @@ impl From<syn::Meta> for Attributes {
                 find_component_id_in_list(meta_list)
             }
         };
-    
+
         let component_id = component_id_value.unwrap_or_else(|| "".to_string());
-        Self { is_component, component_id, delegate }
+        Self {
+            is_component,
+            component_id,
+            delegate,
+        }
     }
 }
 

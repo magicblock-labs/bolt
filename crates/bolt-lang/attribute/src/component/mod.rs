@@ -1,5 +1,5 @@
-mod generate;
 mod attributes;
+mod generate;
 
 use proc_macro::TokenStream;
 use quote::quote;
