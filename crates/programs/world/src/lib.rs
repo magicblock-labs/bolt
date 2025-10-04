@@ -258,14 +258,15 @@ pub mod world {
         Ok(())
     }
 
-    pub fn initialize_component(ctx: Context<InitializeComponent>, discriminator: Vec<u8>) -> Result<()> {
+    pub fn initialize_component(
+        ctx: Context<InitializeComponent>,
+        discriminator: Vec<u8>,
+    ) -> Result<()> {
         if !ctx.accounts.authority.is_signer && ctx.accounts.authority.key != &ID {
             return Err(WorldError::InvalidAuthority.into());
         }
         // Pure Solana SDK logic for CPI to bolt_component::initialize
-        use anchor_lang::solana_program::{
-            instruction::{AccountMeta, Instruction},
-        };
+        use anchor_lang::solana_program::instruction::{AccountMeta, Instruction};
 
         // Prepare the accounts for the CPI
         let accounts = vec![
@@ -276,7 +277,6 @@ pub mod world {
             AccountMeta::new_readonly(ctx.accounts.authority.key(), false),
             AccountMeta::new_readonly(ctx.accounts.system_program.key(), false),
         ];
-
 
         let data = discriminator.to_vec();
 
@@ -304,9 +304,7 @@ pub mod world {
 
     pub fn destroy_component(ctx: Context<DestroyComponent>, discriminator: Vec<u8>) -> Result<()> {
         // Pure Solana SDK logic for CPI to bolt_component::destroy
-        use anchor_lang::solana_program::{
-            instruction::{AccountMeta, Instruction},
-        };
+        use anchor_lang::solana_program::instruction::{AccountMeta, Instruction};
 
         // Prepare the accounts for the CPI (must match bolt_component::Destroy)
         let accounts = vec![
@@ -358,7 +356,11 @@ pub mod world {
             args,
             ctx.remaining_accounts.to_vec(),
         )?;
-        require_eq!(pairs.len(), discriminators.len(), WorldError::InvalidSystemOutput);
+        require_eq!(
+            pairs.len(),
+            discriminators.len(),
+            WorldError::InvalidSystemOutput
+        );
 
         use anchor_lang::solana_program::instruction::{AccountMeta, Instruction};
         use anchor_lang::solana_program::program::invoke_signed as invoke_signed_program;
@@ -427,7 +429,11 @@ pub mod world {
             args,
             ctx.remaining_accounts.to_vec(),
         )?;
-        require_eq!(pairs.len(), discriminators.len(), WorldError::InvalidSystemOutput);
+        require_eq!(
+            pairs.len(),
+            discriminators.len(),
+            WorldError::InvalidSystemOutput
+        );
 
         use anchor_lang::solana_program::instruction::{AccountMeta, Instruction};
         use anchor_lang::solana_program::program::invoke_signed as invoke_signed_program;
@@ -536,10 +542,18 @@ fn apply_impl<'info>(
     use anchor_lang::solana_program::program::invoke;
 
     let mut accounts = vec![AccountMeta::new_readonly(authority.key(), false)];
-    accounts.extend(remaining_accounts.iter().map(|account| AccountMeta::new_readonly(account.key(), false)));
+    accounts.extend(
+        remaining_accounts
+            .iter()
+            .map(|account| AccountMeta::new_readonly(account.key(), false)),
+    );
 
     let mut account_infos = vec![authority.to_account_info()];
-    account_infos.extend(remaining_accounts.iter().map(|account| account.to_account_info()));
+    account_infos.extend(
+        remaining_accounts
+            .iter()
+            .map(|account| account.to_account_info()),
+    );
 
     let ix = Instruction {
         program_id: bolt_system.key(),
@@ -547,10 +561,7 @@ fn apply_impl<'info>(
         data,
     };
 
-    invoke(
-        &ix,
-        &account_infos
-    )?;
+    invoke(&ix, &account_infos)?;
 
     // Extract return data using Solana SDK
     use anchor_lang::solana_program::program::get_return_data;
@@ -693,7 +704,6 @@ pub struct DestroyComponent<'info> {
     pub cpi_auth: UncheckedAccount<'info>,
     pub system_program: Program<'info, System>,
 }
-
 
 #[account]
 #[derive(InitSpace, Default, Copy)]

@@ -1,8 +1,8 @@
 mod commands;
 mod ephemeral_validator;
 
-mod component;
 mod bundle;
+mod component;
 mod instructions;
 mod rust_template;
 mod system;
@@ -11,13 +11,13 @@ mod workspace;
 
 pub use ephemeral_validator::EphemeralValidator;
 
+use crate::bundle::new_bundle;
 use crate::component::new_component;
 use crate::instructions::{
     approve_system, authorize, create_registry, create_world, deauthorize, remove_system,
 };
 use crate::rust_template::{create_component, create_system};
 use crate::system::new_system;
-use crate::bundle::new_bundle;
 use anchor_cli::config;
 use anchor_cli::config::{
     BootstrapMode, Config, ConfigOverride, GenesisEntry, ProgramArch, ProgramDeployment,

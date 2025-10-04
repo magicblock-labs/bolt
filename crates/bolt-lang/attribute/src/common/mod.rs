@@ -17,13 +17,16 @@ pub fn inject_program(module: &mut syn::ItemMod) {
     module.attrs.push(syn::parse_quote! { #[program] });
     module.content.as_mut().map(|(brace, items)| {
         items.insert(0, syn::Item::Use(syn::parse_quote! { use super::*; }));
-        items.insert(1, syn::Item::Struct(syn::parse_quote! {
-            #[derive(Accounts)]
-            pub struct VariadicBoltComponents<'info> {
-                #[account()]
-                pub authority: AccountInfo<'info>,
-            }
-        }));
+        items.insert(
+            1,
+            syn::Item::Struct(syn::parse_quote! {
+                #[derive(Accounts)]
+                pub struct VariadicBoltComponents<'info> {
+                    #[account()]
+                    pub authority: AccountInfo<'info>,
+                }
+            }),
+        );
         (brace, items.clone())
     });
 }

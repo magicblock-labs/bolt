@@ -113,8 +113,6 @@ export function acceleration(framework: Framework) {
       expect(acc?.owner.toBase58()).to.equal(DELEGATION_PROGRAM_ID.toBase58());
     });
 
-    return;
-
     it("Apply Simple Movement System (Up) on Entity 1 on Accelerator 10 times", async () => {
       if (process.env.GITHUB_ACTIONS === "true") {
         // Skip this test if running in GitHub Actions

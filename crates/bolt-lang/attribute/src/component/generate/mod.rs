@@ -1,8 +1,8 @@
 mod program;
 
-use syn::{DeriveInput, ItemMod};
 use quote::quote;
 use syn::{parse_quote, Attribute};
+use syn::{DeriveInput, ItemMod};
 
 pub use program::*;
 
@@ -14,12 +14,20 @@ pub fn enrich_type(type_: &mut DeriveInput) {
     bolt_utils::add_bolt_metadata(type_);
 }
 
-pub fn generate_implementation(program: &mut ItemMod, attributes: &super::Attributes, input: &DeriveInput) {
-    generate_new_fn(program, &input);
-    generate_component_traits(program, attributes, &input);
+pub fn generate_implementation(
+    program: &mut ItemMod,
+    attributes: &super::Attributes,
+    input: &DeriveInput,
+) {
+    generate_new_fn(program, input);
+    generate_component_traits(program, attributes, input);
 }
 
-fn generate_component_traits(program: &mut ItemMod, attributes: &super::Attributes, input: &DeriveInput) {
+fn generate_component_traits(
+    program: &mut ItemMod,
+    attributes: &super::Attributes,
+    input: &DeriveInput,
+) {
     let name = &input.ident;
     let component_id_value = &attributes.component_id;
     let implementation = quote! {

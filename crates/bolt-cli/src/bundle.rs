@@ -1,7 +1,4 @@
-use crate::{
-    rust_template::create_bundle,
-    workspace::with_workspace,
-};
+use crate::{rust_template::create_bundle, workspace::with_workspace};
 use anchor_cli::config::{ConfigOverride, ProgramDeployment};
 use anyhow::{anyhow, Result};
 use std::fs;

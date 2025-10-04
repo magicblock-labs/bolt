@@ -13,13 +13,13 @@ pub mod instructions;
 pub use session_keys;
 
 pub use bolt_attribute_bolt_arguments::arguments;
+pub use bolt_attribute_bolt_bundle::bundle;
 pub use bolt_attribute_bolt_component::component;
 pub use bolt_attribute_bolt_component_deserialize::component_deserialize;
 pub use bolt_attribute_bolt_component_id::component_id;
 pub use bolt_attribute_bolt_delegate::delegate;
 pub use bolt_attribute_bolt_extra_accounts::extra_accounts;
 pub use bolt_attribute_bolt_extra_accounts::pubkey;
-pub use bolt_attribute_bolt_bundle::bundle;
 pub use bolt_attribute_bolt_system::system;
 pub use bolt_attribute_bolt_system_input::system_input;
 
