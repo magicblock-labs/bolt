@@ -513,7 +513,7 @@ async function createApplySystemInstruction({
 
   // Build discriminators per component in order of remaining accounts pairs
   const discriminators: Buffer[] = components.map((component) =>
-    Component.from(component.id).getMethodDiscriminator(
+    new Component(component.id, component.name).getMethodDiscriminator(
       session ? "update_with_session" : "update",
     ),
   );
