@@ -81,7 +81,7 @@ namespace Solana.Unity.Bolt.Test
             });
         }
 
-        public async Task<string> SendAndConfirmInstruction(IRpcClient client, TransactionInstruction instruction, List<Account>? signers = null, PublicKey? payer = null)
+        public async Task<string> SendAndConfirmInstruction(IRpcClient client, TransactionInstruction instruction, List<Account>? signers = null, PublicKey? payer = null, bool mayFail = false)
         {
             if (signers == null) {
                 signers = new List<Account> { Wallet.Account };
@@ -96,23 +96,31 @@ namespace Solana.Unity.Bolt.Test
                 .AddInstruction(instruction)
                 .Build(signers);
 
-            var signature = await client.SendTransactionAsync(transaction, true, Commitment.Processed);
+            var signature = await client.SendTransactionAsync(transaction, false, Commitment.Processed);
             var confirmed = await client.ConfirmTransaction(signature.Result, Commitment.Processed);
             if (signature.WasSuccessful && confirmed)
             {
                 return signature.Result;
             }
-            string errorMessage = signature.Reason.ToString();
-            errorMessage += "\n" + signature.RawRpcResponse;
-            if (signature.ErrorData != null) {
-                errorMessage += "\n" + string.Join("\n", signature.ErrorData.Logs);
+
+            if (mayFail) {
+                return null;
+            } else {
+                string errorMessage = signature.Reason.ToString();
+                errorMessage += "\n" + signature.RawRpcResponse;
+                if (signature.ErrorData != null) {
+                    errorMessage += "\n" + string.Join("\n", signature.ErrorData.Logs);
+                }
+
+                Console.WriteLine(errorMessage);
+                Environment.Exit(1);
+                return null;
             }
-            throw new Exception(errorMessage);
         }
 
-        public async Task<string> SendAndConfirmInstruction(TransactionInstruction instruction, List<Account>? signers = null, PublicKey? payer = null)
+        public async Task<string> SendAndConfirmInstruction(TransactionInstruction instruction, List<Account>? signers = null, PublicKey? payer = null, bool mayFail = false)
         {
-            return await SendAndConfirmInstruction(Client, instruction, signers, payer);
+            return await SendAndConfirmInstruction(Client, instruction, signers, payer, mayFail);
         }
 
         public async Task<AccountInfo> GetAccountInfo(IRpcClient client, PublicKey publicKey)
