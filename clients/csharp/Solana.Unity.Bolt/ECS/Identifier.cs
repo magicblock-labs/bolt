@@ -25,5 +25,15 @@ namespace Bolt {
             this.Program = program;
             this.Name = name;
         }
+
+        /// <summary>
+        /// Build the 8-byte Anchor discriminator for a given method, mirroring TS Identifier.getMethodDiscriminator.
+        /// Format: "global:" + (name? name + "_" : "") + method
+        /// </summary>
+        public byte[] GetMethodDiscriminator(string method)
+        {
+            var prefix = string.IsNullOrEmpty(Name) ? "" : Name + "_";
+            return World.GetDiscriminator("global:" + prefix + method);
+        }
     }
 }
