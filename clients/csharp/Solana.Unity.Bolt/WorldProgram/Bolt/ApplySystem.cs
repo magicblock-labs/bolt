@@ -78,25 +78,25 @@ namespace Bolt {
                 for (int i = 0; i < components.Length; i++)
                 {
                     var comp = components[i];
-                    var seed = comp.Name; // bundled component uses name as seed
-                    var pda = WorldProgram.FindComponentPda(comp.Program, entity, seed);
+                    var providedSeed = (seeds != null && i < seeds.Length) ? seeds[i] : "";
+                    var pda = WorldProgram.FindComponentPda(comp.Program, entity, comp.Seeds(providedSeed));
                     remainingAccounts.Add(Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(comp.Program, false));
                     remainingAccounts.Add(Solana.Unity.Rpc.Models.AccountMeta.Writable(pda, false));
 
-                    var discrName = "global:" + (comp.Name != null ? comp.Name + "_" : "") + (sessionToken != null ? "update_with_session" : "update");
-                    discriminators.Add(GetDiscriminator(discrName));
+                    var compDiscriminator = comp.GetMethodDiscriminator(sessionToken != null ? "update_with_session" : "update");
+                    discriminators.Add(compDiscriminator);
                 }
             }
 
             // Optional delimiter and extra accounts
-            if ((extraAccounts != null && extraAccounts.Length > 0) || remainingAccounts.Count > 0)
+            if (extraAccounts != null && extraAccounts.Length > 0)
             {
                 remainingAccounts.Add(Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(new PublicKey(WorldProgram.ID), false));
                 if (extraAccounts != null)
                     remainingAccounts.AddRange(extraAccounts);
             }
 
-            var systemDiscriminator = GetDiscriminator("global:" + (systemId.Name != null ? $"bolt_execute_{systemId.Name}" : "bolt_execute"));
+            var systemDiscriminator = systemId.GetMethodDiscriminator("bolt_execute");
 
             Solana.Unity.Rpc.Models.TransactionInstruction instruction;
             if (sessionToken != null)
