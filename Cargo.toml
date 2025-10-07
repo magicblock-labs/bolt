@@ -62,7 +62,7 @@ ephemeral-rollups-sdk = "^0"
 bincode = "^1"
 which = "^7"
 tokio = { version = "^1", features = ["full"] }
-sysinfo = "^0"
+sysinfo = "=0.36.1"
 bytemuck_derive = "^1"
 
 [profile.release]

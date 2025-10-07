@@ -10,6 +10,7 @@ clients/typescript/node_modules
 clients/typescript/yarn-error.log
 .yarn
 **/test-ledger
+**/test-ledger-magicblock
 
 # Examples
 tests/examples/.anchor
