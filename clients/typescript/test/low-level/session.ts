@@ -89,11 +89,7 @@ export function session(framework) {
         );
 
       const instruction = await framework.worldProgram.methods
-        .applyWithSession(
-          GetDiscriminator("global:bolt_execute"),
-          [GetDiscriminator("global:update")],
-          SerializeArgs(),
-        )
+        .applyWithSession(SerializeArgs())
         .accounts({
           authority: sessionSigner.publicKey,
           boltSystem: framework.systemFly.programId,
@@ -182,11 +178,7 @@ export function session(framework) {
         );
 
       const instruction = await framework.worldProgram.methods
-        .applyWithSession(
-          GetDiscriminator("global:bolt_execute"),
-          [GetDiscriminator("global:update_with_session")],
-          SerializeArgs(),
-        )
+        .applyWithSession(SerializeArgs())
         .accounts({
           authority: sessionSigner.publicKey,
           boltSystem: framework.systemFly.programId,

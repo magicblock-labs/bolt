@@ -85,3 +85,11 @@ pub struct BoltMetadata {
 pub fn pubkey_from_str(s: &str) -> solana_program::pubkey::Pubkey {
     solana_program::pubkey::Pubkey::from_str(s).unwrap()
 }
+
+impl BoltMetadata {
+    pub fn try_from_account_info(account: &AccountInfo) -> Result<Self> {
+        let data = account.try_borrow_data()?;
+        let bolt_metadata = &data[8..8 + std::mem::size_of::<BoltMetadata>()];
+        Ok(BoltMetadata::try_from_slice(bolt_metadata)?)
+    }
+}

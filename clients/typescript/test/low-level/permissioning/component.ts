@@ -64,11 +64,7 @@ export function component(framework) {
       const keypair = Keypair.generate();
 
       const instruction = await framework.worldProgram.methods
-        .apply(
-          GetDiscriminator("global:bolt_execute"),
-          [GetDiscriminator("global:update")],
-          SerializeArgs(),
-        )
+        .apply(SerializeArgs())
         .accounts({
           authority: keypair.publicKey,
           boltSystem: framework.systemFly.programId,
@@ -118,11 +114,7 @@ export function component(framework) {
         );
 
       const instruction = await framework.worldProgram.methods
-        .apply(
-          GetDiscriminator("global:bolt_execute"),
-          [GetDiscriminator("global:update")],
-          SerializeArgs(),
-        )
+        .apply(SerializeArgs())
         .accounts({
           authority: framework.provider.wallet.publicKey,
           boltSystem: framework.systemFly.programId,

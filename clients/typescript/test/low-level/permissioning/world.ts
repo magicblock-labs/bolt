@@ -121,11 +121,7 @@ export function world(framework) {
 
     it("Apply Fly System on Entity 1", async () => {
       const instruction = await framework.worldProgram.methods
-        .apply(
-          GetDiscriminator("global:bolt_execute"),
-          [GetDiscriminator("global:update")],
-          SerializeArgs(),
-        )
+        .apply(SerializeArgs())
         .accounts({
           authority: framework.provider.wallet.publicKey,
           boltSystem: framework.systemFly.programId,
@@ -173,11 +169,7 @@ export function world(framework) {
 
     it("Apply unauthorized Fly System on Entity 1", async () => {
       const instruction = await framework.worldProgram.methods
-        .apply(
-          GetDiscriminator("global:bolt_execute"),
-          [GetDiscriminator("global:update")],
-          SerializeArgs(),
-        )
+        .apply(SerializeArgs())
         .accounts({
           authority: framework.provider.wallet.publicKey,
           boltSystem: framework.systemFly.programId,

@@ -1,14 +1,14 @@
-use crate::borsh::BorshDeserialize;
+
 use crate::world;
 use crate::{cpi::check, errors::BoltError};
 use anchor_lang::prelude::*;
 use session_keys::SessionToken;
 
-pub fn update<'info, T: AccountSerialize + AccountDeserialize + BorshDeserialize + Clone>(
+pub fn update<'info>(
     cpi_auth: &AccountInfo<'info>,
     authority: &AccountInfo<'info>,
     component_authority: Pubkey,
-    bolt_component: &mut Account<'info, T>,
+    bolt_component: &AccountInfo<'info>,
     data: &[u8],
 ) -> Result<()> {
     require!(
@@ -17,18 +17,25 @@ pub fn update<'info, T: AccountSerialize + AccountDeserialize + BorshDeserialize
         BoltError::InvalidAuthority
     );
     check(&cpi_auth.to_account_info())?;
-    bolt_component.set_inner(<T>::try_from_slice(data)?);
+    let mut account_data = bolt_component
+        .try_borrow_mut_data()
+        .map_err(|_| BoltError::AccountMismatch)?;
+    // Anchor account data starts with an 8-byte discriminator; skip it when writing
+    require!(
+        8 + data.len() <= account_data.len(),
+        BoltError::AccountMismatch
+    );
+    let start = 8;
+    let end = start + data.len();
+    account_data[start..end].copy_from_slice(data);
     Ok(())
 }
 
-pub fn update_with_session<
-    'info,
-    T: AccountSerialize + AccountDeserialize + BorshDeserialize + Clone,
->(
+pub fn update_with_session<'info>(
     cpi_auth: &AccountInfo<'info>,
     authority: &Signer<'info>,
     component_authority: Pubkey,
-    bolt_component: &mut Account<'info, T>,
+    bolt_component: &AccountInfo<'info>,
     session_token: &Account<'info, SessionToken>,
     data: &[u8],
 ) -> Result<()> {
@@ -57,6 +64,16 @@ pub fn update_with_session<
 
     crate::cpi::check(&cpi_auth.to_account_info())?;
 
-    bolt_component.set_inner(<T>::try_from_slice(data)?);
+    let mut account_data = bolt_component
+        .try_borrow_mut_data()
+        .map_err(|_| BoltError::AccountMismatch)?;
+    // Anchor account data starts with an 8-byte discriminator; skip it when writing
+    require!(
+        8 + data.len() <= account_data.len(),
+        BoltError::AccountMismatch
+    );
+    let start = 8;
+    let end = start + data.len();
+    account_data[start..end].copy_from_slice(data);
     Ok(())
 }

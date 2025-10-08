@@ -27,3 +27,4 @@ custom-panic = []
 anchor-lang.workspace = true
 solana-security-txt.workspace = true
 tuple-conv.workspace = true
+const-crypto.workspace = true
