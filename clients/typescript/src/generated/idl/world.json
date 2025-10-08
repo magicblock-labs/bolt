@@ -133,14 +133,42 @@
       ],
       "args": [
         {
-          "name": "system_discriminator",
+          "name": "args",
           "type": "bytes"
+        }
+      ]
+    },
+    {
+      "name": "apply_with_discriminator",
+      "discriminator": [
+        126,
+        75,
+        184,
+        115,
+        193,
+        245,
+        69,
+        15
+      ],
+      "accounts": [
+        {
+          "name": "bolt_system"
         },
         {
-          "name": "discriminators",
-          "type": {
-            "vec": "bytes"
-          }
+          "name": "authority",
+          "signer": true
+        },
+        {
+          "name": "cpi_auth"
+        },
+        {
+          "name": "world"
+        }
+      ],
+      "args": [
+        {
+          "name": "system_discriminator",
+          "type": "bytes"
         },
         {
           "name": "args",
@@ -181,14 +209,45 @@
       ],
       "args": [
         {
-          "name": "system_discriminator",
+          "name": "args",
           "type": "bytes"
+        }
+      ]
+    },
+    {
+      "name": "apply_with_session_and_discriminator",
+      "discriminator": [
+        156,
+        187,
+        1,
+        148,
+        179,
+        240,
+        139,
+        27
+      ],
+      "accounts": [
+        {
+          "name": "bolt_system"
         },
         {
-          "name": "discriminators",
-          "type": {
-            "vec": "bytes"
-          }
+          "name": "authority",
+          "signer": true
+        },
+        {
+          "name": "cpi_auth"
+        },
+        {
+          "name": "world"
+        },
+        {
+          "name": "session_token"
+        }
+      ],
+      "args": [
+        {
+          "name": "system_discriminator",
+          "type": "bytes"
         },
         {
           "name": "args",

@@ -50,11 +50,10 @@ namespace Bolt {
         }
 
         /// <summary>
-        /// Apply a bundled system and/or bundled components by name, mirroring TS client behavior.
-        /// - If systemId is a bundled System (program + name), we use "global:{name}_bolt_execute" discriminator.
-        /// - For each component, if provided as bundled Component (program + name), we:
-        ///   * use the component name as the PDA seed and
-        ///   * build the component-specific update discriminator (name + _update or _update_with_session).
+        /// Apply a bundled system and components, mirroring TS client behavior.
+        /// Chooses among apply/applyWithSession/applyWithDiscriminator/applyWithSessionAndDiscriminator
+        /// based on whether the System has a name (discriminator) and whether a session token is provided.
+        /// Component discriminators are no longer sent; only component id + PDA pairs are included.
         /// </summary>
         public static Solana.Unity.Rpc.Models.TransactionInstruction ApplySystem(
             PublicKey world,
@@ -69,7 +68,6 @@ namespace Bolt {
             programId ??= new(WorldProgram.ID);
 
             var remainingAccounts = new global::System.Collections.Generic.List<Solana.Unity.Rpc.Models.AccountMeta>();
-            var discriminators = new global::System.Collections.Generic.List<byte[]>();
 
             foreach (var entry in entities)
             {
@@ -82,9 +80,6 @@ namespace Bolt {
                     var pda = WorldProgram.FindComponentPda(comp.Program, entity, comp.Seeds(providedSeed));
                     remainingAccounts.Add(Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(comp.Program, false));
                     remainingAccounts.Add(Solana.Unity.Rpc.Models.AccountMeta.Writable(pda, false));
-
-                    var compDiscriminator = comp.GetMethodDiscriminator(sessionToken != null ? "update_with_session" : "update");
-                    discriminators.Add(compDiscriminator);
                 }
             }
 
@@ -96,12 +91,13 @@ namespace Bolt {
                     remainingAccounts.AddRange(extraAccounts);
             }
 
-            var systemDiscriminator = systemId.GetMethodDiscriminator("bolt_execute");
+            bool hasSystemName = !string.IsNullOrEmpty(systemId.Name);
+            var serializedArgs = SerializeArgs(args);
 
             Solana.Unity.Rpc.Models.TransactionInstruction instruction;
             if (sessionToken != null)
             {
-                var apply = new ApplyWithSessionAccounts()
+                var accounts = new ApplyWithSessionAccounts()
                 {
                     BoltSystem = systemId.Program,
                     Authority = authority,
@@ -109,18 +105,34 @@ namespace Bolt {
                     World = world,
                     SessionToken = sessionToken,
                 };
-                instruction = WorldProgram.ApplyWithSession(apply, systemDiscriminator, discriminators.ToArray(), SerializeArgs(args), programId);
+                if (hasSystemName)
+                {
+                    var sysDisc = systemId.GetMethodDiscriminator("bolt_execute");
+                    instruction = WorldProgram.ApplyWithSessionAndDiscriminator(accounts, sysDisc, serializedArgs, programId);
+                }
+                else
+                {
+                    instruction = WorldProgram.ApplyWithSession(accounts, serializedArgs, programId);
+                }
             }
             else
             {
-                var apply = new ApplyAccounts()
+                var accounts = new ApplyAccounts()
                 {
                     BoltSystem = systemId.Program,
                     Authority = authority,
                     CpiAuth = WorldProgram.CpiAuthAddress,
                     World = world,
                 };
-                instruction = WorldProgram.Apply(apply, systemDiscriminator, discriminators.ToArray(), SerializeArgs(args), programId);
+                if (hasSystemName)
+                {
+                    var sysDisc = systemId.GetMethodDiscriminator("bolt_execute");
+                    instruction = WorldProgram.ApplyWithDiscriminator(accounts, sysDisc, serializedArgs, programId);
+                }
+                else
+                {
+                    instruction = WorldProgram.Apply(accounts, serializedArgs, programId);
+                }
             }
 
             // Append remaining accounts (component id+pda pairs and extras)

@@ -473,17 +473,15 @@ async function createApplySystemInstruction({
   }
 
   let remainingAccounts: web3.AccountMeta[] = [];
-  let components: { id: PublicKey; pda: PublicKey; name?: string }[] = [];
+  let components: { id: PublicKey; pda: PublicKey }[] = [];
   for (const entity of entities) {
     for (const applyComponent of entity.components) {
       const component = Component.from(applyComponent.componentId);
       const id = component.program;
-      const name = component.name;
       const pda = component.pda(entity.entity, applyComponent.seed);
       components.push({
         id,
         pda,
-        name,
       });
     }
   }
@@ -511,40 +509,60 @@ async function createApplySystemInstruction({
     }
   }
 
-  // Build discriminators per component in order of remaining accounts pairs
-  const discriminators: Buffer[] = components.map((component) =>
-    new Component(component.id, component.name).getMethodDiscriminator(
-      session ? "update_with_session" : "update",
-    ),
-  );
-
   const systemDiscriminator = system.getMethodDiscriminator("bolt_execute");
 
-  if (session)
-    return program.methods
-      .applyWithSession(
-        systemDiscriminator,
-        discriminators,
-        SerializeArgs(args),
-      )
-      .accounts({
-        authority: authority ?? PROGRAM_ID,
-        boltSystem: system.program,
-        sessionToken: session.token,
-        world,
-      })
-      .remainingAccounts(remainingAccounts)
-      .instruction();
-  else
-    return program.methods
-      .apply(systemDiscriminator, discriminators, SerializeArgs(args))
-      .accounts({
-        authority: authority ?? PROGRAM_ID,
-        boltSystem: system.program,
-        world,
-      })
-      .remainingAccounts(remainingAccounts)
-      .instruction();
+  if (system.name != null) {
+    if (session)
+      return program.methods
+        .applyWithSessionAndDiscriminator(
+          systemDiscriminator,
+          SerializeArgs(args),
+        )
+        .accounts({
+          authority: authority ?? PROGRAM_ID,
+          boltSystem: system.program,
+          sessionToken: session.token,
+          world,
+          cpiAuth: CPI_AUTH_ADDRESS,
+        })
+        .remainingAccounts(remainingAccounts)
+        .instruction();
+    else
+      return program.methods
+        .applyWithDiscriminator(systemDiscriminator, SerializeArgs(args))
+        .accounts({
+          authority: authority ?? PROGRAM_ID,
+          boltSystem: system.program,
+          world,
+          cpiAuth: CPI_AUTH_ADDRESS,
+        })
+        .remainingAccounts(remainingAccounts)
+        .instruction();
+  } else {
+    if (session)
+      return program.methods
+        .applyWithSession(SerializeArgs(args))
+        .accounts({
+          authority: authority ?? PROGRAM_ID,
+          boltSystem: system.program,
+          sessionToken: session.token,
+          world,
+          cpiAuth: CPI_AUTH_ADDRESS,
+        })
+        .remainingAccounts(remainingAccounts)
+        .instruction();
+    else
+      return program.methods
+        .apply(SerializeArgs(args))
+        .accounts({
+          authority: authority ?? PROGRAM_ID,
+          boltSystem: system.program,
+          world,
+          cpiAuth: CPI_AUTH_ADDRESS,
+        })
+        .remainingAccounts(remainingAccounts)
+        .instruction();
+  }
 }
 
 interface ApplySystemEntity {
@@ -552,8 +570,7 @@ interface ApplySystemEntity {
   components: ApplySystemComponent[];
 }
 interface ApplySystemComponent {
-  componentId: PublicKey | Component;
-  name?: string;
+  componentId: PublicKey;
   seed?: string;
 }
 

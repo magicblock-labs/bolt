@@ -106,14 +106,33 @@ export type World = {
       ];
       args: [
         {
-          name: "systemDiscriminator";
+          name: "args";
           type: "bytes";
         },
+      ];
+    },
+    {
+      name: "applyWithDiscriminator";
+      discriminator: [126, 75, 184, 115, 193, 245, 69, 15];
+      accounts: [
         {
-          name: "discriminators";
-          type: {
-            vec: "bytes";
-          };
+          name: "boltSystem";
+        },
+        {
+          name: "authority";
+          signer: true;
+        },
+        {
+          name: "cpiAuth";
+        },
+        {
+          name: "world";
+        },
+      ];
+      args: [
+        {
+          name: "systemDiscriminator";
+          type: "bytes";
         },
         {
           name: "args";
@@ -145,14 +164,36 @@ export type World = {
       ];
       args: [
         {
-          name: "systemDiscriminator";
+          name: "args";
           type: "bytes";
         },
+      ];
+    },
+    {
+      name: "applyWithSessionAndDiscriminator";
+      discriminator: [156, 187, 1, 148, 179, 240, 139, 27];
+      accounts: [
         {
-          name: "discriminators";
-          type: {
-            vec: "bytes";
-          };
+          name: "boltSystem";
+        },
+        {
+          name: "authority";
+          signer: true;
+        },
+        {
+          name: "cpiAuth";
+        },
+        {
+          name: "world";
+        },
+        {
+          name: "sessionToken";
+        },
+      ];
+      args: [
+        {
+          name: "systemDiscriminator";
+          type: "bytes";
         },
         {
           name: "args";

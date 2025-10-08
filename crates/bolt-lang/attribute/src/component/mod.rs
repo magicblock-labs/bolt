@@ -17,6 +17,7 @@ pub fn process(attr: TokenStream, item: TokenStream) -> TokenStream {
     let attributes = Attributes::from(attr);
     generate_implementation(&mut program, &attributes, &type_);
     generate_instructions(&mut program, &attributes, &type_.ident, None);
+    generate_update(&mut program);
     enrich_type(&mut type_);
 
     let expanded = quote! {

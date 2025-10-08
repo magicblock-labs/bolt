@@ -2,7 +2,7 @@ use proc_macro2::Ident;
 use syn::{DeriveInput, Field, Type, Visibility};
 
 pub fn add_bolt_metadata(input: &mut DeriveInput) {
-    let authority_field: Field = Field {
+    let bolt_metadata_field: Field = Field {
         attrs: vec![],
         vis: Visibility::Public(syn::VisPublic {
             pub_token: Default::default(),
@@ -16,7 +16,7 @@ pub fn add_bolt_metadata(input: &mut DeriveInput) {
     };
     if let syn::Data::Struct(ref mut data) = input.data {
         if let syn::Fields::Named(ref mut fields) = data.fields {
-            fields.named.push(authority_field);
+            fields.named.insert(0, bolt_metadata_field);
         }
     }
 }

@@ -344,60 +344,21 @@ pub mod world {
 
     pub fn apply<'info>(
         ctx: Context<'_, '_, '_, 'info, Apply<'info>>,
-        system_discriminator: Vec<u8>,
-        discriminators: Vec<Vec<u8>>,
         args: Vec<u8>,
     ) -> Result<()> {
-        let (pairs, results) = apply_impl(
-            &ctx.accounts.authority,
-            &ctx.accounts.world,
-            &ctx.accounts.bolt_system,
-            system_discriminator,
-            args,
-            ctx.remaining_accounts.to_vec(),
-        )?;
-        require_eq!(
-            pairs.len(),
-            discriminators.len(),
-            WorldError::InvalidSystemOutput
-        );
+        apply_impl(
+            ctx,
+            const_crypto::sha2::Sha256::new().update(b"global:bolt_execute").finalize()[0..8].to_vec(),
+            args
+        )
+    }
 
-        use anchor_lang::solana_program::instruction::{AccountMeta, Instruction};
-        use anchor_lang::solana_program::program::invoke_signed as invoke_signed_program;
-
-        for (((program, component), result), discr) in pairs
-            .into_iter()
-            .zip(results.into_iter())
-            .zip(discriminators.into_iter())
-        {
-            let accounts = vec![
-                AccountMeta::new_readonly(ctx.accounts.cpi_auth.key(), true),
-                AccountMeta::new(component.key(), false),
-                AccountMeta::new_readonly(ctx.accounts.authority.key(), true),
-            ];
-
-            let mut data = discr;
-            let len_le = (result.len() as u32).to_le_bytes();
-            data.extend_from_slice(&len_le);
-            data.extend_from_slice(result.as_slice());
-
-            let ix = Instruction {
-                program_id: program.key(),
-                accounts,
-                data,
-            };
-
-            invoke_signed_program(
-                &ix,
-                &[
-                    ctx.accounts.cpi_auth.to_account_info(),
-                    component.clone(),
-                    ctx.accounts.authority.to_account_info(),
-                ],
-                &[World::cpi_auth_seeds().as_slice()],
-            )?;
-        }
-        Ok(())
+    pub fn apply_with_discriminator<'info>(
+        ctx: Context<'_, '_, '_, 'info, Apply<'info>>,
+        system_discriminator: Vec<u8>,
+        args: Vec<u8>,
+    ) -> Result<()> {
+        apply_impl(ctx, system_discriminator, args)
     }
 
     #[derive(Accounts)]
@@ -417,62 +378,21 @@ pub mod world {
 
     pub fn apply_with_session<'info>(
         ctx: Context<'_, '_, '_, 'info, ApplyWithSession<'info>>,
-        system_discriminator: Vec<u8>,
-        discriminators: Vec<Vec<u8>>,
         args: Vec<u8>,
     ) -> Result<()> {
-        let (pairs, results) = apply_impl(
-            &ctx.accounts.authority,
-            &ctx.accounts.world,
-            &ctx.accounts.bolt_system,
-            system_discriminator,
-            args,
-            ctx.remaining_accounts.to_vec(),
-        )?;
-        require_eq!(
-            pairs.len(),
-            discriminators.len(),
-            WorldError::InvalidSystemOutput
-        );
+        apply_with_session_impl(
+            ctx,
+            const_crypto::sha2::Sha256::new().update(b"global:bolt_execute").finalize()[0..8].to_vec(),
+            args
+        )
+    }
 
-        use anchor_lang::solana_program::instruction::{AccountMeta, Instruction};
-        use anchor_lang::solana_program::program::invoke_signed as invoke_signed_program;
-
-        for (((program, component), result), discr) in pairs
-            .into_iter()
-            .zip(results.into_iter())
-            .zip(discriminators.into_iter())
-        {
-            let accounts = vec![
-                AccountMeta::new_readonly(ctx.accounts.cpi_auth.key(), true),
-                AccountMeta::new(component.key(), false),
-                AccountMeta::new_readonly(ctx.accounts.authority.key(), true),
-                AccountMeta::new_readonly(ctx.accounts.session_token.key(), false),
-            ];
-
-            let mut data = discr;
-            let len_le = (result.len() as u32).to_le_bytes();
-            data.extend_from_slice(&len_le);
-            data.extend_from_slice(result.as_slice());
-
-            let ix = Instruction {
-                program_id: program.key(),
-                accounts,
-                data,
-            };
-
-            invoke_signed_program(
-                &ix,
-                &[
-                    ctx.accounts.cpi_auth.to_account_info(),
-                    component.clone(),
-                    ctx.accounts.authority.to_account_info(),
-                    ctx.accounts.session_token.to_account_info(),
-                ],
-                &[World::cpi_auth_seeds().as_slice()],
-            )?;
-        }
-        Ok(())
+    pub fn apply_with_session_and_discriminator<'info>(
+        ctx: Context<'_, '_, '_, 'info, ApplyWithSession<'info>>,
+        system_discriminator: Vec<u8>,
+        args: Vec<u8>,
+    ) -> Result<()> {
+        apply_with_session_impl(ctx, system_discriminator, args)
     }
 
     #[derive(Accounts)]
@@ -494,8 +414,112 @@ pub mod world {
     }
 }
 
+pub fn apply_impl<'info>(
+    ctx: Context<'_, '_, '_, 'info, Apply<'info>>,
+    system_discriminator: Vec<u8>,
+    args: Vec<u8>,
+) -> Result<()> {
+    let (pairs, results) = system_execute(
+        &ctx.accounts.authority,
+        &ctx.accounts.world,
+        &ctx.accounts.bolt_system,
+        system_discriminator,
+        args,
+        ctx.remaining_accounts.to_vec(),
+    )?;
+
+    use anchor_lang::solana_program::instruction::{AccountMeta, Instruction};
+    use anchor_lang::solana_program::program::invoke_signed as invoke_signed_program;
+
+    for ((program, component), result) in pairs
+        .into_iter()
+        .zip(results.into_iter())
+    {
+        let accounts = vec![
+            AccountMeta::new_readonly(ctx.accounts.cpi_auth.key(), true),
+            AccountMeta::new(component.key(), false),
+            AccountMeta::new_readonly(ctx.accounts.authority.key(), true),
+        ];
+
+        let mut data = const_crypto::sha2::Sha256::new().update(b"global:update").finalize()[0..8].to_vec();
+        let len_le = (result.len() as u32).to_le_bytes();
+        data.extend_from_slice(&len_le);
+        data.extend_from_slice(result.as_slice());
+
+        let ix = Instruction {
+            program_id: program.key(),
+            accounts,
+            data,
+        };
+
+        invoke_signed_program(
+            &ix,
+            &[
+                ctx.accounts.cpi_auth.to_account_info(),
+                component.clone(),
+                ctx.accounts.authority.to_account_info(),
+            ],
+            &[World::cpi_auth_seeds().as_slice()],
+        )?;
+    }
+    Ok(())
+}
+
+pub fn apply_with_session_impl<'info>(
+    ctx: Context<'_, '_, '_, 'info, ApplyWithSession<'info>>,
+    system_discriminator: Vec<u8>,
+    args: Vec<u8>,
+) -> Result<()> {
+    let (pairs, results) = system_execute(
+        &ctx.accounts.authority,
+        &ctx.accounts.world,
+        &ctx.accounts.bolt_system,
+        system_discriminator,
+        args,
+        ctx.remaining_accounts.to_vec(),
+    )?;
+
+    use anchor_lang::solana_program::instruction::{AccountMeta, Instruction};
+    use anchor_lang::solana_program::program::invoke_signed as invoke_signed_program;
+
+    for ((program, component), result) in pairs
+        .into_iter()
+        .zip(results.into_iter())
+    {
+        let accounts = vec![
+            AccountMeta::new_readonly(ctx.accounts.cpi_auth.key(), true),
+            AccountMeta::new(component.key(), false),
+            AccountMeta::new_readonly(ctx.accounts.authority.key(), true),
+            AccountMeta::new_readonly(ctx.accounts.session_token.key(), false),
+        ];
+
+        let mut data = const_crypto::sha2::Sha256::new().update(b"global:update_with_session").finalize()[0..8].to_vec();
+        let len_le = (result.len() as u32).to_le_bytes();
+        data.extend_from_slice(&len_le);
+        data.extend_from_slice(result.as_slice());
+
+        let ix = Instruction {
+            program_id: program.key(),
+            accounts,
+            data,
+        };
+
+        invoke_signed_program(
+            &ix,
+            &[
+                ctx.accounts.cpi_auth.to_account_info(),
+                component.clone(),
+                ctx.accounts.authority.to_account_info(),
+                ctx.accounts.session_token.to_account_info(),
+            ],
+            &[World::cpi_auth_seeds().as_slice()],
+        )?;
+    }
+    Ok(())
+}
+
 #[allow(clippy::type_complexity)]
-fn apply_impl<'info>(
+fn system_execute<'info>(
     authority: &Signer<'info>,
     world: &Account<'info, World>,
     bolt_system: &UncheckedAccount<'info>,

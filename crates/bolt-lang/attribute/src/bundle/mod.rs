@@ -15,6 +15,7 @@ pub fn process(attr: TokenStream, item: TokenStream) -> TokenStream {
             .attrs
             .insert(0, syn::parse_quote! { #[bolt_lang::delegate] });
     }
+    component::generate_update(&mut program);
     if let Some((_, items)) = bundle_mod.content {
         for item in items {
             match item {

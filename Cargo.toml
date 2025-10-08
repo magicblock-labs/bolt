@@ -62,6 +62,7 @@ which = "^7"
 tokio = { version = "^1", features = ["full"] }
 sysinfo = "=0.36.1"
 bytemuck_derive = "^1"
+const-crypto = "0.3.0"
 
 [profile.release]
 overflow-checks = true

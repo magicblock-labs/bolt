@@ -3,7 +3,7 @@ use quote::{quote, ToTokens};
 
 use proc_macro2::TokenStream as TokenStream2;
 use syn::{
-    parse_quote, spanned::Spanned, Attribute, Field, Fields, ItemMod, ItemStruct, LitByteStr, Type,
+    parse_quote, spanned::Spanned, Attribute, Field, Fields, ItemMod, ItemStruct, LitByteStr, Type
 };
 
 pub fn remove_component_attributes(attrs: &mut Vec<syn::Attribute>) {
@@ -36,18 +36,12 @@ fn modify_component_module(
 ) {
     let (initialize_fn, initialize_struct) = generate_initialize(component_type, component_name);
     let (destroy_fn, destroy_struct) = generate_destroy(component_type, component_name);
-    let (update_fn, update_with_session_fn, update_struct, update_with_session_struct) =
-        generate_update(component_type, component_name);
 
     module.content.as_mut().map(|(brace, items)| {
         items.extend(
             vec![
                 initialize_fn,
                 initialize_struct,
-                update_fn,
-                update_struct,
-                update_with_session_fn,
-                update_with_session_struct,
                 destroy_fn,
                 destroy_struct,
             ]
@@ -205,91 +199,58 @@ fn generate_initialize(
 }
 
 /// Generates the instructions and related structs to inject in the component.
-fn generate_update(
-    component_type: &Type,
-    component_name: Option<&String>,
-) -> (TokenStream2, TokenStream2, TokenStream2, TokenStream2) {
-    let update_structure_name = if let Some(name) = component_name {
-        syn::Ident::new(
-            &format!("{}Update", name.to_pascal_case()),
-            component_type.span(),
-        )
-    } else {
-        syn::Ident::new("Update", component_type.span())
+pub fn generate_update(module: &mut ItemMod) {
+    let update_fn = quote! {
+        #[automatically_derived]
+        pub fn update(ctx: Context<Update>, data: Vec<u8>) -> Result<()> {
+            let bolt_metadata = BoltMetadata::try_from_account_info(&ctx.accounts.bolt_component)?;
+            bolt_lang::instructions::update(&ctx.accounts.cpi_auth.to_account_info(), &ctx.accounts.authority.to_account_info(), bolt_metadata.authority, &mut ctx.accounts.bolt_component, &data)?;
+            Ok(())
+        }
     };
-    let update_with_session_structure_name = if let Some(name) = component_name {
-        syn::Ident::new(
-            &format!("{}UpdateWithSession", name.to_pascal_case()),
-            component_type.span(),
-        )
-    } else {
-        syn::Ident::new("UpdateWithSession", component_type.span())
-    };
-    let fn_update = if let Some(name) = &component_name {
-        syn::Ident::new(&format!("{}_update", name), component_type.span())
-    } else {
-        syn::Ident::new("update", component_type.span())
-    };
-    let fn_update_with_session = if let Some(name) = &component_name {
-        syn::Ident::new(
-            &format!("{}_update_with_session", name),
-            component_type.span(),
-        )
-    } else {
-        syn::Ident::new("update_with_session", component_type.span())
-    };
-    (
-        quote! {
+    let update_with_session_fn = quote! {
             #[automatically_derived]
-            pub fn #fn_update(ctx: Context<#update_structure_name>, data: Vec<u8>) -> Result<()> {
-                bolt_lang::instructions::update(&ctx.accounts.cpi_auth.to_account_info(), &ctx.accounts.authority.to_account_info(), ctx.accounts.bolt_component.bolt_metadata.authority, &mut ctx.accounts.bolt_component, &data)?;
+            pub fn update_with_session(ctx: Context<UpdateWithSession>, data: Vec<u8>) -> Result<()> {
+                let bolt_metadata = BoltMetadata::try_from_account_info(&ctx.accounts.bolt_component)?;
+                bolt_lang::instructions::update_with_session(&ctx.accounts.cpi_auth.to_account_info(), &ctx.accounts.authority, bolt_metadata.authority, &mut ctx.accounts.bolt_component, &ctx.accounts.session_token, &data)?;
                 Ok(())
             }
-        },
-        quote! {
-            #[automatically_derived]
-            pub fn #fn_update_with_session(ctx: Context<#update_with_session_structure_name>, data: Vec<u8>) -> Result<()> {
-                // Check if the instruction is called from the world program
-                let instruction = anchor_lang::solana_program::sysvar::instructions::get_instruction_relative(
-                    0, &ctx.accounts.instruction_sysvar_account.to_account_info()
-                ).map_err(|_| BoltError::InvalidCaller)?;
-                require_eq!(instruction.program_id, World::id(), BoltError::InvalidCaller);
-
-                ctx.accounts.bolt_component.set_inner(<#component_type>::try_from_slice(&data)?);
-                Ok(())
-            }
-        },
-        quote! {
-            #[automatically_derived]
-            #[derive(Accounts)]
-            pub struct #update_structure_name<'info> {
-                #[account()]
-                pub cpi_auth: Signer<'info>,
-                #[account(mut)]
-                pub bolt_component: Account<'info, #component_type>,
-                #[account()]
-                pub authority: Signer<'info>,
-                #[account(address = anchor_lang::solana_program::sysvar::instructions::id())]
-                pub instruction_sysvar_account: UncheckedAccount<'info>
-            }
-        },
-        quote! {
-            #[automatically_derived]
-            #[derive(Accounts)]
-            pub struct #update_with_session_structure_name<'info> {
-                #[account()]
-                pub cpi_auth: Signer<'info>,
-                #[account(mut)]
-                pub bolt_component: Account<'info, #component_type>,
-                #[account()]
-                pub authority: Signer<'info>,
-                #[account(address = anchor_lang::solana_program::sysvar::instructions::id())]
-                pub instruction_sysvar_account: UncheckedAccount<'info>,
-                #[account(constraint = session_token.to_account_info().owner == &bolt_lang::session_keys::ID)]
-                pub session_token: Account<'info, bolt_lang::session_keys::SessionToken>,
-            }
-        },
-    )
+        };
+    let update_struct = quote! {
+        #[automatically_derived]
+        #[derive(Accounts)]
+        pub struct Update<'info> {
+            #[account()]
+            pub cpi_auth: Signer<'info>,
+            #[account(mut)]
+            pub bolt_component: AccountInfo<'info>,
+            #[account()]
+            pub authority: Signer<'info>,
+        }
+    };
+    let update_with_session_struct = quote! {
+        #[automatically_derived]
+        #[derive(Accounts)]
+        pub struct UpdateWithSession<'info> {
+            #[account()]
+            pub cpi_auth: Signer<'info>,
+            #[account(mut)]
+            pub bolt_component: AccountInfo<'info>,
+            #[account()]
+            pub authority: Signer<'info>,
+            #[account(constraint = session_token.to_account_info().owner == &bolt_lang::session_keys::ID)]
+            pub session_token: Account<'info, bolt_lang::session_keys::SessionToken>,
+        }
+    };
+    module.content.as_mut().map(|(brace, items)| {
+        items.extend(
+            vec![update_fn, update_struct, update_with_session_fn, update_with_session_struct]
+                .into_iter()
+                .map(|item| syn::parse2(item).unwrap())
+                .collect::<Vec<_>>(),
+        );
+        (brace, items.clone())
+    });
 }
 
 /// Checks if the field is expecting a program.
