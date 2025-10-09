@@ -348,8 +348,11 @@ pub mod world {
     ) -> Result<()> {
         apply_impl(
             ctx,
-            const_crypto::sha2::Sha256::new().update(b"global:bolt_execute").finalize()[0..8].to_vec(),
-            args
+            const_crypto::sha2::Sha256::new()
+                .update(b"global:bolt_execute")
+                .finalize()[0..8]
+                .to_vec(),
+            args,
         )
     }
 
@@ -382,8 +385,11 @@ pub mod world {
     ) -> Result<()> {
         apply_with_session_impl(
             ctx,
-            const_crypto::sha2::Sha256::new().update(b"global:bolt_execute").finalize()[0..8].to_vec(),
-            args
+            const_crypto::sha2::Sha256::new()
+                .update(b"global:bolt_execute")
+                .finalize()[0..8]
+                .to_vec(),
+            args,
         )
     }
 
@@ -431,17 +437,17 @@ pub fn apply_impl<'info>(
     use anchor_lang::solana_program::instruction::{AccountMeta, Instruction};
     use anchor_lang::solana_program::program::invoke_signed as invoke_signed_program;
 
-    for ((program, component), result) in pairs
-        .into_iter()
-        .zip(results.into_iter())
-    {
+    for ((program, component), result) in pairs.into_iter().zip(results.into_iter()) {
         let accounts = vec![
             AccountMeta::new_readonly(ctx.accounts.cpi_auth.key(), true),
             AccountMeta::new(component.key(), false),
             AccountMeta::new_readonly(ctx.accounts.authority.key(), true),
         ];
 
-        let mut data = const_crypto::sha2::Sha256::new().update(b"global:update").finalize()[0..8].to_vec();
+        let mut data = const_crypto::sha2::Sha256::new()
+            .update(b"global:update")
+            .finalize()[0..8]
+            .to_vec();
         let len_le = (result.len() as u32).to_le_bytes();
         data.extend_from_slice(&len_le);
         data.extend_from_slice(result.as_slice());
@@ -482,10 +488,7 @@ pub fn apply_with_session_impl<'info>(
     use anchor_lang::solana_program::instruction::{AccountMeta, Instruction};
     use anchor_lang::solana_program::program::invoke_signed as invoke_signed_program;
 
-    for ((program, component), result) in pairs
-        .into_iter()
-        .zip(results.into_iter())
-    {
+    for ((program, component), result) in pairs.into_iter().zip(results.into_iter()) {
         let accounts = vec![
             AccountMeta::new_readonly(ctx.accounts.cpi_auth.key(), true),
             AccountMeta::new(component.key(), false),
@@ -493,7 +496,10 @@ pub fn apply_with_session_impl<'info>(
             AccountMeta::new_readonly(ctx.accounts.session_token.key(), false),
         ];
 
-        let mut data = const_crypto::sha2::Sha256::new().update(b"global:update_with_session").finalize()[0..8].to_vec();
+        let mut data = const_crypto::sha2::Sha256::new()
+            .update(b"global:update_with_session")
+            .finalize()[0..8]
+            .to_vec();
         let len_le = (result.len() as u32).to_le_bytes();
         data.extend_from_slice(&len_le);
         data.extend_from_slice(result.as_slice());

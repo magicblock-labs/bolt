@@ -19,7 +19,8 @@ pub fn process(_attr: TokenStream, item: TokenStream) -> TokenStream {
                     let attributes = component::Attributes::from(item.attrs.clone());
                     if attributes.is_component {
                         if attributes.delegate {
-                            delegate_components.push((item.ident.clone(), item.ident.to_string().to_snake_case()));
+                            delegate_components
+                                .push((item.ident.clone(), item.ident.to_string().to_snake_case()));
                         }
                         let data = syn::Data::Struct(syn::DataStruct {
                             struct_token: Default::default(),

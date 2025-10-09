@@ -1,4 +1,4 @@
-use proc_macro2::{TokenStream as TokenStream2};
+use proc_macro2::TokenStream as TokenStream2;
 use quote::quote;
 use syn::ItemMod;
 
@@ -7,7 +7,7 @@ pub fn inject_delegate_items(module: &mut ItemMod, components: Vec<(syn::Ident, 
     if components.is_empty() {
         return;
     }
-    
+
     let (
         delegate_fn,
         delegate_struct,
@@ -36,7 +36,9 @@ pub fn inject_delegate_items(module: &mut ItemMod, components: Vec<(syn::Ident, 
 }
 
 /// Generates the delegate/undelegate functions and related structs to inject in the component program.
-fn generate_delegate_set(components: Vec<(syn::Ident, String)>) -> (
+fn generate_delegate_set(
+    components: Vec<(syn::Ident, String)>,
+) -> (
     TokenStream2,
     TokenStream2,
     TokenStream2,
