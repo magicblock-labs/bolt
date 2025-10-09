@@ -87,8 +87,7 @@ namespace Bolt {
             if (extraAccounts != null && extraAccounts.Length > 0)
             {
                 remainingAccounts.Add(Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(new PublicKey(WorldProgram.ID), false));
-                if (extraAccounts != null)
-                    remainingAccounts.AddRange(extraAccounts);
+                remainingAccounts.AddRange(extraAccounts);
             }
 
             bool hasSystemName = !string.IsNullOrEmpty(systemId.Name);
