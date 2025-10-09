@@ -58,15 +58,12 @@ impl From<syn::Meta> for Attributes {
 
 pub fn is_component_set(meta: &Meta) -> bool {
     match meta {
+        // #[component]
         Meta::Path(path) => path.is_ident("component"),
-        Meta::List(meta_list) => meta_list.nested.iter().any(|nested_meta| {
-            if let NestedMeta::Meta(Meta::Path(path)) = nested_meta {
-                path.is_ident("component")
-            } else {
-                false
-            }
-        }),
-        _ => false,
+        // #[component(...)]
+        Meta::List(meta_list) => meta_list.path.is_ident("component"),
+        // #[component = ...] (not expected, but handle defensively)
+        Meta::NameValue(name_value) => name_value.path.is_ident("component"),
     }
 }
 

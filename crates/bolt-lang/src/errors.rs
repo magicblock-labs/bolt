@@ -11,4 +11,7 @@ pub enum BoltError {
     /// Returned if the account mismatch
     #[msg("Account mismatch")]
     AccountMismatch,
+    /// Component is not delegateable
+    #[msg("Component is not delegateable")]
+    ComponentNotDelegateable,
 }

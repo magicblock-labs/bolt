@@ -1,4 +1,5 @@
 use bolt_utils::add_bolt_metadata;
+use sha2::{Digest, Sha256};
 use proc_macro::TokenStream;
 use quote::quote;
 use syn::{parse_macro_input, Attribute, DeriveInput};
@@ -38,6 +39,9 @@ pub fn component_deserialize(_attr: TokenStream, item: TokenStream) -> TokenStre
             }
         };
     }
+    let mut sha256 = Sha256::new();
+    sha256.update(name_str.as_bytes());
+    let discriminator = sha256.finalize()[0..8].to_vec();
     let expanded = quote! {
         #input
 
@@ -70,7 +74,7 @@ pub fn component_deserialize(_attr: TokenStream, item: TokenStream) -> TokenStre
 
         #[automatically_derived]
         impl anchor_lang::Discriminator for #name {
-            const DISCRIMINATOR: &'static [u8] = &[1, 1, 1, 1, 1, 1, 1, 1];
+            const DISCRIMINATOR: &'static [u8] = &[#(#discriminator),*];
         }
 
         #owner_definition

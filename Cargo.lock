@@ -813,6 +813,7 @@ dependencies = [
  "bolt-utils",
  "proc-macro2",
  "quote",
+ "sha2 0.10.8",
  "syn 1.0.109",
 ]
 
@@ -823,13 +824,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 1.0.109",
-]
-
-[[package]]
-name = "bolt-attribute-bolt-delegate"
-version = "0.2.6"
-dependencies = [
- "bolt-attribute",
 ]
 
 [[package]]
@@ -892,7 +886,6 @@ dependencies = [
  "bolt-attribute-bolt-component",
  "bolt-attribute-bolt-component-deserialize",
  "bolt-attribute-bolt-component-id",
- "bolt-attribute-bolt-delegate",
  "bolt-attribute-bolt-extra-accounts",
  "bolt-attribute-bolt-system",
  "bolt-attribute-bolt-system-input",

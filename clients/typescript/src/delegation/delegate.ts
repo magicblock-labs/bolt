@@ -17,7 +17,6 @@ import {
 export interface DelegateInstructionArgs {
   commitFrequencyMs: number;
   validator: beet.COption<PublicKey>;
-  pdaSeeds: Uint8Array[];
 }
 
 export const delegateStruct = new beet.FixableBeetArgsStruct<
@@ -29,7 +28,6 @@ export const delegateStruct = new beet.FixableBeetArgsStruct<
     ["instructionDiscriminator", beet.uniformFixedSizeArray(beet.u8, 8)],
     ["commitFrequencyMs", beet.u32],
     ["validator", beet.coption(beetSolana.publicKey)],
-    ["pdaSeeds", beet.array(beet.bytes)],
   ],
   "DelegateInstructionArgs",
 );
@@ -61,7 +59,6 @@ export const delegateInstructionDiscriminator = [
 
 export function createDelegateInstruction(
   accounts: DelegateInstructionAccounts,
-  pdaSeeds: Uint8Array[],
   commitFrequencyMs: number = 0,
   validator?: PublicKey,
   programId = accounts.ownerProgram,
@@ -70,7 +67,6 @@ export function createDelegateInstruction(
     instructionDiscriminator: delegateInstructionDiscriminator,
     commitFrequencyMs,
     validator: validator ?? null,
-    pdaSeeds,
   });
 
   const delegationRecord = delegationRecordPdaFromDelegatedAccount(
@@ -182,22 +178,18 @@ export async function DelegateComponent({
 }> {
   const component = Component.from(componentId);
   let ownerProgram = component.program;
-  const pdaSeeds = component.seeds(seed);
   const componentPda = component.pda(entity, seed);
-  const delegateComponentIx = createDelegateInstruction(
-    {
-      payer,
-      entity,
-      account: componentPda,
-      ownerProgram,
-      buffer,
-      delegationRecord,
-      delegationMetadata,
-      delegationProgram,
-      systemProgram,
-    },
-    [Buffer.from(pdaSeeds), entity.toBytes()],
-  );
+  const delegateComponentIx = createDelegateInstruction({
+    payer,
+    entity,
+    account: componentPda,
+    ownerProgram,
+    buffer,
+    delegationRecord,
+    delegationMetadata,
+    delegationProgram,
+    systemProgram,
+  });
 
   return {
     instruction: delegateComponentIx,

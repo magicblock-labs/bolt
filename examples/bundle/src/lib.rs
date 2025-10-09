@@ -2,10 +2,10 @@ use bolt_lang::*;
 
 declare_id!("CgfPBUeDUL3GT6b5AUDFE56KKgU4ycWA9ERjEWsfMZCj");
 
-#[bundle(delegate)]
+#[bundle]
 pub mod example_bundle {
 
-    #[component]
+    #[component(delegate)]
     #[derive(Default)]
     pub struct Position {
         pub x: i64,

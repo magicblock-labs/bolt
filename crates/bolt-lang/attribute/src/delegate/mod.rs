@@ -1,16 +1,13 @@
-use proc_macro::TokenStream;
-use proc_macro2::TokenStream as TokenStream2;
-use quote::{quote, ToTokens};
-use syn::{parse_macro_input, ItemMod};
-
-pub fn process(_attr: TokenStream, item: TokenStream) -> TokenStream {
-    let mut ast = parse_macro_input!(item as syn::ItemMod);
-    inject_delegate_items(&mut ast);
-    ast.to_token_stream().into()
-}
+use proc_macro2::{TokenStream as TokenStream2};
+use quote::quote;
+use syn::ItemMod;
 
 /// Injects delegate-related functions and structs directly into the program module.
-fn inject_delegate_items(module: &mut ItemMod) {
+pub fn inject_delegate_items(module: &mut ItemMod, components: Vec<(syn::Ident, String)>) {
+    if components.is_empty() {
+        return;
+    }
+    
     let (
         delegate_fn,
         delegate_struct,
@@ -18,7 +15,7 @@ fn inject_delegate_items(module: &mut ItemMod) {
         reinit_undelegate_struct,
         undelegate_fn,
         undelegate_struct,
-    ) = generate_delegate_set();
+    ) = generate_delegate_set(components);
 
     module.content.as_mut().map(|(brace, items)| {
         items.extend(
@@ -39,7 +36,7 @@ fn inject_delegate_items(module: &mut ItemMod) {
 }
 
 /// Generates the delegate/undelegate functions and related structs to inject in the component program.
-fn generate_delegate_set() -> (
+fn generate_delegate_set(components: Vec<(syn::Ident, String)>) -> (
     TokenStream2,
     TokenStream2,
     TokenStream2,
@@ -47,11 +44,19 @@ fn generate_delegate_set() -> (
     TokenStream2,
     TokenStream2,
 ) {
+    let component_matches = components.iter().map(|(component, name)| quote! {
+        #component::DISCRIMINATOR => &[#component::seed(), #name.as_bytes(), &ctx.accounts.entity.key().to_bytes()]
+    }).collect::<Vec<_>>();
+
     let delegate_fn = quote! {
         #[automatically_derived]
-        pub fn delegate(ctx: Context<DelegateInput>, commit_frequency_ms: u32, validator: Option<Pubkey>, pda_seeds: Vec<Vec<u8>>) -> Result<()> {
-            let pda_seeds = pda_seeds.iter().map(|seed| seed.as_slice()).collect::<Vec<_>>();
-            let pda_seeds: &[&[u8]] = pda_seeds.as_slice();
+        pub fn delegate(ctx: Context<DelegateInput>, commit_frequency_ms: u32, validator: Option<Pubkey>) -> Result<()> {
+            let discriminator = ::bolt_lang::BoltMetadata::discriminator_from_account_info(&ctx.accounts.account)?;
+
+            let pda_seeds: &[&[u8]] = match discriminator.as_slice() {
+                #(#component_matches),*,
+                _ => return Err(error!(::bolt_lang::BoltError::ComponentNotDelegateable)),
+            };
 
             let del_accounts = ::bolt_lang::DelegateAccounts {
                 payer: &ctx.accounts.payer,

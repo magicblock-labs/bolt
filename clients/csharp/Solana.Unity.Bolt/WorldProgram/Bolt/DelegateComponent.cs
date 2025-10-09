@@ -33,12 +33,7 @@ namespace Bolt {
 			byte[] commitFrequencyBytes = BitConverter.GetBytes(commitFrequencyMs); // little-endian on most platforms
 			byte[] validatorNoneTag = new byte[] { 0 }; // COption None
 
-			// pdaSeeds = [seedBytes, entityPubkeyBytes]
-			var seedBytes = Encoding.UTF8.GetBytes(seed ?? "");
-			var entityBytes = entity.KeyBytes;
-			byte[] pdaSeeds = BuildVecOfBytes(new byte[][] { seedBytes, entityBytes });
-
-			var data = Concat(discriminator, commitFrequencyBytes, validatorNoneTag, pdaSeeds);
+			var data = Concat(discriminator, commitFrequencyBytes, validatorNoneTag);
 
 			TransactionInstruction instruction = new TransactionInstruction() {
 				ProgramId = componentId,
@@ -76,11 +71,7 @@ namespace Bolt {
 			byte[] commitFrequencyBytes = BitConverter.GetBytes(commitFrequencyMs);
 			byte[] validatorNoneTag = new byte[] { 0 };
 
-			var seedBytes = Encoding.UTF8.GetBytes(component.Seeds(seed));
-			var entityBytes = entity.KeyBytes;
-			byte[] pdaSeeds = BuildVecOfBytes(new byte[][] { seedBytes, entityBytes });
-
-			var data = Concat(discriminator, commitFrequencyBytes, validatorNoneTag, pdaSeeds);
+			var data = Concat(discriminator, commitFrequencyBytes, validatorNoneTag);
 
 			TransactionInstruction instruction = new TransactionInstruction() {
 				ProgramId = component.Program,
