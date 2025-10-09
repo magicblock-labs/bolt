@@ -1,7 +1,7 @@
 use bolt_utils::add_bolt_metadata;
-use sha2::{Digest, Sha256};
 use proc_macro::TokenStream;
 use quote::quote;
+use sha2::{Digest, Sha256};
 use syn::{parse_macro_input, Attribute, DeriveInput};
 
 /// This macro is used to defined a struct as a BOLT component and automatically implements the

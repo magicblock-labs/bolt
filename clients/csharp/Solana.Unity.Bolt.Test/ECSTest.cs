@@ -204,7 +204,7 @@ namespace ECSTest {
                     (framework.Entity1Pda, new Bolt.Component[] {
                         new Bolt.Component(framework.ExampleBundleProgramId, "position"),
                         new Bolt.Component(framework.ExampleBundleProgramId, "velocity")
-                    }, null)
+                    }, Array.Empty<string>())
                 },
                 new { },
                 framework.Wallet.Account.PublicKey
@@ -226,7 +226,7 @@ namespace ECSTest {
                 new (PublicKey entity, Bolt.Component[] components, string[] seeds)?[] {
                     (framework.Entity1Pda, new Bolt.Component[] {
                         new Bolt.Component(framework.ExampleBundleProgramId, "velocity")
-                    }, null)
+                    }, Array.Empty<string>())
                 },
                 new { },
                 framework.Wallet.Account.PublicKey

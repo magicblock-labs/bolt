@@ -3,7 +3,7 @@ use quote::{quote, ToTokens};
 
 use proc_macro2::TokenStream as TokenStream2;
 use syn::{
-    parse_quote, spanned::Spanned, Attribute, Field, Fields, ItemMod, ItemStruct, LitByteStr, Type
+    parse_quote, spanned::Spanned, Attribute, Field, Fields, ItemMod, ItemStruct, LitByteStr, Type,
 };
 
 pub fn remove_component_attributes(attrs: &mut Vec<syn::Attribute>) {
@@ -33,15 +33,10 @@ fn modify_component_module(
 
     module.content.as_mut().map(|(brace, items)| {
         items.extend(
-            vec![
-                initialize_fn,
-                initialize_struct,
-                destroy_fn,
-                destroy_struct,
-            ]
-            .into_iter()
-            .map(|item| syn::parse2(item).unwrap())
-            .collect::<Vec<_>>(),
+            vec![initialize_fn, initialize_struct, destroy_fn, destroy_struct]
+                .into_iter()
+                .map(|item| syn::parse2(item).unwrap())
+                .collect::<Vec<_>>(),
         );
 
         let modified_items: Vec<syn::Item> = items
@@ -203,13 +198,13 @@ pub fn generate_update(module: &mut ItemMod) {
         }
     };
     let update_with_session_fn = quote! {
-            #[automatically_derived]
-            pub fn update_with_session(ctx: Context<UpdateWithSession>, data: Vec<u8>) -> Result<()> {
-                let bolt_metadata = BoltMetadata::try_from_account_info(&ctx.accounts.bolt_component)?;
-                bolt_lang::instructions::update_with_session(&ctx.accounts.cpi_auth.to_account_info(), &ctx.accounts.authority, bolt_metadata.authority, &mut ctx.accounts.bolt_component, &ctx.accounts.session_token, &data)?;
-                Ok(())
-            }
-        };
+        #[automatically_derived]
+        pub fn update_with_session(ctx: Context<UpdateWithSession>, data: Vec<u8>) -> Result<()> {
+            let bolt_metadata = BoltMetadata::try_from_account_info(&ctx.accounts.bolt_component)?;
+            bolt_lang::instructions::update_with_session(&ctx.accounts.cpi_auth.to_account_info(), &ctx.accounts.authority, bolt_metadata.authority, &mut ctx.accounts.bolt_component, &ctx.accounts.session_token, &data)?;
+            Ok(())
+        }
+    };
     let update_struct = quote! {
         #[automatically_derived]
         #[derive(Accounts)]
@@ -238,10 +233,15 @@ pub fn generate_update(module: &mut ItemMod) {
     };
     module.content.as_mut().map(|(brace, items)| {
         items.extend(
-            vec![update_fn, update_struct, update_with_session_fn, update_with_session_struct]
-                .into_iter()
-                .map(|item| syn::parse2(item).unwrap())
-                .collect::<Vec<_>>(),
+            vec![
+                update_fn,
+                update_struct,
+                update_with_session_fn,
+                update_with_session_struct,
+            ]
+            .into_iter()
+            .map(|item| syn::parse2(item).unwrap())
+            .collect::<Vec<_>>(),
         );
         (brace, items.clone())
     });
