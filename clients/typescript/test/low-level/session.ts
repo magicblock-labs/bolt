@@ -8,6 +8,7 @@ import {
   FindSessionTokenPda,
   BN,
   CPI_AUTH_ADDRESS,
+  GetDiscriminator,
 } from "../../lib";
 import { Keypair } from "@solana/web3.js";
 
@@ -67,7 +68,7 @@ export function session(framework) {
         entity,
       });
       const instruction = await framework.worldProgram.methods
-        .initializeComponent()
+        .initializeComponent(GetDiscriminator("global:initialize"))
         .accounts({
           payer: sessionSigner.publicKey,
           entity: entity,
@@ -156,7 +157,7 @@ export function session(framework) {
         entity: entityWithAuthority,
       });
       const instruction = await framework.worldProgram.methods
-        .initializeComponent()
+        .initializeComponent(GetDiscriminator("global:initialize"))
         .accounts({
           payer: sessionSigner.publicKey,
           entity: entityWithAuthority,

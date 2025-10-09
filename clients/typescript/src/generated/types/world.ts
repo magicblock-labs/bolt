@@ -111,6 +111,35 @@ export type World = {
       ];
     },
     {
+      name: "applyWithDiscriminator";
+      discriminator: [126, 75, 184, 115, 193, 245, 69, 15];
+      accounts: [
+        {
+          name: "boltSystem";
+        },
+        {
+          name: "authority";
+          signer: true;
+        },
+        {
+          name: "cpiAuth";
+        },
+        {
+          name: "world";
+        },
+      ];
+      args: [
+        {
+          name: "systemDiscriminator";
+          type: "bytes";
+        },
+        {
+          name: "args";
+          type: "bytes";
+        },
+      ];
+    },
+    {
       name: "applyWithSession";
       discriminator: [213, 69, 29, 230, 142, 107, 134, 103];
       accounts: [
@@ -132,6 +161,38 @@ export type World = {
         },
       ];
       args: [
+        {
+          name: "args";
+          type: "bytes";
+        },
+      ];
+    },
+    {
+      name: "applyWithSessionAndDiscriminator";
+      discriminator: [156, 187, 1, 148, 179, 240, 139, 27];
+      accounts: [
+        {
+          name: "boltSystem";
+        },
+        {
+          name: "authority";
+          signer: true;
+        },
+        {
+          name: "cpiAuth";
+        },
+        {
+          name: "world";
+        },
+        {
+          name: "sessionToken";
+        },
+      ];
+      args: [
+        {
+          name: "systemDiscriminator";
+          type: "bytes";
+        },
         {
           name: "args";
           type: "bytes";
@@ -195,7 +256,12 @@ export type World = {
           address: "11111111111111111111111111111111";
         },
       ];
-      args: [];
+      args: [
+        {
+          name: "discriminator";
+          type: "bytes";
+        },
+      ];
     },
     {
       name: "initializeComponent";
@@ -227,7 +293,12 @@ export type World = {
           address: "11111111111111111111111111111111";
         },
       ];
-      args: [];
+      args: [
+        {
+          name: "discriminator";
+          type: "bytes";
+        },
+      ];
     },
     {
       name: "initializeNewWorld";

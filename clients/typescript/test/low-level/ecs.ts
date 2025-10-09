@@ -7,8 +7,10 @@ import {
   FindEntityPda,
   SerializeArgs,
   CPI_AUTH_ADDRESS,
+  GetDiscriminator,
 } from "../../lib";
 import { Direction } from "../framework";
+import crypto from "crypto";
 
 export function ecs(framework) {
   describe("ECS", () => {
@@ -98,7 +100,7 @@ export function ecs(framework) {
         seed: "component-velocity",
       });
       const instruction = await framework.worldProgram.methods
-        .initializeComponent()
+        .initializeComponent(GetDiscriminator("global:initialize"))
         .accounts({
           payer: framework.provider.wallet.publicKey,
           entity: framework.entity1Pda,
@@ -118,8 +120,9 @@ export function ecs(framework) {
         componentId,
         entity: framework.entity1Pda,
       });
+
       const instruction = await framework.worldProgram.methods
-        .initializeComponent()
+        .initializeComponent(GetDiscriminator("global:initialize"))
         .accounts({
           payer: framework.provider.wallet.publicKey,
           entity: framework.entity1Pda,
@@ -140,7 +143,7 @@ export function ecs(framework) {
         entity: framework.entity2Pda,
       });
       const instruction = await framework.worldProgram.methods
-        .initializeComponent()
+        .initializeComponent(GetDiscriminator("global:initialize"))
         .accounts({
           payer: framework.provider.wallet.publicKey,
           entity: framework.entity2Pda,
@@ -161,7 +164,7 @@ export function ecs(framework) {
         entity: framework.entity4Pda,
       });
       const instruction = await framework.worldProgram.methods
-        .initializeComponent()
+        .initializeComponent(GetDiscriminator("global:initialize"))
         .accounts({
           payer: framework.provider.wallet.publicKey,
           entity: framework.entity4Pda,
@@ -443,7 +446,7 @@ export function ecs(framework) {
       });
 
       const instruction = await framework.worldProgram.methods
-        .destroyComponent()
+        .destroyComponent(GetDiscriminator("global:destroy"))
         .accounts({
           authority: framework.provider.wallet.publicKey,
           componentProgram: framework.exampleComponentVelocity.programId,
