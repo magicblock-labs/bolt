@@ -8,7 +8,7 @@ use syn::{parse_macro_input, DeriveInput};
 pub use attributes::*;
 pub use generate::*;
 
-use crate::common::generate_program;
+use crate::{common::generate_program, delegate::inject_delegate_items};
 
 pub fn process(attr: TokenStream, item: TokenStream) -> TokenStream {
     let mut type_ = parse_macro_input!(item as DeriveInput);
@@ -16,7 +16,10 @@ pub fn process(attr: TokenStream, item: TokenStream) -> TokenStream {
 
     let attributes = Attributes::from(attr);
     generate_implementation(&mut program, &attributes, &type_);
-    generate_instructions(&mut program, &attributes, &type_.ident, None);
+    generate_instructions(&mut program, &type_.ident, None);
+    if attributes.delegate {
+        inject_delegate_items(&mut program, vec![(type_.ident.clone(), "".to_string())]);
+    }
     generate_update(&mut program);
     enrich_type(&mut type_);
 

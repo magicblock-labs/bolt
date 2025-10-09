@@ -7,21 +7,20 @@ use crate::common::generate_program;
 use crate::component;
 use crate::system;
 
-pub fn process(attr: TokenStream, item: TokenStream) -> TokenStream {
+pub fn process(_attr: TokenStream, item: TokenStream) -> TokenStream {
     let bundle_mod = parse_macro_input!(item as ItemMod);
     let mut program = generate_program(&bundle_mod.ident.to_string());
-    if attr.to_string().contains("delegate") {
-        program
-            .attrs
-            .insert(0, syn::parse_quote! { #[bolt_lang::delegate] });
-    }
     component::generate_update(&mut program);
+    let mut delegate_components = Vec::new();
     if let Some((_, items)) = bundle_mod.content {
         for item in items {
             match item {
                 syn::Item::Struct(item) => {
                     let attributes = component::Attributes::from(item.attrs.clone());
                     if attributes.is_component {
+                        if attributes.delegate {
+                            delegate_components.push((item.ident.clone(), item.ident.to_string().to_snake_case()));
+                        }
                         let data = syn::Data::Struct(syn::DataStruct {
                             struct_token: Default::default(),
                             fields: item.fields,
@@ -37,7 +36,6 @@ pub fn process(attr: TokenStream, item: TokenStream) -> TokenStream {
                         component::generate_implementation(&mut program, &attributes, &type_);
                         component::generate_instructions(
                             &mut program,
-                            &attributes,
                             &type_.ident,
                             Some(&type_.ident.to_string().to_snake_case()),
                         );
@@ -74,6 +72,8 @@ pub fn process(attr: TokenStream, item: TokenStream) -> TokenStream {
             }
         }
     }
+
+    crate::delegate::inject_delegate_items(&mut program, delegate_components);
 
     program.to_token_stream().into()
 }

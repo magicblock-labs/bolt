@@ -17,7 +17,6 @@ pub use bolt_attribute_bolt_bundle::bundle;
 pub use bolt_attribute_bolt_component::component;
 pub use bolt_attribute_bolt_component_deserialize::component_deserialize;
 pub use bolt_attribute_bolt_component_id::component_id;
-pub use bolt_attribute_bolt_delegate::delegate;
 pub use bolt_attribute_bolt_extra_accounts::extra_accounts;
 pub use bolt_attribute_bolt_extra_accounts::pubkey;
 pub use bolt_attribute_bolt_system::system;
@@ -91,5 +90,11 @@ impl BoltMetadata {
         let data = account.try_borrow_data()?;
         let bolt_metadata = &data[8..8 + std::mem::size_of::<BoltMetadata>()];
         Ok(BoltMetadata::try_from_slice(bolt_metadata)?)
+    }
+
+    pub fn discriminator_from_account_info(account: &AccountInfo) -> Result<Vec<u8>> {
+        let data = account.try_borrow_data()?;
+        let discriminator = &data[0..8];
+        Ok(discriminator.to_vec())
     }
 }

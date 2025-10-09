@@ -22,7 +22,6 @@ bolt-lang = { path = "crates/bolt-lang", version = "=0.2.6" }
 bolt-attribute = { path = "crates/bolt-lang/attribute", version = "=0.2.6" }
 bolt-attribute-bolt-bundle = { path = "crates/bolt-lang/attribute/bundle", version = "=0.2.6" }
 bolt-attribute-bolt-program = { path = "crates/bolt-lang/attribute/bolt-program", version = "=0.2.6" }
-bolt-attribute-bolt-delegate = { path = "crates/bolt-lang/attribute/delegate", version = "=0.2.6" }
 bolt-attribute-bolt-component = { path = "crates/bolt-lang/attribute/component", version = "=0.2.6" }
 bolt-attribute-bolt-system = { path = "crates/bolt-lang/attribute/system", version = "=0.2.6"}
 bolt-attribute-bolt-system-input = { path = "crates/bolt-lang/attribute/system-input", version = "=0.2.6" }
@@ -63,6 +62,7 @@ tokio = { version = "^1", features = ["full"] }
 sysinfo = "=0.36.1"
 bytemuck_derive = "^1"
 const-crypto = "0.3.0"
+sha2 = "^0.10"
 
 [profile.release]
 overflow-checks = true

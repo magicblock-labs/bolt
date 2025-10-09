@@ -12,7 +12,6 @@ pub fn remove_component_attributes(attrs: &mut Vec<syn::Attribute>) {
 
 pub fn generate_instructions(
     program_mod: &mut ItemMod,
-    attributes: &crate::component::Attributes,
     pascal_case_name: &syn::Ident,
     component_name: Option<&String>,
 ) {
@@ -20,11 +19,6 @@ pub fn generate_instructions(
         qself: None,
         path: pascal_case_name.clone().into(),
     });
-    if attributes.delegate {
-        program_mod
-            .attrs
-            .insert(0, syn::parse_quote! { #[bolt_lang::delegate] });
-    }
     modify_component_module(program_mod, &component_type, component_name)
 }
 

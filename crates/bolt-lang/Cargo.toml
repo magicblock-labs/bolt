@@ -17,7 +17,6 @@ anchor-lang = { workspace = true }
 
 # Bolt Attributes
 bolt-attribute-bolt-bundle = { workspace = true }
-bolt-attribute-bolt-delegate = { workspace = true }
 bolt-attribute-bolt-component = { workspace = true }
 bolt-attribute-bolt-system = { workspace = true }
 bolt-attribute-bolt-system-input = { workspace = true }
