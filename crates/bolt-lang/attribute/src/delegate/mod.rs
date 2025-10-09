@@ -53,7 +53,7 @@ fn generate_delegate_set(
     let delegate_fn = quote! {
         #[automatically_derived]
         pub fn delegate(ctx: Context<DelegateInput>, commit_frequency_ms: u32, validator: Option<Pubkey>) -> Result<()> {
-            let discriminator = ::bolt_lang::BoltMetadata::discriminator_from_account_info(&ctx.accounts.account)?;
+            let discriminator = ::bolt_lang::BoltMetadata::discriminator_from_account_info(&ctx.accounts.pda)?;
 
             let pda_seeds: &[&[u8]] = match discriminator.as_slice() {
                 #(#component_matches),*,
@@ -62,7 +62,7 @@ fn generate_delegate_set(
 
             let del_accounts = ::bolt_lang::DelegateAccounts {
                 payer: &ctx.accounts.payer,
-                pda: &ctx.accounts.account,
+                pda: &ctx.accounts.pda,
                 owner_program: &ctx.accounts.owner_program,
                 buffer: &ctx.accounts.buffer,
                 delegation_record: &ctx.accounts.delegation_record,
@@ -92,7 +92,7 @@ fn generate_delegate_set(
             pub entity: Account<'info, Entity>,
             /// CHECK:
             #[account(mut)]
-            pub account: AccountInfo<'info>,
+            pub pda: AccountInfo<'info>,
             /// CHECK:`
             pub owner_program: AccountInfo<'info>,
             /// CHECK:
