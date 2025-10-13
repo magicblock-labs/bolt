@@ -349,7 +349,8 @@ pub mod world {
         ctx: Context<'_, '_, '_, 'info, Apply<'info>>,
         args: Vec<u8>,
     ) -> Result<()> {
-        apply_impl(ctx, discriminator_for("global:bolt_execute").to_vec(), args)
+        const DISCRIMINATOR: [u8; 8] = discriminator_for("global:bolt_execute");
+        apply_impl(ctx, DISCRIMINATOR.to_vec(), args)
     }
 
     pub fn apply_with_discriminator<'info>(
@@ -379,7 +380,8 @@ pub mod world {
         ctx: Context<'_, '_, '_, 'info, ApplyWithSession<'info>>,
         args: Vec<u8>,
     ) -> Result<()> {
-        apply_with_session_impl(ctx, discriminator_for("global:bolt_execute").to_vec(), args)
+        const DISCRIMINATOR: [u8; 8] = discriminator_for("global:bolt_execute");
+        apply_with_session_impl(ctx, DISCRIMINATOR.to_vec(), args)
     }
 
     pub fn apply_with_session_and_discriminator<'info>(
@@ -433,7 +435,8 @@ pub fn apply_impl<'info>(
             AccountMeta::new_readonly(ctx.accounts.authority.key(), true),
         ];
 
-        let mut data = discriminator_for("global:update").to_vec();
+        const DISCRIMINATOR: [u8; 8] = discriminator_for("global:update");
+        let mut data = DISCRIMINATOR.to_vec();
         let len_le = (result.len() as u32).to_le_bytes();
         data.extend_from_slice(&len_le);
         data.extend_from_slice(result.as_slice());
@@ -482,7 +485,8 @@ pub fn apply_with_session_impl<'info>(
             AccountMeta::new_readonly(ctx.accounts.session_token.key(), false),
         ];
 
-        let mut data = discriminator_for("global:update_with_session").to_vec();
+        const DISCRIMINATOR: [u8; 8] = discriminator_for("global:update_with_session");
+        let mut data = DISCRIMINATOR.to_vec();
         let len_le = (result.len() as u32).to_le_bytes();
         data.extend_from_slice(&len_le);
         data.extend_from_slice(result.as_slice());
