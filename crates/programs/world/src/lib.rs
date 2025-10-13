@@ -9,6 +9,10 @@ use utils::discriminator_for;
 #[cfg(not(feature = "no-entrypoint"))]
 use solana_security_txt::security_txt;
 
+pub const BOLT_EXECUTE: [u8; 8] = discriminator_for("global:bolt_execute");
+pub const UPDATE: [u8; 8] = discriminator_for("global:update");
+pub const UPDATE_WITH_SESSION: [u8; 8] = discriminator_for("global:update_with_session");
+
 declare_id!("WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n");
 
 #[cfg(not(feature = "no-entrypoint"))]
@@ -349,8 +353,7 @@ pub mod world {
         ctx: Context<'_, '_, '_, 'info, Apply<'info>>,
         args: Vec<u8>,
     ) -> Result<()> {
-        const DISCRIMINATOR: [u8; 8] = discriminator_for("global:bolt_execute");
-        apply_impl(ctx, DISCRIMINATOR.to_vec(), args)
+        apply_impl(ctx, BOLT_EXECUTE.to_vec(), args)
     }
 
     pub fn apply_with_discriminator<'info>(
@@ -380,8 +383,7 @@ pub mod world {
         ctx: Context<'_, '_, '_, 'info, ApplyWithSession<'info>>,
         args: Vec<u8>,
     ) -> Result<()> {
-        const DISCRIMINATOR: [u8; 8] = discriminator_for("global:bolt_execute");
-        apply_with_session_impl(ctx, DISCRIMINATOR.to_vec(), args)
+        apply_with_session_impl(ctx, BOLT_EXECUTE.to_vec(), args)
     }
 
     pub fn apply_with_session_and_discriminator<'info>(
@@ -435,8 +437,7 @@ pub fn apply_impl<'info>(
             AccountMeta::new_readonly(ctx.accounts.authority.key(), true),
         ];
 
-        const DISCRIMINATOR: [u8; 8] = discriminator_for("global:update");
-        let mut data = DISCRIMINATOR.to_vec();
+        let mut data = UPDATE.to_vec();
         let len_le = (result.len() as u32).to_le_bytes();
         data.extend_from_slice(&len_le);
         data.extend_from_slice(result.as_slice());
@@ -485,8 +486,7 @@ pub fn apply_with_session_impl<'info>(
             AccountMeta::new_readonly(ctx.accounts.session_token.key(), false),
         ];
 
-        const DISCRIMINATOR: [u8; 8] = discriminator_for("global:update_with_session");
-        let mut data = DISCRIMINATOR.to_vec();
+        let mut data = UPDATE_WITH_SESSION.to_vec();
         let len_le = (result.len() as u32).to_le_bytes();
         data.extend_from_slice(&len_le);
         data.extend_from_slice(result.as_slice());
