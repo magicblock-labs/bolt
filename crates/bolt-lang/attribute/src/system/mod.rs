@@ -488,7 +488,11 @@ impl VisitMut for Extractor {
         for input in &i.sig.inputs {
             if let FnArg::Typed(pat_type) = input {
                 if let Type::Path(type_path) = &*pat_type.ty {
-                    let last_segment = type_path.path.segments.last().expect("Context segment not found");
+                    let last_segment = type_path
+                        .path
+                        .segments
+                        .last()
+                        .expect("Context segment not found");
                     if last_segment.ident == "Context" {
                         if let PathArguments::AngleBracketed(args) = &last_segment.arguments {
                             for ga in args.args.iter() {

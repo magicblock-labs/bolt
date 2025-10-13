@@ -349,11 +349,7 @@ pub mod world {
         ctx: Context<'_, '_, '_, 'info, Apply<'info>>,
         args: Vec<u8>,
     ) -> Result<()> {
-        apply_impl(
-            ctx,
-            discriminator_for("global:bolt_execute").to_vec(),
-            args,
-        )
+        apply_impl(ctx, discriminator_for("global:bolt_execute").to_vec(), args)
     }
 
     pub fn apply_with_discriminator<'info>(
@@ -383,11 +379,7 @@ pub mod world {
         ctx: Context<'_, '_, '_, 'info, ApplyWithSession<'info>>,
         args: Vec<u8>,
     ) -> Result<()> {
-        apply_with_session_impl(
-            ctx,
-            discriminator_for("global:bolt_execute").to_vec(),
-            args,
-        )
+        apply_with_session_impl(ctx, discriminator_for("global:bolt_execute").to_vec(), args)
     }
 
     pub fn apply_with_session_and_discriminator<'info>(
