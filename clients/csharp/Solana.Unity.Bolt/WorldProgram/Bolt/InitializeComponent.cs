@@ -3,6 +3,7 @@
 
 using Solana.Unity.Rpc.Models;
 using Solana.Unity.Wallet;
+using System;
 using System.Threading.Tasks;
 using World.Program;
 
@@ -54,6 +55,9 @@ namespace Bolt {
 		/// <param name="seed">Optional additional seed; defaults to empty. Final seed is seed + component name.</param>
 		/// <param name="authority">Optional authority, defaults to world program id.</param>
 		public static async Task<InitializeComponentInstruction> InitializeComponent(PublicKey payer, PublicKey entity, Component component, string seed = "", PublicKey authority = null) {
+            if (component is null) throw new ArgumentNullException(nameof(component));
+            var discriminator = component.GetMethodDiscriminator("initialize");
+            if (discriminator is null || discriminator.Length != 8) throw new ArgumentException("Invalid discriminator", nameof(component));
             var componentPda = WorldProgram.FindComponentPda(component.Program, entity, component.Seeds(seed));
 			var initializeComponent = new InitializeComponentAccounts() {
 				Payer = payer,
@@ -63,7 +67,7 @@ namespace Bolt {
 				Authority = authority ?? new PublicKey(WorldProgram.ID),
 				CpiAuth = WorldProgram.CpiAuthAddress
 			};
-            var instruction = WorldProgram.InitializeComponent(initializeComponent, component.GetMethodDiscriminator("initialize"));
+            var instruction = WorldProgram.InitializeComponent(initializeComponent, discriminator);
 			return new InitializeComponentInstruction() {
 				Pda = componentPda,
 				Instruction = instruction
