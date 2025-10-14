@@ -94,24 +94,6 @@ namespace Bolt {
 			};
 		}
 
-		private static byte[] BuildVecOfBytes(byte[][] items)
-		{
-			// beet array encoding: u32 count, then each element as beet.bytes => u32 length + bytes
-			var countLe = BitConverter.GetBytes((uint)items.Length);
-			if (!BitConverter.IsLittleEndian) Array.Reverse(countLe);
-			List<byte> result = new List<byte>(4);
-			result.AddRange(countLe);
-			foreach (var item in items)
-			{
-				var lenLe = BitConverter.GetBytes((uint)(item?.Length ?? 0));
-				if (!BitConverter.IsLittleEndian) Array.Reverse(lenLe);
-				result.AddRange(lenLe);
-				if (item != null && item.Length > 0)
-					result.AddRange(item);
-			}
-			return result.ToArray();
-		}
-
 		private static byte[] Concat(params byte[][] arrays)
 		{
 			int total = 0;
