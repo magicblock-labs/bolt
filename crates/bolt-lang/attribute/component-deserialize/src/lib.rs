@@ -40,7 +40,7 @@ pub fn component_deserialize(_attr: TokenStream, item: TokenStream) -> TokenStre
         };
     }
     let mut sha256 = Sha256::new();
-    sha256.update(name_str.as_bytes());
+    sha256.update(format!("account:{}", name_str).as_bytes());
     let discriminator = sha256.finalize()[0..8].to_vec();
     let expanded = quote! {
         #input
