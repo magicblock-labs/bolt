@@ -50,8 +50,7 @@ pub fn process(_attr: TokenStream, item: TokenStream) -> TokenStream {
                 let variadic_struct: Item = parse_quote! {
                     #[derive(Accounts)]
                     pub struct VariadicBoltComponents<'info> {
-                        #[account()]
-                        pub authority: AccountInfo<'info>,
+                        pub authority: Signer<'info>,
                     }
                 };
                 items.insert(1, variadic_struct);

@@ -22,8 +22,7 @@ pub fn inject_program(module: &mut syn::ItemMod) {
             syn::Item::Struct(syn::parse_quote! {
                 #[derive(Accounts)]
                 pub struct VariadicBoltComponents<'info> {
-                    #[account()]
-                    pub authority: AccountInfo<'info>,
+                    pub authority: Signer<'info>,
                 }
             }),
         );
