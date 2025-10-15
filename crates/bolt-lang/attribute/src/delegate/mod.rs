@@ -28,7 +28,7 @@ pub fn inject_delegate_items(module: &mut ItemMod, components: Vec<(syn::Ident, 
                 undelegate_struct,
             ]
             .into_iter()
-            .map(|item| syn::parse2(item).unwrap())
+            .map(|item| syn::parse2(item).expect("Failed to parse delegate item"))
             .collect::<Vec<_>>(),
         );
         (brace, items.clone())
