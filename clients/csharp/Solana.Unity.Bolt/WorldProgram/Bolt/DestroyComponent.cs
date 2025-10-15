@@ -35,9 +35,32 @@ namespace Bolt {
                 Entity = entity,
                 Component = componentPda,
                 ComponentProgram = componentProgram,
-                ComponentProgramData = componentProgramData
+                ComponentProgramData = componentProgramData,
+                CpiAuth = WorldProgram.CpiAuthAddress
             };
-            var instruction = WorldProgram.DestroyComponent(destroyComponent);
+            var instruction = WorldProgram.DestroyComponent(destroyComponent, GetDiscriminator("global:destroy"));
+            return new DestroyComponentInstruction() {
+                Instruction = instruction
+            };
+        }
+
+        /// <summary>
+        /// Overload accepting bundled component identifier; seed defaults to component name.
+        /// Mirrors TS: discriminator derived from component name if provided.
+        /// </summary>
+        public static async Task<DestroyComponentInstruction> DestroyComponent(PublicKey authority, PublicKey receiver, PublicKey entity, Component component, string seed = "") {
+            var pda = WorldProgram.FindComponentPda(component.Program, entity, component.Seeds(seed));
+            var componentProgramData = WorldProgram.FindComponentProgramDataPda(component.Program);
+            var destroyComponent = new DestroyComponentAccounts() {
+                Authority = authority,
+                Receiver = receiver,
+                Entity = entity,
+                Component = pda,
+                ComponentProgram = component.Program,
+                ComponentProgramData = componentProgramData,
+                CpiAuth = WorldProgram.CpiAuthAddress
+            };
+            var instruction = WorldProgram.DestroyComponent(destroyComponent, component.GetMethodDiscriminator("destroy"));
             return new DestroyComponentInstruction() {
                 Instruction = instruction
             };

@@ -277,7 +277,8 @@ namespace World
 
             public PublicKey Authority { get; set; }
 
-            public PublicKey CpiAuth { get; set; } = new PublicKey("B2f2y3QTBv346wE6nWKor72AUhUvFF6mPk7TWCF2QVhi");
+            public PublicKey CpiAuth { get; set; }
+
             public PublicKey World { get; set; }
         }
 
@@ -287,7 +288,8 @@ namespace World
 
             public PublicKey Authority { get; set; }
 
-            public PublicKey CpiAuth { get; set; } = new PublicKey("B2f2y3QTBv346wE6nWKor72AUhUvFF6mPk7TWCF2QVhi");
+            public PublicKey CpiAuth { get; set; }
+
             public PublicKey World { get; set; }
 
             public PublicKey SessionToken { get; set; }
@@ -318,7 +320,8 @@ namespace World
 
             public PublicKey Component { get; set; }
 
-            public PublicKey CpiAuth { get; set; } = new PublicKey("B2f2y3QTBv346wE6nWKor72AUhUvFF6mPk7TWCF2QVhi");
+            public PublicKey CpiAuth { get; set; }
+
             public PublicKey SystemProgram { get; set; } = new PublicKey("11111111111111111111111111111111");
         }
 
@@ -334,7 +337,8 @@ namespace World
 
             public PublicKey Authority { get; set; }
 
-            public PublicKey CpiAuth { get; set; } = new PublicKey("B2f2y3QTBv346wE6nWKor72AUhUvFF6mPk7TWCF2QVhi");
+            public PublicKey CpiAuth { get; set; }
+
             public PublicKey SystemProgram { get; set; } = new PublicKey("11111111111111111111111111111111");
         }
 
@@ -428,7 +432,7 @@ namespace World
                 return new Solana.Unity.Rpc.Models.TransactionInstruction{Keys = keys, ProgramId = programId.KeyBytes, Data = resultData};
             }
 
-            public static Solana.Unity.Rpc.Models.TransactionInstruction Apply(ApplyAccounts accounts, byte[] args, PublicKey programId = null)
+            public static Solana.Unity.Rpc.Models.TransactionInstruction Apply(ApplyAccounts accounts, byte[] system_discriminator, byte[][] discriminators, byte[] args, PublicKey programId = null)
             {
                 programId ??= new(ID);
                 List<Solana.Unity.Rpc.Models.AccountMeta> keys = new()
@@ -437,6 +441,20 @@ namespace World
                 int offset = 0;
                 _data.WriteU64(16258613031726085112UL, offset);
                 offset += 8;
+                _data.WriteS32(system_discriminator.Length, offset);
+                offset += 4;
+                _data.WriteSpan(system_discriminator, offset);
+                offset += system_discriminator.Length;
+                _data.WriteS32(discriminators.Length, offset);
+                offset += 4;
+                foreach (var discriminatorsElement in discriminators)
+                {
+                    _data.WriteS32(discriminatorsElement.Length, offset);
+                    offset += 4;
+                    _data.WriteSpan(discriminatorsElement, offset);
+                    offset += discriminatorsElement.Length;
+                }
+
                 _data.WriteS32(args.Length, offset);
                 offset += 4;
                 _data.WriteSpan(args, offset);
@@ -446,7 +464,7 @@ namespace World
                 return new Solana.Unity.Rpc.Models.TransactionInstruction{Keys = keys, ProgramId = programId.KeyBytes, Data = resultData};
             }
 
-            public static Solana.Unity.Rpc.Models.TransactionInstruction ApplyWithSession(ApplyWithSessionAccounts accounts, byte[] args, PublicKey programId = null)
+            public static Solana.Unity.Rpc.Models.TransactionInstruction ApplyWithSession(ApplyWithSessionAccounts accounts, byte[] system_discriminator, byte[][] discriminators, byte[] args, PublicKey programId = null)
             {
                 programId ??= new(ID);
                 List<Solana.Unity.Rpc.Models.AccountMeta> keys = new()
@@ -455,6 +473,20 @@ namespace World
                 int offset = 0;
                 _data.WriteU64(7459768094276011477UL, offset);
                 offset += 8;
+                _data.WriteS32(system_discriminator.Length, offset);
+                offset += 4;
+                _data.WriteSpan(system_discriminator, offset);
+                offset += system_discriminator.Length;
+                _data.WriteS32(discriminators.Length, offset);
+                offset += 4;
+                foreach (var discriminatorsElement in discriminators)
+                {
+                    _data.WriteS32(discriminatorsElement.Length, offset);
+                    offset += 4;
+                    _data.WriteSpan(discriminatorsElement, offset);
+                    offset += discriminatorsElement.Length;
+                }
+
                 _data.WriteS32(args.Length, offset);
                 offset += 4;
                 _data.WriteSpan(args, offset);
@@ -478,7 +510,7 @@ namespace World
                 return new Solana.Unity.Rpc.Models.TransactionInstruction{Keys = keys, ProgramId = programId.KeyBytes, Data = resultData};
             }
 
-            public static Solana.Unity.Rpc.Models.TransactionInstruction DestroyComponent(DestroyComponentAccounts accounts, PublicKey programId = null)
+            public static Solana.Unity.Rpc.Models.TransactionInstruction DestroyComponent(DestroyComponentAccounts accounts, byte[] discriminator, PublicKey programId = null)
             {
                 programId ??= new(ID);
                 List<Solana.Unity.Rpc.Models.AccountMeta> keys = new()
@@ -487,12 +519,16 @@ namespace World
                 int offset = 0;
                 _data.WriteU64(5321952129328727336UL, offset);
                 offset += 8;
+                _data.WriteS32(discriminator.Length, offset);
+                offset += 4;
+                _data.WriteSpan(discriminator, offset);
+                offset += discriminator.Length;
                 byte[] resultData = new byte[offset];
                 Array.Copy(_data, resultData, offset);
                 return new Solana.Unity.Rpc.Models.TransactionInstruction{Keys = keys, ProgramId = programId.KeyBytes, Data = resultData};
             }
 
-            public static Solana.Unity.Rpc.Models.TransactionInstruction InitializeComponent(InitializeComponentAccounts accounts, PublicKey programId = null)
+            public static Solana.Unity.Rpc.Models.TransactionInstruction InitializeComponent(InitializeComponentAccounts accounts, byte[] discriminator, PublicKey programId = null)
             {
                 programId ??= new(ID);
                 List<Solana.Unity.Rpc.Models.AccountMeta> keys = new()
@@ -501,6 +537,10 @@ namespace World
                 int offset = 0;
                 _data.WriteU64(2179155133888827172UL, offset);
                 offset += 8;
+                _data.WriteS32(discriminator.Length, offset);
+                offset += 4;
+                _data.WriteSpan(discriminator, offset);
+                offset += discriminator.Length;
                 byte[] resultData = new byte[offset];
                 Array.Copy(_data, resultData, offset);
                 return new Solana.Unity.Rpc.Models.TransactionInstruction{Keys = keys, ProgramId = programId.KeyBytes, Data = resultData};

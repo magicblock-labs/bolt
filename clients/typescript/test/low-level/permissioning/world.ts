@@ -1,5 +1,10 @@
 import { expect } from "chai";
-import { anchor, CPI_AUTH_ADDRESS, SerializeArgs } from "../../../lib";
+import {
+  anchor,
+  CPI_AUTH_ADDRESS,
+  SerializeArgs,
+  GetDiscriminator,
+} from "../../../lib";
 
 export function world(framework) {
   describe("World authority", () => {
