@@ -22,6 +22,6 @@ export class Component extends Identifier {
   }
 
   seeds(seed?: string): string {
-    return (seed ?? "") + (this.name ?? "");
+    return (this.name ?? "") + (seed ?? "");
   }
 }
