@@ -88,7 +88,10 @@ pub fn pubkey_from_str(s: &str) -> solana_program::pubkey::Pubkey {
 impl BoltMetadata {
     pub fn try_from_account_info(account: &AccountInfo) -> Result<Self> {
         let data = account.try_borrow_data()?;
-        require!(data.len() >= 8 + BoltMetadata::INIT_SPACE, ErrorCode::AccountDidNotDeserialize);
+        require!(
+            data.len() >= 8 + BoltMetadata::INIT_SPACE,
+            ErrorCode::AccountDidNotDeserialize
+        );
         let slice = &data[8..8 + BoltMetadata::INIT_SPACE];
         Ok(BoltMetadata::try_from_slice(slice)?)
     }

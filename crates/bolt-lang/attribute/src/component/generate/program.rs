@@ -35,7 +35,9 @@ fn modify_component_module(
         items.extend(
             vec![initialize_fn, initialize_struct, destroy_fn, destroy_struct]
                 .into_iter()
-                .map(|item| syn::parse2(item).expect("Failed to parse generate initialize and destroy item"))
+                .map(|item| {
+                    syn::parse2(item).expect("Failed to parse generate initialize and destroy item")
+                })
                 .collect::<Vec<_>>(),
         );
 
