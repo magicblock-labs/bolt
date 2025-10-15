@@ -88,12 +88,14 @@ pub fn pubkey_from_str(s: &str) -> solana_program::pubkey::Pubkey {
 impl BoltMetadata {
     pub fn try_from_account_info(account: &AccountInfo) -> Result<Self> {
         let data = account.try_borrow_data()?;
-        let bolt_metadata = &data[8..8 + std::mem::size_of::<BoltMetadata>()];
-        Ok(BoltMetadata::try_from_slice(bolt_metadata)?)
+        require!(data.len() >= 8 + BoltMetadata::INIT_SPACE, ErrorCode::AccountDidNotDeserialize);
+        let slice = &data[8..8 + BoltMetadata::INIT_SPACE];
+        Ok(BoltMetadata::try_from_slice(slice)?)
     }
 
     pub fn discriminator_from_account_info(account: &AccountInfo) -> Result<Vec<u8>> {
         let data = account.try_borrow_data()?;
+        require!(data.len() >= 8, ErrorCode::AccountDidNotDeserialize);
         let discriminator = &data[0..8];
         Ok(discriminator.to_vec())
     }
