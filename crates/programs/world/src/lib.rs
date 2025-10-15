@@ -285,7 +285,7 @@ pub mod world {
             AccountMeta::new_readonly(ctx.accounts.system_program.key(), false),
         ];
 
-        let data = discriminator.to_vec();
+        let data = discriminator;
 
         let ix = Instruction {
             program_id: ctx.accounts.component_program.key(),
@@ -324,7 +324,7 @@ pub mod world {
             AccountMeta::new_readonly(ctx.accounts.system_program.key(), false),
         ];
 
-        let data = discriminator.to_vec();
+        let data = discriminator;
 
         let ix = Instruction {
             program_id: ctx.accounts.component_program.key(),
