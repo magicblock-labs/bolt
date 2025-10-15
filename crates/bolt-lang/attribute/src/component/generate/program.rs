@@ -35,7 +35,7 @@ fn modify_component_module(
         items.extend(
             vec![initialize_fn, initialize_struct, destroy_fn, destroy_struct]
                 .into_iter()
-                .map(|item| syn::parse2(item).unwrap())
+                .map(|item| syn::parse2(item).expect("Failed to parse generate initialize and destroy item"))
                 .collect::<Vec<_>>(),
         );
 
@@ -240,7 +240,7 @@ pub fn generate_update(module: &mut ItemMod) {
                 update_with_session_struct,
             ]
             .into_iter()
-            .map(|item| syn::parse2(item).unwrap())
+            .map(|item| syn::parse2(item).expect("Failed to parse generate update item"))
             .collect::<Vec<_>>(),
         );
         (brace, items.clone())
