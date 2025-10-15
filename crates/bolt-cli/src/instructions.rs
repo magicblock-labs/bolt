@@ -1,12 +1,12 @@
 use anchor_cli::config::{Config, ConfigOverride};
-use anchor_client::solana_client::rpc_config::RpcSendTransactionConfig;
 use anchor_client::solana_sdk::commitment_config::CommitmentConfig;
 use anchor_client::solana_sdk::pubkey::Pubkey;
 use anchor_client::solana_sdk::signature::{read_keypair_file, Keypair};
 use anchor_client::solana_sdk::signer::Signer;
-use anchor_client::solana_sdk::system_program;
 use anchor_client::Client;
 use anyhow::{anyhow, Result};
+use solana_client::rpc_config::RpcSendTransactionConfig;
+use solana_system_interface::program as system_program;
 use std::rc::Rc;
 use world::{accounts, instruction, Registry, World, ID};
 

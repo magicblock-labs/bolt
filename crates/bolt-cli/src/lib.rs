@@ -122,7 +122,6 @@ pub async fn entry(opts: Opts) -> Result<()> {
             anchor_cli::Command::Init {
                 name,
                 javascript,
-                solidity,
                 no_install,
                 no_git,
                 template,
@@ -133,7 +132,6 @@ pub async fn entry(opts: Opts) -> Result<()> {
                 &opts.cfg_override,
                 name,
                 javascript,
-                solidity,
                 no_install,
                 no_git,
                 template,
@@ -214,7 +212,6 @@ fn init(
     cfg_override: &ConfigOverride,
     name: String,
     javascript: bool,
-    solidity: bool,
     no_install: bool,
     no_git: bool,
     template: anchor_cli::rust_template::ProgramTemplate,
@@ -289,33 +286,31 @@ fn init(
             idl: None,
         },
     );
-    if !solidity {
-        let component_id = anchor_cli::rust_template::get_or_create_program_id(component_name);
-        let system_id = anchor_cli::rust_template::get_or_create_program_id(system_name);
-        localnet.insert(
-            component_name.to_owned(),
-            ProgramDeployment {
-                address: component_id,
-                path: None,
-                idl: None,
-            },
-        );
-        localnet.insert(
-            system_name.to_owned(),
-            ProgramDeployment {
-                address: system_id,
-                path: None,
-                idl: None,
-            },
-        );
-        cfg.workspace.members.push("programs/*".to_owned());
-        cfg.workspace
-            .members
-            .push("programs-ecs/components/*".to_owned());
-        cfg.workspace
-            .members
-            .push("programs-ecs/systems/*".to_owned());
-    }
+    let component_id = anchor_cli::rust_template::get_or_create_program_id(component_name);
+    let system_id = anchor_cli::rust_template::get_or_create_program_id(system_name);
+    localnet.insert(
+        component_name.to_owned(),
+        ProgramDeployment {
+            address: component_id,
+            path: None,
+            idl: None,
+        },
+    );
+    localnet.insert(
+        system_name.to_owned(),
+        ProgramDeployment {
+            address: system_id,
+            path: None,
+            idl: None,
+        },
+    );
+    cfg.workspace.members.push("programs/*".to_owned());
+    cfg.workspace
+        .members
+        .push("programs-ecs/components/*".to_owned());
+    cfg.workspace
+        .members
+        .push("programs-ecs/systems/*".to_owned());
 
     // Setup the test validator to clone Bolt programs from devnet
     let validator = Validator {
@@ -359,7 +354,7 @@ fn init(
     // Remove the default programs if `--force` is passed
     if force {
         let programs_path = std::env::current_dir()?
-            .join(if solidity { "solidity" } else { "programs" })
+            .join("programs")
             .join(&project_name);
         fs::create_dir_all(&programs_path)?;
         fs::remove_dir_all(&programs_path)?;
@@ -371,32 +366,28 @@ fn init(
     }
 
     // Build the program.
-    if solidity {
-        anchor_cli::solidity_template::create_program(&project_name)?;
-    } else {
-        create_system(system_name)?;
-        create_component(component_name)?;
-        rust_template::create_program(&project_name, template)?;
+    create_system(system_name)?;
+    create_component(component_name)?;
+    rust_template::create_program(&project_name, template)?;
 
-        // Add the component as a dependency to the system
-        std::process::Command::new("cargo")
-            .arg("add")
-            .arg("--package")
-            .arg(system_name)
-            .arg("--path")
-            .arg(format!("programs-ecs/components/{}", component_name))
-            .arg("--features")
-            .arg("cpi")
-            .stdout(std::process::Stdio::null())
-            .stderr(std::process::Stdio::null())
-            .spawn()
-            .map_err(|e| {
-                anyhow::format_err!(
-                    "error adding component as dependency to the system: {}",
-                    e.to_string()
-                )
-            })?;
-    }
+    // Add the component as a dependency to the system
+    std::process::Command::new("cargo")
+        .arg("add")
+        .arg("--package")
+        .arg(system_name)
+        .arg("--path")
+        .arg(format!("programs-ecs/components/{}", component_name))
+        .arg("--features")
+        .arg("cpi")
+        .stdout(std::process::Stdio::null())
+        .stderr(std::process::Stdio::null())
+        .spawn()
+        .map_err(|e| {
+            anyhow::format_err!(
+                "error adding component as dependency to the system: {}",
+                e.to_string()
+            )
+        })?;
 
     // Build the test suite.
     fs::create_dir_all("tests/fixtures")?;
@@ -429,18 +420,10 @@ fn init(
 
         if jest {
             let mut test = File::create(format!("tests/{}.test.js", &project_name))?;
-            if solidity {
-                test.write_all(anchor_cli::solidity_template::jest(&project_name).as_bytes())?;
-            } else {
-                test.write_all(templates::workspace::jest(&project_name).as_bytes())?;
-            }
+            test.write_all(templates::workspace::jest(&project_name).as_bytes())?;
         } else {
             let mut test = File::create(format!("tests/{}.js", &project_name))?;
-            if solidity {
-                test.write_all(anchor_cli::solidity_template::mocha(&project_name).as_bytes())?;
-            } else {
-                test.write_all(templates::workspace::mocha(&project_name).as_bytes())?;
-            }
+            test.write_all(templates::workspace::mocha(&project_name).as_bytes())?;
         }
 
         let mut deploy = File::create("migrations/deploy.js")?;
@@ -458,11 +441,7 @@ fn init(
         deploy.write_all(anchor_cli::rust_template::ts_deploy_script().as_bytes())?;
 
         let mut mocha = File::create(format!("tests/{}.ts", &project_name))?;
-        if solidity {
-            mocha.write_all(anchor_cli::solidity_template::ts_mocha(&project_name).as_bytes())?;
-        } else {
-            mocha.write_all(templates::workspace::ts_mocha(&project_name).as_bytes())?;
-        }
+        mocha.write_all(templates::workspace::ts_mocha(&project_name).as_bytes())?;
     }
 
     if !no_install {
