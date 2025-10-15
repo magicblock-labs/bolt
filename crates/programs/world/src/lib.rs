@@ -558,19 +558,15 @@ fn system_execute<'info>(
     use anchor_lang::solana_program::instruction::{AccountMeta, Instruction};
     use anchor_lang::solana_program::program::invoke;
 
-    let mut accounts = vec![
-        AccountMeta {
-            pubkey: authority.key(),
-            is_signer: authority.is_signer,
-            is_writable: authority.is_writable,
-        }
-    ];
-    accounts.extend(remaining_accounts.iter().map(|account| {
-        AccountMeta {
-            pubkey: account.key(),
-            is_signer: account.is_signer,
-            is_writable: account.is_writable,
-        }
+    let mut accounts = vec![AccountMeta {
+        pubkey: authority.key(),
+        is_signer: authority.is_signer,
+        is_writable: authority.is_writable,
+    }];
+    accounts.extend(remaining_accounts.iter().map(|account| AccountMeta {
+        pubkey: account.key(),
+        is_signer: account.is_signer,
+        is_writable: account.is_writable,
     }));
 
     let mut account_infos = vec![authority.to_account_info()];
