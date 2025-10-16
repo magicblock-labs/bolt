@@ -1,5 +1,5 @@
 use anchor_cli::config::ConfigOverride;
-use anyhow::Result;
+use anyhow::{Context, Result};
 
 use crate::EphemeralValidator;
 
@@ -28,7 +28,14 @@ pub async fn test(
         }
     }
     // Return the actual result when not using the ephemeral validator or if it failed to start.
-    anchor
+    let result = anchor
         .await
         .unwrap_or_else(|e| Err(anyhow::anyhow!("Failed to run anchor: {}", e)))
+        .context("Bolt test failed");
+    if result.is_err() {
+        println!("Something went wrong");
+    } else {
+        println!("Bolt test completed successfully");
+    }
+    result
 }
