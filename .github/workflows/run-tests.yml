@@ -98,5 +98,9 @@ jobs:
           cd clients/typescript
           yarn install && yarn build
           cd ../..
+          # Set limits for being able to run ephemeral-validator test process
+          sudo prlimit --pid $$ --nofile=1048576:1048576
+          sudo sysctl fs.inotify.max_user_instances=1280
+          sudo sysctl fs.inotify.max_user_watches=655360
           bolt test
 
