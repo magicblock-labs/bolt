@@ -22,9 +22,13 @@ pub async fn test(
         if let Ok(_ephemeral_validator) = EphemeralValidator::start().await {
             // Keep the validator alive while tests run by retaining the handle
             // in scope, and return the actual test result.
-            return anchor.await.unwrap_or_else(|e| Err(anyhow::anyhow!("Failed to run anchor: {}", e)));
+            return anchor
+                .await
+                .unwrap_or_else(|e| Err(anyhow::anyhow!("Failed to run anchor: {}", e)));
         }
     }
     // Return the actual result when not using the ephemeral validator or if it failed to start.
-    anchor.await.unwrap_or_else(|e| Err(anyhow::anyhow!("Failed to run anchor: {}", e)))
+    anchor
+        .await
+        .unwrap_or_else(|e| Err(anyhow::anyhow!("Failed to run anchor: {}", e)))
 }
