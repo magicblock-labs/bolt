@@ -34,9 +34,7 @@ pub fn bolt_program(args: TokenStream, input: TokenStream) -> TokenStream {
         extract_type_name(&args).expect("Expected a component type in macro arguments");
     let modified = modify_component_module(ast, &component_type);
     let additional_macro: Attribute = parse_quote! { #[program] };
-    let cpi_checker = generate_cpi_checker();
     TokenStream::from(quote! {
-        #cpi_checker
         #additional_macro
         #modified
     })
@@ -46,6 +44,7 @@ pub fn bolt_program(args: TokenStream, input: TokenStream) -> TokenStream {
 fn modify_component_module(mut module: ItemMod, component_type: &Type) -> ItemMod {
     let (initialize_fn, initialize_struct) = generate_initialize(component_type);
     let (destroy_fn, destroy_struct) = generate_destroy(component_type);
+    //let (apply_fn, apply_struct, apply_impl, update_fn, update_struct) = generate_instructions(component_type);
     let (update_fn, update_with_session_fn, update_struct, update_with_session_struct) =
         generate_update(component_type);
 
@@ -119,18 +118,6 @@ fn create_check_attribute() -> Attribute {
     }
 }
 
-/// Generates the CPI checker function.
-fn generate_cpi_checker() -> TokenStream2 {
-    quote! {
-        fn cpi_checker<'info>(cpi_auth: &AccountInfo<'info>) -> Result<()> {
-            if !cpi_auth.is_signer || cpi_auth.key != &bolt_lang::world::World::cpi_auth_address() {
-                return Err(BoltError::InvalidCaller.into());
-            }
-            Ok(())
-        }
-    }
-}
-
 /// Generates the destroy function and struct.
 fn generate_destroy(component_type: &Type) -> (TokenStream2, TokenStream2) {
     (
@@ -160,8 +147,12 @@ fn generate_destroy(component_type: &Type) -> (TokenStream2, TokenStream2) {
                     return Err(BoltError::InvalidAuthority.into());
                 }
 
-                cpi_checker(&ctx.accounts.cpi_auth.to_account_info())?;
-
+                let instruction = anchor_lang::solana_program::sysvar::instructions::get_instruction_relative(
+                    0, &ctx.accounts.instruction_sysvar_account.to_account_info()
+                ).map_err(|_| BoltError::InvalidCaller)?;
+                if instruction.program_id != World::id() {
+                    return Err(BoltError::InvalidCaller.into());
+                }
                 Ok(())
             }
         },
@@ -169,8 +160,6 @@ fn generate_destroy(component_type: &Type) -> (TokenStream2, TokenStream2) {
             #[automatically_derived]
             #[derive(Accounts)]
             pub struct Destroy<'info> {
-                #[account()]
-                pub cpi_auth: Signer<'info>,
                 #[account()]
                 pub authority: Signer<'info>,
                 #[account(mut)]
@@ -181,6 +170,8 @@ fn generate_destroy(component_type: &Type) -> (TokenStream2, TokenStream2) {
                 pub component: Account<'info, #component_type>,
                 #[account()]
                 pub component_program_data: AccountInfo<'info>,
+                #[account(address = anchor_lang::solana_program::sysvar::instructions::id())]
+                pub instruction_sysvar_account: AccountInfo<'info>,
                 pub system_program: Program<'info, System>,
             }
         },
@@ -193,7 +184,12 @@ fn generate_initialize(component_type: &Type) -> (TokenStream2, TokenStream2) {
         quote! {
             #[automatically_derived]
             pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
-                cpi_checker(&ctx.accounts.cpi_auth.to_account_info())?;
+                let instruction = anchor_lang::solana_program::sysvar::instructions::get_instruction_relative(
+                    0, &ctx.accounts.instruction_sysvar_account.to_account_info()
+                ).map_err(|_| BoltError::InvalidCaller)?;
+                if instruction.program_id != World::id() {
+                    return Err(BoltError::InvalidCaller.into());
+                }
                 ctx.accounts.data.set_inner(<#component_type>::default());
                 ctx.accounts.data.bolt_metadata.authority = *ctx.accounts.authority.key;
                 Ok(())
@@ -203,8 +199,6 @@ fn generate_initialize(component_type: &Type) -> (TokenStream2, TokenStream2) {
             #[automatically_derived]
             #[derive(Accounts)]
             pub struct Initialize<'info>  {
-                #[account()]
-                pub cpi_auth: Signer<'info>,
                 #[account(mut)]
                 pub payer: Signer<'info>,
                 #[account(init_if_needed, payer = payer, space = <#component_type>::size(), seeds = [<#component_type>::seed(), entity.key().as_ref()], bump)]
@@ -213,6 +207,8 @@ fn generate_initialize(component_type: &Type) -> (TokenStream2, TokenStream2) {
                 pub entity: Account<'info, Entity>,
                 #[account()]
                 pub authority: AccountInfo<'info>,
+                #[account(address = anchor_lang::solana_program::sysvar::instructions::id())]
+                pub instruction_sysvar_account: UncheckedAccount<'info>,
                 pub system_program: Program<'info, System>,
             }
         },
@@ -229,7 +225,11 @@ fn generate_update(
             pub fn update(ctx: Context<Update>, data: Vec<u8>) -> Result<()> {
                 require!(ctx.accounts.bolt_component.bolt_metadata.authority == World::id() || (ctx.accounts.bolt_component.bolt_metadata.authority == *ctx.accounts.authority.key && ctx.accounts.authority.is_signer), BoltError::InvalidAuthority);
 
-                cpi_checker(&ctx.accounts.cpi_auth.to_account_info())?;
+                // Check if the instruction is called from the world program
+                let instruction = anchor_lang::solana_program::sysvar::instructions::get_instruction_relative(
+                    0, &ctx.accounts.instruction_sysvar_account.to_account_info()
+                ).map_err(|_| BoltError::InvalidCaller)?;
+                require_eq!(instruction.program_id, World::id(), BoltError::InvalidCaller);
 
                 ctx.accounts.bolt_component.set_inner(<#component_type>::try_from_slice(&data)?);
                 Ok(())
@@ -251,7 +251,11 @@ fn generate_update(
                     require_eq!(ctx.accounts.bolt_component.bolt_metadata.authority, ctx.accounts.session_token.authority, bolt_lang::session_keys::SessionError::InvalidToken);
                 }
 
-                cpi_checker(&ctx.accounts.cpi_auth.to_account_info())?;
+                // Check if the instruction is called from the world program
+                let instruction = anchor_lang::solana_program::sysvar::instructions::get_instruction_relative(
+                    0, &ctx.accounts.instruction_sysvar_account.to_account_info()
+                ).map_err(|_| BoltError::InvalidCaller)?;
+                require_eq!(instruction.program_id, World::id(), BoltError::InvalidCaller);
 
                 ctx.accounts.bolt_component.set_inner(<#component_type>::try_from_slice(&data)?);
                 Ok(())
@@ -261,24 +265,24 @@ fn generate_update(
             #[automatically_derived]
             #[derive(Accounts)]
             pub struct Update<'info> {
-                #[account()]
-                pub cpi_auth: Signer<'info>,
                 #[account(mut)]
                 pub bolt_component: Account<'info, #component_type>,
                 #[account()]
                 pub authority: Signer<'info>,
+                #[account(address = anchor_lang::solana_program::sysvar::instructions::id())]
+                pub instruction_sysvar_account: UncheckedAccount<'info>
             }
         },
         quote! {
             #[automatically_derived]
             #[derive(Accounts)]
             pub struct UpdateWithSession<'info> {
-                #[account()]
-                pub cpi_auth: Signer<'info>,
                 #[account(mut)]
                 pub bolt_component: Account<'info, #component_type>,
                 #[account()]
                 pub authority: Signer<'info>,
+                #[account(address = anchor_lang::solana_program::sysvar::instructions::id())]
+                pub instruction_sysvar_account: UncheckedAccount<'info>,
                 #[account(constraint = session_token.to_account_info().owner == &bolt_lang::session_keys::ID)]
                 pub session_token: Account<'info, bolt_lang::session_keys::SessionToken>,
             }

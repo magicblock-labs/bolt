@@ -97,7 +97,8 @@ export type World = {
           signer: true;
         },
         {
-          name: "cpiAuth";
+          name: "instructionSysvarAccount";
+          address: "Sysvar1nstructions1111111111111111111111111";
         },
         {
           name: "world";
@@ -122,7 +123,8 @@ export type World = {
           signer: true;
         },
         {
-          name: "cpiAuth";
+          name: "instructionSysvarAccount";
+          address: "Sysvar1nstructions1111111111111111111111111";
         },
         {
           name: "world";
@@ -188,7 +190,8 @@ export type World = {
           writable: true;
         },
         {
-          name: "cpiAuth";
+          name: "instructionSysvarAccount";
+          address: "Sysvar1nstructions1111111111111111111111111";
         },
         {
           name: "systemProgram";
@@ -220,7 +223,8 @@ export type World = {
           name: "authority";
         },
         {
-          name: "cpiAuth";
+          name: "instructionSysvarAccount";
+          address: "Sysvar1nstructions1111111111111111111111111";
         },
         {
           name: "systemProgram";
