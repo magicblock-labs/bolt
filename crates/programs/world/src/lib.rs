@@ -261,12 +261,12 @@ pub mod world {
         if !ctx.accounts.authority.is_signer && ctx.accounts.authority.key != &ID {
             return Err(WorldError::InvalidAuthority.into());
         }
-        bolt_component::cpi::initialize(ctx.accounts.build(&[World::cpi_auth_seeds().as_slice()]))?;
+        bolt_component::cpi::initialize(ctx.accounts.build())?;
         Ok(())
     }
 
     pub fn destroy_component(ctx: Context<DestroyComponent>) -> Result<()> {
-        bolt_component::cpi::destroy(ctx.accounts.build(&[World::cpi_auth_seeds().as_slice()]))?;
+        bolt_component::cpi::destroy(ctx.accounts.build())?;
         Ok(())
     }
 
@@ -288,8 +288,7 @@ pub mod world {
                     program,
                     component,
                     ctx.accounts.authority.clone(),
-                    ctx.accounts.cpi_auth.clone(),
-                    &[World::cpi_auth_seeds().as_slice()],
+                    ctx.accounts.instruction_sysvar_account.clone(),
                 ),
                 result,
             )?;
@@ -305,9 +304,9 @@ pub mod world {
         /// CHECK: authority check
         #[account()]
         pub authority: Signer<'info>,
-        #[account()]
-        /// CHECK: cpi auth check
-        pub cpi_auth: UncheckedAccount<'info>,
+        /// CHECK: instruction sysvar check
+        #[account(address = anchor_lang::solana_program::sysvar::instructions::id())]
+        pub instruction_sysvar_account: UncheckedAccount<'info>,
         #[account()]
         pub world: Account<'info, World>,
     }
@@ -342,9 +341,8 @@ pub mod world {
                     program,
                     component,
                     ctx.accounts.authority.clone(),
-                    ctx.accounts.cpi_auth.clone(),
+                    ctx.accounts.instruction_sysvar_account.clone(),
                     ctx.accounts.session_token.clone(),
-                    &[World::cpi_auth_seeds().as_slice()],
                 ),
                 result,
             )?;
@@ -360,9 +358,9 @@ pub mod world {
         /// CHECK: authority check
         #[account()]
         pub authority: Signer<'info>,
-        #[account()]
-        /// CHECK: cpi auth check
-        pub cpi_auth: UncheckedAccount<'info>,
+        /// CHECK: instruction sysvar check
+        #[account(address = anchor_lang::solana_program::sysvar::instructions::id())]
+        pub instruction_sysvar_account: UncheckedAccount<'info>,
         #[account()]
         pub world: Account<'info, World>,
         #[account()]
@@ -535,17 +533,16 @@ pub struct InitializeComponent<'info> {
     pub component_program: AccountInfo<'info>,
     /// CHECK: authority check
     pub authority: AccountInfo<'info>,
-    #[account()]
-    /// CHECK: cpi auth check
-    pub cpi_auth: UncheckedAccount<'info>,
+    #[account(address = anchor_lang::solana_program::sysvar::instructions::id())]
+    /// CHECK: instruction sysvar check
+    pub instruction_sysvar_account: UncheckedAccount<'info>,
     pub system_program: Program<'info, System>,
 }
 
 impl<'info> InitializeComponent<'info> {
-    pub fn build<'a, 'b, 'c>(
+    pub fn build(
         &self,
-        signer_seeds: &'a [&'b [&'c [u8]]],
-    ) -> CpiContext<'a, 'b, 'c, 'info, bolt_component::cpi::accounts::Initialize<'info>> {
+    ) -> CpiContext<'_, '_, '_, 'info, bolt_component::cpi::accounts::Initialize<'info>> {
         let cpi_program = self.component_program.to_account_info();
 
         let cpi_accounts = bolt_component::cpi::accounts::Initialize {
@@ -553,10 +550,10 @@ impl<'info> InitializeComponent<'info> {
             data: self.data.to_account_info(),
             entity: self.entity.to_account_info(),
             authority: self.authority.to_account_info(),
-            cpi_auth: self.cpi_auth.to_account_info(),
+            instruction_sysvar_account: self.instruction_sysvar_account.to_account_info(),
             system_program: self.system_program.to_account_info(),
         };
-        CpiContext::new_with_signer(cpi_program, cpi_accounts, signer_seeds)
+        CpiContext::new(cpi_program, cpi_accounts)
     }
 }
 
@@ -576,17 +573,16 @@ pub struct DestroyComponent<'info> {
     #[account(mut)]
     /// CHECK: component data check
     pub component: UncheckedAccount<'info>,
-    #[account()]
-    /// CHECK: cpi auth check
-    pub cpi_auth: UncheckedAccount<'info>,
+    #[account(address = anchor_lang::solana_program::sysvar::instructions::id())]
+    /// CHECK: instruction sysvar check
+    pub instruction_sysvar_account: UncheckedAccount<'info>,
     pub system_program: Program<'info, System>,
 }
 
 impl<'info> DestroyComponent<'info> {
-    pub fn build<'a, 'b, 'c>(
+    pub fn build(
         &self,
-        signer_seeds: &'a [&'b [&'c [u8]]],
-    ) -> CpiContext<'a, 'b, 'c, 'info, bolt_component::cpi::accounts::Destroy<'info>> {
+    ) -> CpiContext<'_, '_, '_, 'info, bolt_component::cpi::accounts::Destroy<'info>> {
         let cpi_program = self.component_program.to_account_info();
 
         let cpi_accounts = bolt_component::cpi::accounts::Destroy {
@@ -595,10 +591,10 @@ impl<'info> DestroyComponent<'info> {
             entity: self.entity.to_account_info(),
             component: self.component.to_account_info(),
             component_program_data: self.component_program_data.to_account_info(),
-            cpi_auth: self.cpi_auth.to_account_info(),
+            instruction_sysvar_account: self.instruction_sysvar_account.to_account_info(),
             system_program: self.system_program.to_account_info(),
         };
-        CpiContext::new_with_signer(cpi_program, cpi_accounts, signer_seeds)
+        CpiContext::new(cpi_program, cpi_accounts)
     }
 }
 
@@ -679,14 +675,6 @@ impl World {
     pub fn pda(&self) -> (Pubkey, u8) {
         Pubkey::find_program_address(&[World::seed(), &self.id.to_be_bytes()], &crate::ID)
     }
-
-    pub fn cpi_auth_seeds() -> [&'static [u8]; 2] {
-        [b"cpi_auth", &[251]] // 251 is the pre-computed bump for cpi_auth.
-    }
-
-    pub const fn cpi_auth_address() -> Pubkey {
-        Pubkey::from_str_const("B2f2y3QTBv346wE6nWKor72AUhUvFF6mPk7TWCF2QVhi") // This is the pre-computed address for cpi_auth.
-    }
 }
 
 #[account]
@@ -716,42 +704,41 @@ impl SystemWhitelist {
 }
 
 /// Builds the context for updating a component.
-pub fn build_update_context<'a, 'b, 'c, 'info>(
+pub fn build_update_context<'info>(
     component_program: AccountInfo<'info>,
     bolt_component: AccountInfo<'info>,
     authority: Signer<'info>,
-    cpi_auth: UncheckedAccount<'info>,
-    signer_seeds: &'a [&'b [&'c [u8]]],
-) -> CpiContext<'a, 'b, 'c, 'info, bolt_component::cpi::accounts::Update<'info>> {
+    instruction_sysvar_account: UncheckedAccount<'info>,
+) -> CpiContext<'info, 'info, 'info, 'info, bolt_component::cpi::accounts::Update<'info>> {
     let authority = authority.to_account_info();
-    let cpi_auth = cpi_auth.to_account_info();
+    let instruction_sysvar_account = instruction_sysvar_account.to_account_info();
     let cpi_program = component_program;
     bolt_component::cpi::accounts::Update {
         bolt_component,
         authority,
-        cpi_auth,
+        instruction_sysvar_account,
     }
-    .build_cpi_context(cpi_program, signer_seeds)
+    .build_cpi_context(cpi_program)
 }
 
 /// Builds the context for updating a component.
-pub fn build_update_context_with_session<'a, 'b, 'c, 'info>(
+pub fn build_update_context_with_session<'info>(
     component_program: AccountInfo<'info>,
     bolt_component: AccountInfo<'info>,
     authority: Signer<'info>,
-    cpi_auth: UncheckedAccount<'info>,
+    instruction_sysvar_account: UncheckedAccount<'info>,
     session_token: UncheckedAccount<'info>,
-    signer_seeds: &'a [&'b [&'c [u8]]],
-) -> CpiContext<'a, 'b, 'c, 'info, bolt_component::cpi::accounts::UpdateWithSession<'info>> {
+) -> CpiContext<'info, 'info, 'info, 'info, bolt_component::cpi::accounts::UpdateWithSession<'info>>
+{
     let authority = authority.to_account_info();
-    let cpi_auth = cpi_auth.to_account_info();
+    let instruction_sysvar_account = instruction_sysvar_account.to_account_info();
     let cpi_program = component_program;
     let session_token = session_token.to_account_info();
     bolt_component::cpi::accounts::UpdateWithSession {
         bolt_component,
         authority,
-        cpi_auth,
+        instruction_sysvar_account,
         session_token,
     }
-    .build_cpi_context(cpi_program, signer_seeds)
+    .build_cpi_context(cpi_program)
 }

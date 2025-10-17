@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { anchor, CPI_AUTH_ADDRESS, SerializeArgs } from "../../../lib";
+import { anchor, SerializeArgs } from "../../../lib";
 
 export function world(framework) {
   describe("World authority", () => {
@@ -121,7 +121,6 @@ export function world(framework) {
           authority: framework.provider.wallet.publicKey,
           boltSystem: framework.systemFly.programId,
           world: framework.worldPda,
-          cpiAuth: CPI_AUTH_ADDRESS,
         })
         .remainingAccounts([
           {
@@ -169,7 +168,6 @@ export function world(framework) {
           authority: framework.provider.wallet.publicKey,
           boltSystem: framework.systemFly.programId,
           world: framework.worldPda,
-          cpiAuth: CPI_AUTH_ADDRESS,
         })
         .remainingAccounts([
           {

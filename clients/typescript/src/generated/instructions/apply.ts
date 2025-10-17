@@ -7,7 +7,6 @@
 
 import * as beet from "@metaplex-foundation/beet";
 import * as web3 from "@solana/web3.js";
-import { CPI_AUTH_ADDRESS } from "../../world/transactions";
 
 /**
  * @category Instructions
@@ -40,6 +39,7 @@ export const applyStruct = new beet.FixableBeetArgsStruct<
  * @property [] boltSystem
  * @property [_writable_] boltComponent
  * @property [] authority
+ * @property [] instructionSysvarAccount
  * @category Instructions
  * @category Apply
  * @category generated
@@ -49,6 +49,7 @@ export interface ApplyInstructionAccounts {
   boltSystem: web3.PublicKey;
   boltComponent: web3.PublicKey;
   authority: web3.PublicKey;
+  instructionSysvarAccount: web3.PublicKey;
   world: web3.PublicKey;
   anchorRemainingAccounts?: web3.AccountMeta[];
 }
@@ -98,7 +99,7 @@ export function createApplyInstruction(
       isSigner: false,
     },
     {
-      pubkey: CPI_AUTH_ADDRESS,
+      pubkey: accounts.instructionSysvarAccount,
       isWritable: false,
       isSigner: false,
     },
