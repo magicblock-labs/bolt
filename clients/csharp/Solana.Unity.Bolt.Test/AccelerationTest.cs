@@ -21,10 +21,9 @@ namespace AccelerationTest {
             await Profiler.Run("DelegateComponent", async () => {
                 await DelegateComponent(framework);
             });
-            // TODO: Re-enable this test when ephemeral-validator is properly installed on the CI.
-            // await Profiler.Run("ApplySimpleMovementSystemOnAccelerator 10", async () => {
-            //     await ApplySimpleMovementSystemOnAccelerator(framework);
-            // });
+            await Profiler.Run("ApplySimpleMovementSystemOnAccelerator 10", async () => {
+                await ApplySimpleMovementSystemOnAccelerator(framework);
+            });
         }
 
         public static async Task AddAccelerationEntity(Framework framework) {

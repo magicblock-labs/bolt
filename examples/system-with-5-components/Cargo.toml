@@ -22,5 +22,5 @@ custom-panic = []
 
 [dependencies]
 bolt-lang.workspace = true
-component-small.workspace = true
+small.workspace = true
 serde.workspace = true

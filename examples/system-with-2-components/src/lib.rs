@@ -1,5 +1,5 @@
 use bolt_lang::*;
-use component_small::Small;
+use small::Small;
 
 declare_id!("X5wTvz1i6ocNXzfrEB8JmhFCniojUZxqk3TXDq98fZX");
 
