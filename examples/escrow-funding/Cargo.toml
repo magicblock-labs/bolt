@@ -23,4 +23,4 @@ custom-panic = []
 [dependencies]
 bolt-lang.workspace = true
 serde = { version = "1.0", features = ["derive"] }
-component-small.workspace = true
+small.workspace = true

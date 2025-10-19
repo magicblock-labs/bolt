@@ -1,6 +1,6 @@
 use bolt_lang::anchor_lang::*;
 use bolt_lang::*;
-use component_small::Small;
+use small::Small;
 
 declare_id!("4Um2d8SvyfWyLLtfu2iJMFhM77DdjjyQusEy7K3VhPkd");
 

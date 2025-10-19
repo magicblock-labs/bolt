@@ -1259,13 +1259,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "component-small"
-version = "0.2.6"
-dependencies = [
- "bolt-lang",
-]
-
-[[package]]
 name = "concurrent-queue"
 version = "2.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1847,8 +1840,8 @@ name = "escrow-funding"
 version = "0.2.6"
 dependencies = [
  "bolt-lang",
- "component-small",
  "serde",
+ "small",
 ]
 
 [[package]]
@@ -4228,6 +4221,13 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8f92a496fb766b417c996b9c5e57daf2f7ad3b0bebe1ccfca4856390e3d3bb67"
 dependencies = [
  "autocfg",
+]
+
+[[package]]
+name = "small"
+version = "0.2.6"
+dependencies = [
+ "bolt-lang",
 ]
 
 [[package]]
@@ -7079,8 +7079,8 @@ name = "with-1-component"
 version = "0.2.3"
 dependencies = [
  "bolt-lang",
- "component-small",
  "serde",
+ "small",
 ]
 
 [[package]]
@@ -7088,8 +7088,8 @@ name = "with-10-components"
 version = "0.2.3"
 dependencies = [
  "bolt-lang",
- "component-small",
  "serde",
+ "small",
 ]
 
 [[package]]
@@ -7097,8 +7097,8 @@ name = "with-2-components"
 version = "0.2.3"
 dependencies = [
  "bolt-lang",
- "component-small",
  "serde",
+ "small",
 ]
 
 [[package]]
@@ -7106,8 +7106,8 @@ name = "with-3-components"
 version = "0.2.3"
 dependencies = [
  "bolt-lang",
- "component-small",
  "serde",
+ "small",
 ]
 
 [[package]]
@@ -7115,8 +7115,8 @@ name = "with-4-components"
 version = "0.2.3"
 dependencies = [
  "bolt-lang",
- "component-small",
  "serde",
+ "small",
 ]
 
 [[package]]
@@ -7124,8 +7124,8 @@ name = "with-5-components"
 version = "0.2.3"
 dependencies = [
  "bolt-lang",
- "component-small",
  "serde",
+ "small",
 ]
 
 [[package]]
@@ -7133,8 +7133,8 @@ name = "with-6-components"
 version = "0.2.3"
 dependencies = [
  "bolt-lang",
- "component-small",
  "serde",
+ "small",
 ]
 
 [[package]]
@@ -7142,8 +7142,8 @@ name = "with-7-components"
 version = "0.2.3"
 dependencies = [
  "bolt-lang",
- "component-small",
  "serde",
+ "small",
 ]
 
 [[package]]
@@ -7151,8 +7151,8 @@ name = "with-8-components"
 version = "0.2.3"
 dependencies = [
  "bolt-lang",
- "component-small",
  "serde",
+ "small",
 ]
 
 [[package]]
@@ -7160,8 +7160,8 @@ name = "with-9-components"
 version = "0.2.3"
 dependencies = [
  "bolt-lang",
- "component-small",
  "serde",
+ "small",
 ]
 
 [[package]]
