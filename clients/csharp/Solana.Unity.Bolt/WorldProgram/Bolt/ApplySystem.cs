@@ -100,7 +100,6 @@ namespace Bolt {
                 {
                     BoltSystem = systemId.Program,
                     Authority = authority,
-                    CpiAuth = WorldProgram.CpiAuthAddress,
                     World = world,
                     SessionToken = sessionToken,
                 };
@@ -120,7 +119,6 @@ namespace Bolt {
                 {
                     BoltSystem = systemId.Program,
                     Authority = authority,
-                    CpiAuth = WorldProgram.CpiAuthAddress,
                     World = world,
                 };
                 if (hasSystemName)

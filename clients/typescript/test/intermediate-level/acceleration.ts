@@ -136,7 +136,6 @@ export function acceleration(framework: Framework) {
           applySystem.transaction,
           [],
           {
-            skipPreflight: true,
             commitment: "processed",
           },
         );

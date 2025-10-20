@@ -36,9 +36,8 @@ namespace Bolt {
                 Data = componentPda,
                 ComponentProgram = componentId,
                 Authority = authority ?? new PublicKey(WorldProgram.ID),
-                CpiAuth = WorldProgram.CpiAuthAddress
             };
-            var instruction = WorldProgram.InitializeComponent(initializeComponent, GetDiscriminator("global:initialize"));
+            var instruction = WorldProgram.InitializeComponent(initializeComponent);
             return new InitializeComponentInstruction() {
                 Pda = componentPda,
                 Instruction = instruction
@@ -65,9 +64,8 @@ namespace Bolt {
 				Data = componentPda,
 				ComponentProgram = component.Program,
 				Authority = authority ?? new PublicKey(WorldProgram.ID),
-				CpiAuth = WorldProgram.CpiAuthAddress
 			};
-            var instruction = WorldProgram.InitializeComponent(initializeComponent, discriminator);
+            var instruction = WorldProgram.InitializeComponentWithDiscriminator(initializeComponent, discriminator);
 			return new InitializeComponentInstruction() {
 				Pda = componentPda,
 				Instruction = instruction

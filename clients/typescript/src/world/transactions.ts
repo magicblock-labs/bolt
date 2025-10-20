@@ -367,7 +367,7 @@ export async function DestroyComponent({
   });
   const componentPda = component.pda(entity, seed);
   const instruction = await program.methods
-    .destroyComponent(discriminator)
+    .destroyComponentWithDiscriminator(discriminator)
     .accounts({
       authority,
       component: componentPda,
@@ -422,14 +422,13 @@ export async function InitializeComponent({
   ) as unknown as Program<WorldProgram>;
 
   const instruction = await program.methods
-    .initializeComponent(discriminator)
+    .initializeComponentWithDiscriminator(discriminator)
     .accounts({
       payer,
       entity,
       data: componentPda,
       componentProgram: componentProgram,
       authority: authority ?? PROGRAM_ID,
-      instructionSysvarAccount: SYSVAR_INSTRUCTIONS_PUBKEY,
     })
     .remainingAccounts(anchorRemainingAccounts ?? [])
     .instruction();
@@ -523,7 +522,6 @@ async function createApplySystemInstruction({
           boltSystem: system.program,
           sessionToken: session.token,
           world,
-          cpiAuth: CPI_AUTH_ADDRESS,
         })
         .remainingAccounts(remainingAccounts)
         .instruction();
@@ -534,7 +532,6 @@ async function createApplySystemInstruction({
           authority: authority ?? PROGRAM_ID,
           boltSystem: system.program,
           world,
-          cpiAuth: CPI_AUTH_ADDRESS,
         })
         .remainingAccounts(remainingAccounts)
         .instruction();
@@ -547,7 +544,6 @@ async function createApplySystemInstruction({
           boltSystem: system.program,
           sessionToken: session.token,
           world,
-          cpiAuth: CPI_AUTH_ADDRESS,
         })
         .remainingAccounts(remainingAccounts)
         .instruction();
@@ -558,7 +554,6 @@ async function createApplySystemInstruction({
           authority: authority ?? PROGRAM_ID,
           boltSystem: system.program,
           world,
-          cpiAuth: CPI_AUTH_ADDRESS,
         })
         .remainingAccounts(remainingAccounts)
         .instruction();

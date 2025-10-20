@@ -1,5 +1,5 @@
 #![allow(clippy::manual_unwrap_or_default)]
-use anchor_lang::prelude::*;
+use anchor_lang::{prelude::*, solana_program::instruction::{AccountMeta, Instruction}, solana_program::program::invoke};
 use error::WorldError;
 use std::collections::BTreeSet;
 
@@ -10,6 +10,8 @@ use utils::discriminator_for;
 use solana_security_txt::security_txt;
 
 pub const BOLT_EXECUTE: [u8; 8] = discriminator_for("global:bolt_execute");
+pub const INITIALIZE: [u8; 8] = discriminator_for("global:initialize");
+pub const DESTROY: [u8; 8] = discriminator_for("global:destroy");
 pub const UPDATE: [u8; 8] = discriminator_for("global:update");
 pub const UPDATE_WITH_SESSION: [u8; 8] = discriminator_for("global:update_with_session");
 
@@ -29,8 +31,6 @@ mod error;
 
 #[program]
 pub mod world {
-    use anchor_lang::solana_program::program::invoke_signed;
-
     use super::*;
     use crate::error::WorldError;
 
@@ -265,7 +265,12 @@ pub mod world {
         Ok(())
     }
 
-    pub fn initialize_component(
+    pub fn initialize_component(ctx: Context<InitializeComponent>) -> Result<()> {
+        initialize_component_with_discriminator(ctx, INITIALIZE.to_vec())
+    }
+
+
+    pub fn initialize_component_with_discriminator(
         ctx: Context<InitializeComponent>,
         discriminator: Vec<u8>,
     ) -> Result<()> {
@@ -277,11 +282,11 @@ pub mod world {
 
         // Prepare the accounts for the CPI
         let accounts = vec![
-            AccountMeta::new_readonly(ctx.accounts.cpi_auth.key(), true),
             AccountMeta::new(ctx.accounts.payer.key(), true),
             AccountMeta::new(ctx.accounts.data.key(), false),
             AccountMeta::new_readonly(ctx.accounts.entity.key(), false),
             AccountMeta::new_readonly(ctx.accounts.authority.key(), false),
+            AccountMeta::new_readonly(ctx.accounts.instruction_sysvar_account.key(), false),
             AccountMeta::new_readonly(ctx.accounts.system_program.key(), false),
         ];
 
@@ -294,33 +299,36 @@ pub mod world {
         };
 
         // CPI: invoke the instruction
-        invoke_signed(
+        invoke(
             &ix,
             &[
-                ctx.accounts.cpi_auth.to_account_info(),
                 ctx.accounts.payer.to_account_info(),
                 ctx.accounts.data.to_account_info(),
                 ctx.accounts.entity.to_account_info(),
                 ctx.accounts.authority.to_account_info(),
+                ctx.accounts.instruction_sysvar_account.to_account_info(),
                 ctx.accounts.system_program.to_account_info(),
             ],
-            &[World::cpi_auth_seeds().as_slice()],
         )?;
         Ok(())
     }
 
-    pub fn destroy_component(ctx: Context<DestroyComponent>, discriminator: Vec<u8>) -> Result<()> {
+    pub fn destroy_component(ctx: Context<DestroyComponent>) -> Result<()> {
+        destroy_component_with_discriminator(ctx, DESTROY.to_vec())
+    }
+
+    pub fn destroy_component_with_discriminator(ctx: Context<DestroyComponent>, discriminator: Vec<u8>) -> Result<()> {
         // Pure Solana SDK logic for CPI to bolt_component::destroy
         use anchor_lang::solana_program::instruction::{AccountMeta, Instruction};
 
         // Prepare the accounts for the CPI (must match bolt_component::Destroy)
         let accounts = vec![
-            AccountMeta::new_readonly(ctx.accounts.cpi_auth.key(), true),
             AccountMeta::new_readonly(ctx.accounts.authority.key(), true),
             AccountMeta::new(ctx.accounts.receiver.key(), false),
             AccountMeta::new_readonly(ctx.accounts.entity.key(), false),
             AccountMeta::new(ctx.accounts.component.key(), false),
             AccountMeta::new_readonly(ctx.accounts.component_program_data.key(), false),
+            AccountMeta::new_readonly(ctx.accounts.instruction_sysvar_account.key(), false),
             AccountMeta::new_readonly(ctx.accounts.system_program.key(), false),
         ];
 
@@ -333,18 +341,17 @@ pub mod world {
         };
 
         // CPI: invoke the instruction
-        invoke_signed(
+        invoke(
             &ix,
             &[
-                ctx.accounts.cpi_auth.to_account_info(),
                 ctx.accounts.authority.to_account_info(),
                 ctx.accounts.receiver.to_account_info(),
                 ctx.accounts.entity.to_account_info(),
                 ctx.accounts.component.to_account_info(),
                 ctx.accounts.component_program_data.to_account_info(),
+                ctx.accounts.instruction_sysvar_account.to_account_info(),
                 ctx.accounts.system_program.to_account_info(),
             ],
-            &[World::cpi_auth_seeds().as_slice()],
         )?;
         Ok(())
     }
@@ -427,14 +434,11 @@ pub fn apply_impl<'info>(
         ctx.remaining_accounts.to_vec(),
     )?;
 
-    use anchor_lang::solana_program::instruction::{AccountMeta, Instruction};
-    use anchor_lang::solana_program::program::invoke_signed as invoke_signed_program;
-
     for ((program, component), result) in pairs.into_iter().zip(results.into_iter()) {
         let accounts = vec![
-            AccountMeta::new_readonly(ctx.accounts.cpi_auth.key(), true),
             AccountMeta::new(component.key(), false),
             AccountMeta::new_readonly(ctx.accounts.authority.key(), true),
+            AccountMeta::new_readonly(ctx.accounts.instruction_sysvar_account.key(), false),
         ];
 
         let mut data = UPDATE.to_vec();
@@ -448,14 +452,13 @@ pub fn apply_impl<'info>(
             data,
         };
 
-        invoke_signed_program(
+        invoke(
             &ix,
             &[
-                ctx.accounts.cpi_auth.to_account_info(),
                 component.clone(),
                 ctx.accounts.authority.to_account_info(),
+                ctx.accounts.instruction_sysvar_account.to_account_info(),
             ],
-            &[World::cpi_auth_seeds().as_slice()],
         )?;
     }
     Ok(())
@@ -475,14 +478,11 @@ pub fn apply_with_session_impl<'info>(
         ctx.remaining_accounts.to_vec(),
     )?;
 
-    use anchor_lang::solana_program::instruction::{AccountMeta, Instruction};
-    use anchor_lang::solana_program::program::invoke_signed as invoke_signed_program;
-
     for ((program, component), result) in pairs.into_iter().zip(results.into_iter()) {
         let accounts = vec![
-            AccountMeta::new_readonly(ctx.accounts.cpi_auth.key(), true),
             AccountMeta::new(component.key(), false),
             AccountMeta::new_readonly(ctx.accounts.authority.key(), true),
+            AccountMeta::new_readonly(ctx.accounts.instruction_sysvar_account.key(), false),
             AccountMeta::new_readonly(ctx.accounts.session_token.key(), false),
         ];
 
@@ -497,15 +497,14 @@ pub fn apply_with_session_impl<'info>(
             data,
         };
 
-        invoke_signed_program(
+        invoke(
             &ix,
             &[
-                ctx.accounts.cpi_auth.to_account_info(),
                 component.clone(),
                 ctx.accounts.authority.to_account_info(),
+                ctx.accounts.instruction_sysvar_account.to_account_info(),
                 ctx.accounts.session_token.to_account_info(),
-            ],
-            &[World::cpi_auth_seeds().as_slice()],
+            ]
         )?;
     }
     Ok(())

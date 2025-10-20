@@ -159,7 +159,8 @@
           "signer": true
         },
         {
-          "name": "cpi_auth"
+          "name": "instruction_sysvar_account",
+          "address": "Sysvar1nstructions1111111111111111111111111"
         },
         {
           "name": "world"
@@ -235,7 +236,8 @@
           "signer": true
         },
         {
-          "name": "cpi_auth"
+          "name": "instruction_sysvar_account",
+          "address": "Sysvar1nstructions1111111111111111111111111"
         },
         {
           "name": "world"
@@ -331,6 +333,52 @@
           "address": "11111111111111111111111111111111"
         }
       ],
+      "args": []
+    },
+    {
+      "name": "destroy_component_with_discriminator",
+      "discriminator": [
+        71,
+        25,
+        153,
+        201,
+        108,
+        92,
+        114,
+        125
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "receiver",
+          "writable": true
+        },
+        {
+          "name": "component_program"
+        },
+        {
+          "name": "component_program_data"
+        },
+        {
+          "name": "entity"
+        },
+        {
+          "name": "component",
+          "writable": true
+        },
+        {
+          "name": "instruction_sysvar_account",
+          "address": "Sysvar1nstructions1111111111111111111111111"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
       "args": [
         {
           "name": "discriminator",
@@ -349,6 +397,48 @@
         234,
         61,
         30
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "data",
+          "writable": true
+        },
+        {
+          "name": "entity"
+        },
+        {
+          "name": "component_program"
+        },
+        {
+          "name": "authority"
+        },
+        {
+          "name": "instruction_sysvar_account",
+          "address": "Sysvar1nstructions1111111111111111111111111"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "initialize_component_with_discriminator",
+      "discriminator": [
+        174,
+        196,
+        222,
+        15,
+        149,
+        54,
+        137,
+        23
       ],
       "accounts": [
         {

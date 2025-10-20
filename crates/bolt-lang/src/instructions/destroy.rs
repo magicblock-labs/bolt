@@ -4,7 +4,7 @@ use crate::BoltError;
 
 pub fn destroy<'info>(
     program_id: &Pubkey,
-    cpi_auth: &AccountInfo<'info>,
+    instruction_sysvar_account: &AccountInfo<'info>,
     authority: &AccountInfo<'info>,
     component_program_data: &AccountInfo<'info>,
     component_authority: Pubkey,
@@ -35,5 +35,5 @@ pub fn destroy<'info>(
         return Err(BoltError::InvalidAuthority.into());
     }
 
-    crate::cpi::check(&cpi_auth.to_account_info())
+    crate::cpi::check(&instruction_sysvar_account.to_account_info())
 }

@@ -4,7 +4,6 @@ import {
   FindEntityPda,
   FindComponentPda,
   SerializeArgs,
-  GetDiscriminator,
 } from "../../../lib";
 import { assert, expect } from "chai";
 
@@ -40,7 +39,7 @@ export function component(framework) {
         entity: entity,
       });
       const instruction = await framework.worldProgram.methods
-        .initializeComponent(GetDiscriminator("global:initialize"))
+        .initializeComponent()
         .accounts({
           payer: framework.provider.wallet.publicKey,
           entity: entity,

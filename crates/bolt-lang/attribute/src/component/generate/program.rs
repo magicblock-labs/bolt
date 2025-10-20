@@ -107,7 +107,7 @@ fn generate_destroy(
     (
         quote! {
             pub fn #fn_destroy(ctx: Context<#structure_name>) -> Result<()> {
-                bolt_lang::instructions::destroy(&crate::id(), &ctx.accounts.cpi_auth.to_account_info(), &ctx.accounts.authority.to_account_info(), &ctx.accounts.component_program_data, ctx.accounts.component.bolt_metadata.authority)
+                bolt_lang::instructions::destroy(&crate::id(), &ctx.accounts.instruction_sysvar_account.to_account_info(), &ctx.accounts.authority.to_account_info(), &ctx.accounts.component_program_data, ctx.accounts.component.bolt_metadata.authority)
             }
         },
         quote! {
@@ -162,7 +162,7 @@ fn generate_initialize(
         quote! {
             #[automatically_derived]
             pub fn #fn_initialize(ctx: Context<#structure_name>) -> Result<()> {
-                bolt_lang::instructions::initialize(&ctx.accounts.cpi_auth.to_account_info(), &mut ctx.accounts.data)?;
+                bolt_lang::instructions::initialize(&ctx.accounts.instruction_sysvar_account.to_account_info(), &mut ctx.accounts.data)?;
                 ctx.accounts.data.bolt_metadata.authority = *ctx.accounts.authority.key;
                 Ok(())
             }
@@ -171,8 +171,6 @@ fn generate_initialize(
             #[automatically_derived]
             #[derive(Accounts)]
             pub struct #structure_name<'info>  {
-                #[account()]
-                pub cpi_auth: Signer<'info>,
                 #[account(mut)]
                 pub payer: Signer<'info>,
                 #[account(init_if_needed, payer = payer, space = <#component_type>::size(), seeds = #seeds_tokens, bump)]
@@ -182,7 +180,7 @@ fn generate_initialize(
                 #[account()]
                 pub authority: AccountInfo<'info>,
                 #[account(address = anchor_lang::solana_program::sysvar::instructions::id())]
-                pub instruction_sysvar_account: UncheckedAccount<'info>,
+                pub instruction_sysvar_account: AccountInfo<'info>,
                 pub system_program: Program<'info, System>,
             }
         },
@@ -195,7 +193,7 @@ pub fn generate_update(module: &mut ItemMod) {
         #[automatically_derived]
         pub fn update(ctx: Context<Update>, data: Vec<u8>) -> Result<()> {
             let bolt_metadata = BoltMetadata::try_from_account_info(&ctx.accounts.bolt_component)?;
-            bolt_lang::instructions::update(&ctx.accounts.cpi_auth.to_account_info(), &ctx.accounts.authority.to_account_info(), bolt_metadata.authority, &mut ctx.accounts.bolt_component, &data)?;
+            bolt_lang::instructions::update(&ctx.accounts.instruction_sysvar_account.to_account_info(), &ctx.accounts.authority.to_account_info(), bolt_metadata.authority, &mut ctx.accounts.bolt_component, &data)?;
             Ok(())
         }
     };
@@ -203,7 +201,7 @@ pub fn generate_update(module: &mut ItemMod) {
         #[automatically_derived]
         pub fn update_with_session(ctx: Context<UpdateWithSession>, data: Vec<u8>) -> Result<()> {
             let bolt_metadata = BoltMetadata::try_from_account_info(&ctx.accounts.bolt_component)?;
-            bolt_lang::instructions::update_with_session(&ctx.accounts.cpi_auth.to_account_info(), &ctx.accounts.authority, bolt_metadata.authority, &mut ctx.accounts.bolt_component, &ctx.accounts.session_token, &data)?;
+            bolt_lang::instructions::update_with_session(&ctx.accounts.instruction_sysvar_account.to_account_info(), &ctx.accounts.authority, bolt_metadata.authority, &mut ctx.accounts.bolt_component, &ctx.accounts.session_token, &data)?;
             Ok(())
         }
     };
@@ -211,24 +209,24 @@ pub fn generate_update(module: &mut ItemMod) {
         #[automatically_derived]
         #[derive(Accounts)]
         pub struct Update<'info> {
-            #[account()]
-            pub cpi_auth: Signer<'info>,
             #[account(mut)]
             pub bolt_component: AccountInfo<'info>,
             #[account()]
             pub authority: Signer<'info>,
+            #[account(address = anchor_lang::solana_program::sysvar::instructions::id())]
+            pub instruction_sysvar_account: AccountInfo<'info>,
         }
     };
     let update_with_session_struct = quote! {
         #[automatically_derived]
         #[derive(Accounts)]
         pub struct UpdateWithSession<'info> {
-            #[account()]
-            pub cpi_auth: Signer<'info>,
             #[account(mut)]
             pub bolt_component: AccountInfo<'info>,
             #[account()]
             pub authority: Signer<'info>,
+            #[account(address = anchor_lang::solana_program::sysvar::instructions::id())]
+            pub instruction_sysvar_account: AccountInfo<'info>,
             #[account(constraint = session_token.to_account_info().owner == &bolt_lang::session_keys::ID)]
             pub session_token: Account<'info, bolt_lang::session_keys::SessionToken>,
         }

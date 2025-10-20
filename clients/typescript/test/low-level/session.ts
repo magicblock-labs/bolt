@@ -7,7 +7,6 @@ import {
   SessionProgram,
   FindSessionTokenPda,
   BN,
-  GetDiscriminator,
 } from "../../lib";
 import { Keypair } from "@solana/web3.js";
 
@@ -65,7 +64,7 @@ export function session(framework) {
         entity,
       });
       const instruction = await framework.worldProgram.methods
-        .initializeComponent(GetDiscriminator("global:initialize"))
+        .initializeComponent()
         .accounts({
           payer: sessionSigner.publicKey,
           entity: entity,
@@ -151,7 +150,7 @@ export function session(framework) {
         entity: entityWithAuthority,
       });
       const instruction = await framework.worldProgram.methods
-        .initializeComponent(GetDiscriminator("global:initialize"))
+        .initializeComponent()
         .accounts({
           payer: sessionSigner.publicKey,
           entity: entityWithAuthority,

@@ -4,7 +4,7 @@ use anchor_lang::prelude::*;
 use session_keys::SessionToken;
 
 pub fn update<'info>(
-    cpi_auth: &AccountInfo<'info>,
+    instruction_sysvar_account: &AccountInfo<'info>,
     authority: &AccountInfo<'info>,
     component_authority: Pubkey,
     bolt_component: &AccountInfo<'info>,
@@ -15,7 +15,7 @@ pub fn update<'info>(
             || (component_authority == *authority.key && authority.is_signer),
         BoltError::InvalidAuthority
     );
-    check(&cpi_auth.to_account_info())?;
+    check(&instruction_sysvar_account.to_account_info())?;
     let mut account_data = bolt_component
         .try_borrow_mut_data()
         .map_err(|_| BoltError::AccountMismatch)?;
@@ -31,7 +31,7 @@ pub fn update<'info>(
 }
 
 pub fn update_with_session<'info>(
-    cpi_auth: &AccountInfo<'info>,
+    instruction_sysvar_account: &AccountInfo<'info>,
     authority: &Signer<'info>,
     component_authority: Pubkey,
     bolt_component: &AccountInfo<'info>,
@@ -61,7 +61,7 @@ pub fn update_with_session<'info>(
         );
     }
 
-    crate::cpi::check(&cpi_auth.to_account_info())?;
+    crate::cpi::check(&instruction_sysvar_account.to_account_info())?;
 
     let mut account_data = bolt_component
         .try_borrow_mut_data()

@@ -123,7 +123,8 @@ export type World = {
           signer: true;
         },
         {
-          name: "cpiAuth";
+          name: "instructionSysvarAccount";
+          address: "Sysvar1nstructions1111111111111111111111111";
         },
         {
           name: "world";
@@ -181,7 +182,8 @@ export type World = {
           signer: true;
         },
         {
-          name: "cpiAuth";
+          name: "instructionSysvarAccount";
+          address: "Sysvar1nstructions1111111111111111111111111";
         },
         {
           name: "world";
@@ -259,6 +261,43 @@ export type World = {
           address: "11111111111111111111111111111111";
         },
       ];
+      args: [];
+    },
+    {
+      name: "destroyComponentWithDiscriminator";
+      discriminator: [71, 25, 153, 201, 108, 92, 114, 125];
+      accounts: [
+        {
+          name: "authority";
+          writable: true;
+          signer: true;
+        },
+        {
+          name: "receiver";
+          writable: true;
+        },
+        {
+          name: "componentProgram";
+        },
+        {
+          name: "componentProgramData";
+        },
+        {
+          name: "entity";
+        },
+        {
+          name: "component";
+          writable: true;
+        },
+        {
+          name: "instructionSysvarAccount";
+          address: "Sysvar1nstructions1111111111111111111111111";
+        },
+        {
+          name: "systemProgram";
+          address: "11111111111111111111111111111111";
+        },
+      ];
       args: [
         {
           name: "discriminator";
@@ -269,6 +308,39 @@ export type World = {
     {
       name: "initializeComponent";
       discriminator: [36, 143, 233, 113, 12, 234, 61, 30];
+      accounts: [
+        {
+          name: "payer";
+          writable: true;
+          signer: true;
+        },
+        {
+          name: "data";
+          writable: true;
+        },
+        {
+          name: "entity";
+        },
+        {
+          name: "componentProgram";
+        },
+        {
+          name: "authority";
+        },
+        {
+          name: "instructionSysvarAccount";
+          address: "Sysvar1nstructions1111111111111111111111111";
+        },
+        {
+          name: "systemProgram";
+          address: "11111111111111111111111111111111";
+        },
+      ];
+      args: [];
+    },
+    {
+      name: "initializeComponentWithDiscriminator";
+      discriminator: [174, 196, 222, 15, 149, 54, 137, 23];
       accounts: [
         {
           name: "payer";

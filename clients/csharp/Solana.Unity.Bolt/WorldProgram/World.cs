@@ -231,7 +231,6 @@ namespace World
                     var apply = new ApplyWithSessionAccounts() {
                         BoltSystem = system,
                         Authority = authority,
-                        CpiAuth = CpiAuthAddress,
                         World = world,
                         SessionToken = sessionToken,
                     };
@@ -240,7 +239,6 @@ namespace World
                     var apply = new ApplyAccounts() {
                         BoltSystem = system,
                         Authority = authority,
-                        CpiAuth = CpiAuthAddress,
                         World = world,
                     };
                     instruction = Apply(apply, args, programId);
@@ -253,29 +251,6 @@ namespace World
                 return instruction;
             }
 
-            public static Solana.Unity.Rpc.Models.TransactionInstruction Apply(ApplyAccounts accounts, byte[] args, PublicKey programId = null)
-            {
-                programId ??= new(ID);
-                List<Solana.Unity.Rpc.Models.AccountMeta> keys = new()
-                {
-                    Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.BoltSystem, false),
-                    Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.Authority, true),
-                    Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.CpiAuth, false),
-                    Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.World, false)
-                };
-                byte[] _data = new byte[1200];
-                int offset = 0;
-                _data.WriteSpan(IX_APPLY, offset);
-                offset += 8;
-                _data.WriteS32(args.Length, offset);
-                offset += 4;
-                _data.WriteSpan(args, offset);
-                offset += args.Length;
-                byte[] resultData = new byte[offset];
-                Array.Copy(_data, resultData, offset);
-                return new Solana.Unity.Rpc.Models.TransactionInstruction{Keys = keys, ProgramId = programId.KeyBytes, Data = resultData};
-            }
-
             public static Solana.Unity.Rpc.Models.TransactionInstruction ApplyWithDiscriminator(ApplyAccounts accounts, byte[] system_discriminator, byte[] args, PublicKey programId = null)
             {
                 programId ??= new(ID);
@@ -283,7 +258,7 @@ namespace World
                 {
                     Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.BoltSystem, false),
                     Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.Authority, true),
-                    Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.CpiAuth, false),
+                    Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.InstructionSysvarAccount, false),
                     Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.World, false)
                 };
                 byte[] _data = new byte[1200];
@@ -303,30 +278,6 @@ namespace World
                 return new Solana.Unity.Rpc.Models.TransactionInstruction{Keys = keys, ProgramId = programId.KeyBytes, Data = resultData};
             }
 
-            public static Solana.Unity.Rpc.Models.TransactionInstruction ApplyWithSession(ApplyWithSessionAccounts accounts, byte[] args, PublicKey programId = null)
-            {
-                programId ??= new(ID);
-                List<Solana.Unity.Rpc.Models.AccountMeta> keys = new()
-                {
-                    Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.BoltSystem, false),
-                    Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.Authority, true),
-                    Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.CpiAuth, false),
-                    Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.World, false),
-                    Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.SessionToken, false)
-                };
-                byte[] _data = new byte[1200];
-                int offset = 0;
-                _data.WriteSpan(IX_APPLY_WITH_SESSION, offset);
-                offset += 8;
-                _data.WriteS32(args.Length, offset);
-                offset += 4;
-                _data.WriteSpan(args, offset);
-                offset += args.Length;
-                byte[] resultData = new byte[offset];
-                Array.Copy(_data, resultData, offset);
-                return new Solana.Unity.Rpc.Models.TransactionInstruction{Keys = keys, ProgramId = programId.KeyBytes, Data = resultData};
-            }
-
             public static Solana.Unity.Rpc.Models.TransactionInstruction ApplyWithSessionAndDiscriminator(ApplyWithSessionAccounts accounts, byte[] system_discriminator, byte[] args, PublicKey programId = null)
             {
                 programId ??= new(ID);
@@ -334,7 +285,7 @@ namespace World
                 {
                     Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.BoltSystem, false),
                     Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.Authority, true),
-                    Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.CpiAuth, false),
+                    Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.InstructionSysvarAccount, false),
                     Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.World, false),
                     Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.SessionToken, false)
                 };
