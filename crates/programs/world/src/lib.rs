@@ -1,5 +1,9 @@
 #![allow(clippy::manual_unwrap_or_default)]
-use anchor_lang::{prelude::*, solana_program::instruction::{AccountMeta, Instruction}, solana_program::program::invoke};
+use anchor_lang::{
+    prelude::*,
+    solana_program::instruction::{AccountMeta, Instruction},
+    solana_program::program::invoke,
+};
 use error::WorldError;
 use std::collections::BTreeSet;
 
@@ -269,7 +273,6 @@ pub mod world {
         initialize_component_with_discriminator(ctx, INITIALIZE.to_vec())
     }
 
-
     pub fn initialize_component_with_discriminator(
         ctx: Context<InitializeComponent>,
         discriminator: Vec<u8>,
@@ -317,7 +320,10 @@ pub mod world {
         destroy_component_with_discriminator(ctx, DESTROY.to_vec())
     }
 
-    pub fn destroy_component_with_discriminator(ctx: Context<DestroyComponent>, discriminator: Vec<u8>) -> Result<()> {
+    pub fn destroy_component_with_discriminator(
+        ctx: Context<DestroyComponent>,
+        discriminator: Vec<u8>,
+    ) -> Result<()> {
         // Pure Solana SDK logic for CPI to bolt_component::destroy
         use anchor_lang::solana_program::instruction::{AccountMeta, Instruction};
 
@@ -504,7 +510,7 @@ pub fn apply_with_session_impl<'info>(
                 ctx.accounts.authority.to_account_info(),
                 ctx.accounts.instruction_sysvar_account.to_account_info(),
                 ctx.accounts.session_token.to_account_info(),
-            ]
+            ],
         )?;
     }
     Ok(())
