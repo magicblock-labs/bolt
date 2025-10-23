@@ -139,6 +139,45 @@
       ]
     },
     {
+      "name": "apply_with_discriminator",
+      "discriminator": [
+        126,
+        75,
+        184,
+        115,
+        193,
+        245,
+        69,
+        15
+      ],
+      "accounts": [
+        {
+          "name": "bolt_system"
+        },
+        {
+          "name": "authority",
+          "signer": true
+        },
+        {
+          "name": "instruction_sysvar_account",
+          "address": "Sysvar1nstructions1111111111111111111111111"
+        },
+        {
+          "name": "world"
+        }
+      ],
+      "args": [
+        {
+          "name": "system_discriminator",
+          "type": "bytes"
+        },
+        {
+          "name": "args",
+          "type": "bytes"
+        }
+      ]
+    },
+    {
       "name": "apply_with_session",
       "discriminator": [
         213,
@@ -170,6 +209,48 @@
         }
       ],
       "args": [
+        {
+          "name": "args",
+          "type": "bytes"
+        }
+      ]
+    },
+    {
+      "name": "apply_with_session_and_discriminator",
+      "discriminator": [
+        156,
+        187,
+        1,
+        148,
+        179,
+        240,
+        139,
+        27
+      ],
+      "accounts": [
+        {
+          "name": "bolt_system"
+        },
+        {
+          "name": "authority",
+          "signer": true
+        },
+        {
+          "name": "instruction_sysvar_account",
+          "address": "Sysvar1nstructions1111111111111111111111111"
+        },
+        {
+          "name": "world"
+        },
+        {
+          "name": "session_token"
+        }
+      ],
+      "args": [
+        {
+          "name": "system_discriminator",
+          "type": "bytes"
+        },
         {
           "name": "args",
           "type": "bytes"
@@ -255,6 +336,57 @@
       "args": []
     },
     {
+      "name": "destroy_component_with_discriminator",
+      "discriminator": [
+        71,
+        25,
+        153,
+        201,
+        108,
+        92,
+        114,
+        125
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "receiver",
+          "writable": true
+        },
+        {
+          "name": "component_program"
+        },
+        {
+          "name": "component_program_data"
+        },
+        {
+          "name": "entity"
+        },
+        {
+          "name": "component",
+          "writable": true
+        },
+        {
+          "name": "instruction_sysvar_account",
+          "address": "Sysvar1nstructions1111111111111111111111111"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "discriminator",
+          "type": "bytes"
+        }
+      ]
+    },
+    {
       "name": "initialize_component",
       "discriminator": [
         36,
@@ -295,6 +427,53 @@
         }
       ],
       "args": []
+    },
+    {
+      "name": "initialize_component_with_discriminator",
+      "discriminator": [
+        174,
+        196,
+        222,
+        15,
+        149,
+        54,
+        137,
+        23
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "data",
+          "writable": true
+        },
+        {
+          "name": "entity"
+        },
+        {
+          "name": "component_program"
+        },
+        {
+          "name": "authority"
+        },
+        {
+          "name": "instruction_sysvar_account",
+          "address": "Sysvar1nstructions1111111111111111111111111"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "discriminator",
+          "type": "bytes"
+        }
+      ]
     },
     {
       "name": "initialize_new_world",

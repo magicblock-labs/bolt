@@ -112,6 +112,36 @@ export type World = {
       ];
     },
     {
+      name: "applyWithDiscriminator";
+      discriminator: [126, 75, 184, 115, 193, 245, 69, 15];
+      accounts: [
+        {
+          name: "boltSystem";
+        },
+        {
+          name: "authority";
+          signer: true;
+        },
+        {
+          name: "instructionSysvarAccount";
+          address: "Sysvar1nstructions1111111111111111111111111";
+        },
+        {
+          name: "world";
+        },
+      ];
+      args: [
+        {
+          name: "systemDiscriminator";
+          type: "bytes";
+        },
+        {
+          name: "args";
+          type: "bytes";
+        },
+      ];
+    },
+    {
       name: "applyWithSession";
       discriminator: [213, 69, 29, 230, 142, 107, 134, 103];
       accounts: [
@@ -134,6 +164,39 @@ export type World = {
         },
       ];
       args: [
+        {
+          name: "args";
+          type: "bytes";
+        },
+      ];
+    },
+    {
+      name: "applyWithSessionAndDiscriminator";
+      discriminator: [156, 187, 1, 148, 179, 240, 139, 27];
+      accounts: [
+        {
+          name: "boltSystem";
+        },
+        {
+          name: "authority";
+          signer: true;
+        },
+        {
+          name: "instructionSysvarAccount";
+          address: "Sysvar1nstructions1111111111111111111111111";
+        },
+        {
+          name: "world";
+        },
+        {
+          name: "sessionToken";
+        },
+      ];
+      args: [
+        {
+          name: "systemDiscriminator";
+          type: "bytes";
+        },
         {
           name: "args";
           type: "bytes";
@@ -201,6 +264,48 @@ export type World = {
       args: [];
     },
     {
+      name: "destroyComponentWithDiscriminator";
+      discriminator: [71, 25, 153, 201, 108, 92, 114, 125];
+      accounts: [
+        {
+          name: "authority";
+          writable: true;
+          signer: true;
+        },
+        {
+          name: "receiver";
+          writable: true;
+        },
+        {
+          name: "componentProgram";
+        },
+        {
+          name: "componentProgramData";
+        },
+        {
+          name: "entity";
+        },
+        {
+          name: "component";
+          writable: true;
+        },
+        {
+          name: "instructionSysvarAccount";
+          address: "Sysvar1nstructions1111111111111111111111111";
+        },
+        {
+          name: "systemProgram";
+          address: "11111111111111111111111111111111";
+        },
+      ];
+      args: [
+        {
+          name: "discriminator";
+          type: "bytes";
+        },
+      ];
+    },
+    {
       name: "initializeComponent";
       discriminator: [36, 143, 233, 113, 12, 234, 61, 30];
       accounts: [
@@ -232,6 +337,44 @@ export type World = {
         },
       ];
       args: [];
+    },
+    {
+      name: "initializeComponentWithDiscriminator";
+      discriminator: [174, 196, 222, 15, 149, 54, 137, 23];
+      accounts: [
+        {
+          name: "payer";
+          writable: true;
+          signer: true;
+        },
+        {
+          name: "data";
+          writable: true;
+        },
+        {
+          name: "entity";
+        },
+        {
+          name: "componentProgram";
+        },
+        {
+          name: "authority";
+        },
+        {
+          name: "instructionSysvarAccount";
+          address: "Sysvar1nstructions1111111111111111111111111";
+        },
+        {
+          name: "systemProgram";
+          address: "11111111111111111111111111111111";
+        },
+      ];
+      args: [
+        {
+          name: "discriminator";
+          type: "bytes";
+        },
+      ];
     },
     {
       name: "initializeNewWorld";

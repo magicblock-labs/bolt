@@ -506,6 +506,25 @@ namespace World
                 return new Solana.Unity.Rpc.Models.TransactionInstruction{Keys = keys, ProgramId = programId.KeyBytes, Data = resultData};
             }
 
+            public static Solana.Unity.Rpc.Models.TransactionInstruction InitializeComponentWithDiscriminator(InitializeComponentAccounts accounts, byte[] discriminator, PublicKey programId = null)
+            {
+                byte[] IX_INITIALIZE_COMPONENT_WITH_DISCRIMINATOR = new byte[] { 174, 196, 222, 15, 149, 54, 137, 23 };
+                programId ??= new(ID);
+                List<Solana.Unity.Rpc.Models.AccountMeta> keys = new()
+                {Solana.Unity.Rpc.Models.AccountMeta.Writable(accounts.Payer, true), Solana.Unity.Rpc.Models.AccountMeta.Writable(accounts.Data, false), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.Entity, false), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.ComponentProgram, false), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.Authority, false), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.InstructionSysvarAccount, false), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.SystemProgram, false)};
+                byte[] _data = new byte[1200];
+                int offset = 0;
+                _data.WriteSpan(IX_INITIALIZE_COMPONENT_WITH_DISCRIMINATOR, offset);
+                offset += 8;
+                _data.WriteS32(discriminator.Length, offset);
+                offset += 4;
+                _data.WriteSpan(discriminator, offset);
+                offset += discriminator.Length;
+                byte[] resultData = new byte[offset];
+                Array.Copy(_data, resultData, offset);
+                return new Solana.Unity.Rpc.Models.TransactionInstruction{Keys = keys, ProgramId = programId.KeyBytes, Data = resultData};
+            }
+
             public static Solana.Unity.Rpc.Models.TransactionInstruction InitializeNewWorld(InitializeNewWorldAccounts accounts, PublicKey programId = null)
             {
                 programId ??= new(ID);

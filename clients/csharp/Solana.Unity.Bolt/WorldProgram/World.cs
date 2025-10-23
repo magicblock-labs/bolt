@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Solana.Unity.Programs;
+using Solana.Unity.Programs.Utilities;
 using Solana.Unity.Wallet;
 using Solana.Unity.Rpc.Models;
 using GplSession.Program;
@@ -15,6 +16,11 @@ namespace World
     {
         public partial class WorldProgram
         {
+            public static readonly PublicKey CpiAuthAddress = new("B2f2y3QTBv346wE6nWKor72AUhUvFF6mPk7TWCF2QVhi");
+            private static readonly byte[] IX_APPLY = new byte[] { 248, 243, 145, 24, 105, 50, 162, 225 };
+            private static readonly byte[] IX_APPLY_WITH_DISCRIMINATOR = new byte[] { 126, 75, 184, 115, 193, 245, 69, 15 };
+            private static readonly byte[] IX_APPLY_WITH_SESSION = new byte[] { 213, 69, 29, 230, 142, 107, 134, 103 };
+            private static readonly byte[] IX_APPLY_WITH_SESSION_AND_DISCRIMINATOR = new byte[] { 156, 187, 1, 148, 179, 240, 139, 27 };
             public static Solana.Unity.Rpc.Models.TransactionInstruction AddEntity(AddEntityAccounts accounts, PublicKey programId = null)
             {
                 programId ??= new(ID);
@@ -242,12 +248,62 @@ namespace World
                     instruction.Keys.Add(AccountMeta.Writable(componentPdas[i], false));
                 }
 
-                if (componentIds.Count > 0) {
-                    // program id delimits the end of the component list
-                    instruction.Keys.Add(AccountMeta.ReadOnly(new PublicKey(WorldProgram.ID), false));
-                }
-
                 return instruction;
+            }
+
+            public static Solana.Unity.Rpc.Models.TransactionInstruction ApplyWithDiscriminator(ApplyAccounts accounts, byte[] system_discriminator, byte[] args, PublicKey programId = null)
+            {
+                programId ??= new(ID);
+                List<Solana.Unity.Rpc.Models.AccountMeta> keys = new()
+                {
+                    Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.BoltSystem, false),
+                    Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.Authority, true),
+                    Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.InstructionSysvarAccount, false),
+                    Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.World, false)
+                };
+                byte[] _data = new byte[1200];
+                int offset = 0;
+                _data.WriteSpan(IX_APPLY_WITH_DISCRIMINATOR, offset);
+                offset += 8;
+                _data.WriteS32(system_discriminator.Length, offset);
+                offset += 4;
+                _data.WriteSpan(system_discriminator, offset);
+                offset += system_discriminator.Length;
+                _data.WriteS32(args.Length, offset);
+                offset += 4;
+                _data.WriteSpan(args, offset);
+                offset += args.Length;
+                byte[] resultData = new byte[offset];
+                Array.Copy(_data, resultData, offset);
+                return new Solana.Unity.Rpc.Models.TransactionInstruction{Keys = keys, ProgramId = programId.KeyBytes, Data = resultData};
+            }
+
+            public static Solana.Unity.Rpc.Models.TransactionInstruction ApplyWithSessionAndDiscriminator(ApplyWithSessionAccounts accounts, byte[] system_discriminator, byte[] args, PublicKey programId = null)
+            {
+                programId ??= new(ID);
+                List<Solana.Unity.Rpc.Models.AccountMeta> keys = new()
+                {
+                    Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.BoltSystem, false),
+                    Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.Authority, true),
+                    Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.InstructionSysvarAccount, false),
+                    Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.World, false),
+                    Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.SessionToken, false)
+                };
+                byte[] _data = new byte[1200];
+                int offset = 0;
+                _data.WriteSpan(IX_APPLY_WITH_SESSION_AND_DISCRIMINATOR, offset);
+                offset += 8;
+                _data.WriteS32(system_discriminator.Length, offset);
+                offset += 4;
+                _data.WriteSpan(system_discriminator, offset);
+                offset += system_discriminator.Length;
+                _data.WriteS32(args.Length, offset);
+                offset += 4;
+                _data.WriteSpan(args, offset);
+                offset += args.Length;
+                byte[] resultData = new byte[offset];
+                Array.Copy(_data, resultData, offset);
+                return new Solana.Unity.Rpc.Models.TransactionInstruction{Keys = keys, ProgramId = programId.KeyBytes, Data = resultData};
             }
        }
     }
