@@ -7,20 +7,21 @@ pub use anchor_lang::{
     AccountDeserialize, AccountSerialize, AnchorDeserialize, AnchorSerialize, Bumps, Result,
 };
 
+pub mod cpi;
+pub mod instructions;
+
 pub use session_keys;
 
 pub use bolt_attribute_bolt_arguments::arguments;
+pub use bolt_attribute_bolt_bundle::bundle;
 pub use bolt_attribute_bolt_component::component;
 pub use bolt_attribute_bolt_component_deserialize::component_deserialize;
 pub use bolt_attribute_bolt_component_id::component_id;
-pub use bolt_attribute_bolt_delegate::delegate;
 pub use bolt_attribute_bolt_extra_accounts::extra_accounts;
 pub use bolt_attribute_bolt_extra_accounts::pubkey;
-pub use bolt_attribute_bolt_program::bolt_program;
 pub use bolt_attribute_bolt_system::system;
 pub use bolt_attribute_bolt_system_input::system_input;
 
-pub use bolt_system;
 pub use world;
 pub use world::program::World;
 pub use world::Entity;
@@ -68,6 +69,11 @@ pub trait ComponentDeserialize: Sized {
     fn from_account_info(account: &anchor_lang::prelude::AccountInfo) -> Result<Self>;
 }
 
+/// Number of system input components expected by a system.
+pub trait NumberOfComponents {
+    const NUMBER_OF_COMPONENTS: usize;
+}
+
 /// Metadata for the component.
 #[derive(InitSpace, AnchorSerialize, AnchorDeserialize, Default, Copy, Clone)]
 pub struct BoltMetadata {
@@ -77,4 +83,23 @@ pub struct BoltMetadata {
 /// Wrapper method to create a pubkey from a string
 pub fn pubkey_from_str(s: &str) -> solana_program::pubkey::Pubkey {
     solana_program::pubkey::Pubkey::from_str(s).unwrap()
+}
+
+impl BoltMetadata {
+    pub fn try_from_account_info(account: &AccountInfo) -> Result<Self> {
+        let data = account.try_borrow_data()?;
+        require!(
+            data.len() >= 8 + BoltMetadata::INIT_SPACE,
+            ErrorCode::AccountDidNotDeserialize
+        );
+        let slice = &data[8..8 + BoltMetadata::INIT_SPACE];
+        Ok(BoltMetadata::try_from_slice(slice)?)
+    }
+
+    pub fn discriminator_from_account_info(account: &AccountInfo) -> Result<Vec<u8>> {
+        let data = account.try_borrow_data()?;
+        require!(data.len() >= 8, ErrorCode::AccountDidNotDeserialize);
+        let discriminator = &data[0..8];
+        Ok(discriminator.to_vec())
+    }
 }

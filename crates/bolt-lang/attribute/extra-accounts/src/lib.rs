@@ -1,5 +1,7 @@
+use heck::ToPascalCase;
 use proc_macro::TokenStream;
 
+use proc_macro2::Span;
 use quote::quote;
 use syn::{parse_macro_input, Fields, ItemStruct, LitStr};
 
@@ -22,9 +24,23 @@ use syn::{parse_macro_input, Fields, ItemStruct, LitStr};
 ///
 /// ```
 #[proc_macro_attribute]
-pub fn extra_accounts(_attr: TokenStream, item: TokenStream) -> TokenStream {
+pub fn extra_accounts(attr: TokenStream, item: TokenStream) -> TokenStream {
+    let attr = parse_macro_input!(attr as syn::MetaNameValue);
+    let literal = if let syn::Lit::Str(lit_str) = attr.lit {
+        lit_str.value()
+    } else {
+        panic!("Invalid literal");
+    };
+    let type_path = syn::parse_str::<syn::TypePath>(&literal).expect("Invalid type path");
     let input = parse_macro_input!(item as ItemStruct);
     let extra_accounts_struct_name = &input.ident;
+    let context_extension_name = syn::Ident::new(
+        &format!(
+            "ContextExtensions{}",
+            extra_accounts_struct_name.to_string().to_pascal_case()
+        ),
+        Span::call_site(),
+    );
 
     // Ensure the struct has named fields
     let fields = match &input.fields {
@@ -59,7 +75,7 @@ pub fn extra_accounts(_attr: TokenStream, item: TokenStream) -> TokenStream {
     });
 
     let output_trait = quote! {
-        pub trait ContextExtensions<'a, 'b, 'c, 'info, T>
+        pub trait #context_extension_name<'a, 'b, 'c, 'info, T>
         {
             #(#helper_functions)*
         }
@@ -71,13 +87,13 @@ pub fn extra_accounts(_attr: TokenStream, item: TokenStream) -> TokenStream {
         let index = syn::Index::from(index); // Create a compile-time index representation
         quote! {
             fn #field_name(&self) -> Result<&'c AccountInfo<'info>> {
-                self.remaining_accounts.get(Self::NUMBER_OF_COMPONENTS + #index).ok_or_else(|| ErrorCode::ConstraintAccountIsNone.into())
+                self.remaining_accounts.get(<#type_path as bolt_lang::NumberOfComponents>::NUMBER_OF_COMPONENTS + #index).ok_or_else(|| ErrorCode::ConstraintAccountIsNone.into())
             }
         }
     });
 
     let output_trait_implementation = quote! {
-        impl<'a, 'b, 'c, 'info, T: bolt_lang::Bumps> ContextExtensions<'a, 'b, 'c, 'info, T> for Context<'a, 'b, 'c, 'info, T> {
+        impl<'a, 'b, 'c, 'info> #context_extension_name<'a, 'b, 'c, 'info, #type_path> for Context<'a, 'b, 'c, 'info, #type_path> {
             #(#helper_functions_impl)*
         }
     };

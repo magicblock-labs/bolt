@@ -1,7 +1,5 @@
 import {
-  createApplyInstruction,
   createAddEntityInstruction,
-  createInitializeComponentInstruction,
   createInitializeNewWorldInstruction,
   FindComponentPda,
   FindEntityPda,
@@ -9,7 +7,6 @@ import {
   FindRegistryPda,
   Registry,
   SerializeArgs,
-  SYSVAR_INSTRUCTIONS_PUBKEY,
   World,
   SessionProgram,
   Session,
@@ -17,22 +14,27 @@ import {
   WORLD_PROGRAM_ID,
   BN,
   FindComponentProgramDataPda,
+  GetDiscriminator,
+  Component,
 } from "../index";
 import type web3 from "@solana/web3.js";
 import {
   type Connection,
   Keypair,
   type PublicKey,
+  SYSVAR_INSTRUCTIONS_PUBKEY,
   Transaction,
   type TransactionInstruction,
 } from "@solana/web3.js";
 import type WorldProgram from "../generated";
 import {
+  createInitializeComponentInstruction,
   createInitializeRegistryInstruction,
   PROGRAM_ID,
   worldIdl,
 } from "../generated";
 import { type Idl, Program } from "@coral-xyz/anchor";
+import { System } from "../ecs";
 
 export async function InitializeRegistry({
   payer,
@@ -347,26 +349,28 @@ export async function DestroyComponent({
 }: {
   authority: PublicKey;
   entity: PublicKey;
-  componentId: PublicKey;
+  componentId: PublicKey | Component;
   receiver: PublicKey;
   seed?: string;
 }): Promise<{
   instruction: TransactionInstruction;
   transaction: Transaction;
 }> {
+  const component = Component.from(componentId);
   const program = new Program(
     worldIdl as Idl,
   ) as unknown as Program<WorldProgram>;
+  const discriminator = component.getMethodDiscriminator("destroy");
+  const componentProgram = component.program;
   const componentProgramData = FindComponentProgramDataPda({
-    programId: componentId,
+    programId: componentProgram,
   });
-  const componentProgram = componentId;
-  const component = FindComponentPda({ componentId, entity, seed });
+  const componentPda = component.pda(entity, seed);
   const instruction = await program.methods
-    .destroyComponent()
+    .destroyComponentWithDiscriminator(discriminator)
     .accounts({
       authority,
-      component,
+      component: componentPda,
       entity,
       componentProgram,
       componentProgramData,
@@ -400,7 +404,7 @@ export async function InitializeComponent({
 }: {
   payer: PublicKey;
   entity: PublicKey;
-  componentId: PublicKey;
+  componentId: PublicKey | Component;
   seed?: string;
   authority?: web3.PublicKey;
   anchorRemainingAccounts?: web3.AccountMeta[];
@@ -409,16 +413,26 @@ export async function InitializeComponent({
   transaction: Transaction;
   componentPda: PublicKey;
 }> {
-  const componentPda = FindComponentPda({ componentId, entity, seed });
-  const instruction = createInitializeComponentInstruction({
-    payer,
-    entity,
-    data: componentPda,
-    componentProgram: componentId,
-    authority: authority ?? PROGRAM_ID,
-    instructionSysvarAccount: SYSVAR_INSTRUCTIONS_PUBKEY,
-    anchorRemainingAccounts,
-  });
+  const component = Component.from(componentId);
+  const discriminator = component.getMethodDiscriminator("initialize");
+  const componentProgram = component.program;
+  const componentPda = component.pda(entity, seed);
+  const program = new Program(
+    worldIdl as Idl,
+  ) as unknown as Program<WorldProgram>;
+
+  const instruction = await program.methods
+    .initializeComponentWithDiscriminator(discriminator)
+    .accounts({
+      payer,
+      entity,
+      data: componentPda,
+      componentProgram: componentProgram,
+      authority: authority ?? PROGRAM_ID,
+    })
+    .remainingAccounts(anchorRemainingAccounts ?? [])
+    .instruction();
+
   const transaction = new Transaction().add(instruction);
   return {
     instruction,
@@ -429,7 +443,7 @@ export async function InitializeComponent({
 
 interface ApplySystemInstruction {
   authority: PublicKey;
-  systemId: PublicKey;
+  systemId: PublicKey | System;
   entities: ApplySystemEntity[];
   world: PublicKey;
   session?: Session;
@@ -445,6 +459,7 @@ async function createApplySystemInstruction({
   extraAccounts,
   args,
 }: ApplySystemInstruction): Promise<web3.TransactionInstruction> {
+  let system = System.from(systemId);
   const program = new Program(
     worldIdl as Idl,
   ) as unknown as Program<WorldProgram>;
@@ -459,15 +474,13 @@ async function createApplySystemInstruction({
   let remainingAccounts: web3.AccountMeta[] = [];
   let components: { id: PublicKey; pda: PublicKey }[] = [];
   for (const entity of entities) {
-    for (const component of entity.components) {
-      const componentPda = FindComponentPda({
-        componentId: component.componentId,
-        entity: entity.entity,
-        seed: component.seed,
-      });
+    for (const applyComponent of entity.components) {
+      const component = Component.from(applyComponent.componentId);
+      const id = component.program;
+      const pda = component.pda(entity.entity, applyComponent.seed);
       components.push({
-        id: component.componentId,
-        pda: componentPda,
+        id,
+        pda,
       });
     }
   }
@@ -495,27 +508,56 @@ async function createApplySystemInstruction({
     }
   }
 
-  if (session)
-    return program.methods
-      .applyWithSession(SerializeArgs(args))
-      .accounts({
-        authority: authority ?? PROGRAM_ID,
-        boltSystem: systemId,
-        sessionToken: session.token,
-        world,
-      })
-      .remainingAccounts(remainingAccounts)
-      .instruction();
-  else
-    return program.methods
-      .apply(SerializeArgs(args))
-      .accounts({
-        authority: authority ?? PROGRAM_ID,
-        boltSystem: systemId,
-        world,
-      })
-      .remainingAccounts(remainingAccounts)
-      .instruction();
+  const systemDiscriminator = system.getMethodDiscriminator("bolt_execute");
+
+  if (system.name != null) {
+    if (session)
+      return program.methods
+        .applyWithSessionAndDiscriminator(
+          systemDiscriminator,
+          SerializeArgs(args),
+        )
+        .accounts({
+          authority: authority ?? PROGRAM_ID,
+          boltSystem: system.program,
+          sessionToken: session.token,
+          world,
+        })
+        .remainingAccounts(remainingAccounts)
+        .instruction();
+    else
+      return program.methods
+        .applyWithDiscriminator(systemDiscriminator, SerializeArgs(args))
+        .accounts({
+          authority: authority ?? PROGRAM_ID,
+          boltSystem: system.program,
+          world,
+        })
+        .remainingAccounts(remainingAccounts)
+        .instruction();
+  } else {
+    if (session)
+      return program.methods
+        .applyWithSession(SerializeArgs(args))
+        .accounts({
+          authority: authority ?? PROGRAM_ID,
+          boltSystem: system.program,
+          sessionToken: session.token,
+          world,
+        })
+        .remainingAccounts(remainingAccounts)
+        .instruction();
+    else
+      return program.methods
+        .apply(SerializeArgs(args))
+        .accounts({
+          authority: authority ?? PROGRAM_ID,
+          boltSystem: system.program,
+          world,
+        })
+        .remainingAccounts(remainingAccounts)
+        .instruction();
+  }
 }
 
 interface ApplySystemEntity {
@@ -546,7 +588,7 @@ export async function ApplySystem({
   session,
 }: {
   authority: PublicKey;
-  systemId: PublicKey;
+  systemId: PublicKey | System;
   entities: ApplySystemEntity[];
   world: PublicKey;
   extraAccounts?: web3.AccountMeta[];
