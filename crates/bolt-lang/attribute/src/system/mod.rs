@@ -1,4 +1,4 @@
-use heck::ToPascalCase;
+use heck::{ToPascalCase, ToSnakeCase};
 use proc_macro::TokenStream;
 use proc_macro2::{Ident, Span};
 use quote::{quote, ToTokens, TokenStreamExt};
@@ -8,7 +8,9 @@ use syn::{
 };
 
 #[derive(Default)]
-struct SystemTransform;
+struct SystemTransform {
+    is_bundle: bool,
+}
 
 #[derive(Default)]
 struct Extractor {
@@ -64,7 +66,7 @@ pub fn process(_attr: TokenStream, item: TokenStream) -> TokenStream {
             items.push(wrapper);
         }
 
-        let mut transform = SystemTransform;
+        let mut transform = SystemTransform { is_bundle: false };
         transform.visit_item_mod_mut(&mut ast);
 
         let expanded = quote! {
@@ -94,7 +96,7 @@ pub fn transform_module_for_bundle(module: &mut ItemMod, name_suffix: Option<&st
         );
     }
 
-    let mut transform = SystemTransform;
+    let mut transform = SystemTransform { is_bundle: true };
     transform.visit_item_mod_mut(module);
 
     let mut items: Vec<Item> = match module.content.take() {
@@ -268,6 +270,25 @@ impl VisitMut for SystemTransform {
 
         let mut extra_accounts_struct_name = None;
 
+        let system_input = content
+            .iter()
+            .find_map(|item| {
+                if let syn::Item::Struct(item_struct) = item {
+                    if item_struct
+                        .attrs
+                        .iter()
+                        .any(|attr| attr.path.is_ident("system_input"))
+                    {
+                        Some(item_struct)
+                    } else {
+                        None
+                    }
+                } else {
+                    None
+                }
+            })
+            .cloned();
+
         for item in content.iter_mut() {
             match item {
                 syn::Item::Fn(item_fn) => self.visit_item_fn_mut(item_fn),
@@ -279,13 +300,26 @@ impl VisitMut for SystemTransform {
                     {
                         attr.tokens.append_all(quote! { (session_key) });
                     }
-                    if item_struct
+                    if let Some(attr) = item_struct
                         .attrs
-                        .iter()
-                        .any(|attr| attr.path.is_ident("extra_accounts"))
+                        .iter_mut()
+                        .find(|attr| attr.path.is_ident("extra_accounts"))
                     {
+                        if let Some(system_input) = &system_input {
+                            let mod_ident = &item_mod.ident.to_string().to_pascal_case();
+                            let ident = if self.is_bundle {
+                                syn::Ident::new(
+                                    &format!("{}{}", mod_ident, &system_input.ident),
+                                    Span::call_site(),
+                                )
+                            } else {
+                                system_input.ident.clone()
+                            };
+                            let type_path: syn::TypePath = syn::parse_quote! { #ident<'info> };
+                            let literal = type_path.to_token_stream().to_string();
+                            attr.tokens.append_all(quote! { (input = #literal) });
+                        }
                         extra_accounts_struct_name = Some(&item_struct.ident);
-                        break;
                     }
                 }
                 _ => {}
@@ -293,9 +327,16 @@ impl VisitMut for SystemTransform {
         }
 
         if let Some(struct_name) = extra_accounts_struct_name {
+            let init_extra_accounts_name = syn::Ident::new(
+                &format!(
+                    "init_extra_accounts_{}",
+                    struct_name.to_string().to_snake_case()
+                ),
+                Span::call_site(),
+            );
             let initialize_extra_accounts = quote! {
             #[automatically_derived]
-                pub fn init_extra_accounts(_ctx: Context<#struct_name>) -> Result<()> {
+                pub fn #init_extra_accounts_name(_ctx: Context<#struct_name>) -> Result<()> {
                     Ok(())
                 }
             };
