@@ -189,7 +189,6 @@ pub mod world {
             .world
             .to_account_info()
             .realloc(new_space, false)?;
-        msg!("Approved system: {:?}", world_systems);
         Ok(())
     }
 
@@ -242,7 +241,6 @@ pub mod world {
             .world
             .to_account_info()
             .realloc(new_space, false)?;
-        msg!("Approved system: {:?}", world_systems);
         Ok(())
     }
 
