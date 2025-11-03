@@ -773,16 +773,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "bolt-attribute-bolt-arguments"
-version = "0.2.6"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 1.0.109",
-]
-
-[[package]]
-name = "bolt-attribute-bolt-component"
+name = "bolt-attribute"
 version = "0.2.6"
 dependencies = [
  "bolt-utils",
@@ -793,12 +784,36 @@ dependencies = [
 ]
 
 [[package]]
+name = "bolt-attribute-bolt-arguments"
+version = "0.2.6"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 1.0.109",
+]
+
+[[package]]
+name = "bolt-attribute-bolt-bundle"
+version = "0.2.6"
+dependencies = [
+ "bolt-attribute",
+]
+
+[[package]]
+name = "bolt-attribute-bolt-component"
+version = "0.2.6"
+dependencies = [
+ "bolt-attribute",
+]
+
+[[package]]
 name = "bolt-attribute-bolt-component-deserialize"
 version = "0.2.6"
 dependencies = [
  "bolt-utils",
  "proc-macro2",
  "quote",
+ "sha2 0.10.8",
  "syn 1.0.109",
 ]
 
@@ -812,27 +827,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "bolt-attribute-bolt-delegate"
-version = "0.2.6"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 1.0.109",
-]
-
-[[package]]
 name = "bolt-attribute-bolt-extra-accounts"
 version = "0.2.6"
 dependencies = [
- "proc-macro2",
- "quote",
- "syn 1.0.109",
-]
-
-[[package]]
-name = "bolt-attribute-bolt-program"
-version = "0.2.6"
-dependencies = [
+ "heck 0.5.0",
  "proc-macro2",
  "quote",
  "syn 1.0.109",
@@ -842,6 +840,7 @@ dependencies = [
 name = "bolt-attribute-bolt-system"
 version = "0.2.6"
 dependencies = [
+ "bolt-attribute",
  "proc-macro2",
  "quote",
  "syn 1.0.109",
@@ -877,14 +876,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "bolt-component"
-version = "0.2.6"
-dependencies = [
- "anchor-lang",
- "bolt-system",
-]
-
-[[package]]
 name = "bolt-lang"
 version = "0.2.6"
 dependencies = [
@@ -892,15 +883,13 @@ dependencies = [
  "anchor-lang",
  "bincode",
  "bolt-attribute-bolt-arguments",
+ "bolt-attribute-bolt-bundle",
  "bolt-attribute-bolt-component",
  "bolt-attribute-bolt-component-deserialize",
  "bolt-attribute-bolt-component-id",
- "bolt-attribute-bolt-delegate",
  "bolt-attribute-bolt-extra-accounts",
- "bolt-attribute-bolt-program",
  "bolt-attribute-bolt-system",
  "bolt-attribute-bolt-system-input",
- "bolt-system",
  "ephemeral-rollups-sdk",
  "getrandom 0.1.16",
  "serde",
@@ -909,13 +898,6 @@ dependencies = [
  "solana-program",
  "world",
  "zeroize",
-]
-
-[[package]]
-name = "bolt-system"
-version = "0.2.6"
-dependencies = [
- "anchor-lang",
 ]
 
 [[package]]
@@ -1298,6 +1280,16 @@ checksum = "e89f72f65e8501878b8a004d5a1afb780987e2ce2b4532c562e367a72c57499f"
 dependencies = [
  "log",
  "web-sys",
+]
+
+[[package]]
+name = "const-crypto"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1c06f1eb05f06cf2e380fdded278fbf056a38974299d77960555a311dcf91a52"
+dependencies = [
+ "keccak-const",
+ "sha2-const-stable",
 ]
 
 [[package]]
@@ -1869,6 +1861,14 @@ checksum = "8be9f3dfaaffdae2972880079a491a1a8bb7cbed0b8dd7a347f668b4150a3b93"
 dependencies = [
  "event-listener 5.4.0",
  "pin-project-lite",
+]
+
+[[package]]
+name = "example-bundle"
+version = "0.2.5"
+dependencies = [
+ "bolt-lang",
+ "serde",
 ]
 
 [[package]]
@@ -2649,6 +2649,12 @@ checksum = "ecc2af9a1119c51f12a14607e783cb977bde58bc069ff0c3da1095e635d70654"
 dependencies = [
  "cpufeatures",
 ]
+
+[[package]]
+name = "keccak-const"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "57d8d8ce877200136358e0bbff3a77965875db3af755a11e1fa6b1b3e2df13ea"
 
 [[package]]
 name = "lalrpop"
@@ -4155,6 +4161,12 @@ dependencies = [
  "cpufeatures",
  "digest 0.10.7",
 ]
+
+[[package]]
+name = "sha2-const-stable"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5f179d4e11094a893b82fff208f74d448a7512f99f5a0acbd5c679b705f83ed9"
 
 [[package]]
 name = "sha3"
@@ -7169,8 +7181,7 @@ name = "world"
 version = "0.2.6"
 dependencies = [
  "anchor-lang",
- "bolt-component",
- "bolt-system",
+ "const-crypto",
  "solana-security-txt",
  "tuple-conv",
 ]

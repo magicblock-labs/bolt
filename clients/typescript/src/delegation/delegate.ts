@@ -7,7 +7,7 @@ import {
   delegationMetadataPdaFromDelegatedAccount,
   delegationRecordPdaFromDelegatedAccount,
 } from "@magicblock-labs/ephemeral-rollups-sdk";
-import { FindComponentPda } from "../index";
+import { Component } from "../index";
 import {
   type PublicKey,
   Transaction,
@@ -164,7 +164,7 @@ export async function DelegateComponent({
 }: {
   payer: PublicKey;
   entity: PublicKey;
-  componentId: PublicKey;
+  componentId: PublicKey | Component;
   seed?: string;
   buffer?: web3.PublicKey;
   delegationRecord?: web3.PublicKey;
@@ -176,12 +176,14 @@ export async function DelegateComponent({
   transaction: Transaction;
   componentPda: PublicKey;
 }> {
-  const componentPda = FindComponentPda({ componentId, entity, seed });
+  const component = Component.from(componentId);
+  let ownerProgram = component.program;
+  const componentPda = component.pda(entity, seed);
   const delegateComponentIx = createDelegateInstruction({
     payer,
     entity,
     account: componentPda,
-    ownerProgram: componentId,
+    ownerProgram,
     buffer,
     delegationRecord,
     delegationMetadata,

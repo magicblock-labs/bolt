@@ -1,8 +1,9 @@
 [workspace]
 members = [
-    "programs/*",
-    "programs-ecs/components/*",
-    "programs-ecs/systems/*"
+	"programs/*",
+	"programs-ecs/components/*",
+	"programs-ecs/systems/*",
+	"programs-ecs/bundles/*"
 ]
 resolver = "2"
 

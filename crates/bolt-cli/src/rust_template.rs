@@ -4,6 +4,7 @@ use anchor_lang_idl::types::{IdlArrayLen, IdlGenericArg, IdlType};
 use anyhow::Result;
 use std::path::{Path, PathBuf};
 
+use crate::templates::bundle::create_bundle_template;
 use crate::templates::component::create_component_template_simple;
 use crate::templates::program::{create_program_template_multiple, create_program_template_single};
 use crate::templates::system::create_system_template_simple;
@@ -24,6 +25,22 @@ pub fn create_component(name: &str) -> Result<()> {
     ] as Files;
 
     let template_files = create_component_template_simple(name, &program_path);
+    anchor_cli::create_files(&[common_files, template_files].concat())
+}
+
+/// Create a bundle from a given name.
+pub(crate) fn create_bundle(name: &str) -> Result<()> {
+    let program_path = Path::new("programs-ecs/bundles").join(name);
+    let common_files = vec![
+        (
+            PathBuf::from("Cargo.toml".to_string()),
+            workspace_manifest().to_string(),
+        ),
+        (program_path.join("Cargo.toml"), cargo_toml_with_serde(name)),
+        (program_path.join("Xargo.toml"), xargo_toml().to_string()),
+    ] as Files;
+
+    let template_files = create_bundle_template(name, &program_path);
     anchor_cli::create_files(&[common_files, template_files].concat())
 }
 

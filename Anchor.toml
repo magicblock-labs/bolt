@@ -8,10 +8,9 @@ skip-lint = false
 world = "WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n"
 
 [programs.localnet]
-bolt-component = "CmP2djJgABZ4cRokm4ndxuq6LerqpNHLBsaUv2XKEJua"
-bolt-system = "7X4EFsDJ5aYTcEjKzJ94rD8FRKgQeXC89fkpeTS4KaqP"
 component-small = "9yBADAhoTWCkNRB6hbfpwUgPpxyJiF9uEiWVPR6k7A4y"
 escrow-funding = "4Um2d8SvyfWyLLtfu2iJMFhM77DdjjyQusEy7K3VhPkd"
+example-bundle = "CgfPBUeDUL3GT6b5AUDFE56KKgU4ycWA9ERjEWsfMZCj"
 position = "Fn1JzzEdyb55fsyduWS94mYHizGhJZuhvjX6DVvrmGbQ"
 system-apply-velocity = "6LHhFVwif6N9Po3jHtSmMVtPjF6zRfL3xMosSzcrQAS8"
 system-fly = "HT2YawJjkNmqWcLNfPAMvNsLdWwPvvvbKA5bpMw4eUpq"
@@ -36,7 +35,7 @@ cluster = "localnet"
 wallet = "./tests/fixtures/provider.json"
 
 [workspace]
-members = ["crates/programs/bolt-component", "crates/programs/bolt-system", "crates/programs/world", "examples/component-position", "examples/component-velocity", "examples/system-apply-velocity", "examples/system-fly", "examples/system-simple-movement", "examples/component-small", "examples/system-with-1-component", "examples/system-with-2-components", "examples/system-with-3-components", "examples/system-with-4-components", "examples/system-with-5-components", "examples/system-with-6-components", "examples/system-with-7-components", "examples/system-with-8-components", "examples/system-with-9-components", "examples/system-with-10-components", "examples/escrow-funding"]
+members = ["crates/programs/world", "examples/component-position", "examples/component-velocity", "examples/system-apply-velocity", "examples/system-fly", "examples/system-simple-movement", "examples/component-small", "examples/system-with-1-component", "examples/system-with-2-components", "examples/system-with-3-components", "examples/system-with-4-components", "examples/system-with-5-components", "examples/system-with-6-components", "examples/system-with-7-components", "examples/system-with-8-components", "examples/system-with-9-components", "examples/system-with-10-components", "examples/escrow-funding", "examples/bundle"]
 
 [scripts]
 test = "tests/script.sh"
