@@ -19,7 +19,7 @@ pub const DESTROY: [u8; 8] = discriminator_for("global:destroy");
 pub const UPDATE: [u8; 8] = discriminator_for("global:update");
 pub const UPDATE_WITH_SESSION: [u8; 8] = discriminator_for("global:update_with_session");
 
-declare_id!("WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n");
+declare_id!("wor1DcaDr8AeBdaf5bqeBQUY9My2sgZwtanRcaALE9L");
 
 #[cfg(not(feature = "no-entrypoint"))]
 security_txt! {

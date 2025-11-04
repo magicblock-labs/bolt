@@ -86,7 +86,7 @@ export const apply5InstructionDiscriminator = [
 export function createApply5Instruction(
   accounts: Apply5InstructionAccounts,
   args: Apply5InstructionArgs,
-  programId = new web3.PublicKey("WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n"),
+  programId = new web3.PublicKey("wor1DcaDr8AeBdaf5bqeBQUY9My2sgZwtanRcaALE9L"),
 ) {
   const [data] = apply5Struct.serialize({
     instructionDiscriminator: apply5InstructionDiscriminator,

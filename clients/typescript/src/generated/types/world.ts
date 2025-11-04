@@ -5,7 +5,7 @@
  * IDL can be found at `target/idl/world.json`.
  */
 export type World = {
-  address: "WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n";
+  address: "wor1DcaDr8AeBdaf5bqeBQUY9My2sgZwtanRcaALE9L";
   metadata: {
     name: "world";
     version: "0.2.6";

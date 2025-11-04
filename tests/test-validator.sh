@@ -7,7 +7,7 @@ echo "Starting validator"
 solana-test-validator --reset \
   --bpf-program DELeGGvXpWV2fqJUhqcF5ZSYMS4JTLjteaAMARRSaeSh tests/fixtures/delegation.so \
   --bpf-program KeyspM2ssCJbqUhQ4k7sveSiY4WjnYsrXkC8oDbwde5 tests/fixtures/session_keys.so \
-  --bpf-program WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n target/deploy/world.so \
+  --bpf-program wor1DcaDr8AeBdaf5bqeBQUY9My2sgZwtanRcaALE9L target/deploy/world.so \
   --bpf-program CmP2djJgABZ4cRokm4ndxuq6LerqpNHLBsaUv2XKEJua target/deploy/bolt_component.so \
   --bpf-program 7X4EFsDJ5aYTcEjKzJ94rD8FRKgQeXC89fkpeTS4KaqP target/deploy/bolt_system.so \
   --bpf-program Fn1JzzEdyb55fsyduWS94mYHizGhJZuhvjX6DVvrmGbQ target/deploy/position.so \

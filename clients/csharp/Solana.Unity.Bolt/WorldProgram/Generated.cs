@@ -382,7 +382,7 @@ namespace World
 
         public partial class WorldProgram
         {
-            public const string ID = "WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n";
+            public const string ID = "wor1DcaDr8AeBdaf5bqeBQUY9My2sgZwtanRcaALE9L";
             public static Solana.Unity.Rpc.Models.TransactionInstruction AddAuthority(AddAuthorityAccounts accounts, ulong world_id, PublicKey programId = null)
             {
                 programId ??= new(ID);
