@@ -18,6 +18,7 @@ pub const INITIALIZE: [u8; 8] = discriminator_for("global:initialize");
 pub const DESTROY: [u8; 8] = discriminator_for("global:destroy");
 pub const UPDATE: [u8; 8] = discriminator_for("global:update");
 pub const UPDATE_WITH_SESSION: [u8; 8] = discriminator_for("global:update_with_session");
+pub const SET_OWNER: [u8; 8] = discriminator_for("global:set_owner");
 
 declare_id!("WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n");
 
@@ -433,6 +434,7 @@ pub fn apply_impl<'info>(
 ) -> Result<()> {
     let (pairs, results) = system_execute(
         &ctx.accounts.authority,
+        &ctx.accounts.instruction_sysvar_account,
         &ctx.accounts.world,
         &ctx.accounts.bolt_system,
         system_discriminator,
@@ -477,6 +479,7 @@ pub fn apply_with_session_impl<'info>(
 ) -> Result<()> {
     let (pairs, results) = system_execute(
         &ctx.accounts.authority,
+        &ctx.accounts.instruction_sysvar_account,
         &ctx.accounts.world,
         &ctx.accounts.bolt_system,
         system_discriminator,
@@ -519,6 +522,7 @@ pub fn apply_with_session_impl<'info>(
 #[allow(clippy::type_complexity)]
 fn system_execute<'info>(
     authority: &Signer<'info>,
+    instruction_sysvar_account: &UncheckedAccount<'info>,
     world: &Account<'info, World>,
     bolt_system: &UncheckedAccount<'info>,
     system_discriminator: Vec<u8>,
@@ -547,12 +551,33 @@ fn system_execute<'info>(
         pairs.push((program, component));
     }
 
+    let (first_program, first_component) = pairs.remove(0);
+    let pda_data = first_component.try_borrow_data()?.to_vec();
+
+    let owner = bolt_system.key().to_bytes();
+    let mut data = SET_OWNER.to_vec();
+    data.extend_from_slice(owner.as_slice());
+
+    // set owner
+    invoke(&Instruction {
+        program_id: first_program.key(),
+        accounts: vec![
+            AccountMeta::new(first_component.key(), false),
+            AccountMeta::new_readonly(instruction_sysvar_account.key(), false),
+        ],
+        data,
+    }, &[
+        first_component.to_account_info(),
+        instruction_sysvar_account.to_account_info(),
+    ])?;
+
     let mut components_accounts = pairs
         .iter()
         .map(|(_, component)| component)
         .cloned()
         .collect::<Vec<_>>();
     components_accounts.append(&mut remaining_accounts);
+
     let remaining_accounts = components_accounts;
 
     let mut data = system_discriminator;

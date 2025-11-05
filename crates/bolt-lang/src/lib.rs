@@ -10,6 +10,10 @@ pub use anchor_lang::{
 pub mod cpi;
 pub mod instructions;
 
+pub mod bpf_writer;
+pub mod account;
+pub use account::BoltAccount;
+
 pub use session_keys;
 
 pub use bolt_attribute_bolt_arguments::arguments;

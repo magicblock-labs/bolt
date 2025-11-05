@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use proc_macro::TokenStream;
 
 use quote::quote;
@@ -61,13 +63,23 @@ pub fn system_input(_attr: TokenStream, item: TokenStream) -> TokenStream {
         })
         .collect();
 
+    let unique_fields = fields.iter().map(|f| f.ty.clone()).collect::<HashSet<_>>();
+    let bolt_accounts = unique_fields.iter().map(|f| {
+        let field_type = &f;
+        quote! {
+            pub type #field_type = bolt_lang::account::BoltAccount<super::#field_type, { bolt_lang::account::pubkey_p0(crate::ID) }, { bolt_lang::account::pubkey_p1(crate::ID) }>;
+        }
+    });
+
+    let bolt_accounts_name = syn::Ident::new(&format!("{}_accounts", name.to_string()), proc_macro2::Span::call_site());
+
     // Transform fields for the struct definition
     let transformed_fields = fields.iter().map(|f| {
         let field_name = &f.ident;
         let field_type = &f.ty;
         quote! {
             #[account()]
-            pub #field_name: Account<'info, #field_type>,
+            pub #field_name: Account<'info, #bolt_accounts_name::#field_type>,
         }
     });
 
@@ -123,6 +135,10 @@ pub fn system_input(_attr: TokenStream, item: TokenStream) -> TokenStream {
 
     // Combine the struct definition and its implementation into the final TokenStream
     let output = quote! {
+        mod #bolt_accounts_name {
+            #(#bolt_accounts)*
+        }
+
         #output_struct
         #output_impl
         #output_trait_implementation

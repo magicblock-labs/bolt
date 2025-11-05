@@ -26,9 +26,34 @@ fn generate_bolt_execute_wrapper(
 ) -> Item {
     parse_quote! {
         pub fn #fn_ident<'a, 'b, 'info>(ctx: Context<'a, 'b, 'info, 'info, VariadicBoltComponents<'info>>, args: Vec<u8>) -> Result<Vec<Vec<u8>>> {
+            use std::rc::Rc;
+            use std::cell::RefCell;
+            let key = Pubkey::from_str_const("tEsT3eV6RFCWs1BZ7AXTzasHqTtMnMLCB2tjQ42TDXD");
+            let owner = Pubkey::from_str_const("tEsT3eV6RFCWs1BZ7AXTzasHqTtMnMLCB2tjQ42TDXD");
+            let key: &'info Pubkey = unsafe { std::mem::transmute(&key) };
+            let owner: &'info Pubkey = unsafe { std::mem::transmute(&owner) };
+            let first_account = AccountInfo {
+                key: &key,
+                lamports: Rc::new(RefCell::new(&mut 0)),
+                data: Rc::new(RefCell::new(&mut vec![0; 100])),
+                owner: &owner,
+                rent_epoch: 0,
+                is_signer: false,
+                is_writable: false,
+                executable: false,
+            };
+            let mut remaining_accounts = vec![first_account];
+            remaining_accounts.extend(ctx.remaining_accounts.iter().cloned());
+            let remaining_accounts: &'info [AccountInfo<'info>] = unsafe { std::mem::transmute(remaining_accounts.as_slice()) };
+            let ctx = Context {
+                program_id: ctx.program_id,
+                accounts: ctx.accounts,
+                remaining_accounts,
+                bumps: ctx.bumps,
+            };
             let mut components = #components_ident::try_from(&ctx)?;
             let bumps = #bumps_ident {};
-            let context = Context::new(ctx.program_id, &mut components, ctx.remaining_accounts, bumps);
+            let context = Context::new(ctx.program_id, &mut components, remaining_accounts, bumps);
             #callee_ident(context, args)
         }
     }
