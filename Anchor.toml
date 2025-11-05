@@ -5,7 +5,7 @@ resolution = true
 skip-lint = false
 
 [programs.devnet]
-world = "WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n"
+world = "wor1DcaDr8AeBdaf5bqeBQUY9My2sgZwtanRcaALE9L"
 
 [programs.localnet]
 component-small = "9yBADAhoTWCkNRB6hbfpwUgPpxyJiF9uEiWVPR6k7A4y"

@@ -111,7 +111,7 @@ export class Framework {
     for (let index in log) {
       let line = log[index];
       if (line.includes(" consumed ")) {
-        if (!line.includes("WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n")) {
+        if (!line.includes("wor1DcaDr8AeBdaf5bqeBQUY9My2sgZwtanRcaALE9L")) {
           cpi.push(this.consume(line));
         } else {
           worldReport = this.consume(line);

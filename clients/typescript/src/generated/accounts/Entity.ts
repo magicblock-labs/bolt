@@ -76,7 +76,7 @@ export class Entity implements EntityArgs {
    */
   static gpaBuilder(
     programId: web3.PublicKey = new web3.PublicKey(
-      "WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n",
+      "wor1DcaDr8AeBdaf5bqeBQUY9My2sgZwtanRcaALE9L",
     ),
   ) {
     return beetSolana.GpaBuilder.fromStruct(programId, entityBeet);

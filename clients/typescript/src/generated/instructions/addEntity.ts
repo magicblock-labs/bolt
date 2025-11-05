@@ -67,7 +67,7 @@ export const addEntityInstructionDiscriminator = [
 export function createAddEntityInstruction(
   accounts: AddEntityInstructionAccounts,
   args: AddEntityInstructionArgs,
-  programId = new web3.PublicKey("WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n"),
+  programId = new web3.PublicKey("wor1DcaDr8AeBdaf5bqeBQUY9My2sgZwtanRcaALE9L"),
 ) {
   const [data] = addEntityStruct.serialize({
     instructionDiscriminator: addEntityInstructionDiscriminator,

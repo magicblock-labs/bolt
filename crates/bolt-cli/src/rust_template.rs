@@ -87,7 +87,7 @@ pub fn registry_account() -> &'static str {
       "L65u9ri2/NoCAAAAAAAAAA==",
       "base64"
     ],
-    "owner": "WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n",
+    "owner": "wor1DcaDr8AeBdaf5bqeBQUY9My2sgZwtanRcaALE9L",
     "executable": false,
     "rentEpoch": 18446744073709551615,
     "space": 16
