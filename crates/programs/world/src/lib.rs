@@ -581,6 +581,9 @@ fn system_execute<'info>(
     let remaining_accounts = components_accounts;
 
     let mut data = system_discriminator;
+    let pda_data_len_le = (pda_data.len() as u32).to_le_bytes();
+    data.extend_from_slice(&pda_data_len_le);
+    data.extend_from_slice(pda_data.as_slice());
     let len_le = (args.len() as u32).to_le_bytes();
     data.extend_from_slice(&len_le);
     data.extend_from_slice(args.as_slice());
