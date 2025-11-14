@@ -27,6 +27,8 @@ import { With8Components } from "../../../target/types/with_8_components";
 import { With9Components } from "../../../target/types/with_9_components";
 import { With10Components } from "../../../target/types/with_10_components";
 import { ExampleBundle } from "../../../target/types/example_bundle";
+import { WithLargeComponent } from "../../../target/types/with_large_component";
+import { Large } from "../../../target/types/large";
 
 export class Framework {
   provider: anchor.AnchorProvider;
@@ -48,7 +50,9 @@ export class Framework {
   systemWith8Components: anchor.Program<With8Components>;
   systemWith9Components: anchor.Program<With9Components>;
   systemWith10Components: anchor.Program<With10Components>;
+  systemWithLargeComponent: anchor.Program<WithLargeComponent>;
   componentSmall: anchor.Program<Small>;
+  componentLarge: anchor.Program<Large>;
   worldPda: PublicKey;
   worldId: BN;
 
@@ -76,6 +80,8 @@ export class Framework {
     this.systemFly = anchor.workspace.SystemFly;
     this.systemApplyVelocity = anchor.workspace.SystemApplyVelocity;
     this.componentSmall = anchor.workspace.Small;
+    this.componentLarge = anchor.workspace.Large;
+    this.systemWithLargeComponent = anchor.workspace.WithLargeComponent;
     this.systemWith1Component = anchor.workspace.With1Component;
     this.systemWith2Components = anchor.workspace.With2Components;
     this.systemWith3Components = anchor.workspace.With3Components;

@@ -89,6 +89,53 @@ export function ecs(framework) {
       await framework.provider.sendAndConfirm(transaction);
     });
 
+    it("Initialize Large Component on Entity 4", async () => {
+      const componentId = framework.componentLarge.programId;
+      framework.componentLargeEntity4Pda = FindComponentPda({
+        componentId,
+        entity: framework.entity4Pda,
+      });
+      const instruction = await framework.worldProgram.methods
+        .initializeComponent()
+        .accounts({
+          payer: framework.provider.wallet.publicKey,
+          entity: framework.entity4Pda,
+          data: framework.componentLargeEntity4Pda,
+          componentProgram: componentId,
+          authority: framework.worldProgram.programId,
+        })
+        .instruction();
+      const transaction = new anchor.web3.Transaction().add(instruction);
+      await framework.provider.sendAndConfirm(transaction);
+    });
+
+    it("Apply system with large component on Entity 4", async () => {
+      const instruction = await framework.worldProgram.methods
+        .apply(SerializeArgs())
+        .accounts({
+          authority: framework.provider.wallet.publicKey,
+          boltSystem: framework.systemWithLargeComponent.programId,
+          world: framework.worldPda,
+        })
+        .remainingAccounts([
+          {
+            pubkey: framework.componentLarge.programId,
+            isSigner: false,
+            isWritable: false,
+          },
+          {
+            pubkey: framework.componentLargeEntity4Pda,
+            isSigner: false,
+            isWritable: true,
+          },
+        ])
+        .instruction();
+      const transaction = new anchor.web3.Transaction().add(instruction);
+      await framework.provider.sendAndConfirm(transaction);
+    });
+
+    return;
+
     it("Initialize Velocity Component on Entity 1 (with seed)", async () => {
       const componentId = framework.exampleComponentVelocity.programId;
       framework.componentVelocityEntity1Pda = FindComponentPda({

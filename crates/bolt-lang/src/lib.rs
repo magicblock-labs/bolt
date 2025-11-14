@@ -1,3 +1,7 @@
+#[cfg(test)]
+/// Used for allowing usage of #[account] in tests.
+const ID: Pubkey = Pubkey::from_str_const("tEsT3eV6RFCWs1BZ7AXTzasHqTtMnMLCB2tjQ42TDXD");
+
 pub mod prelude;
 
 pub use anchor_lang;
@@ -10,7 +14,13 @@ pub use anchor_lang::{
 pub mod cpi;
 pub mod instructions;
 
+pub mod bpf_writer;
+pub mod account;
+pub use account::BoltAccount;
+
 pub use session_keys;
+
+pub mod context;
 
 pub use bolt_attribute_bolt_arguments::arguments;
 pub use bolt_attribute_bolt_bundle::bundle;

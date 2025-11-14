@@ -2687,6 +2687,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "large"
+version = "0.2.6"
+dependencies = [
+ "bolt-lang",
+]
+
+[[package]]
 name = "lazy_static"
 version = "1.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -7174,6 +7181,15 @@ dependencies = [
  "bolt-lang",
  "serde",
  "small",
+]
+
+[[package]]
+name = "with-large-component"
+version = "0.2.6"
+dependencies = [
+ "bolt-lang",
+ "large",
+ "serde",
 ]
 
 [[package]]

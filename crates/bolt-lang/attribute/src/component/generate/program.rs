@@ -187,6 +187,31 @@ fn generate_initialize(
     )
 }
 
+/// Generates the set_owner function and struct.
+pub fn generate_set_owner(module: &mut ItemMod) {
+    let set_owner_fn = quote! {
+        #[automatically_derived]
+        pub fn set_owner(ctx: Context<SetOwner>, owner: Pubkey) -> Result<()> {
+            bolt_lang::instructions::set_owner(&ctx.accounts.instruction_sysvar_account.to_account_info(), &ctx.accounts.component.to_account_info(), owner)
+        }
+    };
+    let set_owner_struct = quote! {
+        #[automatically_derived]
+        #[derive(Accounts)]
+        pub struct SetOwner<'info> {
+            /// CHECK: This is a component account
+            #[account(mut)]
+            pub component: AccountInfo<'info>,
+            #[account(address = anchor_lang::solana_program::sysvar::instructions::id())]
+            pub instruction_sysvar_account: AccountInfo<'info>,
+        }
+    };
+    module.content.as_mut().map(|(brace, items)| {
+        items.extend(vec![set_owner_fn, set_owner_struct].into_iter().map(|item| syn::parse2(item).expect("Failed to parse generate set_owner item")).collect::<Vec<_>>());
+        (brace, items.clone())
+    });
+}
+
 /// Generates the instructions and related structs to inject in the component.
 pub fn generate_update(module: &mut ItemMod) {
     let update_fn = quote! {
