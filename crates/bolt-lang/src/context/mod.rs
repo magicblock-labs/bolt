@@ -6,12 +6,63 @@ pub struct ContextData<'info, T: Bumps> {
     accounts: T,
     bumps: T::Bumps,
     remaining_accounts: &'info [AccountInfo<'info>],
+    // Own storage for rebuilt remaining accounts when we need to override the first one
+    rebuilt_remaining_storage: Option<Box<[AccountInfo<'info>]>>,
+    // Own storage for the first component's data and lamports to back AccountInfo::new
+    first_component_data: Option<Vec<u8>>,
+    first_component_lamports: u64,
 }
 
 impl<'info, T: Bumps> ContextData<'info, T> {
-    pub fn rebuild_from<'a, 'b, 'c>(_ctx: Context<'a, 'b, 'c, 'info, T>, _input: BoltExecuteInput) -> (Self, Vec<u8>, AccountInfo<'info>) {
-        // Self::new(*ctx.program_id, ctx.accounts, ctx.bumps, ctx.remaining_accounts)
-        todo!("Not implemented")
+    pub fn rebuild_from<'a, 'b, 'c>(ctx: &Context<'a, 'b, 'c, 'info, T>, input: BoltExecuteInput) -> (Self, Vec<u8>, AccountInfo<'info>)
+    where
+        T: Clone,
+        'c: 'info,
+    {
+        let BoltExecuteInput { pda_data, args } = input;
+        // Use the first remaining account as buffer (removed from remaining_accounts).
+        let buffer = ctx
+            .remaining_accounts
+            .get(0)
+            .expect("expected at least one remaining account")
+            .clone();
+        // Rebuild first component account info using same key/owner/rent_epoch, writable and with data from input.
+        let key = buffer.key;
+        let owner = buffer.owner;
+        let rent_epoch = buffer.rent_epoch;
+
+        // Build the context data and stash owned storage so the references live long enough
+        let bumps: T::Bumps = unsafe { std::mem::transmute_copy(&ctx.bumps) };
+        let mut rebuilt = Self::new(*ctx.program_id, ctx.accounts.clone(), bumps, &[]);
+        // initialize owned storages
+        rebuilt.first_component_lamports = buffer.lamports();
+        rebuilt.first_component_data = Some(pda_data);
+        // Create AccountInfo that borrows from rebuilt's owned fields
+        {
+            let is_signer = false;
+            let is_writable = true;
+            let executable = false;
+            // SAFETY: casting references to 'info is safe because `rebuilt` (returned Self)
+            // owns the backing storage for these references for at least 'info.
+            let lamports_ref: &'info mut u64 =
+                unsafe { &mut *(&mut rebuilt.first_component_lamports as *mut u64) };
+            let data_slice_ref: &'info mut [u8] = unsafe {
+                let slice_ptr = rebuilt.first_component_data.as_mut().unwrap().as_mut_slice() as *mut [u8];
+                &mut *slice_ptr
+            };
+            let first_component =
+                AccountInfo::new(key, is_signer, is_writable, lamports_ref, data_slice_ref, owner, executable, rent_epoch);
+            // Build new remaining accounts storage: first is rebuilt component, rest are original (skipping buffer)
+            let mut storage_vec: Vec<AccountInfo<'info>> = Vec::with_capacity(ctx.remaining_accounts.len());
+            storage_vec.push(first_component);
+            storage_vec.extend_from_slice(&ctx.remaining_accounts[1..]);
+            rebuilt.rebuilt_remaining_storage = Some(storage_vec.into_boxed_slice());
+        }
+        // Now point remaining_accounts to our owned storage
+        let ra_ref: &[AccountInfo<'info>] = rebuilt.rebuilt_remaining_storage.as_ref().unwrap().as_ref();
+        // Extend lifetime to 'info; safe here because rebuilt owns the storage
+        rebuilt.remaining_accounts = unsafe { std::mem::transmute::<&[AccountInfo<'info>], &'info [AccountInfo<'info>]>(ra_ref) };
+        (rebuilt, args, buffer)
     }
 
     pub fn new(program_id: Pubkey, accounts: T, bumps: T::Bumps, remaining_accounts: &'info [AccountInfo<'info>]) -> Self {
@@ -20,6 +71,9 @@ impl<'info, T: Bumps> ContextData<'info, T> {
             accounts,
             bumps,
             remaining_accounts,
+            rebuilt_remaining_storage: None,
+            first_component_data: None,
+            first_component_lamports: 0,
         }
     }
 
@@ -112,7 +166,7 @@ mod tests {
         pub data: u64,
     }
 
-    #[derive(Accounts)]
+    #[derive(Accounts, Clone)]
     pub struct VariadicComponents<'info> {
         pub authority: Signer<'info>,
     }
@@ -129,9 +183,13 @@ mod tests {
     }
 
     fn bolt_execute<'a, 'b, 'info>(ctx: Context<'a, 'b, 'info, 'info, VariadicComponents<'info>>, input: BoltExecuteInput) -> Result<()> {
-        let (mut rebuilt_context_data, args, buffer) = ContextData::rebuild_from(ctx, input);
-        let rebuilt_context = rebuilt_context_data.to_context();
-        let mut components = Components::try_from(&rebuilt_context).expect("Failed to convert context to components");
+        let (rebuilt_context_data, args, buffer) = ContextData::rebuild_from(&ctx, input);
+        let mut variadic = VariadicComponents {
+            authority: ctx.accounts.authority.clone(),
+        };
+        let variadic_bumps = VariadicComponentsBumps {};
+        let var_ctx = Context::new(ctx.program_id, &mut variadic, rebuilt_context_data.remaining_accounts, variadic_bumps);
+        let mut components = Components::try_from(&var_ctx).expect("Failed to convert context to components");
         let bumps = ComponentsBumps {};
         let context = Context::new(ctx.program_id, &mut components, ctx.remaining_accounts, bumps);
         let result = execute(context, args)?;
@@ -153,10 +211,13 @@ mod tests {
         pub account: Account<'info, SomeAccount>,
     }
 
-    impl<'info> TryFrom<&Context<'_, '_, 'info, 'info, VariadicComponents<'info>>> for Components<'info> {
+    impl<'a, 'b, 'c, 'info> TryFrom<&Context<'a, 'b, 'c, 'info, VariadicComponents<'info>>> for Components<'info>
+    where
+        'c: 'info,
+    {
         type Error = ErrorCode;
 
-        fn try_from(context: &Context<'_, '_, 'info, 'info, VariadicComponents<'info>>) -> std::result::Result<Self, ErrorCode> {
+        fn try_from(context: &Context<'a, 'b, 'c, 'info, VariadicComponents<'info>>) -> std::result::Result<Self, ErrorCode> {
             Ok(Self {
                 authority: context.accounts.authority.clone(),
                 account: Account::try_from(context.remaining_accounts.as_ref().get(0).ok_or_else(|| ErrorCode::ConstraintAccountIsNone)?).expect("Failed to convert context to components"),

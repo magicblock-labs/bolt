@@ -25,13 +25,21 @@ fn generate_bolt_execute_wrapper(
     bumps_ident: Ident,
 ) -> Item {
     parse_quote! {
-        pub fn #fn_ident<'a, 'b, 'info>(ctx: Context<'a, 'b, 'info, 'info, VariadicBoltComponents<'info>>, args: Vec<u8>) -> Result<Vec<Vec<u8>>> {
-            let pda_data = PdaData::from_slice(&args);
-            let args = args[4 + pda_data.len()..].to_vec();
-            let mut components = #components_ident::try_from(&ctx)?;
+        pub fn #fn_ident<'a, 'b, 'info>(ctx: Context<'a, 'b, 'info, 'info, VariadicBoltComponents<'info>>, input: BoltExecuteInput) -> Result<()> {
+            let (rebuilt_context_data, args, buffer) = ContextData::rebuild_from(&ctx, input);
+            let mut variadic = VariadicComponents {
+                authority: ctx.accounts.authority.clone(),
+            };
+            let variadic_bumps = VariadicComponentsBumps {};
+            let var_ctx = Context::new(ctx.program_id, &mut variadic, rebuilt_context_data.remaining_accounts, variadic_bumps);
+            let mut components = #components_ident::try_from(&var_ctx).expect("Failed to convert context to components");
             let bumps = #bumps_ident {};
             let context = Context::new(ctx.program_id, &mut components, ctx.remaining_accounts, bumps);
-            #callee_ident(context, args)
+            let result = #callee_ident(context, args)?;
+            let result = result.try_to_vec()?;
+            buffer.realloc(result.len(), false)?;
+            buffer.data.borrow_mut().copy_from_slice(&result);
+            Ok(())    
         }
     }
 }
