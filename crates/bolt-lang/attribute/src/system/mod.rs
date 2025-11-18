@@ -26,6 +26,8 @@ fn generate_bolt_execute_wrapper(
 ) -> Item {
     parse_quote! {
         pub fn #fn_ident<'a, 'b, 'info>(ctx: Context<'a, 'b, 'info, 'info, VariadicBoltComponents<'info>>, input: bolt_lang::context::BoltExecuteInput) -> Result<()> {
+            let mut input = input;
+            let input: &'info mut bolt_lang::context::BoltExecuteInput = unsafe { std::mem::transmute(&mut input) };
             let (rebuilt_context_data, args, buffer) = bolt_lang::context::ContextData::rebuild_from(&ctx, input);
             let mut variadic = VariadicBoltComponents {
                 authority: ctx.accounts.authority.clone(),

@@ -522,6 +522,7 @@ pub fn apply_with_session_impl<'info>(
 
 #[derive(BorshSerialize)]
 pub struct BoltExecuteInput {
+    pub owner: Pubkey,
     pub pda_data: Vec<u8>,
     pub args: Vec<u8>,
 }
@@ -605,8 +606,10 @@ fn system_execute<'info>(
     let remaining_accounts = components_accounts;
 
     let mut data = system_discriminator;
-    let input = BoltExecuteInput { pda_data, args };
-    data.extend_from_slice(&input.try_to_vec()?);
+    {
+        let input = BoltExecuteInput { owner: first_program.key(), pda_data, args };
+        data.extend_from_slice(&input.try_to_vec()?);
+    }
 
     let mut accounts = vec![AccountMeta {
         pubkey: authority.key(),

@@ -1,3 +1,5 @@
+// TODO: Not used. Can be removed.
+
 use anchor_lang::prelude::*;
 
 /// BoltAccount used as a workaround for altering the account ownership check during deserialization.
