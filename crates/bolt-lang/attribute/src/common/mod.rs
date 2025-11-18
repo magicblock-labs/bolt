@@ -20,7 +20,7 @@ pub fn inject_program(module: &mut syn::ItemMod) {
         items.insert(
             1,
             syn::Item::Struct(syn::parse_quote! {
-                #[derive(Accounts)]
+                #[derive(Accounts, Clone)]
                 pub struct VariadicBoltComponents<'info> {
                     pub authority: Signer<'info>,
                 }

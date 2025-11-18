@@ -21,6 +21,8 @@ pub fn process(attr: TokenStream, item: TokenStream) -> TokenStream {
         inject_delegate_items(&mut program, vec![(type_.ident.clone(), "".to_string())]);
     }
     generate_update(&mut program);
+    generate_set_owner(&mut program);
+    generate_recover_metadata(&mut program);
     enrich_type(&mut type_);
 
     let expanded = quote! {
