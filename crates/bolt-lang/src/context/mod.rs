@@ -1,16 +1,16 @@
-use anchor_lang::{Bumps, prelude::{borsh::{BorshDeserialize, BorshSerialize}, *}};
+use anchor_lang::{Bumps, prelude::*};
 use std::{cell::RefCell, rc::Rc};
 
 pub struct ContextData<'info, T: Bumps> {
-    program_id: Pubkey,
-    accounts: T,
-    bumps: T::Bumps,
-    remaining_accounts: &'info [AccountInfo<'info>],
+    pub program_id: Pubkey,
+    pub accounts: T,
+    pub bumps: T::Bumps,
+    pub remaining_accounts: &'info [AccountInfo<'info>],
     // Own storage for rebuilt remaining accounts when we need to override the first one
-    rebuilt_remaining_storage: Option<Box<[AccountInfo<'info>]>>,
+    pub rebuilt_remaining_storage: Option<Box<[AccountInfo<'info>]>>,
     // Own storage for the first component's data and lamports to back AccountInfo::new
-    first_component_data: Option<Vec<u8>>,
-    first_component_lamports: u64,
+    pub first_component_data: Option<Vec<u8>>,
+    pub first_component_lamports: u64,
 }
 
 impl<'info, T: Bumps> ContextData<'info, T> {
@@ -133,7 +133,7 @@ impl AccountData {
     }
 }
 
-#[derive(BorshSerialize, BorshDeserialize)]
+#[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct BoltExecuteInput {
     pub pda_data: Vec<u8>,
     pub args: Vec<u8>,
@@ -167,27 +167,27 @@ mod tests {
     }
 
     #[derive(Accounts, Clone)]
-    pub struct VariadicComponents<'info> {
+    pub struct VariadicBoltComponents<'info> {
         pub authority: Signer<'info>,
     }
 
-    impl<'info> VariadicComponents<'info> {
-        pub fn test_data(authority: &'info AccountInfo<'info>) -> (Self, VariadicComponentsBumps) {
+    impl<'info> VariadicBoltComponents<'info> {
+        pub fn test_data(authority: &'info AccountInfo<'info>) -> (Self, VariadicBoltComponentsBumps) {
             (
                 Self {
                     authority: Signer::try_from(authority).unwrap(),
                 },
-                VariadicComponentsBumps {}
+                VariadicBoltComponentsBumps {}
             )
         }
     }
 
-    fn bolt_execute<'a, 'b, 'info>(ctx: Context<'a, 'b, 'info, 'info, VariadicComponents<'info>>, input: BoltExecuteInput) -> Result<()> {
+    fn bolt_execute<'a, 'b, 'info>(ctx: Context<'a, 'b, 'info, 'info, VariadicBoltComponents<'info>>, input: BoltExecuteInput) -> Result<()> {
         let (rebuilt_context_data, args, buffer) = ContextData::rebuild_from(&ctx, input);
-        let mut variadic = VariadicComponents {
+        let mut variadic = VariadicBoltComponents {
             authority: ctx.accounts.authority.clone(),
         };
-        let variadic_bumps = VariadicComponentsBumps {};
+        let variadic_bumps = VariadicBoltComponentsBumps {};
         let var_ctx = Context::new(ctx.program_id, &mut variadic, rebuilt_context_data.remaining_accounts, variadic_bumps);
         let mut components = Components::try_from(&var_ctx).expect("Failed to convert context to components");
         let bumps = ComponentsBumps {};
@@ -211,13 +211,13 @@ mod tests {
         pub account: Account<'info, SomeAccount>,
     }
 
-    impl<'a, 'b, 'c, 'info> TryFrom<&Context<'a, 'b, 'c, 'info, VariadicComponents<'info>>> for Components<'info>
+    impl<'a, 'b, 'c, 'info> TryFrom<&Context<'a, 'b, 'c, 'info, VariadicBoltComponents<'info>>> for Components<'info>
     where
         'c: 'info,
     {
         type Error = ErrorCode;
 
-        fn try_from(context: &Context<'a, 'b, 'c, 'info, VariadicComponents<'info>>) -> std::result::Result<Self, ErrorCode> {
+        fn try_from(context: &Context<'a, 'b, 'c, 'info, VariadicBoltComponents<'info>>) -> std::result::Result<Self, ErrorCode> {
             Ok(Self {
                 authority: context.accounts.authority.clone(),
                 account: Account::try_from(context.remaining_accounts.as_ref().get(0).ok_or_else(|| ErrorCode::ConstraintAccountIsNone)?).expect("Failed to convert context to components"),
@@ -236,7 +236,7 @@ mod tests {
         let [mut signer, mut component_a] = AccountData::test_data();
         let input= prepare_execution_input(&mut component_a)?;
         let (signer_account_info, component_a_info) = (signer.to_account_info(), component_a.to_account_info());
-        let (components, bumps) = VariadicComponents::test_data(&signer_account_info);
+        let (components, bumps) = VariadicBoltComponents::test_data(&signer_account_info);
         let remaining_accounts = &[component_a_info.clone()];
         let mut context = ContextData::test_data(components, bumps, remaining_accounts);
         let context = context.to_context();

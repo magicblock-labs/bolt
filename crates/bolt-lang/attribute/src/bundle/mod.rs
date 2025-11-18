@@ -12,6 +12,7 @@ pub fn process(_attr: TokenStream, item: TokenStream) -> TokenStream {
     let mut program = generate_program(&bundle_mod.ident.to_string());
     component::generate_update(&mut program);
     component::generate_set_owner(&mut program);
+    component::generate_recover_metadata(&mut program);
     let mut delegate_components = Vec::new();
     if let Some((_, items)) = bundle_mod.content {
         for item in items {

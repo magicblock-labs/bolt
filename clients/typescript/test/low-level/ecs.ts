@@ -134,8 +134,6 @@ export function ecs(framework) {
       await framework.provider.sendAndConfirm(transaction);
     });
 
-    return;
-
     it("Initialize Velocity Component on Entity 1 (with seed)", async () => {
       const componentId = framework.exampleComponentVelocity.programId;
       framework.componentVelocityEntity1Pda = FindComponentPda({

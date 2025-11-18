@@ -212,6 +212,29 @@ pub fn generate_set_owner(module: &mut ItemMod) {
     });
 }
 
+pub fn generate_recover_metadata(module: &mut ItemMod) {
+    let recover_metadata_fn = parse_quote! {
+        #[automatically_derived]
+        pub fn recover_metadata(ctx: Context<RecoverMetadata>, original_size: u32, discriminator: Vec<u8>, bolt_metadata: bolt_lang::BoltMetadata) -> Result<()> {
+            bolt_lang::instructions::recover_metadata(&ctx.accounts.instruction_sysvar_account.to_account_info(), &ctx.accounts.bolt_component, original_size, discriminator, bolt_metadata)?;
+            Ok(())
+        }
+    };
+    let recover_metadata_struct = parse_quote! {
+        #[automatically_derived]
+        #[derive(Accounts)]
+        pub struct RecoverMetadata<'info> {
+            #[account(mut)]
+            pub bolt_component: AccountInfo<'info>,
+            #[account(address = anchor_lang::solana_program::sysvar::instructions::id())]
+            pub instruction_sysvar_account: AccountInfo<'info>,
+        }
+    };
+    module.content.as_mut().map(|(brace, items)| {
+        items.extend(vec![recover_metadata_fn, recover_metadata_struct]);
+        (brace, items.clone())
+    });
+}
 /// Generates the instructions and related structs to inject in the component.
 pub fn generate_update(module: &mut ItemMod) {
     let update_fn = quote! {

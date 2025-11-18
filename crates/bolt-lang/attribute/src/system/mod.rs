@@ -25,12 +25,12 @@ fn generate_bolt_execute_wrapper(
     bumps_ident: Ident,
 ) -> Item {
     parse_quote! {
-        pub fn #fn_ident<'a, 'b, 'info>(ctx: Context<'a, 'b, 'info, 'info, VariadicBoltComponents<'info>>, input: BoltExecuteInput) -> Result<()> {
-            let (rebuilt_context_data, args, buffer) = ContextData::rebuild_from(&ctx, input);
-            let mut variadic = VariadicComponents {
+        pub fn #fn_ident<'a, 'b, 'info>(ctx: Context<'a, 'b, 'info, 'info, VariadicBoltComponents<'info>>, input: bolt_lang::context::BoltExecuteInput) -> Result<()> {
+            let (rebuilt_context_data, args, buffer) = bolt_lang::context::ContextData::rebuild_from(&ctx, input);
+            let mut variadic = VariadicBoltComponents {
                 authority: ctx.accounts.authority.clone(),
             };
-            let variadic_bumps = VariadicComponentsBumps {};
+            let variadic_bumps = VariadicBoltComponentsBumps {};
             let var_ctx = Context::new(ctx.program_id, &mut variadic, rebuilt_context_data.remaining_accounts, variadic_bumps);
             let mut components = #components_ident::try_from(&var_ctx).expect("Failed to convert context to components");
             let bumps = #bumps_ident {};
@@ -39,7 +39,7 @@ fn generate_bolt_execute_wrapper(
             let result = result.try_to_vec()?;
             buffer.realloc(result.len(), false)?;
             buffer.data.borrow_mut().copy_from_slice(&result);
-            Ok(())    
+            Ok(())
         }
     }
 }
@@ -60,12 +60,36 @@ pub fn process(_attr: TokenStream, item: TokenStream) -> TokenStream {
             );
             if !has_variadic {
                 let variadic_struct: Item = parse_quote! {
-                    #[derive(Accounts)]
+                    #[derive(Accounts, Clone)]
                     pub struct VariadicBoltComponents<'info> {
                         pub authority: Signer<'info>,
                     }
                 };
                 items.insert(1, variadic_struct);
+            }
+            let has_set_owner = items.iter().any(
+                |it| matches!(it, syn::Item::Fn(f) if f.sig.ident == "set_owner"),
+            );
+            if !has_set_owner {
+                let set_owner_fn: Item = parse_quote! {
+                    #[automatically_derived]
+                    pub fn set_owner(ctx: Context<SetOwner>, new_owner: Pubkey) -> Result<()> {
+                        bolt_lang::instructions::set_owner(&ctx.accounts.instruction_sysvar_account.to_account_info(), &ctx.accounts.component.to_account_info(), new_owner)
+                    }
+                };
+                items.push(set_owner_fn);
+                let set_owner_struct = parse_quote! {
+                    #[automatically_derived]
+                    #[derive(Accounts)]
+                    pub struct SetOwner<'info> {
+                        /// CHECK: This is a component account
+                        #[account(mut)]
+                        pub component: AccountInfo<'info>,
+                        #[account(address = anchor_lang::solana_program::sysvar::instructions::id())]
+                        pub instruction_sysvar_account: AccountInfo<'info>,
+                    }
+                };
+                items.push(set_owner_struct);
             }
             let wrapper = generate_bolt_execute_wrapper(
                 Ident::new("bolt_execute", Span::call_site()),

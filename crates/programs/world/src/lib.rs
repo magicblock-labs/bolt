@@ -1,14 +1,14 @@
 #![allow(clippy::manual_unwrap_or_default)]
 use anchor_lang::{
-    prelude::*,
-    solana_program::instruction::{AccountMeta, Instruction},
-    solana_program::program::invoke,
+    prelude::{borsh::BorshSerialize, *},
+    solana_program::{instruction::{AccountMeta, Instruction}, program::invoke},
 };
 use error::WorldError;
 use std::collections::BTreeSet;
 
 pub mod utils;
 use utils::discriminator_for;
+
 
 #[cfg(not(feature = "no-entrypoint"))]
 use solana_security_txt::security_txt;
@@ -19,6 +19,7 @@ pub const DESTROY: [u8; 8] = discriminator_for("global:destroy");
 pub const UPDATE: [u8; 8] = discriminator_for("global:update");
 pub const UPDATE_WITH_SESSION: [u8; 8] = discriminator_for("global:update_with_session");
 pub const SET_OWNER: [u8; 8] = discriminator_for("global:set_owner");
+pub const RECOVER_METADATA: [u8; 8] = discriminator_for("global:recover_metadata");
 
 declare_id!("WorLD15A7CrDwLcLy4fRqtaTb9fbd8o8iqiEMUDse2n");
 
@@ -463,7 +464,7 @@ pub fn apply_impl<'info>(
         invoke(
             &ix,
             &[
-                component.clone(),
+                component,
                 ctx.accounts.authority.to_account_info(),
                 ctx.accounts.instruction_sysvar_account.to_account_info(),
             ],
@@ -519,6 +520,20 @@ pub fn apply_with_session_impl<'info>(
     Ok(())
 }
 
+#[derive(BorshSerialize)]
+pub struct BoltExecuteInput {
+    pub pda_data: Vec<u8>,
+    pub args: Vec<u8>,
+}
+
+// TODO: Deduplicate with bolt-lang
+/// Metadata for the component.
+#[derive(InitSpace, AnchorSerialize, AnchorDeserialize, Default, Copy, Clone)]
+pub struct BoltMetadata {
+    pub authority: Pubkey,
+}
+
+
 #[allow(clippy::type_complexity)]
 fn system_execute<'info>(
     authority: &Signer<'info>,
@@ -551,8 +566,11 @@ fn system_execute<'info>(
         pairs.push((program, component));
     }
 
-    let (first_program, first_component) = pairs.remove(0);
+    let (first_program, first_component) = pairs.get(0).ok_or(WorldError::InvalidSystemOutput)?;
     let pda_data = first_component.try_borrow_data()?.to_vec();
+    let original_size = pda_data.len() as u32;
+    let first_component_discriminator = first_component.try_borrow_data()?[0..8].to_vec();
+    let first_component_bolt_metadata = BoltMetadata::try_from_slice(&first_component.try_borrow_data()?[8..8 + BoltMetadata::INIT_SPACE])?;
 
     let owner = bolt_system.key().to_bytes();
     let mut data = SET_OWNER.to_vec();
@@ -571,25 +589,24 @@ fn system_execute<'info>(
         instruction_sysvar_account.to_account_info(),
     ])?;
 
-    let mut components_accounts = pairs
-        .iter()
-        .map(|(_, component)| component)
-        .cloned()
-        .collect::<Vec<_>>();
+    // Ensure the first component (used as buffer by the bolt system) is the
+    // first remaining account forwarded to the system program.
+    let expected_capacity = 1 + pairs.len() + remaining_accounts.len();
+    let mut components_accounts =
+        Vec::with_capacity(expected_capacity);
+    components_accounts.extend(
+        pairs
+            .iter()
+            .map(|(_, component)| component)
+            .cloned(),
+    );
     components_accounts.append(&mut remaining_accounts);
 
     let remaining_accounts = components_accounts;
 
     let mut data = system_discriminator;
-    let pda_data_len_le = (pda_data.len() as u32).to_le_bytes();
-    data.extend_from_slice(&pda_data_len_le);
-    data.extend_from_slice(pda_data.as_slice());
-    let len_le = (args.len() as u32).to_le_bytes();
-    data.extend_from_slice(&len_le);
-    data.extend_from_slice(args.as_slice());
-
-    use anchor_lang::solana_program::instruction::{AccountMeta, Instruction};
-    use anchor_lang::solana_program::program::invoke;
+    let input = BoltExecuteInput { pda_data, args };
+    data.extend_from_slice(&input.try_to_vec()?);
 
     let mut accounts = vec![AccountMeta {
         pubkey: authority.key(),
@@ -617,16 +634,40 @@ fn system_execute<'info>(
 
     invoke(&ix, &account_infos)?;
 
-    // Extract return data using Solana SDK
-    use anchor_lang::solana_program::program::get_return_data;
-    let (pid, data) = get_return_data().ok_or(WorldError::InvalidSystemOutput)?;
-    require_keys_eq!(pid, bolt_system.key(), WorldError::InvalidSystemOutput);
-    let results: Vec<Vec<u8>> = borsh::BorshDeserialize::try_from_slice(&data)
+    let results: Vec<Vec<u8>> = borsh::BorshDeserialize::try_from_slice(&first_component.try_borrow_data()?)
         .map_err(|_| WorldError::InvalidSystemOutput)?;
 
-    if results.len() != pairs.len() {
-        return Err(WorldError::InvalidSystemOutput.into());
-    }
+    // invoke set_owner
+    let owner = first_program.key().to_bytes();
+    let mut data = SET_OWNER.to_vec();
+    data.extend_from_slice(owner.as_slice());
+
+    // set owner
+    invoke(&Instruction {
+        program_id: bolt_system.key(),
+        accounts: vec![
+            AccountMeta::new(first_component.key(), false),
+            AccountMeta::new_readonly(instruction_sysvar_account.key(), false),
+        ],
+        data,
+    }, &[
+        first_component.to_account_info(),
+        instruction_sysvar_account.to_account_info(),
+    ])?;
+
+    // invoke recover_metadata
+    let mut data = RECOVER_METADATA.to_vec();
+    // Borsh encodes Vec<u8> as u32 length (LE) followed by bytes
+    let disc_len_le = (first_component_discriminator.len() as u32).to_le_bytes();
+    data.extend_from_slice(&original_size.to_le_bytes());
+    data.extend_from_slice(&disc_len_le);
+    data.extend_from_slice(&first_component_discriminator);
+    data.extend_from_slice(&first_component_bolt_metadata.try_to_vec()?);
+    invoke(&Instruction {
+        program_id: first_program.key(),
+        accounts: vec![AccountMeta::new(first_component.key(), false), AccountMeta::new_readonly(instruction_sysvar_account.key(), false)],
+        data,
+    }, &[first_component.to_account_info(), instruction_sysvar_account.to_account_info()])?;
     Ok((pairs, results))
 }
 
