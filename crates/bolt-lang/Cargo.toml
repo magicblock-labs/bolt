@@ -1,6 +1,7 @@
 [package]
 name = "bolt-lang"
 description = "Bolt Language"
+readme = "README.md"
 version = { workspace = true }
 authors = { workspace = true }
 repository = { workspace = true }
