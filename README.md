@@ -1,3 +1,9 @@
+> [!WARNING]
+> **Deprecation Notice**
+>
+> Bolt has been deprecated and is no longer actively maintained.
+> This repository is kept available for reference only.
+
 <div align="center">
 
   <img height="170x" src="https://book.boltengine.gg/images/bolt.png" />
