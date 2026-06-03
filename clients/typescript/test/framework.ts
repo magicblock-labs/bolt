@@ -26,6 +26,7 @@ import { With7Components } from "../../../target/types/with_7_components";
 import { With8Components } from "../../../target/types/with_8_components";
 import { With9Components } from "../../../target/types/with_9_components";
 import { With10Components } from "../../../target/types/with_10_components";
+import { ExampleBundle } from "../../../target/types/example_bundle";
 
 export class Framework {
   provider: anchor.AnchorProvider;
@@ -33,6 +34,7 @@ export class Framework {
   worldProgram: anchor.Program<World>;
   exampleComponentPosition: anchor.Program<Position>;
   exampleComponentVelocity: anchor.Program<Velocity>;
+  exampleBundle: anchor.Program<ExampleBundle>;
   systemSimpleMovement: anchor.Program<SystemSimpleMovement>;
   systemFly: anchor.Program<SystemFly>;
   systemApplyVelocity: anchor.Program<SystemApplyVelocity>;
@@ -59,7 +61,9 @@ export class Framework {
 
   acceleratedComponentPositionPda: PublicKey;
   componentPositionEntity1Pda: PublicKey;
+  bundlePositionEntity1Pda: PublicKey;
   componentVelocityEntity1Pda: PublicKey;
+  bundleVelocityEntity1Pda: PublicKey;
   componentPositionEntity4Pda: PublicKey;
 
   constructor() {
@@ -67,6 +71,7 @@ export class Framework {
     this.worldProgram = anchor.workspace.World;
     this.exampleComponentPosition = anchor.workspace.Position;
     this.exampleComponentVelocity = anchor.workspace.Velocity;
+    this.exampleBundle = anchor.workspace.ExampleBundle;
     this.systemSimpleMovement = anchor.workspace.SystemSimpleMovement;
     this.systemFly = anchor.workspace.SystemFly;
     this.systemApplyVelocity = anchor.workspace.SystemApplyVelocity;

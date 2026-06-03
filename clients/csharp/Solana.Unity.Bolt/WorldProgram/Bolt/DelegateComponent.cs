@@ -19,43 +19,93 @@ namespace Bolt {
             public TransactionInstruction Instruction { get; set; }
         }
 
-        public static async Task<DelegateComponentInstruction> DelegateComponent(PublicKey payer, PublicKey entity, PublicKey componentId, string seed = "") {
-            var account = WorldProgram.FindComponentPda(componentId, entity, seed);
-            var bufferPda = WorldProgram.FindBufferPda(account, componentId);
-            var delegationRecord = WorldProgram.FindDelegationProgramPda("delegation", account);
-            var delegationMetadata = WorldProgram.FindDelegationProgramPda("delegation-metadata", account);
+		public static async Task<DelegateComponentInstruction> DelegateComponent(PublicKey payer, PublicKey entity, PublicKey componentId, string seed = "") {
+			// Compute the delegated account PDA and related PDAs
+			var account = WorldProgram.FindComponentPda(componentId, entity, seed);
+			var bufferPda = WorldProgram.FindBufferPda(account, componentId);
+			var delegationRecord = WorldProgram.FindDelegationProgramPda("delegation", account);
+			var delegationMetadata = WorldProgram.FindDelegationProgramPda("delegation-metadata", account);
 
-            byte[] discriminator = new byte[] { 90, 147, 75, 178, 85, 88, 4, 137 };
-            uint commitFrequencyMs = 0;
-            byte[] commitFrequencyBytes = BitConverter.GetBytes(commitFrequencyMs);
-            if (!BitConverter.IsLittleEndian) Array.Reverse(commitFrequencyBytes);
-            var validator = new byte[1];
-            validator[0] = 0;
+			// Build instruction data per TS beet struct:
+			// discriminator[8] + commitFrequencyMs[u32 le] + validator[COption<Pubkey>] + pdaSeeds[Vec<Bytes>]
+			byte[] discriminator = new byte[] { 90, 147, 75, 178, 85, 88, 4, 137 };
+			uint commitFrequencyMs = 0;
+			byte[] commitFrequencyBytes = BitConverter.GetBytes(commitFrequencyMs); // little-endian on most platforms
+			byte[] validatorNoneTag = new byte[] { 0 }; // COption None
 
-            var data = new byte[discriminator.Length + commitFrequencyBytes.Length + validator.Length];
-            Array.Copy(discriminator, data, discriminator.Length);
-            Array.Copy(commitFrequencyBytes, 0, data, discriminator.Length, commitFrequencyBytes.Length);
-            Array.Copy(validator, 0, data, discriminator.Length + commitFrequencyBytes.Length, validator.Length);
+			var data = Concat(discriminator, commitFrequencyBytes, validatorNoneTag);
 
-            TransactionInstruction instruction = new TransactionInstruction() {
-                ProgramId = componentId,
-                Keys = new List<AccountMeta>() {
-                    AccountMeta.ReadOnly(payer, true),
-                    AccountMeta.ReadOnly(entity, false),
-                    AccountMeta.Writable(account, false),
-                    AccountMeta.ReadOnly(componentId, false),
-                    AccountMeta.Writable(bufferPda, false),
-                    AccountMeta.Writable(delegationRecord, false),
-                    AccountMeta.Writable(delegationMetadata, false),
-                    AccountMeta.ReadOnly(WorldProgram.DelegationProgram, false),
-                    AccountMeta.ReadOnly(SystemProgram.ProgramIdKey, false),
-                },
-                Data = data,
-            };
-            return new DelegateComponentInstruction() {
-                Pda = WorldProgram.FindDelegationProgramPda(seed, entity),
-                Instruction = instruction,
-            };
-        }
+			TransactionInstruction instruction = new TransactionInstruction() {
+				ProgramId = componentId,
+				Keys = new List<AccountMeta>() {
+					AccountMeta.ReadOnly(payer, true),
+					AccountMeta.ReadOnly(entity, false),
+					AccountMeta.Writable(account, false),
+					AccountMeta.ReadOnly(componentId, false),
+					AccountMeta.Writable(bufferPda, false),
+					AccountMeta.Writable(delegationRecord, false),
+					AccountMeta.Writable(delegationMetadata, false),
+					AccountMeta.ReadOnly(WorldProgram.DelegationProgram, false),
+					AccountMeta.ReadOnly(SystemProgram.ProgramIdKey, false),
+				},
+				Data = data,
+			};
+			return new DelegateComponentInstruction() {
+				Pda = account,
+				Instruction = instruction,
+			};
+		}
+
+		/// <summary>
+		/// Overload for bundled components: seed is augmented with component name.
+		/// Mirrors TS behavior using component.seeds(seed) for PDA seeds.
+		/// </summary>
+		public static async Task<DelegateComponentInstruction> DelegateComponent(PublicKey payer, PublicKey entity, Component component, string seed = "") {
+			var account = WorldProgram.FindComponentPda(component.Program, entity, component.Seeds(seed));
+			var bufferPda = WorldProgram.FindBufferPda(account, component.Program);
+			var delegationRecord = WorldProgram.FindDelegationProgramPda("delegation", account);
+			var delegationMetadata = WorldProgram.FindDelegationProgramPda("delegation-metadata", account);
+
+			byte[] discriminator = new byte[] { 90, 147, 75, 178, 85, 88, 4, 137 };
+			uint commitFrequencyMs = 0;
+			byte[] commitFrequencyBytes = BitConverter.GetBytes(commitFrequencyMs);
+			byte[] validatorNoneTag = new byte[] { 0 };
+
+			var data = Concat(discriminator, commitFrequencyBytes, validatorNoneTag);
+
+			TransactionInstruction instruction = new TransactionInstruction() {
+				ProgramId = component.Program,
+				Keys = new List<AccountMeta>() {
+					AccountMeta.ReadOnly(payer, true),
+					AccountMeta.ReadOnly(entity, false),
+					AccountMeta.Writable(account, false),
+					AccountMeta.ReadOnly(component.Program, false),
+					AccountMeta.Writable(bufferPda, false),
+					AccountMeta.Writable(delegationRecord, false),
+					AccountMeta.Writable(delegationMetadata, false),
+					AccountMeta.ReadOnly(WorldProgram.DelegationProgram, false),
+					AccountMeta.ReadOnly(SystemProgram.ProgramIdKey, false),
+				},
+				Data = data,
+			};
+			return new DelegateComponentInstruction() {
+				Pda = account,
+				Instruction = instruction,
+			};
+		}
+
+		private static byte[] Concat(params byte[][] arrays)
+		{
+			int total = 0;
+			foreach (var a in arrays) total += a.Length;
+			var buf = new byte[total];
+			int offset = 0;
+			foreach (var a in arrays)
+			{
+				Buffer.BlockCopy(a, 0, buf, offset, a.Length);
+				offset += a.Length;
+			}
+			return buf;
+		}
     }
 }

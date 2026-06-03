@@ -2,6 +2,7 @@ import { PublicKey } from "@solana/web3.js";
 import BN from "bn.js";
 import { PROGRAM_ID as WORLD_PROGRAM_ID } from "./generated";
 import { World as WORLD_PROGRAM_IDL } from "./generated/types";
+import crypto from "crypto";
 export { BN };
 export * from "./generated/accounts";
 export * from "./generated/instructions";
@@ -16,10 +17,15 @@ import { SessionProgram, Session } from "./session";
 export { anchor };
 export { Provider, Program, Wallet, web3, workspace } from "@coral-xyz/anchor";
 export { WORLD_PROGRAM_ID, WORLD_PROGRAM_IDL };
+export { Component, System } from "./ecs";
 
 export const SYSVAR_INSTRUCTIONS_PUBKEY = new PublicKey(
   "Sysvar1nstructions1111111111111111111111111",
 );
+
+export function GetDiscriminator(name: string) {
+  return crypto.createHash("sha256").update(name).digest().subarray(0, 8);
+}
 
 export function FindRegistryPda({ programId }: { programId?: PublicKey }) {
   return PublicKey.findProgramAddressSync(

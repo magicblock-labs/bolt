@@ -16,8 +16,7 @@ idl-build = ["anchor-lang/idl-build"]
 anchor-lang = { workspace = true }
 
 # Bolt Attributes
-bolt-attribute-bolt-program = { workspace = true }
-bolt-attribute-bolt-delegate = { workspace = true }
+bolt-attribute-bolt-bundle = { workspace = true }
 bolt-attribute-bolt-component = { workspace = true }
 bolt-attribute-bolt-system = { workspace = true }
 bolt-attribute-bolt-system-input = { workspace = true }
@@ -28,7 +27,6 @@ bolt-attribute-bolt-arguments = { workspace = true }
 
 # Bolt Programs
 world = { workspace = true }
-bolt-system = { workspace = true }
 
 # Session Keys
 session-keys = { workspace = true }

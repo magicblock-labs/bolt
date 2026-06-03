@@ -56,6 +56,11 @@ namespace Solana.Unity.Bolt.Test
 
         public PublicKey SessionToken { get; set; }
 
+        // Example bundle
+        public PublicKey ExampleBundleProgramId { get; set; }
+        public PublicKey BundlePositionEntity1Pda { get; set; }
+        public PublicKey BundleVelocityEntity1Pda { get; set; }
+
         public Framework()
         {
             SecondAuthority = new Wallet.Wallet(new Mnemonic(WordList.English, WordCount.Twelve));
@@ -67,6 +72,7 @@ namespace Solana.Unity.Bolt.Test
             ExampleComponentPosition = new PublicKey(Position.Program.PositionProgram.ID);
             ExampleComponentVelocity = new PublicKey(Velocity.Program.VelocityProgram.ID);
             SystemSimpleMovement = new PublicKey("FSa6qoJXFBR3a7ThQkTAMrC15p6NkchPEjBdd4n6dXxA");
+            ExampleBundleProgramId = new PublicKey("CgfPBUeDUL3GT6b5AUDFE56KKgU4ycWA9ERjEWsfMZCj");
         }
 
         public async Task Initialize()

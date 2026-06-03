@@ -89,6 +89,7 @@ jobs:
           echo ${{ secrets.SYSTEM_APPLY_VELOCITY }} > target/deploy/system_apply_velocity-keypair.json
           echo ${{ secrets.SYSTEM_FLY }} > target/deploy/system_fly-keypair.json
           echo ${{ secrets.SYSTEM_SIMPLE_MOVEMENT }} > target/deploy/system_simple_movement-keypair.json
+          echo ${{ secrets.EXAMPLE_BUNDLE }} > target/deploy/example_bundle-keypair.json
 
       - name: Run Build and Tests
         run: |

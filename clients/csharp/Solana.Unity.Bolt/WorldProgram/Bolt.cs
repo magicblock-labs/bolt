@@ -4,8 +4,10 @@ using Solana.Unity.Rpc;
 using Solana.Unity.Rpc.Types;
 using Solana.Unity.Wallet;
 using System;
+using System.Text;
 using System.Threading.Tasks;
 using WorldNamespace = World;
+using System.Security.Cryptography;
 
 namespace Bolt {
     public partial class World {
@@ -22,8 +24,19 @@ namespace Bolt {
 
         public static byte[] SerializeArgs(object args)
         {
-            return System.Text.Encoding.UTF8.GetBytes(Newtonsoft.Json.JsonConvert.SerializeObject(args));
+            return Encoding.UTF8.GetBytes(Newtonsoft.Json.JsonConvert.SerializeObject(args));
         }
 
+        public static byte[] GetDiscriminator(string name) {
+            // Anchor uses the first 8 bytes of the SHA256 hash of the instruction name.
+            // See: https://github.com/coral-xyz/anchor/blob/master/lang/syn/src/codegen/accounts/discriminator.rs
+            var nameBytes = Encoding.UTF8.GetBytes(name);
+            using (var sha256 = SHA256.Create()) {
+                var hash = sha256.ComputeHash(nameBytes);
+                var discriminator = new byte[8];
+                Array.Copy(hash, discriminator, 8);
+                return discriminator;
+            }
+        }
     }
 }
