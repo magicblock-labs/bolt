@@ -19,6 +19,7 @@ dev = []
 [dependencies]
 anchor-cli = { workspace = true }
 anchor-client = { workspace = true }
+solana-client = { workspace = true }
 anchor-syn = { workspace = true }
 anchor-lang-idl = { workspace = true, features = ["build"] }
 anyhow = { workspace = true }
@@ -31,3 +32,4 @@ which = { workspace = true }
 tokio = { workspace = true }
 sysinfo = { workspace = true }
 bytemuck_derive = { workspace = true }
+solana-system-interface = { workspace = true }
